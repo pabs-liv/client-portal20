@@ -1,0 +1,492 @@
+# Client Portal v2.0 - PBM Client Portal Project Structure
+
+## PROJECT_OVERVIEW
+```
+Project Name: Client Portal v2.0
+Type: PBM (Pharmacy Benefits Manager) Client Portal
+Framework: Vue.js + TypeScript + Vuetify
+Target Users: External (Consultants, Brokers, TPAs) + Internal (Staff)
+Devices: Desktop, Laptop, Tablet, Mobile (Responsive)
+```
+
+## USER_TYPES_AND_PERMISSIONS
+```
+EXTERNAL_USERS:
+- consultants, brokers, TPAs
+- entity-scoped data access only
+- standard UI with client-focused features
+- cannot access other entities' data
+- report explorer shows only their entity's accounts
+
+INTERNAL_USERS:
+- internal staff members
+- access to all client data across entities
+- enhanced UI with administrative features
+- cross-entity report access
+- additional administrative tools and bulk operations
+```
+
+## TECHNICAL_STACK
+```
+Frontend:
+- Vue.js 3 with TypeScript
+- Vue Router for navigation and route protection
+- Vuex/Pinia for state management
+- Vuetify components for UI framework
+- Axios for API calls
+- PWA capabilities
+
+Backend_API_Endpoints:
+- /api/auth/
+- /api/entities/
+- /api/high-cost-claims/
+- /api/prior-auths/
+- /api/billing/
+- /api/rebates/
+- /api/documents/
+- /api/formulary/
+- /api/reports/
+- /api/report-explorer/
+- /api/test-results/
+- /api/plans/
+- /api/approvals/
+- /api/settings/
+- /api/users/
+```
+
+## RESPONSIVE_DESIGN_BREAKPOINTS
+```
+Large Desktop: 1920px and above
+Medium Laptop: 1366px-1920px
+Small Laptop: 1024px-1366px
+Tablet: 768px-1024px
+Mobile: 320px-768px
+```
+
+## MAIN_NAVIGATION_STRUCTURE
+
+### 1. HOME_DASHBOARD
+```
+Route: /
+Component: HomePage
+Features:
+- Summary widgets for pending items (high cost claims, prior auths, approvals)
+- Quick access cards to main sections
+- Report explorer for entity-level reporting
+- Recent activity feed with real-time updates
+- Mobile-optimized widget layouts
+- Touch-friendly interface for mobile devices
+
+Sub-routes:
+- /dashboard (main dashboard view)
+- /dashboard/widgets (widget configuration)
+- /dashboard/reports (report explorer interface)
+
+Report_Explorer_Features:
+- Entity-level reporting dashboard
+- Cross-account analytics for internal users
+- Custom report generation
+- Real-time data visualization
+- Export capabilities
+- Mobile-optimized report viewing
+```
+
+### 2. APPROVALS
+```
+Route: /approvals
+Component: ApprovalsPage
+Description: Single page displaying all reports pending user approvals
+Features:
+- Table view of all reports pending approvals
+- Search functionality across all pending reports
+- Filtering capabilities by report type, date, entity
+- Export functionality for approval data
+- Entity-scoped approval access
+- Report approval actions directly from the table
+- Mobile-optimized table view with touch interactions
+```
+
+### 3. REPORTS
+```
+Route: /reports
+Component: ReportsPage
+Description: Comprehensive PBM reporting system with organized report categories
+
+Sub-pages (tabs):
+- /reports/all (All reports - comprehensive list for all accounts under entity)
+- /reports/approvals (Reports pending user approvals)
+- /reports/ad-hoc (Custom reports created for accounts under entity)
+- /reports/monthly-value (Monthly value reports for accounts under entity)
+- /reports/quarterly-executive (Quarterly executive reports for accounts under entity)
+- /reports/rebate (Rebate reports for accounts under entity)
+- /reports/savings (Savings reports for accounts under entity)
+- /reports/caa (CAA reports for accounts under entity)
+
+Features:
+- Tab-based navigation for organized report categories
+- Entity-scoped report access for external users
+- Cross-entity report access for internal users
+- Report approval workflow management
+- Custom ad-hoc report creation and management
+- Export functionality (PDF, Excel, CSV)
+- Search and filtering within report categories
+```
+
+### 4. DOCUMENTS
+```
+Route: /documents
+Component: DocumentsPage
+Description: PBM document management system
+
+Sub-pages (tabs):
+- /documents/all (All documents)
+- /documents/phi (PHI documents)
+- /documents/accounting (Accounting documents)
+- /documents/notifications (Notification files)
+- /documents/upload (Upload new documents)
+
+Features:
+- Document upload/download
+- Document categorization
+- Search functionality
+- Access controls
+- PHI document security and compliance
+- Accounting document organization
+- Notification file management
+```
+
+### 5. HIGH_COST_CLAIMS
+```
+Route: /high-cost-claims
+Component: HighCostClaimsPage
+Description: High cost claims management system
+
+Sub-pages (tabs):
+- /high-cost-claims/all (All High-Cost Claims)
+- /high-cost-claims/overdue (Overdue claims)
+- /high-cost-claims/unacknowledged (Unacknowledged claims)
+- /high-cost-claims/processed (Processed claims)
+
+Features:
+- High cost claim tracking and monitoring
+- Status-based claim organization
+- Claim history and details
+- Search and filtering
+- Export functionality for claim data
+```
+
+### 6. PRIOR_AUTHS
+```
+Route: /prior-auths
+Component: PriorAuthsPage
+Description: Pharmacy prior authorization request and management system
+
+Sub-pages (tabs):
+- /prior-auths/all (All Prior Auths - lists all for accounts under entity)
+- /prior-auths/pending (Pending prior auths)
+- /prior-auths/approved (Approved prior auths)
+- /prior-auths/denied (Denied prior auths)
+
+Features:
+- Prior auth request submission
+- Status-based prior authorization organization
+- Search and filtering capabilities
+- Prior authorization history and details
+- Export functionality for prior auth data
+```
+
+### 7. BILLING
+```
+Route: /billing
+Component: BillingPage
+Description: PBM billing document management and viewing system
+
+Sub-pages (tabs):
+- /billing/all (All documents - lists all invoices/statements for accounts under entity)
+- /billing/invoices (Invoice documents)
+- /billing/statements (Statement documents)
+
+Features:
+- Billing document viewing and management
+- Document categorization (invoices vs statements)
+- Search and filtering capabilities
+- Export functionality for billing documents
+- Entity-scoped billing document access
+```
+
+### 8. PLAN_EXPLORER
+```
+Route: /plan-explorer
+Component: PlanExplorerPage
+Description: Implementation tracking and management system with progress monitoring
+
+Page_Structure:
+- Summary widgets section displaying key metrics
+- Implementation Explorer table with tabbed status views
+- Entity selector for filtering and narrowing tracker view
+
+Summary_Widgets:
+- "Plans awaiting required documents" widget
+- "Plans going live in next 90 days" widget
+
+Implementation_Explorer_Table_Tabs:
+- /plan-explorer/all-status (All Status - progress tracker 0% to 100%)
+- /plan-explorer/plan-setup (Plan setup - pending setups)
+- /plan-explorer/contract-status (Contract Status - contract status)
+- /plan-explorer/clinical-setup (Clinical Setup - clinical status)
+- /plan-explorer/systems (Systems - system status)
+- /plan-explorer/eligibility (Eligibility - eligibility status)
+- /plan-explorer/card-status (Card Status - card status)
+
+Features:
+- Entity selector for filtering tracker views
+- Progress tracking with 0% to 100% completion indicators
+- Search and filtering capabilities across all implementation statuses
+- Tabbed interface for different status categories
+- Widget and table view options for each status type
+- Export functionality for implementation data
+- Real-time status updates
+- Mobile-optimized progress tracking interface
+```
+
+### 9. TEST_RESULTS
+```
+Route: /test-results
+Component: TestResultsPage
+Description: Pharmacy and medical test results management and viewing
+
+Sub-pages (tabs):
+- /test-results/all (All test results - lists all tests for accounts under entity)
+- /test-results/pending (Pending Tests)
+- /test-results/approved (Approved Tests)
+- /test-results/denied (Denied Tests)
+
+Features:
+- Test result viewing and management
+- Status-based test result organization
+- Search and filtering capabilities
+- Test result history and details
+- Print/export functionality
+- Entity-scoped test result access
+```
+
+### 10. ADDED_VALUE
+```
+Route: /added-value
+Component: AddedValuePage
+Description: PBM value-added services and member benefits with enrollment capabilities
+
+Page_Structure:
+- Single page with 3 accordion components:
+  1. Anti-Obesity Management Program
+  2. Liviniti Pharmacogenics
+  3. Liviniti Delivery on Demand
+
+Features:
+- Accordion-based information presentation
+- Program information and details
+- Request for enrollment functionality
+- Program enrollment status tracking
+- Entity-scoped program access
+- Export functionality for program information
+```
+
+### 11. SETTINGS
+```
+Route: /settings
+Component: SettingsPage
+Description: Account-specific settings management with user permissions and configuration
+
+Page_Structure:
+- Account selection modal (users first select account to manage)
+- After selection, sub-pages (tabs) available:
+  - /settings/company (Company information - company name, high-cost notifications)
+  - /settings/users (User administration - permissions, activate/deactivate users)
+  - /settings/caa-reporting (CAA Drug Cost Reporting Configuration)
+  - /settings/caa-attestation (CAA Gag clause attestation configuration)
+
+Features:
+- Account selection and management
+- Company information management
+- User permission management (read permissions for app pages)
+- User activation/deactivation
+- High-cost notification settings
+- CAA reporting configuration
+- CAA attestation management
+- Entity-scoped settings management
+```
+
+## SHARED_COMPONENTS
+```
+Navigation Components:
+- Navigation.vue (global navigation - responsive for mobile)
+- MobileNavigation.vue (mobile-optimized navigation)
+- UserProfile.vue (user management and preferences)
+
+Common Components:
+- SettingsPanel.vue (common settings interface)
+- ReportExplorer.vue (cross-account reporting component)
+- PermissionWrapper.vue (handle external vs internal user permissions)
+- EntitySelector.vue (for internal users to select/manage entities)
+
+UI Components:
+- Button.vue
+- Modal.vue
+- DataTable.vue
+- SummaryWidget.vue
+- QuickAccessCard.vue
+- ClaimStatusIndicator.vue
+- TouchFriendlyComponents.vue
+```
+
+## PROJECT_STRUCTURE
+```
+src/
+├── components/
+│   ├── common/
+│   │   ├── Navigation.vue
+│   │   ├── UserProfile.vue
+│   │   ├── SettingsPanel.vue
+│   │   ├── ReportExplorer.vue
+│   │   ├── PermissionWrapper.vue
+│   │   ├── EntitySelector.vue
+│   │   └── MobileNavigation.vue
+│   ├── layout/
+│   │   ├── Header.vue
+│   │   ├── Sidebar.vue
+│   │   └── Footer.vue
+│   └── ui/
+│       ├── Button.vue
+│       ├── Modal.vue
+│       ├── DataTable.vue
+│       ├── SummaryWidget.vue
+│       ├── QuickAccessCard.vue
+│       ├── ClaimStatusIndicator.vue
+│       ├── MobileNavigation.vue
+│       └── TouchFriendlyComponents.vue
+├── views/
+│   ├── HomePage.vue
+│   ├── ApprovalsPage.vue
+│   ├── ReportsPage.vue
+│   ├── DocumentsPage.vue
+│   ├── HighCostClaimsPage.vue
+│   ├── PriorAuthsPage.vue
+│   ├── BillingPage.vue
+│   ├── PlanExplorerPage.vue
+│   ├── TestResultsPage.vue
+│   ├── AddedValuePage.vue
+│   └── SettingsPage.vue
+├── composables/
+│   ├── useAuth.ts
+│   ├── useApi.ts
+│   ├── useNavigation.ts
+│   ├── useSettings.ts
+│   ├── useReportExplorer.ts
+│   ├── usePermissions.ts
+│   ├── useEntityManagement.ts
+│   └── useMobileDetection.ts
+├── services/
+│   ├── api.ts
+│   ├── auth.ts
+│   ├── storage.ts
+│   ├── settings.ts
+│   ├── reportExplorer.ts
+│   ├── permissions.ts
+│   ├── entityManagement.ts
+│   └── mobileServices.ts
+└── utils/
+    ├── constants.ts
+    ├── helpers.ts
+    ├── types.ts
+    ├── pbmUtils.ts
+    ├── permissions.ts
+    └── mobileUtils.ts
+```
+
+## SECURITY_AND_ACCESS_CONTROL
+```
+Authentication:
+- Role-based access control (RBAC) for external vs internal users
+- Different UI/features based on user permissions
+- Entity-level data isolation for external users
+- Cross-account access controls for internal users
+
+Data Security:
+- HIPAA compliance for pharmacy and medical data
+- PHI (Protected Health Information) handling
+- Secure document storage
+- Audit trails for all actions
+- Data encryption at rest and in transit
+
+Mobile Security:
+- Mobile device security and biometric authentication
+- Secure mobile data storage and transmission
+- API rate limiting and security
+```
+
+## PERFORMANCE_CONSIDERATIONS
+```
+Loading Optimization:
+- Lazy loading for large datasets
+- Pagination for high cost claims and transaction lists
+- Caching strategies for report explorer
+- Entity-level data caching for external users
+
+Mobile Optimization:
+- Mobile-first loading strategies for smaller screens
+- Image optimization for different screen densities
+- Touch-friendly interactions
+- Offline capability for critical PBM functions across devices
+
+Real-time Features:
+- Real-time high cost claim processing status updates
+- Real-time notifications optimized for all environments
+- Progressive Web App (PWA) capabilities
+```
+
+## KEY_FEATURES_TO_IMPLEMENT
+```
+Dashboard Features:
+- Summary widgets with real-time data
+- Quick access cards with contextual actions
+- Report explorer with entity-level insights
+- Mobile-optimized layouts
+
+Table Features:
+- Search and filtering capabilities
+- Export functionality (PDF, Excel, CSV)
+- Mobile-optimized table views
+- Status-based organization
+
+Progress Tracking:
+- 0% to 100% completion indicators
+- Real-time status updates
+- Visual progress components
+- Entity selector for filtering
+
+Approval Workflow:
+- Single-page approval interface
+- Direct approval actions from table
+- Report approval workflow management
+- Mobile-optimized approval interface
+```
+
+## ADDITIONAL_CONSIDERATIONS
+```
+PBM-Specific Features:
+- Integration with existing PBM systems
+- Real-time high cost claim processing
+- Formulary data synchronization
+- Drug interaction checking
+- Rebate calculation and tracking
+- Clinical program management
+- Medication therapy management
+- Specialty pharmacy coordination
+
+Mobile Features:
+- Push notifications for mobile devices
+- Biometric authentication for mobile security
+- Mobile-friendly data entry and navigation
+- Touch-optimized interfaces
+- Offline capability for critical functions
+```
