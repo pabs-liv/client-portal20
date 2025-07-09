@@ -15,7 +15,39 @@
         active-class="nav-item-active"
       >
         <div class="nav-item-content">
-          <img :src="item.icon" :alt="item.title" class="nav-icon" />
+          <template v-if="item.title === 'Home'">
+            <House :size="25" :stroke-width="1" class="nav-icon" color="#1f2022" />
+          </template>
+          <template v-else-if="item.title === 'Approvals'">
+            <CircleCheckBig :size="25" :stroke-width="1" class="nav-icon" color="#1f2022" />
+          </template>
+          <template v-else-if="item.title === 'Reports'">
+            <FileChartColumnIncreasing :size="25" :stroke-width="1" class="nav-icon" color="#1f2022" />
+          </template>
+          <template v-else-if="item.title === 'Documents'">
+            <FileText :size="25" :stroke-width="1" class="nav-icon" color="#1f2022" />
+          </template>
+          <template v-else-if="item.title === 'Claims'">
+            <Tablets :size="25" :stroke-width="1" class="nav-icon" color="#1f2022" />
+          </template>
+          <template v-else-if="item.title === 'Prior Auths'">
+            <RotateCcwKey :size="25" :stroke-width="1" class="nav-icon" color="#1f2022" />
+          </template>
+          <template v-else-if="item.title === 'Billing'">
+            <ScrollText :size="25" :stroke-width="1" class="nav-icon" color="#1f2022" />
+          </template>
+          <template v-else-if="item.title === 'Plan Explorer'">
+            <Blocks :size="25" :stroke-width="1" class="nav-icon" color="#1f2022" />
+          </template>
+          <template v-else-if="item.title === 'Test Results'">
+            <CircleGauge :size="25" :stroke-width="1" class="nav-icon" color="#1f2022" />
+          </template>
+          <template v-else-if="item.title === 'Added Value'">
+            <Blocks :size="25" :stroke-width="1" class="nav-icon" color="#1f2022" />
+          </template>
+          <template v-else>
+            <img :src="item.icon" :alt="item.title" class="nav-icon" />
+          </template>
           <span class="nav-title">{{ item.title }}</span>
         </div>
       </v-list-item>
@@ -24,7 +56,7 @@
 
       <v-list-item to="/settings" class="nav-item">
         <div class="nav-item-content">
-          <img src="/icons/settings.svg" alt="Settings" class="nav-icon" />
+          <MonitorCog :size="25" :stroke-width="1" class="nav-icon" color="#1f2022" />
           <span class="nav-title">Settings</span>
         </div>
       </v-list-item>
@@ -40,18 +72,19 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { House, CircleCheckBig, FileChartColumnIncreasing, FileText, Tablets, RotateCcwKey, ScrollText, Blocks, CircleGauge, MonitorCog } from 'lucide-vue-next';
 
 const navItems = ref([
-  { title: 'Home', icon: '/icons/home.svg', to: '/' },
-  { title: 'Approvals', icon: '/icons/approvals.svg', to: '/approvals' },
-  { title: 'Reports', icon: '/icons/reports.svg', to: '/reports' },
-  { title: 'Documents', icon: '/icons/documents.svg', to: '/documents' },
-  { title: 'Claims', icon: '/icons/claims.svg', to: '/high-cost-claims' },
-  { title: 'Prior Auths', icon: '/icons/priorauth.svg', to: '/prior-auths' },
-  { title: 'Billing', icon: '/icons/billing.svg', to: '/billing' },
-  { title: 'Plan Explorer', icon: '/icons/planexplorer.svg', to: '/plan-explorer' },
-  { title: 'Test Results', icon: '/icons/testresults.svg', to: '/test-results' },
-  { title: 'Added Value', icon: '/icons/addedvalue.svg', to: '/added-value' },
+  { title: 'Home', to: '/' },
+  { title: 'Approvals', to: '/approvals' },
+  { title: 'Reports', to: '/reports' },
+  { title: 'Documents', to: '/documents' },
+  { title: 'Claims', to: '/high-cost-claims' },
+  { title: 'Prior Auths', to: '/prior-auths' },
+  { title: 'Billing', to: '/billing' },
+  { title: 'Plan Explorer', to: '/plan-explorer' },
+  { title: 'Test Results', to: '/test-results' },
+  { title: 'Added Value', to: '/added-value' },
 ]);
 </script>
 
@@ -97,8 +130,8 @@ const navItems = ref([
   padding: 5px;
 }
 .nav-icon {
-  height: 24px;
-  width: 24px;
+  height: 25px;
+  width: 25px;
   margin-bottom: 4px;
 }
 .nav-title {
@@ -110,7 +143,5 @@ const navItems = ref([
   color: #0052CC;
   font-weight: bold;
 }
-.nav-item-active .nav-icon {
-  filter: invert(25%) sepia(99%) saturate(2051%) hue-rotate(202deg) brightness(93%) contrast(101%);
-}
+
 </style>

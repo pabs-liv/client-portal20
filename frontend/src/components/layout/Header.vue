@@ -4,7 +4,7 @@
     <v-spacer></v-spacer>
     <v-btn variant="outlined" color="black" class="mr-2 help-button">Get Help</v-btn>
     <v-btn icon class="mr-2">
-      <v-icon color="#0F285B">mdi-cog-outline</v-icon>
+      <Settings :size="28" :stroke-width="1" color="#0F285B" />
     </v-btn>
     <v-menu offset-y>
       <template v-slot:activator="{ props }">
@@ -27,6 +27,7 @@
 </template>
 
 <script setup lang="ts">
+import { Settings } from 'lucide-vue-next';
 // No script needed for this static component
 </script>
 
