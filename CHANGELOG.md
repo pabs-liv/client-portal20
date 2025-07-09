@@ -18,4 +18,12 @@ This file documents all significant changes made to the project for future refer
 
 ---
 
+## [2025-07-09]
+- Installed `@mdi/font` to enable Material Design Icons.
+- Configured Vuetify to use Material Design Icons in `frontend/src/plugins/vuetify.ts`.
+- Set the top navigation settings icon color to `#0F285B` in `frontend/src/components/layout/Header.vue`.
+- Changed the sidebar navigation title color to `#1f2022` in `frontend/src/components/layout/Sidebar.vue`.
+
+---
+
 Please append all future changes here with a date and a brief description.

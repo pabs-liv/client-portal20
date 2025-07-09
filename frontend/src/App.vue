@@ -1,17 +1,18 @@
 <template>
   <v-app>
-    <Header />
     <Sidebar />
-    <v-main>
-      <router-view />
+    <Header />
+    <v-main style="overflow-y: auto;">
+      <v-container fluid>
+        <router-view />
+      </v-container>
     </v-main>
-    <Footer />
   </v-app>
 </template>
 
 <script setup lang="ts">
-import Header from '@/components/layout/Header.vue'
-import Sidebar from '@/components/layout/Sidebar.vue'
-import Footer from '@/components/layout/Footer.vue'
+import Header from '@/components/layout/Header.vue';
+import Sidebar from '@/components/layout/Sidebar.vue';
 </script>
+
 
