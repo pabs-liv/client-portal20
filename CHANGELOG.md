@@ -26,4 +26,14 @@ This file documents all significant changes made to the project for future refer
 
 ---
 
+## [2025-07-10]
+- Established root styling in `frontend/src/style.css`.
+- Defined a global color palette with CSS variables, including primary, neutral, success, warning, and error colors.
+- Added background/surface color variations for success, warning, and error states.
+- Set 'Lato' as the default font family and imported it from Google Fonts.
+- Defined typography styles for headings (H1, H2, H3) and paragraph text (`p`, `.p2`).
+- Established a 4pt grid system with CSS variables for consistent spacing (`--spacing-nano` to `--spacing-xlarge`).
+
+---
+
 Please append all future changes here with a date and a brief description.
