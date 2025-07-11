@@ -20,6 +20,9 @@
   --spacing-medium: 20px;
   --spacing-large: 32px;
   --spacing-xlarge: 48px;
+
+  /* Root Padding */
+  --root-padding: clamp(3rem, calc(3rem + ((1vw - 0.48rem) * 2.0833)), 4.5rem);
 }
 
 body {
@@ -45,6 +48,14 @@ h3 {
   font-weight: 700; /* bold */
   line-height: 120%;
 }
+
+h4 {
+  font-size: 1.2rem;
+  font-weight: 700; /* bold */
+  line-height: 120%;
+}
+
+
 
 p {
   font-size: 1rem;

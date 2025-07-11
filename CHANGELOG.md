@@ -36,4 +36,21 @@ This file documents all significant changes made to the project for future refer
 
 ---
 
+## [2025-07-10]
+- Established root styling in `frontend/src/style.css`.
+- Defined a global color palette with CSS variables, including primary, neutral, success, warning, and error colors.
+- Added background/surface color variations for success, warning, and error states.
+- Set 'Lato' as the default font family and imported it from Google Fonts.
+- Defined typography styles for headings (H1, H2, H3, H4) and paragraph text (`p`, `.p2`).
+- Established a 4pt grid system with CSS variables for consistent spacing (`--spacing-nano` to `--spacing-xlarge`).
+- Added a root padding variable (`--root-padding`) and applied it to `frontend/src/App.vue` for consistent page padding.
+- Created `frontend/src/components/common/Banner.vue` component with customizable icon and optional button.
+- Installed `lucide-vue-next` for icon support.
+- Created and moved `frontend/src/components/common/Button.vue` component with multiple variants and optional icon.
+- Created `frontend/src/components/common/SummaryWidget.vue` component with customizable icon, circular background, and icon color.
+- Created `frontend/src/components/common/ReportExplorer.vue` placeholder component.
+- Updated `frontend/src/views/HomePage.vue` to include `Banner`, `SummaryWidget`, and `ReportExplorer` components with appropriate props and styling.
+
+---
+
 Please append all future changes here with a date and a brief description.
