@@ -37,7 +37,28 @@
       />
     </div>
 
-    <ReportExplorer />
+    <div class="two-column-layout">
+      <ImplementationStatusChart
+        headerText="Implementations Overview"
+        :data="{
+          new: 5,
+          inProgress: 12,
+          pendingAction: 7,
+          completed: 20,
+        }"
+      />
+      <UpcomingImplementationsTable headerText="Upcoming Implementations Next 90 Days" />
+    </div>
+
+    <ReportExplorer
+      :reports="[
+        { id: 1, name: 'Monthly Value Report', dateGenerated: '2025-07-01', status: 'Completed' },
+        { id: 2, name: 'Quarterly Executive Summary', dateGenerated: '2025-06-30', status: 'Completed' },
+        { id: 3, name: 'Ad-Hoc Savings Analysis', dateGenerated: '2025-07-05', status: 'Processing' },
+      ]"
+    />
+
+    
 
   </div>
 </template>
@@ -46,10 +67,14 @@
 import Banner from '../components/common/Banner.vue';
 import SummaryWidget from '../components/common/SummaryWidget.vue';
 import ReportExplorer from '../components/common/ReportExplorer.vue';
+import ImplementationStatusChart from '../components/common/ImplementationStatusChart.vue';
+import UpcomingImplementationsTable from '../components/common/UpcomingImplementationsTable.vue';
+import QuickAccessCard from '../components/common/QuickAccessCard.vue';
 import {
   CircleCheckBig,
   ChartNoAxesCombined,
   RotateCcwKey,
+  FileText, Folder, CircleDollarSign, Settings
 } from 'lucide-vue-next';
 </script>
 
@@ -65,4 +90,28 @@ import {
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: var(--spacing-medium);
 }
+
+.two-column-layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--spacing-medium);
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .widgets-container {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .widgets-container {
+    grid-template-columns: 1fr;
+  }
+
+  .two-column-layout {
+    grid-template-columns: 1fr;
+  }
+}
 </style>
+
