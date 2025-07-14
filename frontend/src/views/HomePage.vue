@@ -47,7 +47,7 @@
           completed: 20,
         }"
       />
-      <UpcomingImplementationsTable headerText="Upcoming Implementations Next 90 Days" />
+      <UpcomingImplementationsTable headerText="Upcoming Implementations Next 90 Days" :showViewAllButton="true" />
     </div>
 
     <ReportExplorer

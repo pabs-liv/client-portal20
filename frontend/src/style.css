@@ -12,6 +12,7 @@
   --color-success-background: rgba(190, 227, 190, 0.4);
   --color-warning-background: rgba(253, 214, 113, 0.2);
   --color-error-background: rgba(212, 107, 107, 0.4);
+  --color-link: #2C82CB; /* Link Color */
 
   /* Spacing */
   --spacing-nano: 4px;

@@ -1,15 +1,18 @@
 <template>
   <v-card class="upcoming-implementations-table">
-    <v-card-title><h3>{{ headerText }}</h3></v-card-title>
+    <v-card-title class="d-flex justify-space-between align-center">
+      <h3>{{ headerText }}</h3>
+      <Button v-if="showViewAllButton" variant="secondary" label="View All" />
+    </v-card-title>
     <v-data-table
       :headers="headers"
       :items="items"
       :items-per-page="5"
       hide-default-footer
-      class="elevation-1"
+      class=""
     >
       <template v-slot:item.accountName="{ item }">
-        {{ item.accountName }}
+        <a href="#" class="account-link">{{ item.accountName }}</a>
       </template>
       <template v-slot:item.implementationStatus="{ item }">
         {{ item.implementationStatus }}
@@ -17,22 +20,22 @@
       <template v-slot:item.goLiveDate="{ item }">
         {{ item.goLiveDate }}
       </template>
-      <template v-slot:footer>
-        <v-card-actions class="justify-center">
-          <a href="#" class="view-all-link">View All</a>
-        </v-card-actions>
-      </template>
     </v-data-table>
   </v-card>
 </template>
 
 <script setup>
 import { ref, defineProps } from 'vue';
+import Button from './Button.vue'; // Import our custom Button component
 
 defineProps({
   headerText: {
     type: String,
     default: 'Upcoming Implementations Next 90 Days',
+  },
+  showViewAllButton: {
+    type: Boolean,
+    default: false,
   },
 });
 
@@ -66,6 +69,10 @@ const items = ref([
   padding-bottom: 0;
 }
 
+.upcoming-implementations-table .v-card-title h3 {
+  margin-bottom: 0; /* Remove default bottom margin */
+}
+
 .upcoming-implementations-table h3 {
   margin-bottom: var(--spacing-medium);
   text-align: left;
@@ -75,11 +82,21 @@ const items = ref([
   font-weight: bold !important;
 }
 
-
+/* Remove the old view-all-link styles as it's replaced by Button component */
 .view-all-link {
   color: var(--color-primary);
   text-decoration: none;
   font-weight: 600;
   padding: var(--spacing-small);
 }
+
+.account-link {
+  color: var(--color-link);
+  text-decoration: none;
+}
+
+.account-link:hover {
+  text-decoration: underline;
+}
+
 </style>

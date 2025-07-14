@@ -1,7 +1,7 @@
 <template>
   <div class="implementation-status-chart">
     <h3>{{ headerText }}</h3>
-    <apexchart type="bar" height="250" :options="chartOptions" :series="series"></apexchart>
+    <apexchart type="bar" height="100%" :options="chartOptions" :series="series"></apexchart>
   </div>
 </template>
 
@@ -58,7 +58,7 @@ const series = computed(() => [
 const chartOptions = computed(() => ({
   chart: {
     type: 'bar',
-    height: 250,
+    height: '100%', // Set chart height to 100%
     toolbar: { show: false },
   },
   plotOptions: {
@@ -126,6 +126,9 @@ const chartOptions = computed(() => ({
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   padding: var(--spacing-medium);
   border: 1px solid #eee;
+  display: flex; /* Enable flexbox for vertical alignment */
+  flex-direction: column;
+  flex-grow: 1; /* Allow it to grow in height */
 }
 
 .implementation-status-chart h3 {
