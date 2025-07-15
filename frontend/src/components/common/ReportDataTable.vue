@@ -4,7 +4,7 @@
       <Tabs :tabs="reportTabs" @tab-selected="handleTabSelected" />
     </div>
     <div v-if="showSearchBar && items.length > 0" class="search-bar-wrapper">
-      <SearchBar @update:searchTerm="searchTerm = $event" />
+      <SearchBar @update:searchTerm="searchTerm = $event" :showFilterButton="showFilterButton" />
     </div>
     <div v-if="activeFilters.length > 0" class="filter-pills-container">
       <FilteringPill
@@ -22,10 +22,30 @@
       class="my-table"
       :items-per-page="5"
       dense
-      hide-default-footer
+      :hide-default-footer="!showTableFooter"
+      :items-per-page-props="{ color: 'var(--color-text-primary)' }"
+      :show-select="showSelectionCheckboxes"
+      v-model:selected="selected"
     >
+      <template v-slot:item.data-table-select="{ item, isSelected, toggleSelect }">
+        <v-checkbox-btn
+          :model-value="isSelected"
+          @update:model-value="toggleSelect"
+          color="var(--color-primary)"
+          density="compact"
+        ></v-checkbox-btn>
+      </template>
+      <template v-slot:header.data-table-select="{ someSelected, allSelected, toggleSelectAll }">
+        <v-checkbox-btn
+          :model-value="allSelected"
+          :indeterminate="someSelected && !allSelected"
+          @update:model-value="toggleSelectAll"
+          color="var(--color-primary)"
+          density="compact"
+        ></v-checkbox-btn>
+      </template>
       <template v-slot:item.actions="{ item }">
-        <v-menu>
+        <v-menu v-if="showRowActions">
           <template v-slot:activator="{ props }">
             <EllipsisVertical :stroke-width="1" v-bind="props" class="row-action-icon" />
           </template>
@@ -68,6 +88,10 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  showFilterButton: {
+    type: Boolean,
+    default: true,
+  },
   headers: {
     type: Array,
     required: true,
@@ -75,6 +99,18 @@ const props = defineProps({
   items: {
     type: Array,
     default: () => [],
+  },
+  showRowActions: {
+    type: Boolean,
+    default: true,
+  },
+  showTableFooter: {
+    type: Boolean,
+    default: true,
+  },
+  showSelectionCheckboxes: {
+    type: Boolean,
+    default: true,
   },
 });
 
@@ -96,6 +132,7 @@ const activeTabKey = computed(() => {
 });
 
 const activeFilters = ref([]);
+const selected = ref([]); // For managing selected items
 
 // Function to add or update a filter pill
 const addOrUpdateFilter = (type, value, label) => {
@@ -185,6 +222,41 @@ const handleTabSelected = (key) => {
   font-weight: bold !important;
 }
 
+.my-table :deep(.v-data-footer .v-icon) {
+  color: var(--color-text-primary) !important;
+  opacity: 1 !important;
+}
+
+.my-table :deep(.v-selection-control__input input) {
+  opacity: 1 !important;
+  width: 16px !important;
+  height: 16px !important;
+}
+
+.my-table :deep(.v-selection-control__wrapper) {
+  color: var(--color-primary) !important; /* Apply primary color to the wrapper */
+  opacity: 1 !important; /* Ensure wrapper is visible */
+}
+
+.my-table :deep(.v-selection-control__ripple) {
+  color: var(--color-primary) !important; /* Apply primary color to the ripple effect */
+}
+
+.my-table :deep(.v-checkbox .v-icon) {
+  color: var(--color-primary) !important; /* Ensure checkmark icon is primary color */
+  opacity: 1 !important; /* Ensure checkmark icon is visible */
+}
+
+.my-table :deep(.v-checkbox .v-selection-control__off-icon) {
+  color: var(--color-border) !important; /* Color for unchecked state border */
+  opacity: 1 !important;
+}
+
+.my-table :deep(.v-checkbox .v-selection-control__on-icon) {
+  color: var(--color-primary) !important; /* Color for checked state checkmark */
+  opacity: 1 !important;
+}
+
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -209,3 +281,4 @@ const handleTabSelected = (key) => {
   cursor: pointer;
 }
 </style>
+

@@ -10,7 +10,7 @@
         @input="emitSearch"
       />
     </div>
-    <Button variant="primary" label="Search" :showIcon="true" :icon="Search" />
+    <Button v-if="showSearchButton" variant="primary" label="Search" :showIcon="true" :icon="Search" />
     <ListFilter v-if="showFilterButton" :stroke-width="1" class="filter-icon" />
   </div>
 </template>
@@ -28,6 +28,10 @@ const props = defineProps({
   showFilterButton: {
     type: Boolean,
     default: true,
+  },
+  showSearchButton: {
+    type: Boolean,
+    default: false,
   },
 });
 

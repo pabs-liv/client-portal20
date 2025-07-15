@@ -60,6 +60,7 @@
           :items="reportItems"
           :showNavigationTabs="true"
           :showSearchBar="true"
+          :showFilterButton="false"
         />
       </template>
     </AccordionCard>
