@@ -15,7 +15,7 @@
 <script setup>
 import { computed } from 'vue';
 import { Info, TriangleAlert } from 'lucide-vue-next';
-import Button from './Button.vue';
+import Button from '../ui/Button.vue';
 
 const props = defineProps({
   variant: {

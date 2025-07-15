@@ -26,7 +26,7 @@
 
 <script setup>
 import { ref, defineProps } from 'vue';
-import Button from './Button.vue'; // Import our custom Button component
+import Button from '../ui/Button.vue'; // Import our custom Button component
 
 defineProps({
   headerText: {

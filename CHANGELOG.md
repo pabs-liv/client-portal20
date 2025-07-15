@@ -187,4 +187,15 @@ This file documents all significant changes made to the project for future refer
 
 ---
 
+## [2025-07-10]
+- Refactored `frontend/src/components/common/ReportExplorer.vue` to be an accordion component using Vuetify's expansion panels, with a customizable `h2` header in primary color, a description, and animated chevron icons.
+
+---
+
+## [2025-07-10]
+- Renamed `frontend/src/components/common/ReportExplorer.vue` to `frontend/src/components/common/AccordionCard.vue`.
+- Updated `frontend/src/views/HomePage.vue` to reference the new `AccordionCard.vue` component.
+
+---
+
 Please append all future changes here with a date and a brief description.

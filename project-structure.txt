@@ -343,7 +343,7 @@ UI Components:
 ```
 src/
 ├── components/
-│   ├── common/
+│   ├── common/ # For reusable components that are more complex than basic UI elements (e.g., SummaryWidget, ImplementationStatusChart, AccordionCard)
 │   │   ├── Navigation.vue
 │   │   ├── UserProfile.vue
 │   │   ├── SettingsPanel.vue
@@ -355,7 +355,7 @@ src/
 │   │   ├── Header.vue
 │   │   ├── Sidebar.vue
 │   │   └── Footer.vue
-│   └── ui/
+│   └── ui/ # For atomic, generic UI elements (e.g., Button, Modal, DataTable)
 │       ├── Button.vue
 │       ├── Modal.vue
 │       ├── DataTable.vue
