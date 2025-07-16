@@ -21,13 +21,14 @@
       </template>
     </v-data-table>
     <div class="view-all-container">
-      <a href="#" class="view-all-link">View All</a>
+      <a href="#" class="view-all-link" @click.prevent="goToPlanExplorer">View All</a>
     </div>
   </v-card>
 </template>
 
 <script setup>
 import { ref, defineProps } from 'vue';
+import { useRouter } from 'vue-router';
 
 defineProps({
   headerText: {
@@ -51,6 +52,12 @@ const items = ref([
   { accountName: 'Initech', implementationStatus: 'Pending Documents', goLiveDate: '2025-09-25' },
   { accountName: 'Cyberdyne Systems', implementationStatus: 'Clinical Setup', goLiveDate: '2025-10-01' },
 ]);
+
+const router = useRouter();
+
+const goToPlanExplorer = () => {
+  router.push('/plan-explorer');
+};
 </script>
 
 <style scoped>

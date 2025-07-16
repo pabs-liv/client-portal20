@@ -60,6 +60,7 @@ defineProps({
   padding: var(--spacing-medium);
   background-color: var(--color-neutral-white);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
 }
 
 .widget-icon-wrapper {

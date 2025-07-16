@@ -16,6 +16,7 @@
         :icon="CircleCheckBig"
         iconBackgroundColor="#E6F4EA"
         iconColor="#4CAF50"
+        @click="goToReports"
       />
       <SummaryWidget
         title="High-Cost Claims"
@@ -25,6 +26,7 @@
         :icon="ChartNoAxesCombined"
         iconBackgroundColor="#FFF3E0"
         iconColor="#FF9800"
+        @click="goToApprovals"
       />
       <SummaryWidget
         title="Prior Authorizations"
@@ -34,6 +36,7 @@
         :icon="RotateCcwKey"
         iconBackgroundColor="#E0F2F7"
         iconColor="#2196F3"
+        @click="goToPriorAuths"
       />
     </div>
 
@@ -73,6 +76,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import Banner from '../components/common/Banner.vue';
 import SummaryWidget from '../components/common/SummaryWidget.vue';
 import AccordionCard from '../components/common/AccordionCard.vue';
@@ -113,6 +117,20 @@ const reportItems = ref([
   { id: 4, accountName: 'Umbrella Corp', reportName: 'Rebate Report', type: 'Rebate', reportingPeriod: '2024', lastEditedBy: 'Alice Brown', status: 'Pending Approval' },
   { id: 5, accountName: 'Initech', reportName: 'CAA Report', type: 'CAA', reportingPeriod: '2025', lastEditedBy: 'Bob White', status: 'Draft' },
 ]);
+
+const router = useRouter();
+
+const goToReports = () => {
+  router.push('/reports');
+};
+
+const goToApprovals = () => {
+  router.push('/approvals');
+};
+
+const goToPriorAuths = () => {
+  router.push('/prior-auths');
+};
 </script>
 
 <style scoped>
