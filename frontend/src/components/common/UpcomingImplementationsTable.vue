@@ -2,7 +2,6 @@
   <v-card class="upcoming-implementations-table">
     <v-card-title class="d-flex justify-space-between align-center">
       <h3>{{ headerText }}</h3>
-      <Button v-if="showViewAllButton" variant="secondary" label="View All" />
     </v-card-title>
     <v-data-table
       :headers="headers"
@@ -21,21 +20,19 @@
         {{ item.goLiveDate }}
       </template>
     </v-data-table>
+    <div class="view-all-container">
+      <a href="#" class="view-all-link">View All</a>
+    </div>
   </v-card>
 </template>
 
 <script setup>
 import { ref, defineProps } from 'vue';
-import Button from '../ui/Button.vue'; // Import our custom Button component
 
 defineProps({
   headerText: {
     type: String,
     default: 'Upcoming Implementations Next 90 Days',
-  },
-  showViewAllButton: {
-    type: Boolean,
-    default: false,
   },
 });
 
@@ -67,6 +64,7 @@ const items = ref([
 
 .upcoming-implementations-table .v-card-title {
   padding-bottom: 0;
+  margin-bottom: var(--spacing-medium);
 }
 
 .upcoming-implementations-table .v-card-title h3 {
@@ -97,6 +95,17 @@ const items = ref([
 
 .account-link:hover {
   text-decoration: underline;
+}
+
+.view-all-container {
+  text-align: center;
+  margin-top: var(--spacing-medium);
+}
+
+.view-all-link {
+  color: var(--color-link);
+  text-decoration: none;
+  font-weight: 600;
 }
 
 </style>

@@ -1,11 +1,28 @@
 <template>
-  <v-chip v-bind="$attrs" :color="chipColor" class="filtering-pill">
+  <v-chip
+    v-bind="$attrs"
+    :color="isActive ? 'var(--color-primary)' : chipColor"
+    :variant="isActive ? 'flat' : 'outlined'"
+    :closable="props.closable"
+    class="filtering-pill"
+  >
     <slot></slot>
   </v-chip>
 </template>
 
 <script setup>
-import { computed, useAttrs } from 'vue';
+import { computed, useAttrs, defineProps } from 'vue';
+
+const props = defineProps({
+  closable: {
+    type: Boolean,
+    default: false,
+  },
+  isActive: {
+    type: Boolean,
+    default: false,
+  },
+});
 
 const attrs = useAttrs();
 
@@ -17,7 +34,11 @@ const chipColor = computed(() => {
 </script>
 
 <style scoped>
-.filtering-pill {
-  /* Any additional scoped styles for the filtering pill */
+.filtering-pill.v-chip.v-chip--outlined .v-chip__content {
+  color: var(--color-text-primary) !important;
+}
+
+.filtering-pill.v-chip--flat .v-chip__content {
+  color: var(--color-neutral-white) !important;
 }
 </style>

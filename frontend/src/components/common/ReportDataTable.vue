@@ -1,17 +1,14 @@
 <template>
   <div class="report-data-table">
-    <div v-if="showNavigationTabs" class="navigation-tabs-container">
-      <Tabs :tabs="reportTabs" @tab-selected="handleTabSelected" />
-    </div>
     <div v-if="showSearchBar && items.length > 0" class="search-bar-wrapper">
       <SearchBar @update:searchTerm="searchTerm = $event" :showFilterButton="showFilterButton" />
     </div>
-    <div v-if="activeFilters.length > 0" class="filter-pills-container">
+    <div v-if="showFilterPills && activeFilters.length > 0" class="filter-pills-container">
       <FilteringPill
         v-for="filter in activeFilters"
         :key="filter.type"
-        closable
-        @click:close="removeFilter(filter)"
+        :is-active="filter.isActive"
+        @click="handleFilterPillClick(filter)"
       >
         {{ filter.label }}
       </FilteringPill>
@@ -27,23 +24,7 @@
       :show-select="showSelectionCheckboxes"
       v-model:selected="selected"
     >
-      <template v-slot:item.data-table-select="{ item, isSelected, toggleSelect }">
-        <v-checkbox-btn
-          :model-value="isSelected"
-          @update:model-value="toggleSelect"
-          color="var(--color-primary)"
-          density="compact"
-        ></v-checkbox-btn>
-      </template>
-      <template v-slot:header.data-table-select="{ someSelected, allSelected, toggleSelectAll }">
-        <v-checkbox-btn
-          :model-value="allSelected"
-          :indeterminate="someSelected && !allSelected"
-          @update:model-value="toggleSelectAll"
-          color="var(--color-primary)"
-          density="compact"
-        ></v-checkbox-btn>
-      </template>
+      
       <template v-slot:item.actions="{ item }">
         <v-menu v-if="showRowActions">
           <template v-slot:activator="{ props }">
@@ -53,11 +34,8 @@
             <v-list-item @click="console.log('View item:', item)">
               <v-list-item-title>View</v-list-item-title>
             </v-list-item>
-            <v-list-item @click="console.log('Edit item:', item)">
-              <v-list-item-title>Edit</v-list-item-title>
-            </v-list-item>
-            <v-list-item @click="console.log('Delete item:', item)">
-              <v-list-item-title>Delete</v-list-item-title>
+            <v-list-item @click="console.log('Download item:', item)">
+              <v-list-item-title>Download</v-list-item-title>
             </v-list-item>
           </v-list>
         </v-menu>
@@ -73,22 +51,21 @@
 </template>
 
 <script setup>
-import { ref, defineProps, computed } from 'vue';
+import { ref, defineProps, computed, watch } from 'vue';
 import SearchBar from '../ui/SearchBar.vue';
-import Tabs from './Tabs.vue';
 import FilteringPill from '../ui/FilteringPill.vue';
 import { Microscope, EllipsisVertical } from 'lucide-vue-next';
 
 const props = defineProps({
-  showNavigationTabs: {
-    type: Boolean,
-    default: false,
-  },
   showSearchBar: {
     type: Boolean,
     default: true,
   },
   showFilterButton: {
+    type: Boolean,
+    default: true,
+  },
+  showFilterPills: {
     type: Boolean,
     default: true,
   },
@@ -112,6 +89,10 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  initialFilterPills: {
+    type: Array,
+    default: () => [],
+  },
 });
 
 const searchTerm = ref('');
@@ -124,15 +105,25 @@ const reportTabs = ref([
   { label: 'CAA Reports', key: 'caa', hasDropdown: true },
 ]);
 
-const activeTabKey = computed(() => {
-  if (props.showNavigationTabs && reportTabs.value.length > 0) {
-    return reportTabs.value[0].key;
-  }
-  return null;
-});
-
 const activeFilters = ref([]);
 const selected = ref([]); // For managing selected items
+const activeFilterPill = ref(null); // To track the currently active filter pill
+
+// Watch for initialFilterPills prop to populate activeFilters and set initial activeFilterPill
+watch(() => props.initialFilterPills, (newVal) => {
+  if (newVal && newVal.length > 0) {
+    activeFilters.value = newVal;
+    activeFilterPill.value = newVal[0];
+  }
+}, { immediate: true });
+
+// Watch for initialFilterPills prop to populate activeFilters and set initial activeFilterPill
+watch(() => props.initialFilterPills, (newVal) => {
+  if (newVal && newVal.length > 0) {
+    activeFilters.value = newVal;
+    activeFilterPill.value = newVal[0];
+  }
+}, { immediate: true });
 
 // Function to add or update a filter pill
 const addOrUpdateFilter = (type, value, label) => {
@@ -158,10 +149,13 @@ const removeFilter = (filterToRemove) => {
   if (filterToRemove.type === 'search') {
     searchTerm.value = '';
   }
-  // If removing tab filter, reset active tab
-  if (filterToRemove.type === 'tab') {
-    activeTabKey.value = null;
-  }
+};
+
+const handleFilterPillClick = (clickedFilter) => {
+  activeFilterPill.value = clickedFilter;
+  activeFilters.value.forEach(filter => {
+    filter.isActive = (filter.value === clickedFilter.value);
+  });
 };
 
 const filteredItems = computed(() => {
@@ -177,24 +171,13 @@ const filteredItems = computed(() => {
     );
   }
 
-  // Apply tab filter
-  if (activeTabKey.value && activeTabKey.value !== 'all') {
-    currentItems = currentItems.filter(item => item.status.toLowerCase() === activeTabKey.value.toLowerCase());
+  // Apply filter based on activeFilterPill
+  if (activeFilterPill.value && activeFilterPill.value.value !== 'all') {
+    currentItems = currentItems.filter(item => item.type.toLowerCase() === activeFilterPill.value.value.toLowerCase());
   }
 
-  console.log('ReportDataTable - filteredItems:', currentItems);
   return currentItems;
 });
-
-const handleTabSelected = (key) => {
-  activeTabKey.value = key;
-  const selectedTab = reportTabs.value.find(tab => tab.key === key);
-  if (selectedTab && key !== 'all') {
-    addOrUpdateFilter('tab', key, `Tab: ${selectedTab.label}`);
-  } else {
-    removeFilter(activeFilters.value.find(f => f.type === 'tab'));
-  }
-};
 </script>
 
 <style scoped>
@@ -214,7 +197,7 @@ const handleTabSelected = (key) => {
 .filter-pills-container {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--spacing-nano);
+  gap: var(--spacing-small);
   margin-bottom: var(--spacing-medium);
 }
 
@@ -230,7 +213,7 @@ const handleTabSelected = (key) => {
 .my-table :deep(.v-selection-control__input input) {
   opacity: 1 !important;
   width: 16px !important;
-  height: 16px !important;
+  
 }
 
 .my-table :deep(.v-selection-control__wrapper) {

@@ -151,7 +151,6 @@ This file documents all significant changes made to the project for future refer
 - Registered `vue3-apexcharts` globally in `frontend/src/main.ts`.
 - Created `frontend/src/components/common/RecentActivityFeed.vue` placeholder component.
 - Refactored `frontend/src/components/common/ReportExplorer.vue` to accept a `reports` prop and dynamically render the table.
-- Updated `frontend/src/views/HomePage.vue` to include `Banner`, `SummaryWidget`, `ReportExplorer`, `ImplementationStatusChart`, and `RecentActivityFeed` components with appropriate props and styling, and removed problematic HTML comments.
 - Refactored `frontend/src/components/common/ImplementationStatusChart.vue` to include a customizable `h3` header, a border, and display chart grid lines with x-axis values. Also, set specific colors for each bar using `fillColor` in the series data.
 
 ---
@@ -195,6 +194,38 @@ This file documents all significant changes made to the project for future refer
 ## [2025-07-10]
 - Renamed `frontend/src/components/common/ReportExplorer.vue` to `frontend/src/components/common/AccordionCard.vue`.
 - Updated `frontend/src/views/HomePage.vue` to reference the new `AccordionCard.vue` component.
+
+---
+
+## [2025-07-15]
+- Refactored the `ReportDataTable.vue` component to improve checkbox alignment and submenu functionality.
+- Replaced the custom checkbox implementation with Vuetify's default `v-checkbox-btn` functionality to ensure proper vertical alignment with the row text.
+- Updated the row actions submenu to only include "View" and "Download" options, removing "Edit" and "Delete."
+- Ensured the changes were applied to the `HomePage.vue` instance of the `ReportDataTable` by explicitly setting the `show-selection-checkboxes` prop to `true`.
+
+---
+
+## [2025-07-15]
+- Refactored `UpcomingImplementationsTable.vue`:
+  - Removed the "View All" button.
+  - Added a "View All" text link at the bottom, centered and styled with link color.
+  - Added `--spacing-medium` gap between the heading and the table.
+- Refactored `FilteringPill.vue`:
+  - Updated to use Vuetify's `v-chip` with `variant="outlined"` by default.
+  - Set outline color to `var(--color-primary)` and text color to `var(--color-text-primary)`.
+  - Added `isActive` prop to control active state (filled primary background, `var(--color-neutral-white)` text).
+  - Ensured the close icon is not displayed by default by setting `closable` prop to `false` by default and removing explicit `closable` from `ReportDataTable.vue`.
+- Refactored `ReportDataTable.vue` for filter pills and table filtering:
+  - Added `initialFilterPills` prop to accept an array of filter pill objects.
+  - Modified `activeFilters` and `activeFilterPill` initialization to use `initialFilterPills` with a `watch` for proper timing.
+  - Updated `handleFilterPillClick` to manage `isActive` state of pills (toggling active/outlined appearance).
+  - Removed `showNavigationTabs` prop and related template/script logic (Tabs component, `handleTabSelected`).
+  - Updated `filteredItems` to filter by `item.type` based on `activeFilterPill.value`.
+  - Corrected the `is-active` prop binding on `FilteringPill` to `filter.isActive`.
+- Refactored `HomePage.vue` for filter pills:
+  - Defined `reportFilterPills` array with "All", "Quarterly", "Monthly", "Ad-Hoc", "Rebate", "CAA" labels (removed "Reports" suffix).
+  - Set `isActive: true` for the "All" pill in `reportFilterPills` by default.
+  - Passed `reportFilterPills` to `ReportDataTable` via `initialFilterPills` prop.
 
 ---
 

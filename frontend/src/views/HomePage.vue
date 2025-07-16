@@ -61,6 +61,9 @@
           :showNavigationTabs="true"
           :showSearchBar="true"
           :showFilterButton="false"
+          :showSelectionCheckboxes="true"
+          :showFilterPills="true"
+          :initialFilterPills="reportFilterPills"
         />
       </template>
     </AccordionCard>
@@ -82,6 +85,15 @@ import {
   RotateCcwKey,
   FileText, Folder, CircleDollarSign, Settings
 } from 'lucide-vue-next';
+
+const reportFilterPills = ref([
+  { type: 'tab', value: 'all', label: 'All', isActive: true },
+  { type: 'tab', value: 'quarterly', label: 'Quarterly' },
+  { type: 'tab', value: 'monthly', label: 'Monthly' },
+  { type: 'tab', value: 'ad-hoc', label: 'Ad-Hoc' },
+  { type: 'tab', value: 'rebate', label: 'Rebate' },
+  { type: 'tab', value: 'caa', label: 'CAA' },
+]);
 
 const reportHeaders = ref([
   { title: 'Account Name', key: 'accountName', headerProps: { style: { fontWeight: 'bold' } } },
