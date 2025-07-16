@@ -93,6 +93,7 @@ const reportFilterPills = ref([
   { type: 'tab', value: 'ad-hoc', label: 'Ad-Hoc' },
   { type: 'tab', value: 'rebate', label: 'Rebate' },
   { type: 'tab', value: 'caa', label: 'CAA' },
+  { type: 'status', value: 'pending approval', label: 'Pending Approval' },
 ]);
 
 const reportHeaders = ref([

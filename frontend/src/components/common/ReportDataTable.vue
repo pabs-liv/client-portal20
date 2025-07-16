@@ -173,7 +173,11 @@ const filteredItems = computed(() => {
 
   // Apply filter based on activeFilterPill
   if (activeFilterPill.value && activeFilterPill.value.value !== 'all') {
-    currentItems = currentItems.filter(item => item.type.toLowerCase() === activeFilterPill.value.value.toLowerCase());
+    if (activeFilterPill.value.type === 'tab') {
+      currentItems = currentItems.filter(item => item.type.toLowerCase() === activeFilterPill.value.value.toLowerCase());
+    } else if (activeFilterPill.value.type === 'status') {
+      currentItems = currentItems.filter(item => item.status.toLowerCase() === activeFilterPill.value.value.toLowerCase());
+    }
   }
 
   return currentItems;
