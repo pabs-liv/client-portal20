@@ -27,7 +27,7 @@ defineProps({
 });
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .report-table-container {
   /* Basic styling for the container */
   width: 100%;

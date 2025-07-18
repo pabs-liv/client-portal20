@@ -1,0 +1,185 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;600;700&display=swap');
+
+// Brand Colors
+$color-primary: #0F285B;
+$color-primary-light: #1A3A6B;
+$color-primary-dark: #0A1F4A;
+
+// Neutral Colors
+$color-neutral-white: #FFFFFF;
+$color-neutral-disabled: #858585;
+$color-text-primary: #1A1A1A;
+$color-border: #E0E0E0;
+
+// Status Colors
+$color-success: #5CB85C;
+$color-warning: #FBBA13;
+$color-error: #B80909;
+$color-link: #2C82CB;
+
+// Status Background Colors
+$color-success-background: rgba(190, 227, 190, 0.4);
+$color-warning-background: rgba(253, 214, 113, 0.2);
+$color-error-background: rgba(212, 107, 107, 0.4);
+
+// PBM Status Colors
+$color-approved: #5CB85C;
+$color-pending: #FBBA13;
+$color-denied: #B80909;
+$color-overdue: #B80909;
+
+// Spacing
+$spacing-nano: 4px;
+$spacing-xsmall: 8px;
+$spacing-small: 12px;
+$spacing-medium: 20px;
+$spacing-large: 32px;
+$spacing-xlarge: 48px;
+
+// Root Padding
+$root-padding: clamp(3rem, calc(3rem + ((1vw - 0.48rem) * 2.0833)), 4.5rem);
+
+// Typography
+$font-family-base: 'Lato', sans-serif;
+$font-size-h1: 2.07rem;
+$font-size-h2: 1.728rem;
+$font-size-h3: 1.44rem;
+$font-size-h4: 1.2rem;
+$font-size-body: 1rem;
+$font-size-small: 0.8rem;
+$font-weight-normal: 400;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+$line-height-tight: 120%;
+
+body {
+  font-family: $font-family-base;
+  background-color: $color-neutral-white;
+  color: $color-text-primary;
+  margin: 0;
+  padding: 0;
+}
+
+// Typography base styles
+h1, h2, h3, h4, h5, h6 {
+  font-family: $font-family-base;
+  line-height: $line-height-tight;
+  margin: 0;
+  padding: 0;
+}
+
+p {
+  font-family: $font-family-base;
+  line-height: $line-height-tight;
+  margin: 0;
+  padding: 0;
+}
+
+// Link styles
+a {
+  color: $color-link;
+  text-decoration: none;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// Vuetify overrides
+.v-application {
+  font-family: $font-family-base !important;
+  
+  // Override Vuetify's default spacing
+  .v-container {
+    padding: $root-padding;
+  }
+  
+  // Override button styles
+  .v-btn {
+    font-family: $font-family-base !important;
+    
+    &.v-btn--variant-elevated {
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+  }
+  
+  // Override card styles
+  .v-card {
+    border: 1px solid $color-border;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  // Override input styles
+  .v-field {
+    font-family: $font-family-base !important;
+  }
+  
+  // Override table styles
+  .v-data-table {
+    font-family: $font-family-base !important;
+    
+    .v-data-table__th,
+    .v-data-table__td {
+      font-family: $font-family-base !important;
+    }
+  }
+}
+
+// Utility classes for spacing
+.spacing-nano { margin: $spacing-nano; }
+.spacing-xsmall { margin: $spacing-xsmall; }
+.spacing-small { margin: $spacing-small; }
+.spacing-medium { margin: $spacing-medium; }
+.spacing-large { margin: $spacing-large; }
+.spacing-xlarge { margin: $spacing-xlarge; }
+
+.pa-nano { padding: $spacing-nano; }
+.pa-xsmall { padding: $spacing-xsmall; }
+.pa-small { padding: $spacing-small; }
+.pa-medium { padding: $spacing-medium; }
+.pa-large { padding: $spacing-large; }
+.pa-xlarge { padding: $spacing-xlarge; }
+
+.ma-nano { margin: $spacing-nano; }
+.ma-xsmall { margin: $spacing-xsmall; }
+.ma-small { margin: $spacing-small; }
+.ma-medium { margin: $spacing-medium; }
+.ma-large { margin: $spacing-large; }
+.ma-xlarge { margin: $spacing-xlarge; }
+
+// Typography utility classes
+.text-h1 {
+  font-size: $font-size-h1 !important;
+  font-weight: $font-weight-bold !important;
+  line-height: $line-height-tight !important;
+}
+
+.text-h2 {
+  font-size: $font-size-h2 !important;
+  font-weight: $font-weight-semibold !important;
+  line-height: $line-height-tight !important;
+}
+
+.text-h3 {
+  font-size: $font-size-h3 !important;
+  font-weight: $font-weight-bold !important;
+  line-height: $line-height-tight !important;
+}
+
+.text-h4 {
+  font-size: $font-size-h4 !important;
+  font-weight: $font-weight-bold !important;
+  line-height: $line-height-tight !important;
+}
+
+.text-body {
+  font-size: $font-size-body !important;
+  font-weight: $font-weight-normal !important;
+  line-height: $line-height-tight !important;
+}
+
+.text-small, .p2 {
+  font-size: $font-size-small !important;
+  font-weight: $font-weight-normal !important;
+  line-height: $line-height-tight !important;
+}

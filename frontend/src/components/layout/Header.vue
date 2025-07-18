@@ -29,7 +29,7 @@ import { Settings } from 'lucide-vue-next';
 // No script needed for this static component
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .v-app-bar {
   border-bottom: 1px solid #e0e0e0 !important;
 }

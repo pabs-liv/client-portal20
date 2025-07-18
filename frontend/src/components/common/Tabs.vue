@@ -45,7 +45,7 @@ const selectTab = (key) => {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .tabs-container {
   width: 100%;
   overflow-x: auto;

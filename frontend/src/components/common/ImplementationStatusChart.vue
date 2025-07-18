@@ -1,6 +1,6 @@
 <template>
   <div class="implementation-status-chart">
-    <h3>{{ headerText }}</h3>
+    <h3 class="text-h3">{{ headerText }}</h3>
     <apexchart type="bar" height="100%" :options="chartOptions" :series="series"></apexchart>
   </div>
 </template>
@@ -34,12 +34,12 @@ const series = computed(() => [
       {
         x: 'New',
         y: props.data.new,
-        fillColor: '#847EC1', // Palette2 color
+        fillColor: '#847EC1', // Consider replacing with a themed color if available
       },
       {
         x: 'In Progress',
         y: props.data.inProgress,
-        fillColor: '#60B0E0', // Palette2 color
+        fillColor: '#60B0E0', // Consider replacing with a themed color if available
       },
       {
         x: 'Pending Action',
@@ -49,7 +49,7 @@ const series = computed(() => [
       {
         x: 'Completed',
         y: props.data.completed,
-        fillColor: '#69C969', // Palette2 color
+        fillColor: '#69C969', // Consider replacing with a themed color if available
       },
     ],
   },
@@ -118,21 +118,23 @@ const chartOptions = computed(() => ({
 }));
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+@import '@/style.scss';
+
 .implementation-status-chart {
   width: 100%;
-  background-color: var(--color-neutral-white);
+  background-color: $color-neutral-white;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: var(--spacing-medium);
-  border: 1px solid #eee;
+  padding: $spacing-medium;
+  border: 1px solid $color-border;
   display: flex; /* Enable flexbox for vertical alignment */
   flex-direction: column;
   flex-grow: 1; /* Allow it to grow in height */
 }
 
 .implementation-status-chart h3 {
-  margin-bottom: var(--spacing-medium);
+  margin-bottom: $spacing-medium;
   text-align: left;
 }
 </style>

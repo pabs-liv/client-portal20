@@ -2,7 +2,7 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import vuetify from './plugins/vuetify'
 import router from './router'
-import './style.css'
+import './style.scss'
 import VueApexCharts from 'vue3-apexcharts'
 
 const app = createApp(App)

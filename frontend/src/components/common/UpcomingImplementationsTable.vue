@@ -1,7 +1,7 @@
 <template>
   <v-card class="upcoming-implementations-table">
     <v-card-title class="d-flex justify-space-between align-center">
-      <h3>{{ headerText }}</h3>
+      <h3 class="text-h3">{{ headerText }}</h3>
     </v-card-title>
     <v-data-table
       :headers="headers"
@@ -11,7 +11,7 @@
       class=""
     >
       <template v-slot:item.accountName="{ item }">
-        <a href="#" class="account-link">{{ item.accountName }}</a>
+        <a href="#" class="account-link text-link">{{ item.accountName }}</a>
       </template>
       <template v-slot:item.implementationStatus="{ item }">
         {{ item.implementationStatus }}
@@ -21,7 +21,7 @@
       </template>
     </v-data-table>
     <div class="view-all-container">
-      <a href="#" class="view-all-link" @click.prevent="goToPlanExplorer">View All</a>
+      <a href="#" class="view-all-link text-link" @click.prevent="goToPlanExplorer">View All</a>
     </div>
   </v-card>
 </template>
@@ -60,18 +60,20 @@ const goToPlanExplorer = () => {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+@import '@/style.scss';
+
 .upcoming-implementations-table {
-  border: 1px solid #eee;
+  border: 1px solid $color-border;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  background-color: var(--color-neutral-white);
-  padding: var(--spacing-medium);
+  background-color: $color-neutral-white;
+  padding: $spacing-medium;
 }
 
 .upcoming-implementations-table .v-card-title {
   padding-bottom: 0;
-  margin-bottom: var(--spacing-medium);
+  margin-bottom: $spacing-medium;
 }
 
 .upcoming-implementations-table .v-card-title h3 {
@@ -79,24 +81,24 @@ const goToPlanExplorer = () => {
 }
 
 .upcoming-implementations-table h3 {
-  margin-bottom: var(--spacing-medium);
+  margin-bottom: $spacing-medium;
   text-align: left;
 }
 
 .upcoming-implementations-table .v-table > .v-table__wrapper > table > thead > tr > th {
-  font-weight: bold !important;
+  font-weight: $font-weight-bold !important;
 }
 
 /* Remove the old view-all-link styles as it's replaced by Button component */
 .view-all-link {
-  color: var(--color-primary);
+  color: $color-primary;
   text-decoration: none;
-  font-weight: 600;
-  padding: var(--spacing-small);
+  font-weight: $font-weight-semibold;
+  padding: $spacing-small;
 }
 
 .account-link {
-  color: var(--color-link);
+  color: $color-link;
   text-decoration: none;
 }
 
@@ -106,13 +108,13 @@ const goToPlanExplorer = () => {
 
 .view-all-container {
   text-align: center;
-  margin-top: var(--spacing-medium);
+  margin-top: $spacing-medium;
 }
 
 .view-all-link {
-  color: var(--color-link);
+  color: $color-link;
   text-decoration: none;
-  font-weight: 600;
+  font-weight: $font-weight-semibold;
 }
 
 </style>

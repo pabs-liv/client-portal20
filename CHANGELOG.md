@@ -152,28 +152,6 @@ This file documents all significant changes made to the project for future refer
 - Created `frontend/src/components/common/RecentActivityFeed.vue` placeholder component.
 - Refactored `frontend/src/components/common/ReportExplorer.vue` to accept a `reports` prop and dynamically render the table.
 - Refactored `frontend/src/components/common/ImplementationStatusChart.vue` to include a customizable `h3` header, a border, and display chart grid lines with x-axis values. Also, set specific colors for each bar using `fillColor` in the series data.
-
----
-
-## [2025-07-10]
-- Established root styling in `frontend/src/style.css`.
-- Defined a global color palette with CSS variables, including primary, neutral, success, warning, and error colors.
-- Added background/surface color variations for success, warning, and error states.
-- Set 'Lato' as the default font family and imported it from Google Fonts.
-- Defined typography styles for headings (H1, H2, H3, H4) and paragraph text (`p`, `.p2`).
-- Established a 4pt grid system with CSS variables for consistent spacing (`--spacing-nano` to `--spacing-xlarge`).
-- Added a root padding variable (`--root-padding`) and applied it to `frontend/src/App.vue` for consistent page padding.
-- Created `frontend/src/components/common/Banner.vue` component with customizable icon, optional button, and circular background for the icon with white color.
-- Installed `lucide-vue-next` for icon support.
-- Created and moved `frontend/src/components/common/Button.vue` component with multiple variants and optional icon.
-- Created `frontend/src/components/common/SummaryWidget.vue` component with customizable icon, circular background, icon color, and `h4` title.
-- Created `frontend/src/components/common/ReportExplorer.vue` placeholder component.
-- Created `frontend/src/components/common/ImplementationStatusChart.vue` component using `vue3-apexcharts` for horizontal bar charts.
-- Installed `vue3-apexcharts` and `apexcharts` libraries.
-- Registered `vue3-apexcharts` globally in `frontend/src/main.ts`.
-- Created `frontend/src/components/common/RecentActivityFeed.vue` placeholder component.
-- Refactored `frontend/src/components/common/ReportExplorer.vue` to accept a `reports` prop and dynamically render the table.
-- Refactored `frontend/src/components/common/ImplementationStatusChart.vue` to include a customizable `h3` header, a border, and display chart grid lines with x-axis values. Also, set specific colors for each bar using `fillColor` in the series data.
 - Refactored `frontend/src/views/HomePage.vue` layout: moved `ImplementationStatusChart` below summary widgets in a two-column layout, removed `RecentActivityFeed` component.
 - Created `frontend/src/components/common/UpcomingImplementationsTable.vue` with Vuetify data table and dummy data, and integrated it into `HomePage.vue`.
 - Recreated `frontend/src/components/common/QuickAccessCard.vue` and added it back to `HomePage.vue`.
@@ -226,6 +204,51 @@ This file documents all significant changes made to the project for future refer
   - Defined `reportFilterPills` array with "All", "Quarterly", "Monthly", "Ad-Hoc", "Rebate", "CAA" labels (removed "Reports" suffix).
   - Set `isActive: true` for the "All" pill in `reportFilterPills` by default.
   - Passed `reportFilterPills` to `ReportDataTable` via `initialFilterPills` prop.
+
+---
+
+## [2025-07-15]
+- Added navigation to Summary Widgets on `HomePage.vue`:
+  - "Pending Approvals" widget now navigates to `ReportsPage.vue`.
+  - "High-Cost Claims" widget now navigates to `ApprovalsPage.vue`.
+  - "Prior Authorizations" widget now navigates to `PriorAuthsPage.vue`.
+  - Added `cursor: pointer;` to `SummaryWidget.vue` to indicate clickability.
+- Updated "Upcoming Implementations Next 90 Days" widget in `UpcomingImplementationsTable.vue`:
+  - "View All" link now navigates to `PlanExplorerPage.vue`.
+- Added "Pending Approval" filter pill to `HomePage.vue`:
+  - Pill filters `ReportDataTable` by `status = "Pending Approval"`.
+- Converted `frontend/src/style.css` to `frontend/src/style.scss`.
+- Updated `main.ts` to reference `style.scss`.
+- Converted `<style scoped>` to `<style lang="scss" scoped>` in the following Vue components:
+  - `App.vue`
+  - `AccordionCard.vue`
+  - `Banner.vue`
+  - `ImplementationStatusChart.vue`
+  - `ReportDataTable.vue`
+  - `ReportTable.vue`
+  - `SummaryWidget.vue`
+  - `Tabs.vue`
+  - `UpcomingImplementationsTable.vue`
+  - `Header.vue`
+  - `Sidebar.vue`
+  - `Button.vue`
+  - `FilteringPill.vue`
+  - `SearchBar.vue`
+  - `HomePage.vue`
+- Refactored `frontend/src/style.scss` to use SCSS variables and follow SCSS standards.
+- Updated `Banner.vue` to use SCSS variables for colors and spacing.
+- Updated `SummaryWidget.vue` to use SCSS variables for colors and spacing, and global typography classes.
+- Updated `HomePage.vue` to use SCSS spacing variables.
+- Addressed persistent `Element is missing end tag` error in `ImplementationStatusChart.vue` by re-writing the file content with correct SCSS variable usage and `@import` syntax.
+- Fixed `AccordionCard.vue` by re-adding missing `</script>` tag.
+- Fixed `FilteringPill.vue` by replacing SCSS variable with CSS variable in JavaScript context.
+
+---
+
+## [2025-07-18]
+- Successfully refactored `AccordionCard.vue` to ensure the `ReportDataTable` component renders correctly when the accordion is expanded.
+- Updated `SearchBar.vue` and `FilteringPill.vue` to use SCSS variables, ensuring consistency with the new styling standards.
+- Configured a custom Vuetify theme in `vuetify.ts` to align with the project's color palette, fixing the active state of the `FilteringPill` component.
 
 ---
 

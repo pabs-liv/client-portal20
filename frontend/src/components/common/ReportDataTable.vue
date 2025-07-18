@@ -51,7 +51,7 @@
 </template>
 
 <script setup>
-import { ref, defineProps, computed, watch } from 'vue';
+import { ref, defineProps, computed, watch, onMounted } from 'vue';
 import SearchBar from '../ui/SearchBar.vue';
 import FilteringPill from '../ui/FilteringPill.vue';
 import { Microscope, EllipsisVertical } from 'lucide-vue-next';
@@ -107,21 +107,20 @@ const reportTabs = ref([
 
 const activeFilters = ref([]);
 const selected = ref([]); // For managing selected items
-const activeFilterPill = ref(null); // To track the currently active filter pill
+const activeFilterPill = ref(props.initialFilterPills.length > 0 ? props.initialFilterPills[0] : null); // To track the currently active filter pill
 
-// Watch for initialFilterPills prop to populate activeFilters and set initial activeFilterPill
+// Watch for initialFilterPills prop to populate activeFilters
 watch(() => props.initialFilterPills, (newVal) => {
   if (newVal && newVal.length > 0) {
-    activeFilters.value = newVal;
-    activeFilterPill.value = newVal[0];
-  }
-}, { immediate: true });
-
-// Watch for initialFilterPills prop to populate activeFilters and set initial activeFilterPill
-watch(() => props.initialFilterPills, (newVal) => {
-  if (newVal && newVal.length > 0) {
-    activeFilters.value = newVal;
-    activeFilterPill.value = newVal[0];
+    activeFilters.value = newVal.map(pill => ({ ...pill })); // Create a deep copy
+    // Ensure the initially active pill is marked as active
+    const initialActive = activeFilters.value.find(p => p.isActive);
+    if (initialActive) {
+      activeFilterPill.value = initialActive;
+    } else {
+      activeFilterPill.value = activeFilters.value[0];
+      activeFilterPill.value.isActive = true; // Mark the first pill as active if none are
+    }
   }
 }, { immediate: true });
 
@@ -152,10 +151,10 @@ const removeFilter = (filterToRemove) => {
 };
 
 const handleFilterPillClick = (clickedFilter) => {
-  activeFilterPill.value = clickedFilter;
   activeFilters.value.forEach(filter => {
     filter.isActive = (filter.value === clickedFilter.value);
   });
+  activeFilterPill.value = clickedFilter;
 };
 
 const filteredItems = computed(() => {
@@ -179,38 +178,47 @@ const filteredItems = computed(() => {
       currentItems = currentItems.filter(item => item.status.toLowerCase() === activeFilterPill.value.value.toLowerCase());
     }
   }
-
+  console.log('ReportDataTable - filteredItems:', currentItems);
   return currentItems;
+});
+
+onMounted(() => {
+  console.log('ReportDataTable mounted!');
+  console.log('ReportDataTable - initialFilterPills:', props.initialFilterPills);
+  console.log('ReportDataTable - activeFilters:', activeFilters.value);
+  console.log('ReportDataTable - activeFilterPill:', activeFilterPill.value);
 });
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+@import '@/style.scss';
+
 .report-data-table {
   /* Basic styling for the container */
   /* Removed redundant padding, border, border-radius, and background-color */
 }
 
 .navigation-tabs-container {
-  margin-bottom: var(--spacing-medium);
+  margin-bottom: $spacing-medium;
 }
 
 .search-bar-wrapper {
-  margin-bottom: var(--spacing-medium);
+  margin-bottom: $spacing-medium;
 }
 
 .filter-pills-container {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--spacing-small);
-  margin-bottom: var(--spacing-medium);
+  gap: $spacing-small;
+  margin-bottom: $spacing-medium;
 }
 
 .my-table :deep(.v-table > .v-table__wrapper > table > thead > tr > th) {
-  font-weight: bold !important;
+  font-weight: $font-weight-bold !important;
 }
 
 .my-table :deep(.v-data-footer .v-icon) {
-  color: var(--color-text-primary) !important;
+  color: $color-text-primary !important;
   opacity: 1 !important;
 }
 
@@ -221,26 +229,26 @@ const filteredItems = computed(() => {
 }
 
 .my-table :deep(.v-selection-control__wrapper) {
-  color: var(--color-primary) !important; /* Apply primary color to the wrapper */
+  color: $color-primary !important; /* Apply primary color to the wrapper */
   opacity: 1 !important; /* Ensure wrapper is visible */
 }
 
 .my-table :deep(.v-selection-control__ripple) {
-  color: var(--color-primary) !important; /* Apply primary color to the ripple effect */
+  color: $color-primary !important; /* Apply primary color to the ripple effect */
 }
 
 .my-table :deep(.v-checkbox .v-icon) {
-  color: var(--color-primary) !important; /* Ensure checkmark icon is primary color */
+  color: $color-primary !important; /* Ensure checkmark icon is primary color */
   opacity: 1 !important; /* Ensure checkmark icon is visible */
 }
 
 .my-table :deep(.v-checkbox .v-selection-control__off-icon) {
-  color: var(--color-border) !important; /* Color for unchecked state border */
+  color: $color-border !important; /* Color for unchecked state border */
   opacity: 1 !important;
 }
 
 .my-table :deep(.v-checkbox .v-selection-control__on-icon) {
-  color: var(--color-primary) !important; /* Color for checked state checkmark */
+  color: $color-primary !important; /* Color for checked state checkmark */
   opacity: 1 !important;
 }
 
@@ -249,23 +257,22 @@ const filteredItems = computed(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: var(--spacing-large);
+  padding: $spacing-large;
   text-align: center;
-  color: #888;
+  color: $color-neutral-disabled;
 }
 
 .empty-state-icon {
-  margin-bottom: var(--spacing-small);
-  color: #ccc;
+  margin-bottom: $spacing-small;
+  color: $color-border;
 }
 
 .empty-state-text {
-  font-size: 1rem;
-  color: #888;
+  font-size: $font-size-body;
+  color: $color-neutral-disabled;
 }
 
 .row-action-icon {
   cursor: pointer;
 }
 </style>
-

@@ -1,4 +1,3 @@
-
 <template>
   <div class="home-page-container">
     <Banner
@@ -133,23 +132,25 @@ const goToPriorAuths = () => {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+@import '@/style.scss';
+
 .home-page-container {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-large);
+  gap: $spacing-large;
 }
 
 .widgets-container {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: var(--spacing-medium);
+  gap: $spacing-medium;
 }
 
 .two-column-layout {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: var(--spacing-medium);
+  gap: $spacing-medium;
 }
 
 /* Responsive adjustments */
@@ -169,5 +170,3 @@ const goToPriorAuths = () => {
   }
 }
 </style>
-
-

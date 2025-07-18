@@ -28,7 +28,7 @@ const props = defineProps({
     required: true,
   },
   infoIcon: {
-    type: Object,
+    type: Function,
     default: () => Info,
   },
   showButton: {
@@ -49,14 +49,16 @@ const iconComponent = computed(() => {
 });
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+@import '@/style.scss';
+
 .banner {
   width: 100%;
   display: flex;
   align-items: center;
   border: 1px solid;
   border-radius: 4px;
-  padding: var(--spacing-nano) var(--spacing-xsmall);
+  padding: $spacing-nano $spacing-xsmall;
   box-sizing: border-box;
 }
 
@@ -67,12 +69,12 @@ const iconComponent = computed(() => {
   width: 32px; /* Adjust size as needed */
   height: 32px; /* Adjust size as needed */
   border-radius: 50%;
-  margin-right: var(--spacing-xsmall);
+  margin-right: $spacing-xsmall;
   flex-shrink: 0;
 }
 
 .icon {
-  color: var(--color-neutral-white); /* Set icon color to white */
+  color: $color-neutral-white; /* Set icon color to white */
   font-size: 1.2rem;
 }
 
@@ -85,28 +87,28 @@ const iconComponent = computed(() => {
 }
 
 .banner-button {
-  margin-left: var(--spacing-small);
+  margin-left: $spacing-small;
   flex-shrink: 0; /* Prevent button from shrinking */
 }
 
 /* Variant Styles */
 .banner.info {
-  border-color: var(--color-primary);
+  border-color: $color-primary;
   background-color: transparent;
   color: inherit;
 }
 
 .banner.info .icon-wrapper {
-  background-color: var(--color-primary);
+  background-color: $color-primary;
 }
 
 .banner.warning {
-  border-color: var(--color-warning);
-  background-color: var(--color-warning-background);
-  color: var(--color-text-primary);
+  border-color: $color-warning;
+  background-color: $color-warning-background;
+  color: $color-text-primary;
 }
 
 .banner.warning .icon-wrapper {
-  background-color: var(--color-warning);
+  background-color: $color-warning;
 }
 </style>

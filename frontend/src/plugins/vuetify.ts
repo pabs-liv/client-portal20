@@ -8,6 +8,15 @@ import * as directives from 'vuetify/directives'
 const vuetify = createVuetify({
   components,
   directives,
+  theme: {
+    themes: {
+      light: {
+        colors: {
+          primary: '#0F285B',
+        },
+      },
+    },
+  },
 })
 
 export default vuetify

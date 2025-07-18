@@ -88,7 +88,7 @@ const navItems = ref([
 ]);
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .sidebar::-webkit-scrollbar {
   display: none;
 }

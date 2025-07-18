@@ -57,7 +57,7 @@ const buttonStyle = computed(() => {
 });
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .button {
   display: inline-flex;
   align-items: center;

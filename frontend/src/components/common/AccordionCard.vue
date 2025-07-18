@@ -3,8 +3,8 @@
     <v-expansion-panel>
       <v-expansion-panel-title>
         <div class="d-flex flex-column align-start">
-          <h2 class="accordion-card-title">{{ headerText }}</h2>
-          <p class="accordion-card-description">{{ descriptionText }}</p>
+          <h2 class="accordion-card-title text-h2">{{ headerText }}</h2>
+          <p class="accordion-card-description text-body">{{ descriptionText }}</p>
         </div>
         <template v-slot:actions="{ expanded }">
           <component
@@ -26,7 +26,7 @@
 import { defineProps } from 'vue';
 import { ChevronRight, ChevronUp } from 'lucide-vue-next';
 
-defineProps({
+const props = defineProps({
   showChevron: {
     type: Boolean,
     default: true,
@@ -42,34 +42,34 @@ defineProps({
 });
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+@import '@/style.scss';
+
 .accordion-card {
-  border: 1px solid #eee;
+  border: 1px solid $color-border;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  background-color: var(--color-neutral-white);
+  background-color: $color-neutral-white;
 }
 
 .accordion-card .v-expansion-panel-title {
-  padding: var(--spacing-medium);
+  padding: $spacing-medium;
 }
 
 .accordion-card .v-expansion-panel-text {
-  padding: 0 var(--spacing-medium) var(--spacing-medium) var(--spacing-medium);
+  padding: 0 $spacing-medium $spacing-medium $spacing-medium;
   overflow: visible; /* Ensure content is not hidden */
   height: auto; /* Allow content to define height */
 }
 
 .accordion-card .accordion-card-title {
-  color: var(--color-primary);
-  margin-bottom: var(--spacing-nano); /* Small gap between title and description */
+  color: $color-primary;
+  margin-bottom: $spacing-nano; /* Small gap between title and description */
 }
 
 .accordion-card .accordion-card-description {
-  font-size: 1rem; /* p styling */
-  line-height: 120%; /* p styling */
-  font-weight: 400; /* p styling */
-  margin-bottom: var(--spacing-medium); /* Gap below description */
+  /* font-size, line-height, font-weight are now handled by global p styling */
+  margin-bottom: $spacing-medium; /* Gap below description */
 }
 
 .chevron-icon {

@@ -44,15 +44,17 @@ const emitSearch = () => {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+@import '@/style.scss';
+
 .search-bar-container {
   display: flex;
   align-items: center;
-  gap: var(--spacing-small);
-  border: 1px solid #ccc;
+  gap: $spacing-small;
+  border: 1px solid $color-border;
   border-radius: 8px;
-  padding: var(--spacing-nano);
-  background-color: var(--color-neutral-white);
+  padding: $spacing-nano;
+  background-color: $color-neutral-white;
 }
 
 .search-input-wrapper {
@@ -63,30 +65,30 @@ const emitSearch = () => {
 }
 
 .search-icon {
-  color: #888;
-  margin-right: var(--spacing-nano);
+  color: $color-neutral-disabled;
+  margin-right: $spacing-nano;
 }
 
 .search-input {
   border: none;
   outline: none;
   width: 100%;
-  padding: var(--spacing-nano) 0;
-  font-size: 1rem;
-  color: var(--color-text-primary);
+  padding: $spacing-nano 0;
+  font-size: $font-size-body;
+  color: $color-text-primary;
 }
 
 .search-input::placeholder {
-  color: #aaa;
+  color: $color-neutral-disabled;
 }
 
 /* Adjust button padding for better visual alignment */
 .search-bar-container .button {
-  padding: var(--spacing-nano) var(--spacing-small);
+  padding: $spacing-nano $spacing-small;
 }
 
 .filter-icon {
-  color: var(--color-primary);
+  color: $color-primary;
   cursor: pointer;
   font-size: 1.5rem; /* Adjust size as needed */
 }

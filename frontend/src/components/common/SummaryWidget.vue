@@ -5,11 +5,11 @@
     </div>
     <div class="widget-content">
       <div class="widget-header">
-        <h4 class="widget-title">{{ title }}</h4>
-        <span class="widget-count">{{ count }}</span>
+        <h4 class="widget-title text-h4">{{ title }}</h4>
+        <span class="widget-count text-h3">{{ count }}</span>
       </div>
       <div class="widget-body">
-        <p>{{ description }}</p>
+        <p class="text-body">{{ description }}</p>
       </div>
     </div>
   </div>
@@ -37,7 +37,7 @@ defineProps({
     default: false,
   },
   icon: {
-    type: Object,
+    type: Function,
     default: () => Flame,
   },
   iconBackgroundColor: {
@@ -51,14 +51,16 @@ defineProps({
 });
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+@import '@/style.scss';
+
 .summary-widget {
   display: flex;
   align-items: flex-start;
-  border: 1px solid #eee;
+  border: 1px solid $color-border;
   border-radius: 8px;
-  padding: var(--spacing-medium);
-  background-color: var(--color-neutral-white);
+  padding: $spacing-medium;
+  background-color: $color-neutral-white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   cursor: pointer;
 }
@@ -70,7 +72,7 @@ defineProps({
   width: 48px; /* Slightly larger than icon */
   height: 48px; /* Slightly larger than icon */
   border-radius: 50%;
-  margin-right: var(--spacing-medium);
+  margin-right: $spacing-medium;
   flex-shrink: 0;
 }
 
@@ -87,17 +89,11 @@ defineProps({
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--spacing-small);
+  margin-bottom: $spacing-small;
 }
 
 .widget-title {
   /* font-weight is now handled by global h4 style */
-}
-
-.widget-count {
-  font-size: 1.44rem; /* H3 */
-  font-weight: 700; /* bold */
-  color: var(--color-primary);
 }
 
 .widget-body p {
