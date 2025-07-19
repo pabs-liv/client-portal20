@@ -252,4 +252,15 @@ This file documents all significant changes made to the project for future refer
 
 ---
 
+## [1.0.1] - 2025-07-18
+
+### Added
+- [State Management] Installed and configured Pinia for global state management. Created a `user` store to manage `userType` and a `useUserType` composable to provide reactive access to the user type (`internal`/`external`). Impact: This establishes a centralized and type-safe way to manage global state, enabling role-based UI rendering. #pinia #vue #typescript
+- [Developer Tools] Added a development-only UI switcher in `App.vue` to toggle the `userType` between `internal` and `external`. Impact: This allows for easy testing and validation of role-based UI changes without requiring a full authentication flow. #vue #dev-tools
+
+### Changed
+- [Role-Based Rendering] Refactored the `Banner.vue` component to be displayed only to `external` users. This was achieved by integrating the `useUserType` composable. Impact: The UI now dynamically adapts to the user's role, showing relevant information based on their permissions. #vue #permissions
+
+---
+
 Please append all future changes here with a date and a brief description.

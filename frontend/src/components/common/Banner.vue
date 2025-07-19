@@ -1,5 +1,5 @@
 <template>
-  <div :class="['banner', variant]">
+  <div v-if="isExternal" :class="['banner', variant]">
     <div class="icon-wrapper">
       <component :is="iconComponent" :stroke-width="1" class="icon" />
     </div>
@@ -12,34 +12,27 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue';
 import { Info, TriangleAlert } from 'lucide-vue-next';
 import Button from '../ui/Button.vue';
+import { useUserType } from '@/composables/useUserType';
 
-const props = defineProps({
-  variant: {
-    type: String,
-    required: true,
-    validator: (value) => ['info', 'warning'].includes(value),
-  },
-  message: {
-    type: String,
-    required: true,
-  },
-  infoIcon: {
-    type: Function,
-    default: () => Info,
-  },
-  showButton: {
-    type: Boolean,
-    default: false,
-  },
-  buttonProps: {
-    type: Object,
-    default: () => ({}),
-  },
+interface Props {
+  variant: 'info' | 'warning';
+  message: string;
+  infoIcon?: any; // Allow any component type
+  showButton?: boolean;
+  buttonProps?: object;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  infoIcon: () => Info,
+  showButton: false,
+  buttonProps: () => ({}),
 });
+
+const { isExternal } = useUserType();
 
 const iconComponent = computed(() => {
   if (props.variant === 'warning') {
