@@ -263,4 +263,23 @@ This file documents all significant changes made to the project for future refer
 
 ---
 
+## [1.0.2] - 2025-07-18
+
+### Added
+- [Component] Created a new reusable `PageCard.vue` component to provide a consistent container for page content. Impact: This improves UI consistency and reduces code duplication. #vue #component
+- [Component] Created a new reusable `Breadcrumbs.vue` component to display the user's navigation path. Impact: This improves site navigation and user orientation. #vue #component #navigation
+- [Feature] Added `SummaryWidget` components to the `ApprovalsPage.vue` to display a breakdown of reports awaiting approval by type. Impact: This provides users with a quick overview of their pending tasks. #vue #feature
+
+### Changed
+- [UI/UX] Updated the `ApprovalsPage.vue` to use the new `PageCard` component and added spacing between elements for better visual separation. Impact: This improves the layout and readability of the page. #vue #ui-ux
+- [UI/UX] Updated the `ReportsPage.vue` to use the `PageCard` component and replicated the `ReportDataTable` from the homepage. Impact: This provides a consistent user experience between the home and reports pages. #vue #ui-ux
+- [Styling] Updated the typography utility classes in `style.scss` to ensure all heading levels use the `Lato` font family. Impact: This corrects font inconsistencies and ensures a consistent look and feel. #scss #styling
+- [Styling] Updated the `PageCard.vue` component to use the primary text color for the description. Impact: This improves readability and visual consistency. #scss #styling
+
+### Fixed
+- [UI/UX] Corrected the `ReportDataTable.vue` component to ensure table headers are always bold. Impact: This fixes a visual bug and improves the readability of the data table. #vue #ui-ux
+- [UI/UX] Corrected the `ReportsPage.vue` to hide the "Actions" column header while still displaying the row actions. Impact: This cleans up the UI while retaining functionality. #vue #ui-ux
+
+---
+
 Please append all future changes here with a date and a brief description.

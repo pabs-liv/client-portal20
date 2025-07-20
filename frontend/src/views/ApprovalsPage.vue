@@ -91,6 +91,7 @@ const reportFilterPills = ref([
   { type: 'tab', value: 'quarterly', label: 'Quarterly' },
   { type: 'tab', value: 'monthly', label: 'Monthly' },
   { type: 'tab', value: 'ad-hoc', label: 'Ad-Hoc' },
+  { type: 'tab', value: 'annual', label: 'Annual' },
 ]);
 
 const quarterlyCount = computed(() => reportItems.value.filter(item => item.type === 'Quarterly').length);
