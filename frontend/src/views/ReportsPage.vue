@@ -2,6 +2,33 @@
 <template>
   <div class="reports-page">
     <h1 class="text-h1">Reports</h1>
+
+    <!-- Charts Section -->
+    <div class="charts-container">
+      <!-- External User Charts -->
+      <template v-if="isExternal">
+        <div class="chart-item-large">
+          <ReportStatusChart />
+        </div>
+        <div class="chart-item-large">
+          <ReportsByTypeChart />
+        </div>
+      </template>
+
+      <!-- Internal User Charts -->
+      <template v-if="isInternal">
+        <div class="chart-item-small">
+          <TotalPendingChart />
+        </div>
+        <div class="chart-item-small">
+          <AvgApprovalTimeChart />
+        </div>
+        <div class="chart-item-full">
+          <ReportsByAccountChart />
+        </div>
+      </template>
+    </div>
+
     <PageCard header-text="All Reports" description-text="Browse and manage all available reports.">
       <ReportDataTable
         :headers="reportHeaders"
@@ -20,6 +47,14 @@
 import { ref } from 'vue';
 import PageCard from '@/components/common/PageCard.vue';
 import ReportDataTable from '@/components/common/ReportDataTable.vue';
+import { useUserType } from '@/composables/useUserType';
+import ReportStatusChart from '@/components/common/ReportStatusChart.vue';
+import ReportsByTypeChart from '@/components/common/ReportsByTypeChart.vue';
+import TotalPendingChart from '@/components/common/TotalPendingChart.vue';
+import AvgApprovalTimeChart from '@/components/common/AvgApprovalTimeChart.vue';
+import ReportsByAccountChart from '@/components/common/ReportsByAccountChart.vue';
+
+const { isInternal, isExternal } = useUserType();
 
 const reportHeaders = ref([
   { title: 'Account Name', key: 'accountName' },
@@ -57,5 +92,30 @@ const reportFilterPills = ref([
   display: flex;
   flex-direction: column;
   gap: $spacing-large;
+}
+
+.charts-container {
+  display: grid;
+  gap: $spacing-medium;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.chart-item-small {
+  grid-column: span 1;
+}
+
+.chart-item-large {
+  grid-column: span 2;
+}
+
+.chart-item-full {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 768px) {
+  .chart-item-large,
+  .chart-item-small {
+    grid-column: span 1;
+  }
 }
 </style>

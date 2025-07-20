@@ -282,4 +282,18 @@ This file documents all significant changes made to the project for future refer
 
 ---
 
+## [1.0.3] - 2025-07-18
+
+### Added
+- [Feature] Added a new chart section to the `ReportsPage.vue` with a responsive bento-box layout. This section conditionally renders different charts for internal and external users. Impact: This provides a more data-rich and role-specific experience on the reports page. #vue #feature #charts
+
+### Changed
+- [Component] Refactored the placeholder chart components (`ReportStatusChart.vue`, `ReportsByTypeChart.vue`, `TotalPendingChart.vue`, `AvgApprovalTimeChart.vue`, `ReportsByAccountChart.vue`) to use the `vue3-apexcharts` library. Impact: This makes the charts functional and consistent with the project's charting standards. #vue #apexcharts #component
+- [UI/UX] Adjusted the height of the external user charts to `250px` to prevent them from taking up too much vertical space. Impact: This improves the layout and user experience on the reports page. #vue #ui-ux
+
+### Fixed
+- [Styling] Corrected the chart card components to use the `.text-h4` class for their titles, ensuring consistent typography. Impact: This fixes a styling inconsistency and improves the visual hierarchy of the page. #scss #styling
+
+---
+
 Please append all future changes here with a date and a brief description.
