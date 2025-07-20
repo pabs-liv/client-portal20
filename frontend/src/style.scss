@@ -149,36 +149,42 @@ a {
 
 // Typography utility classes
 .text-h1 {
+  font-family: $font-family-base !important;
   font-size: $font-size-h1 !important;
   font-weight: $font-weight-bold !important;
   line-height: $line-height-tight !important;
 }
 
 .text-h2 {
+  font-family: $font-family-base !important;
   font-size: $font-size-h2 !important;
   font-weight: $font-weight-semibold !important;
   line-height: $line-height-tight !important;
 }
 
 .text-h3 {
+  font-family: $font-family-base !important;
   font-size: $font-size-h3 !important;
   font-weight: $font-weight-bold !important;
   line-height: $line-height-tight !important;
 }
 
 .text-h4 {
+  font-family: $font-family-base !important;
   font-size: $font-size-h4 !important;
   font-weight: $font-weight-bold !important;
   line-height: $line-height-tight !important;
 }
 
 .text-body {
+  font-family: $font-family-base !important;
   font-size: $font-size-body !important;
   font-weight: $font-weight-normal !important;
   line-height: $line-height-tight !important;
 }
 
 .text-small, .p2 {
+  font-family: $font-family-base !important;
   font-size: $font-size-small !important;
   font-weight: $font-weight-normal !important;
   line-height: $line-height-tight !important;

@@ -13,17 +13,17 @@ import AddedValuePage from '@/views/AddedValuePage.vue';
 import SettingsPage from '@/views/SettingsPage.vue';
 
 const routes = [
-  { path: '/', name: 'Home', component: HomePage },
-  { path: '/approvals', name: 'Approvals', component: ApprovalsPage },
-  { path: '/reports', name: 'Reports', component: ReportsPage },
-  { path: '/documents', name: 'Documents', component: DocumentsPage },
-  { path: '/high-cost-claims', name: 'Claims', component: HighCostClaimsPage },
-  { path: '/prior-auths', name: 'PriorAuths', component: PriorAuthsPage },
-  { path: '/billing', name: 'Billing', component: BillingPage },
-  { path: '/plan-explorer', name: 'PlanExplorer', component: PlanExplorerPage },
-  { path: '/test-results', name: 'TestResults', component: TestResultsPage },
-  { path: '/added-value', name: 'AddedValue', component: AddedValuePage },
-  { path: '/settings', name: 'Settings', component: SettingsPage },
+  { path: '/', name: 'Home', component: HomePage, meta: { breadcrumb: 'Home' } },
+  { path: '/approvals', name: 'Approvals', component: ApprovalsPage, meta: { breadcrumb: 'Approvals' } },
+  { path: '/reports', name: 'Reports', component: ReportsPage, meta: { breadcrumb: 'Reports' } },
+  { path: '/documents', name: 'Documents', component: DocumentsPage, meta: { breadcrumb: 'Documents' } },
+  { path: '/high-cost-claims', name: 'Claims', component: HighCostClaimsPage, meta: { breadcrumb: 'High-Cost Claims' } },
+  { path: '/prior-auths', name: 'PriorAuths', component: PriorAuthsPage, meta: { breadcrumb: 'Prior Authorizations' } },
+  { path: '/billing', name: 'Billing', component: BillingPage, meta: { breadcrumb: 'Billing' } },
+  { path: '/plan-explorer', name: 'PlanExplorer', component: PlanExplorerPage, meta: { breadcrumb: 'Plan Explorer' } },
+  { path: '/test-results', name: 'TestResults', component: TestResultsPage, meta: { breadcrumb: 'Test Results' } },
+  { path: '/added-value', name: 'AddedValue', component: AddedValuePage, meta: { breadcrumb: 'Added Value' } },
+  { path: '/settings', name: 'Settings', component: SettingsPage, meta: { breadcrumb: 'Settings' } },
 ];
 
 const router = createRouter({
