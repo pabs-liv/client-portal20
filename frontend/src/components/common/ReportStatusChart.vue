@@ -26,6 +26,22 @@ const chartOptions = ref({
       formatter: (val: number) => `${val} Reports`,
     },
   },
+  plotOptions: {
+    pie: {
+      donut: {
+        labels: {
+          show: true,
+          total: {
+            show: true,
+            label: 'Total',
+            formatter: (w: any) => {
+              return w.globals.seriesTotals.reduce((a: number, b: number) => a + b, 0);
+            },
+          },
+        },
+      },
+    },
+  },
 });
 </script>
 
@@ -42,7 +58,7 @@ const chartOptions = ref({
   flex-direction: column;
 
   h3 {
-    @extend .text-h4;
+    @extend .text-h3;
     margin-bottom: $spacing-medium;
   }
 }

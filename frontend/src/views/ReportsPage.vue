@@ -3,30 +3,25 @@
   <div class="reports-page">
     <h1 class="text-h1">Reports</h1>
 
-    <!-- Charts Section -->
-    <div class="charts-container">
-      <!-- External User Charts -->
-      <template v-if="isExternal">
-        <div class="chart-item-large">
-          <ReportStatusChart />
-        </div>
-        <div class="chart-item-large">
-          <ReportsByTypeChart />
-        </div>
-      </template>
+    <!-- External User Charts -->
+    <div v-if="isExternal" class="external-charts-layout">
+      <div class="chart-item-large">
+        <ReportStatusChart />
+      </div>
+      <div class="chart-item-large">
+        <ReportsByTypeChart />
+      </div>
+    </div>
 
-      <!-- Internal User Charts -->
-      <template v-if="isInternal">
-        <div class="chart-item-small">
-          <TotalPendingChart />
-        </div>
-        <div class="chart-item-small">
-          <AvgApprovalTimeChart />
-        </div>
-        <div class="chart-item-full">
-          <ReportsByAccountChart />
-        </div>
-      </template>
+    <!-- Internal User Charts -->
+    <div v-if="isInternal" class="internal-charts-layout">
+      <div class="kpi-column">
+        <TotalPendingChart />
+        <AvgApprovalTimeChart />
+      </div>
+      <div class="bar-chart-column">
+        <ReportsByAccountChart />
+      </div>
     </div>
 
     <PageCard header-text="All Reports" description-text="Browse and manage all available reports.">
@@ -94,28 +89,28 @@ const reportFilterPills = ref([
   gap: $spacing-large;
 }
 
-.charts-container {
+.external-charts-layout {
   display: grid;
   gap: $spacing-medium;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
 }
 
-.chart-item-small {
-  grid-column: span 1;
-}
+.internal-charts-layout {
+  display: grid;
+  grid-template-columns: 30% 70%;
+  gap: $spacing-medium;
 
-.chart-item-large {
-  grid-column: span 2;
-}
-
-.chart-item-full {
-  grid-column: 1 / -1;
+  .kpi-column {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-medium;
+  }
 }
 
 @media (max-width: 768px) {
-  .chart-item-large,
-  .chart-item-small {
-    grid-column: span 1;
+  .external-charts-layout,
+  .internal-charts-layout {
+    grid-template-columns: 1fr;
   }
 }
 </style>

@@ -24,7 +24,7 @@
   text-align: center;
 
   h4 {
-    @extend .text-h4;
+    @extend .text-h3;
     color: $color-text-primary;
     font-weight: $font-weight-semibold;
   }

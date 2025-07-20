@@ -59,7 +59,7 @@ const chartOptions = ref({
   flex-direction: column;
 
   h3 {
-    @extend .text-h4;
+    @extend .text-h3;
     margin-bottom: $spacing-medium;
   }
 }

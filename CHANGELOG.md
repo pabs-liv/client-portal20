@@ -296,4 +296,12 @@ This file documents all significant changes made to the project for future refer
 
 ---
 
+## [1.0.4] - 2025-07-18
+
+### Changed
+- [UI/UX] Updated `ReportStatusChart.vue` to display the total number of reports inside the donut chart. Impact: This provides a clearer summary of the data directly within the visualization. #vue #apexcharts #ui-ux
+- [UI/UX] Adjusted the styling of the total count and label within the donut chart in `ReportStatusChart.vue` to match the desired visual hierarchy. Impact: Improves readability and visual appeal of the chart. #vue #apexcharts #ui-ux
+
+---
+
 Please append all future changes here with a date and a brief description.
