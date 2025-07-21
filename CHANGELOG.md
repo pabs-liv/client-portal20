@@ -9,7 +9,12 @@ This file documents all significant changes made to the project for future refer
 - [UI/UX] Increased the size of the upload illustration in the `FileUploader` component by 50% (from 120px to 180px) to give it more prominence on the page. Impact: This improves the visual hierarchy and user focus on the upload action. #vue #ui-ux #styling
 - [Refactor] Updated FileUploader component to use an imported image asset. Refactored `frontend/src/components/ui/FileUploader.vue` to import the upload illustration from `@/assets/UploadIllustration.png` instead of using a static path in the template. Moved the image asset from `assets/nav-icons/` to `frontend/src/assets/` to align with Vite's asset handling. This ensures the image is correctly processed and bundled during the build. Impact: Improves asset handling robustness and aligns with modern frontend development best practices for Vite projects. #vue #refactor #vite #assets
 - [UI/UX] Made radio buttons in `FileUploader.vue` visible in their idle state by increasing the border thickness to 2px and removing invalid `on-icon` and `off-icon` properties. Impact: This fixes a UI bug where the radio buttons were invisible until selected, improving usability. #vue #ui-ux #bugfix
-- [UI/UX] Fixed radio button visibility in `FileUploader.vue` by directly styling the idle icon color to match the primary text color. This provides a more robust solution that works with Vuetify's default styling. Impact: This resolves the UI bug where radio buttons were not visible, ensuring a consistent and usable interface. #vue #ui-ux #bugfix
+- [UI/UX] Attempted to fix radio button visibility in `FileUploader.vue` by directly styling the idle icon color to match the primary text color. This provides a more robust solution that works with Vuetify's default styling. Impact: This resolves the UI bug where radio buttons were not visible, ensuring a consistent and usable interface. #vue #ui-ux #bugfix
+- [Feature] Enabled action icons in `ReportDataTable` within `HighCostClaimsPage.vue` and defined `actionIcons` array with `CircleCheckBig`, `BanknoteX`, and `Info` icons and their respective handlers. Impact: Adds interactive action icons to the high-cost claims table. #vue #feature #ui-ux
+
+### Fixed
+- [Bug] Corrected missing end tag in `HighCostClaimsPage.vue`. Impact: Resolves compilation error. #vue #bugfix
+- [Bug] Removed duplicate declarations of `activeFilterPill`, `getIconClasses`, `getIconStyle`, `handleApprove`, `handleReject`, and `handleRequestInfo` in `ReportDataTable.vue`. Impact: Resolves compilation errors due to identifier redeclaration. #vue #bugfix
 
 ---
 

@@ -24,9 +24,24 @@
       :show-select="showSelectionCheckboxes"
       v-model:selected="selected"
     >
-      
+
       <template v-slot:item.actions="{ item }">
-        <v-menu v-if="showRowActions" location="end">
+        <div v-if="showActionIcons" class="d-flex align-center justify-end">
+          <v-tooltip v-for="(iconDef, index) in actionIcons" :key="index" :text="iconDef.tooltip">
+            <template v-slot:activator="{ props: tooltipProps }">
+              <component
+                :is="iconDef.icon"
+                v-bind="tooltipProps"
+                :size="20"
+                :stroke-width="1"
+                :class="['row-action-icon', iconDef.class, { 'mr-2': index < actionIcons.length - 1 }]"
+                :style="iconDef.style"
+                @click="iconDef.onClick(item)"
+              />
+            </template>
+          </v-tooltip>
+        </div>
+        <v-menu v-else-if="showRowActions" location="end">
           <template v-slot:activator="{ props }">
             <EllipsisVertical :stroke-width="1" v-bind="props" class="row-action-icon" />
           </template>
@@ -54,7 +69,7 @@
 import { ref, computed, watch } from 'vue';
 import SearchBar from '../ui/SearchBar.vue';
 import FilteringPill from '../ui/FilteringPill.vue';
-import { Microscope, EllipsisVertical } from 'lucide-vue-next';
+import { Microscope, EllipsisVertical, CircleCheckBig, BanknoteX, Info } from 'lucide-vue-next';
 
 interface Header {
   title: string;
@@ -79,6 +94,8 @@ interface Props {
   showTableFooter?: boolean;
   showSelectionCheckboxes?: boolean;
   initialFilterPills?: Pill[];
+  showActionIcons?: boolean;
+  actionIcons?: { icon: any; tooltip: string; onClick: (item: any) => void; class?: string; style?: object; }[];
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -90,6 +107,8 @@ const props = withDefaults(defineProps<Props>(), {
   showTableFooter: true,
   showSelectionCheckboxes: true,
   initialFilterPills: () => [],
+  showActionIcons: false,
+  actionIcons: () => [],
 });
 
 const searchTerm = ref('');
@@ -97,11 +116,69 @@ const activeFilters = ref<Pill[]>([]);
 const selected = ref<any[]>([]);
 const activeFilterPill = ref<Pill | null>(null);
 
+const getIconClasses = (item: any, iconType: 'approve' | 'reject' | 'info') => {
+  const classes: string[] = [];
+  if (item.status === 'Approved') {
+    if (iconType === 'approve') {
+      classes.push('active-icon');
+    } else {
+      classes.push('disabled-icon');
+    }
+  } else if (item.status === 'Rejected') {
+    if (iconType === 'reject') {
+      classes.push('active-icon');
+    } else {
+      classes.push('disabled-icon');
+    }
+  } else {
+    classes.push('default-icon');
+  }
+  return classes;
+};
+
+const getIconStyle = (item: any, iconType: 'approve' | 'reject' | 'info') => {
+  if (item.status === 'Approved') {
+    if (iconType === 'approve') {
+      return { color: 'var(--color-approved)' };
+    } else {
+      return { color: 'var(--color-neutral-disabled)', pointerEvents: 'none' };
+    }
+  } else if (item.status === 'Rejected') {
+    if (iconType === 'reject') {
+      return { color: 'var(--color-denied)' };
+    } else {
+      return { color: 'var(--color-neutral-disabled)', pointerEvents: 'none' };
+    }
+  }
+  return {};
+};
+
+const handleApprove = (item: any) => {
+  if (item.status !== 'Approved' && item.status !== 'Rejected') {
+    console.log('Approve:', item);
+    // Implement approve logic
+  }
+};
+
+const handleReject = (item: any) => {
+  if (item.status !== 'Approved' && item.status !== 'Rejected') {
+    console.log('Reject:', item);
+    // Implement reject logic
+  }
+};
+
+const handleRequestInfo = (item: any) => {
+  if (item.status !== 'Approved' && item.status !== 'Rejected') {
+    console.log('Request Info:', item);
+    // Implement request info logic
+  }
+};
+
 const processedHeaders = computed(() => 
   props.headers.map(header => ({
     ...header,
     class: 'font-weight-bold',
-    align: header.key === 'actions' ? 'end' : undefined, // Align actions column to end
+    align: header.key === 'actions' || header.key === 'eocId' || header.key === 'cost' || header.key === 'claimDate' ? 'end' : undefined,
   }))
 );
 
@@ -232,5 +309,33 @@ const filteredItems = computed(() => {
 
 .row-action-icon {
   cursor: pointer;
+  transition: color 0.2s ease;
+
+  &.approve-icon:hover {
+    color: $color-approved;
+  }
+
+  &.reject-icon:hover {
+    color: $color-denied;
+  }
+
+  &.info-icon:hover {
+    color: $color-primary;
+  }
+}
+
+.link {
+  color: $color-link !important;
+  text-decoration: none !important;
+
+  &:hover {
+    text-decoration: underline !important;
+  }
+}
+
+.disabled-icon {
+  color: $color-neutral-disabled !important;
+  pointer-events: none;
+  cursor: not-allowed;
 }
 </style>
