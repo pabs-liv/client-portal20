@@ -13,6 +13,9 @@ const chartOptions = ref({
   chart: {
     type: 'donut',
   },
+  theme: {
+    palette: 'palette1',
+  },
   labels: ['Completed', 'Approved', 'Pending', 'Draft'],
   colors: ['#0F285B', '#5CB85C', '#FBBA13', '#e0e0e0'],
   dataLabels: {

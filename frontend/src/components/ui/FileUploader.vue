@@ -2,12 +2,50 @@
   <div class="file-uploader-card">
     <div v-if="props.showDocumentTypeSelection" class="document-type-selection">
       <span class="document-type-label">Document type:</span>
-      <v-radio-group v-model="documentType" inline hide-details class="document-type-radio-group">
-        <v-radio label="PHI" value="phi" color="primary"></v-radio>
-        <v-radio label="Accounting / General" value="accounting_general" color="primary"></v-radio>
-        <v-radio label="Accounting / Invoice" value="accounting_invoice" color="primary"></v-radio>
-        <v-radio label="Notification Files" value="notification_files" color="primary" on-icon="mdi-radiobox-marked" off-icon="mdi-radiobox-blank"></v-radio>
-      </v-radio-group>
+      <v-item-group v-model="documentType" mandatory>
+        <div class="d-flex">
+          <v-item v-slot="{ isSelected, toggle }" value="phi">
+            <v-card
+              :color="isSelected ? 'primary' : ''"
+              class="d-flex align-center px-4 py-2 rounded-pill cursor-pointer mr-2"
+              :variant="isSelected ? 'flat' : 'outlined'"
+              @click="toggle"
+            >
+              <span :class="isSelected ? 'text-white' : 'text-primary'">PHI</span>
+            </v-card>
+          </v-item>
+          <v-item v-slot="{ isSelected, toggle }" value="accounting_general">
+            <v-card
+              :color="isSelected ? 'primary' : ''"
+              class="d-flex align-center px-4 py-2 rounded-pill cursor-pointer mr-2"
+              :variant="isSelected ? 'flat' : 'outlined'"
+              @click="toggle"
+            >
+              <span :class="isSelected ? 'text-white' : 'text-primary'">Accounting / General</span>
+            </v-card>
+          </v-item>
+          <v-item v-slot="{ isSelected, toggle }" value="accounting_invoice">
+            <v-card
+              :color="isSelected ? 'primary' : ''"
+              class="d-flex align-center px-4 py-2 rounded-pill cursor-pointer mr-2"
+              :variant="isSelected ? 'flat' : 'outlined'"
+              @click="toggle"
+            >
+              <span :class="isSelected ? 'text-white' : 'text-primary'">Accounting / Invoice</span>
+            </v-card>
+          </v-item>
+          <v-item v-slot="{ isSelected, toggle }" value="notification_files">
+            <v-card
+              :color="isSelected ? 'primary' : ''"
+              class="d-flex align-center px-4 py-2 rounded-pill cursor-pointer"
+              :variant="isSelected ? 'flat' : 'outlined'"
+              @click="toggle"
+            >
+              <span :class="isSelected ? 'text-white' : 'text-primary'">Notification Files</span>
+            </v-card>
+          </v-item>
+        </div>
+      </v-item-group>
     </div>
 
     <div
@@ -20,7 +58,7 @@
     >
       <input type="file" ref="fileInput" style="display: none" @change="handleFileChange" />
       <div class="dropzone-content">
-        <img src="/icons/upload-placeholder.svg" alt="Upload Icon" class="upload-icon" />
+        <img :src="uploadIllustration" alt="Upload Icon" class="upload-icon" />
         <p class="drag-drop-text">Drag and drop or click to <span class="upload-link">upload file</span></p>
         <p class="important-text">
           <span class="important-label">Important:</span> The name of the document you upload will display on the client
@@ -34,6 +72,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import uploadIllustration from '@/assets/UploadIllustration.png';
 
 interface Props {
   showDocumentTypeSelection?: boolean;
@@ -100,34 +139,7 @@ const handleFiles = (files: FileList) => {
     font-weight: $font-weight-semibold;
     color: $color-text-primary;
     margin-right: $spacing-medium;
-    line-height: 1; // Ensure label itself is aligned if it has its own height
-  }
-
-  .document-type-radio-group {
-    .v-radio {
-      .v-selection-control {
-        min-height: unset; // Remove default min-height
-        .v-selection-control__input {
-          border: 1px solid $color-text-primary; // Add border for visibility
-          border-radius: 50%; // Make it circular
-          .v-icon {
-            color: transparent !important; // Hide default icon
-          }
-        }
-      }
-      .v-label {
-        line-height: normal; // Ensure label text aligns
-      }
-      &.v-radio--is-active {
-        .v-selection-control__input {
-          background-color: $color-primary; // Fill with primary color when active
-          border-color: $color-primary; // Change border color when active
-          .v-icon {
-            color: $color-neutral-white !important; // Set checkmark color to white
-          }
-        }
-      }
-    }
+    padding-bottom: $spacing-small;
   }
 }
 
@@ -151,7 +163,7 @@ const handleFiles = (files: FileList) => {
   }
 
   .upload-icon {
-    width: 120px; // Adjust size as needed
+    width: 180px; // Adjust size as needed
     height: auto;
     margin-bottom: $spacing-medium;
   }

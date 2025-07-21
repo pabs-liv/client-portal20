@@ -18,6 +18,9 @@ const chartOptions = ref({
       show: false,
     }
   },
+  theme: {
+    palette: 'palette1',
+  },
   plotOptions: {
     bar: {
       horizontal: true,

@@ -4,6 +4,15 @@ This file documents all significant changes made to the project for future refer
 
 ---
 
+## [2025-07-21]
+### Changed
+- [UI/UX] Increased the size of the upload illustration in the `FileUploader` component by 50% (from 120px to 180px) to give it more prominence on the page. Impact: This improves the visual hierarchy and user focus on the upload action. #vue #ui-ux #styling
+- [Refactor] Updated FileUploader component to use an imported image asset. Refactored `frontend/src/components/ui/FileUploader.vue` to import the upload illustration from `@/assets/UploadIllustration.png` instead of using a static path in the template. Moved the image asset from `assets/nav-icons/` to `frontend/src/assets/` to align with Vite's asset handling. This ensures the image is correctly processed and bundled during the build. Impact: Improves asset handling robustness and aligns with modern frontend development best practices for Vite projects. #vue #refactor #vite #assets
+- [UI/UX] Made radio buttons in `FileUploader.vue` visible in their idle state by increasing the border thickness to 2px and removing invalid `on-icon` and `off-icon` properties. Impact: This fixes a UI bug where the radio buttons were invisible until selected, improving usability. #vue #ui-ux #bugfix
+- [UI/UX] Fixed radio button visibility in `FileUploader.vue` by directly styling the idle icon color to match the primary text color. This provides a more robust solution that works with Vuetify's default styling. Impact: This resolves the UI bug where radio buttons were not visible, ensuring a consistent and usable interface. #vue #ui-ux #bugfix
+
+---
+
 ## [2025-07-08]
 - Initialized project review and setup.
 - Started frontend server with Vite and Vue 3.
@@ -326,4 +335,10 @@ This file documents all significant changes made to the project for future refer
 
 ---
 
-Please append all future changes here with a date and a brief description."
+- [UI/UX] Fixed active styling for `v-item-group` in `FileUploader.vue` by ensuring all `v-card` elements use `variant="flat"` when selected and `variant="outlined"` when not selected. Impact: This resolves the inconsistency in active state styling for document type selection.
+
+- [UI/UX] Fixed active styling for `v-item-group` in `FileUploader.vue` by ensuring all `v-card` elements use `variant="flat"` when selected and `variant="outlined"` when not selected. Impact: This resolves the inconsistency in active state styling for document type selection.
+
+- [UI/UX] Fixed active styling for `v-item-group` in `FileUploader.vue` by ensuring all `v-card` elements use `variant="flat"` when selected and `variant="outlined"` when not selected. Impact: This resolves the inconsistency in active state styling for document type selection.
+
+Please append all future changes here with a date and a brief description.
