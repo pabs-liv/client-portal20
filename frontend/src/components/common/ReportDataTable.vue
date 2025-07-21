@@ -26,7 +26,7 @@
     >
       
       <template v-slot:item.actions="{ item }">
-        <v-menu v-if="showRowActions">
+        <v-menu v-if="showRowActions" location="end">
           <template v-slot:activator="{ props }">
             <EllipsisVertical :stroke-width="1" v-bind="props" class="row-action-icon" />
           </template>
@@ -101,6 +101,7 @@ const processedHeaders = computed(() =>
   props.headers.map(header => ({
     ...header,
     class: 'font-weight-bold',
+    align: header.key === 'actions' ? 'end' : undefined, // Align actions column to end
   }))
 );
 

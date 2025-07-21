@@ -1,6 +1,6 @@
 <template>
   <div class="chart-card kpi-card">
-    <h4 class="text-h4">Avg. Approval Time</h4>
+    <h3 class="text-h3">Avg. Approval Time</h3>
     <div class="kpi-value">2.5 Days</div>
     <p>Last 30 days</p>
   </div>

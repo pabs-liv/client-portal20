@@ -1,7 +1,7 @@
 <template>
   <div class="chart-card">
-    <h3 class="text-h4">Pending Reports by Account</h3>
-    <apexchart type="bar" height="250" :options="chartOptions" :series="series"></apexchart>
+    <h3 class="text-h3">Top 5 - Pending Reports by Account</h3>
+    <apexchart type="bar" height="250" width="100%" :options="chartOptions" :series="series"></apexchart>
   </div>
 </template>
 

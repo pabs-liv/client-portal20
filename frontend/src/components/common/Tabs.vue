@@ -1,102 +1,93 @@
 <template>
-  <div class="tabs-container">
-    <div class="tabs-wrapper">
-      <div
-        v-for="tab in tabs"
-        :key="tab.key"
-        :class="['tab-item', { 'active': selectedTab === tab.key }]"
-        @click="selectTab(tab.key)"
-      >
-        <span>{{ tab.label }}</span>
-        <span v-if="tab.count" class="tab-count"> ({{ tab.count }})</span>
-        <ChevronDown v-if="tab.hasDropdown" :stroke-width="1" class="dropdown-icon" />
-      </div>
-    </div>
-  </div>
+  <v-tabs
+    v-model="selectedTab"
+    color="primary"
+    slider-color="primary"
+    show-arrows
+    class="custom-vuetify-tabs"
+  >
+    <v-tab
+      v-for="tab in tabs"
+      :key="tab.key"
+      :value="tab.key"
+      @click="selectTab(tab.key)"
+      class="text-capitalize"
+    >
+      {{ tab.label }}
+      <span v-if="tab.count" class="tab-count"> ({{ tab.count }})</span>
+      <ChevronDown v-if="tab.hasDropdown" :stroke-width="1" class="dropdown-icon" />
+    </v-tab>
+  </v-tabs>
 </template>
 
-<script setup>
-import { ref, defineProps, defineEmits } from 'vue';
+<script setup lang="ts">
+import { ref, watch } from 'vue';
 import { ChevronDown } from 'lucide-vue-next';
 
-const props = defineProps({
-  tabs: {
-    type: Array,
-    required: true,
-    default: () => [],
-    validator: (value) => {
-      return value.every(tab =>
-        typeof tab.label === 'string' &&
-        typeof tab.key === 'string' &&
-        (tab.count === undefined || typeof tab.count === 'number') &&
-        (tab.hasDropdown === undefined || typeof tab.hasDropdown === 'boolean')
-      );
-    },
-  },
-});
+interface Tab {
+  label: string;
+  key: string;
+  count?: number;
+  hasDropdown?: boolean;
+}
 
+interface Props {
+  tabs: Tab[];
+}
+
+const props = defineProps<Props>();
 const emit = defineEmits(['tab-selected']);
 
-const selectedTab = ref(props.tabs.length > 0 ? props.tabs[0].key : null);
+const selectedTab = ref<string | null>(props.tabs.length > 0 ? props.tabs[0].key : null);
 
-const selectTab = (key) => {
+watch(() => props.tabs, (newTabs) => {
+  if (newTabs.length > 0 && !newTabs.some(tab => tab.key === selectedTab.value)) {
+    selectedTab.value = newTabs[0].key;
+  } else if (newTabs.length === 0) {
+    selectedTab.value = null;
+  }
+}, { immediate: true });
+
+watch(selectedTab, (newVal) => {
+  if (newVal) {
+    emit('tab-selected', newVal);
+  }
+});
+
+const selectTab = (key: string) => {
   selectedTab.value = key;
-  emit('tab-selected', key);
 };
 </script>
 
 <style lang="scss" scoped>
-.tabs-container {
-  width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch; /* Enable smooth scrolling on iOS */
-  border-bottom: 1px solid #eee; /* Subtle line below tabs */
-}
+@import '@/style.scss';
 
-.tabs-wrapper {
-  display: flex;
-  flex-wrap: nowrap; /* Prevent tabs from wrapping to next line */
-  gap: var(--spacing-medium); /* Spacing between tabs */
-  padding-bottom: var(--spacing-nano); /* Space for underline */
-}
+.custom-vuetify-tabs {
+  border-bottom: 1px solid $color-border;
+  margin-bottom: $spacing-large; // Add margin-bottom here instead of parent
 
-.tab-item {
-  cursor: pointer;
-  padding: var(--spacing-small) 0;
-  white-space: nowrap; /* Prevent text from wrapping */
-  display: flex;
-  align-items: center;
-  color: var(--color-text-primary);
-  transition: color 0.2s ease-in-out;
-  position: relative; /* For the underline */
-}
+  .v-tab {
+    font-weight: $font-weight-normal;
+    color: $color-text-primary;
+    transition: all 0.2s ease-in-out;
+    padding: $spacing-small $spacing-medium;
+    font-family: $font-family-base !important;
+    letter-spacing: normal !important;
 
-.tab-item:hover {
-  color: var(--color-primary);
-}
+    &.v-tab--selected {
+      font-weight: $font-weight-bold;
+      color: $color-primary;
+    }
 
-.tab-item.active {
-  font-weight: bold;
-  color: var(--color-primary);
-}
+    .tab-count {
+      margin-left: $spacing-nano;
+      font-size: $font-size-small;
+    }
 
-.tab-item.active::after {
-  content: '';
-  position: absolute;
-  bottom: -1px; /* Position just above the border-bottom of tabs-container */
-  left: 0;
-  width: 100%;
-  height: 2px; /* Thickness of the underline */
-  background-color: var(--color-primary);
-}
-
-.tab-count {
-  margin-left: var(--spacing-nano);
-  font-size: 0.8rem;
-}
-
-.dropdown-icon {
-  margin-left: var(--spacing-nano);
-  font-size: 1rem;
+    .dropdown-icon {
+      margin-left: $spacing-nano;
+      font-size: 1rem;
+    }
+  }
 }
 </style>

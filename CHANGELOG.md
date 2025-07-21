@@ -304,4 +304,26 @@ This file documents all significant changes made to the project for future refer
 
 ---
 
-Please append all future changes here with a date and a brief description.
+## [2025-07-20]
+### Changed
+- [UI/UX] Updated `ReportsByAccountChart.vue` heading to "Top 5 - Pending Reports by Account" and changed heading tag to `h3` with `text-h3` class.
+- [UI/UX] Updated `TotalPendingChart.vue` and `AvgApprovalTimeChart.vue` headings to `h3` with `text-h3` class.
+- [UI/UX] Added `width="100%"` to `apexchart` in `ReportsByAccountChart.vue` for better alignment.
+- [Feature] Integrated `PageCard` and `ReportDataTable` into `DocumentsPage.vue` with dynamic content based on user type (internal/external).
+- [UI/UX] Updated `DocumentsPage.vue` `PageCard` heading to "Document Explorer" for both internal and external users.
+- [UI/UX] Updated `DocumentsPage.vue` `PageCard` description for external users to "View and download documents relevant to your account(s)."
+- [Component] Refactored `Tabs.vue` to use Vuetify's `v-tabs` and `v-tab` components, ensuring primary color for active states and consistent typography.
+- [UI/UX] Added `.mb-large` utility class to `style.scss` for consistent spacing.
+- [UI/UX] Added `mb-large` class to `Tabs` component in `DocumentsPage.vue` for spacing.
+- [Component] Created `FileUploader.vue` component in `components/ui` for document uploads.
+- [Feature] Implemented conditional rendering of `FileUploader.vue` in `DocumentsPage.vue` for the "Document Uploader" tab (internal users only).
+- [UI/UX] Added placeholder SVG for `upload-placeholder.svg` in `public/icons`.
+- [UI/UX] Removed border, padding, and box-shadow from `.file-uploader-card` in `FileUploader.vue`.
+- [UI/UX] Made document type selection in `FileUploader.vue` a prop, defaulting to `true`.
+- [UI/UX] Reverted `FileUploader.vue` to use `v-radio-group` and `v-radio` components.
+- [UI/UX] Attempted to fix radio button visibility in `FileUploader.vue` by targeting `mdi-radiobox-blank` icon and setting its color. **(Issue still unresolved: Radio buttons not visible in idle state.)**
+- [UI/UX] Attempted to fix radio button visibility in `FileUploader.vue` by explicitly setting `on-icon` and `off-icon` props on `v-radio` components. **(Issue still unresolved: Radio buttons not visible in idle state.)**
+
+---
+
+Please append all future changes here with a date and a brief description."

@@ -1,6 +1,6 @@
 <template>
   <div class="chart-card kpi-card">
-    <h4 class="text-h4">Total Pending Reports</h4>
+    <h3 class="text-h3">Total Pending Reports</h3>
     <div class="kpi-value">125</div>
     <p>Across all clients</p>
   </div>
