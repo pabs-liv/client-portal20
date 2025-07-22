@@ -1,7 +1,7 @@
 <template>
   <div class="report-data-table">
     <div v-if="showSearchBar && items.length > 0" class="search-bar-wrapper">
-      <SearchBar @update:searchTerm="searchTerm = $event" :showFilterButton="showFilterButton" />
+      <SearchBar @update:searchTerm="searchTerm = $event" :showFilterButton="showFilterButton" :placeholder="searchPlaceholder" />
     </div>
     <div v-if="showFilterPills && activeFilters.length > 0" class="filter-pills-container">
       <FilteringPill
@@ -26,13 +26,13 @@
     >
 
       <template v-slot:item.actions="{ item }">
-        <div v-if="showActionIcons" class="d-flex align-center justify-end">
+        <div v-if="showActionIcons" class="d-flex align-center justify-start">
           <v-tooltip v-for="(iconDef, index) in actionIcons" :key="index" :text="iconDef.tooltip">
             <template v-slot:activator="{ props: tooltipProps }">
               <component
                 :is="iconDef.icon"
                 v-bind="tooltipProps"
-                :size="20"
+                :size="iconDef.size || 20"
                 :stroke-width="1"
                 :class="['row-action-icon', iconDef.class, { 'mr-2': index < actionIcons.length - 1 }]"
                 :style="iconDef.style"
@@ -40,6 +40,18 @@
               />
             </template>
           </v-tooltip>
+        </div>
+        <div v-else-if="showInternalUserActions">
+          <span
+            v-if="internalUserActionFormatter(item) === 'Information Requested'"
+            class="link"
+            @click="internalUserActionClickHandler(item)"
+          >
+            {{ internalUserActionFormatter(item) }}
+          </span>
+          <span v-else>
+            {{ internalUserActionFormatter(item) }}
+          </span>
         </div>
         <v-menu v-else-if="showRowActions" location="end">
           <template v-slot:activator="{ props }">
@@ -96,6 +108,10 @@ interface Props {
   initialFilterPills?: Pill[];
   showActionIcons?: boolean;
   actionIcons?: { icon: any; tooltip: string; onClick: (item: any) => void; class?: string; style?: object; }[];
+  searchPlaceholder?: string;
+  showInternalUserActions?: boolean;
+  internalUserActionFormatter?: (item: any) => string;
+  internalUserActionClickHandler?: (item: any) => void;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -109,6 +125,10 @@ const props = withDefaults(defineProps<Props>(), {
   initialFilterPills: () => [],
   showActionIcons: false,
   actionIcons: () => [],
+  searchPlaceholder: 'Search by report name, report type, or keyword',
+  showInternalUserActions: false,
+  internalUserActionFormatter: (item: any) => '-',
+  internalUserActionClickHandler: () => {},
 });
 
 const searchTerm = ref('');
@@ -178,7 +198,7 @@ const processedHeaders = computed(() =>
   props.headers.map(header => ({
     ...header,
     class: 'font-weight-bold',
-    align: header.key === 'actions' || header.key === 'eocId' || header.key === 'cost' || header.key === 'claimDate' ? 'end' : undefined,
+    align: header.key === 'actions' ? 'start' : (header.key === 'eocId' || header.key === 'cost' || header.key === 'claimDate' ? 'end' : undefined),
   }))
 );
 
@@ -326,6 +346,7 @@ const filteredItems = computed(() => {
 
 .link {
   color: $color-link !important;
+  cursor: pointer;
   text-decoration: none !important;
 
   &:hover {

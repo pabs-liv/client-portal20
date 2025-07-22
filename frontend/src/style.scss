@@ -192,3 +192,7 @@ a {
   font-weight: $font-weight-normal !important;
   line-height: $line-height-tight !important;
 }
+
+.text-neutral-disabled {
+  color: $color-neutral-disabled;
+}
