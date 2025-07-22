@@ -70,7 +70,7 @@ const reportHeaders = ref([
   { title: 'Reporting Period', key: 'reportingPeriod' },
   { title: 'Last Edited By', key: 'lastEditedBy' },
   { title: 'Status', key: 'status' },
-  { title: 'Actions', key: 'actions', sortable: false },
+  { title: '', key: 'actions', sortable: false, align: 'end' },
 ]);
 
 const reportItems = ref([

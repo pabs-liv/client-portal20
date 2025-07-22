@@ -19,14 +19,15 @@ const chartOptions = ref({
     }
   },
   theme: {
-    palette: 'palette1',
+    palette: 'palette2',
   },
   plotOptions: {
     bar: {
       distributed: true,
     }
   },
-  colors: ['#0F285B', '#5CB85C', '#FBBA13', '#B80909'],
+  colors: ['rgb(0, 143, 251)'],
+  
   dataLabels: {
     enabled: false,
   },

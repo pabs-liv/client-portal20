@@ -26,7 +26,7 @@ const chartOptions = ref({
       horizontal: true,
     }
   },
-  colors: ['#0F285B'],
+  colors: ['rgb(0, 143, 251)'],
   dataLabels: {
     enabled: false,
   },

@@ -198,7 +198,7 @@ const processedHeaders = computed(() =>
   props.headers.map(header => ({
     ...header,
     class: 'font-weight-bold',
-    align: header.key === 'actions' ? 'start' : (header.key === 'eocId' || header.key === 'cost' || header.key === 'claimDate' ? 'end' : undefined),
+    align: header.key === 'actions' || header.key === 'eocId' || header.key === 'cost' || header.key === 'claimDate' || header.key === 'submissionDate' || header.key === 'approvedDate' ? 'end' : undefined,
   }))
 );
 

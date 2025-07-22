@@ -359,5 +359,20 @@ This file documents all significant changes made to the project for future refer
 - [UI/UX] Renamed "Claims" menu item to "High-Cost Claims" in `frontend/src/components/layout/Sidebar.vue`. Impact: Improves clarity and consistency of navigation. #vue #ui-ux #navigation
 - [UI/UX] Fixed icon association for "High-Cost Claims" menu item in `frontend/src/components/layout/Sidebar.vue`. Impact: Ensures correct visual representation for the updated menu item. #vue #ui-ux #navigation
 - [UI/UX] Updated `PageCard` description in `frontend/src/views/HighCostClaimsPage.vue` to be conditional based on user type. For internal users, the description is now "Review claims and acknowledge client questions about high cost claims.". Impact: Provides a more tailored user experience based on permissions. #vue #ui-ux #permissions
+- [Feature] Added `PageCard` component with "Prior Authorizations" heading and "Review prior authorizations and stay on top of your members." description to `frontend/src/views/PriorAuthsPage.vue`. Impact: Provides a consistent page layout and clear introduction for the Prior Authorizations section. #vue #component #ui-ux
+- [Feature] Integrated `ReportDataTable` into `frontend/src/views/PriorAuthsPage.vue` with search bar enabled, filter button disabled, and filter pills enabled. Impact: Provides data display and filtering capabilities for prior authorizations. #vue #component #ui-ux
+- [UI/UX] Set `search-placeholder` to "Search prior authorizations" in `frontend/src/views/PriorAuthsPage.vue`. Impact: Improves clarity for search functionality. #vue #ui-ux
+- [UI/UX] Hid "Actions" column header and aligned table data submenu to the end in `frontend/src/views/ApprovalsPage.vue`. Impact: Cleans up UI while retaining functionality. #vue #ui-ux
+- [UI/UX] Updated `priorAuthHeaders` in `frontend/src/views/PriorAuthsPage.vue` to include "Account Name", "EOC ID", "Drug Name", "Submission Date", and "Status" columns. Added 10 dummy records to `priorAuthData`. Impact: Provides more comprehensive data display for prior authorizations. #vue #ui-ux
+- [UI/UX] Aligned "Submission Date" column (heading and data) to the right in `frontend/src/views/PriorAuthsPage.vue`. Impact: Improves data readability and consistency. #vue #ui-ux
+- [UI/UX] Adjusted column widths for "Submission Date", "Account Name", and "Drug Name" in `frontend/src/views/PriorAuthsPage.vue`. Impact: Optimizes table layout for better readability. #vue #ui-ux
+- [UI/UX] Removed "Ad-Hoc" type from `reportItems` data and `reportFilterPills` in `frontend/src/views/ReportsPage.vue`. Impact: Streamlines data and filtering options. #vue #ui-ux
+- [UI/UX] Conditionally displayed "Approved By" and "Approved Date" columns for external users in `frontend/src/views/ReportsPage.vue`. Impact: Tailors data display based on user type. #vue #ui-ux #permissions
+- [UI/UX] Set donut chart in `frontend/src/components/common/ReportStatusChart.vue` to use `palette2` by removing hardcoded colors. Impact: Applies consistent color palette. #vue #ui-ux
+- [UI/UX] Updated `ReportsByTypeChart.vue` to use `palette2` and removed hardcoded colors. Impact: Applies consistent color palette. #vue #ui-ux
+- [Bug] Fixed `TypeError: Cannot read properties of undefined (reading 'title')` in `frontend/src/components/layout/Sidebar.vue` by refactoring `v-for` and `v-if` logic. Impact: Resolves critical rendering error. #vue #bugfix
+- [Bug] Fixed malformed `v-list-item` tag in `frontend/src/components/layout/Sidebar.vue`. Impact: Resolves compilation error. #vue #bugfix
+- [UI/UX] Removed `size` and `color` attributes from Lucide icons in `frontend/src/components/layout/Sidebar.vue` to ensure consistent styling via CSS. Impact: Improves icon styling consistency. #vue #ui-ux
+- [UI/UX] Added `color` property to `.nav-icon` style in `frontend/src/components/layout/Sidebar.vue` to ensure consistent icon color. Impact: Ensures correct icon color display. #vue #ui-ux
 
 Please append all future changes here with a date and a brief description.

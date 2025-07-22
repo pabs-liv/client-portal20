@@ -8,7 +8,7 @@
 
     <v-list nav dense class="nav-list">
       <v-list-item
-        v-for="item in navItems"
+        v-for="item in filteredNavItems"
         :key="item.title"
         :to="item.to"
         class="nav-item"
@@ -16,34 +16,34 @@
       >
         <div class="nav-item-content">
           <template v-if="item.title === 'Home'">
-            <House :size="25" :stroke-width="1" class="nav-icon" color="#1f2022" />
+            <House :stroke-width="1" class="nav-icon" />
           </template>
           <template v-else-if="item.title === 'Approvals'">
-            <CircleCheckBig :size="25" :stroke-width="1" class="nav-icon" color="#1f2022" />
+            <CircleCheckBig  :stroke-width="1" class="nav-icon"  />
           </template>
           <template v-else-if="item.title === 'Reports'">
-            <FileChartColumnIncreasing :size="25" :stroke-width="1" class="nav-icon" color="#1f2022" />
+            <FileChartColumnIncreasing  :stroke-width="1" class="nav-icon"  />
           </template>
           <template v-else-if="item.title === 'Documents'">
-            <FileText :size="25" :stroke-width="1" class="nav-icon" color="#1f2022" />
+            <FileText  :stroke-width="1" class="nav-icon"  />
           </template>
           <template v-else-if="item.title === 'High-Cost Claims'">
-            <Tablets :size="25" :stroke-width="1" class="nav-icon" color="#1f2022" />
+            <Tablets  :stroke-width="1" class="nav-icon"  />
           </template>
           <template v-else-if="item.title === 'Prior Auths'">
-            <RotateCcwKey :size="25" :stroke-width="1" class="nav-icon" color="#1f2022" />
+            <RotateCcwKey  :stroke-width="1" class="nav-icon"  />
           </template>
           <template v-else-if="item.title === 'Billing'">
-            <ScrollText :size="25" :stroke-width="1" class="nav-icon" color="#1f2022" />
+            <ScrollText  :stroke-width="1" class="nav-icon"  />
           </template>
           <template v-else-if="item.title === 'Plan Explorer'">
-            <Blocks :size="25" :stroke-width="1" class="nav-icon" color="#1f2022" />
+            <Blocks  :stroke-width="1" class="nav-icon"  />
           </template>
           <template v-else-if="item.title === 'Test Results'">
-            <CircleGauge :size="25" :stroke-width="1" class="nav-icon" color="#1f2022" />
+            <CircleGauge  :stroke-width="1" class="nav-icon"  />
           </template>
           <template v-else-if="item.title === 'Added Value'">
-            <Blocks :size="25" :stroke-width="1" class="nav-icon" color="#1f2022" />
+            <Blocks  :stroke-width="1" class="nav-icon"  />
           </template>
           <template v-else>
             <img :src="item.icon" :alt="item.title" class="nav-icon" />
@@ -56,7 +56,7 @@
 
       <v-list-item to="/settings" class="nav-item">
         <div class="nav-item-content">
-          <MonitorCog :size="25" :stroke-width="1" class="nav-icon" color="#1f2022" />
+          <MonitorCog  :stroke-width="1" class="nav-icon"  />
           <span class="nav-title">Settings</span>
         </div>
       </v-list-item>
@@ -71,8 +71,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { House, CircleCheckBig, FileChartColumnIncreasing, FileText, Tablets, RotateCcwKey, ScrollText, Blocks, CircleGauge, MonitorCog } from 'lucide-vue-next';
+import { useUserType } from '@/composables/useUserType';
+
+const { isExternal } = useUserType();
 
 const navItems = ref([
   { title: 'Home', to: '/' },
@@ -86,6 +89,15 @@ const navItems = ref([
   { title: 'Test Results', to: '/test-results' },
   { title: 'Added Value', to: '/added-value' },
 ]);
+
+const filteredNavItems = computed(() => {
+  return navItems.value.filter(item => {
+    if (item.title === 'Approvals' && isExternal.value) {
+      return false;
+    }
+    return true;
+  });
+});
 </script>
 
 <style lang="scss" scoped>
@@ -133,6 +145,7 @@ const navItems = ref([
   height: 25px;
   width: 25px;
   margin-bottom: 4px;
+  color: #1f2022;
 }
 .nav-title {
   font-size: 0.75rem; /* 12px */

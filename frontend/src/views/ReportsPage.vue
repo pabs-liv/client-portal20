@@ -39,7 +39,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import PageCard from '@/components/common/PageCard.vue';
 import ReportDataTable from '@/components/common/ReportDataTable.vue';
 import { useUserType } from '@/composables/useUserType';
@@ -51,29 +51,43 @@ import ReportsByAccountChart from '@/components/common/ReportsByAccountChart.vue
 
 const { isInternal, isExternal } = useUserType();
 
-const reportHeaders = ref([
-  { title: 'Account Name', key: 'accountName' },
-  { title: 'Report Name', key: 'reportName' },
-  { title: 'Type', key: 'type' },
-  { title: 'Reporting Period', key: 'reportingPeriod' },
-  { title: 'Last Edited By', key: 'lastEditedBy' },
-  { title: 'Status', key: 'status' },
-  { title: '', key: 'actions', sortable: false },
-]);
+const reportHeaders = computed(() => {
+  const baseHeaders = [
+    { title: 'Account Name', key: 'accountName' },
+    { title: 'Report Name', key: 'reportName' },
+    { title: 'Type', key: 'type' },
+    { title: 'Reporting Period', key: 'reportingPeriod' },
+    { title: 'Status', key: 'status' },
+    { title: '', key: 'actions', sortable: false },
+  ];
+
+  if (isExternal.value) {
+    baseHeaders.splice(4, 0, 
+      { title: 'Approved By', key: 'approvedBy' },
+      { title: 'Approved Date', key: 'approvedDate', align: 'end' }
+    );
+  }
+  return baseHeaders;
+});
 
 const reportItems = ref([
-  { id: 1, accountName: 'Acme Corp', reportName: 'Monthly Value Report', type: 'Monthly', reportingPeriod: 'July 2025', lastEditedBy: 'John Doe', status: 'Completed' },
-  { id: 2, accountName: 'Globex Inc.', reportName: 'Quarterly Executive Summary', type: 'Quarterly', reportingPeriod: 'Q2 2025', lastEditedBy: 'Jane Smith', status: 'Approved' },
-  { id: 3, accountName: 'Soylent Corp', reportName: 'Ad-Hoc Savings Analysis', type: 'Ad-Hoc', reportingPeriod: 'June 2025', lastEditedBy: 'Peter Jones', status: 'Processing' },
-  { id: 4, accountName: 'Umbrella Corp', reportName: 'Rebate Report', type: 'Rebate', reportingPeriod: '2024', lastEditedBy: 'Alice Brown', status: 'Pending Approval' },
-  { id: 5, accountName: 'Initech', reportName: 'CAA Report', type: 'CAA', reportingPeriod: '2025', lastEditedBy: 'Bob White', status: 'Draft' },
+  { id: 1, accountName: 'Acme Corp', reportName: 'Monthly Value Report', type: 'Monthly', reportingPeriod: 'July 2025', approvedBy: 'John Doe', approvedDate: '2025-07-10', status: 'Completed' },
+  { id: 2, accountName: 'Globex Inc.', reportName: 'Quarterly Executive Summary', type: 'Quarterly', reportingPeriod: 'Q2 2025', approvedBy: 'Jane Smith', approvedDate: '2025-07-05', status: 'Approved' },
+  
+  { id: 4, accountName: 'Umbrella Corp', reportName: 'Rebate Report', type: 'Rebate', reportingPeriod: '2024', approvedBy: 'Alice Brown', approvedDate: '2025-01-15', status: 'Pending Approval' },
+  { id: 5, accountName: 'Initech', reportName: 'CAA Report', type: 'CAA', reportingPeriod: '2025', approvedBy: 'Bob White', approvedDate: '2025-03-20', status: 'Draft' },
+  { id: 6, accountName: 'Weyland-Yutani', reportName: 'Colony Expansion Plan', type: 'Annual', reportingPeriod: '2024', approvedBy: 'Ellen Ripley', approvedDate: '2025-02-01', status: 'Approved' },
+  { id: 7, accountName: 'Tyrell Corp', reportName: 'Replicant Production Metrics', type: 'Monthly', reportingPeriod: 'July 2025', approvedBy: 'Rick Deckard', approvedDate: '2025-07-18', status: 'Completed' },
+  { id: 8, accountName: 'Omni Consumer Products', reportName: 'RoboCop Project Status', type: 'Quarterly', reportingPeriod: 'Q2 2025', approvedBy: 'Clarence Boddicker', approvedDate: '2025-06-10', status: 'Pending Approval' },
+  { id: 9, accountName: 'Stark Industries', reportName: 'Arc Reactor Efficiency', type: 'Ad-Hoc', reportingPeriod: 'N/A', approvedBy: 'Tony Stark', approvedDate: '2025-07-20', status: 'Processing' },
+  { id: 10, accountName: 'Wayne Enterprises', reportName: 'Bat-Gadget Inventory', type: 'Monthly', reportingPeriod: 'July 2025', approvedBy: 'Bruce Wayne', approvedDate: '2025-07-19', status: 'Approved' },
 ]);
 
 const reportFilterPills = ref([
   { type: 'tab', value: 'all', label: 'All', isActive: true },
   { type: 'tab', value: 'quarterly', label: 'Quarterly' },
   { type: 'tab', value: 'monthly', label: 'Monthly' },
-  { type: 'tab', value: 'ad-hoc', label: 'Ad-Hoc' },
+  
   { type: 'tab', value: 'rebate', label: 'Rebate' },
   { type: 'tab', value: 'caa', label: 'CAA' },
   { type: 'status', value: 'pending approval', label: 'Pending Approval' },
