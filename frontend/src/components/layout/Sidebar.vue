@@ -27,7 +27,7 @@
           <template v-else-if="item.title === 'Documents'">
             <FileText :size="25" :stroke-width="1" class="nav-icon" color="#1f2022" />
           </template>
-          <template v-else-if="item.title === 'Claims'">
+          <template v-else-if="item.title === 'High-Cost Claims'">
             <Tablets :size="25" :stroke-width="1" class="nav-icon" color="#1f2022" />
           </template>
           <template v-else-if="item.title === 'Prior Auths'">
@@ -79,7 +79,7 @@ const navItems = ref([
   { title: 'Approvals', to: '/approvals' },
   { title: 'Reports', to: '/reports' },
   { title: 'Documents', to: '/documents' },
-  { title: 'Claims', to: '/high-cost-claims' },
+  { title: 'High-Cost Claims', to: '/high-cost-claims' },
   { title: 'Prior Auths', to: '/prior-auths' },
   { title: 'Billing', to: '/billing' },
   { title: 'Plan Explorer', to: '/plan-explorer' },

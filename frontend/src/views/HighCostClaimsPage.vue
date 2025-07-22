@@ -43,7 +43,7 @@
 
     <PageCard
       headerText="Recent High-Cost Claims Activity"
-      descriptionText="Review claims, acknowledge or ask questions about high cost claims and take advantage of savings for your members."
+      :descriptionText="isExternal ? 'Review claims, acknowledge or ask questions about high cost claims and take advantage of savings for your members.' : 'Review claims and acknowledge client questions about high cost claims.'"
     >
       <Banner
         variant="warning"
