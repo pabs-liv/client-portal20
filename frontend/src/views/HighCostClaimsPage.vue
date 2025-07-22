@@ -1,14 +1,53 @@
 
 <template>
   <div>
-    <h1 class="text-h1 mb-large">High Cost Claims</h1>
+    <h1 class="text-h1 mb-large">High-Cost Claims</h1>
+    <div v-if="isExternal" class="widgets-container mb-large">
+      <SummaryWidget
+        title="Claims Pending Approval"
+        :count="claimsPendingApprovalCount"
+        description="Claims awaiting your review"
+        icon-background-color="rgba(253, 214, 113, 0.2)"
+        icon-color="#FBBA13"
+        :show-icon="true"
+        :icon="ClockFading"
+      />
+      <SummaryWidget
+        title="Total Cost"
+        :count="totalClaimsCost"
+        description="Total estimated cost of all claims"
+        icon-background-color="rgba(190, 227, 190, 0.4)"
+        icon-color="#5CB85C"
+        :show-icon="true"
+        :icon="DollarSign"
+      />
+      <SummaryWidget
+        title="Average Claim Cost"
+        :count="averageClaimCost"
+        description="Average estimated cost per claim"
+        icon-background-color="rgba(200, 220, 240, 0.4)"
+        icon-color="#2C82CB"
+        :show-icon="true"
+        :icon="Calculator"
+      />
+    </div>
+    <div class="mt-large chart-container mb-large">
+      <h3 class="text-h3">Top 5 Accounts by High-Cost Claim Amount</h3>
+      <apexchart
+        type="bar"
+        height="200"
+        :options="chartOptions"
+        :series="top5AccountsByClaimAmount.series"
+      ></apexchart>
+    </div>
+
     <PageCard
       headerText="Recent High-Cost Claims Activity"
       descriptionText="Review claims, acknowledge or ask questions about high cost claims and take advantage of savings for your members."
     >
       <Banner
         variant="warning"
-        message="For high cost claims, please acknowledge within 24 hours. If this claim is not acknowledged within 24 hours, it will automatically be processed to be filled in order to avoid member disruption and a delay in treatment with the approved therapy. If you have any questions, please select the Help button on that claim or contact your Account Management team."
+        message="For high-cost claims, please acknowledge within 24 hours. If this claim is not acknowledged within 24 hours, it will automatically be processed to be filled in order to avoid member disruption and a delay in treatment with the approved therapy. If you have any questions, please select the Help button on that claim or contact your Account Management team."
       />
       <p v-if="isExternal" class="text-small disclaimer-text mt-small mb-large">
         Disclaimer: Cost represents estimated total cost of the medication, not inclusive of tax, member cost share, applicable program savings, etc.
@@ -20,7 +59,7 @@
         :show-selection-checkboxes="false"
         :show-action-icons="isExternal"
         :action-icons="actionIcons"
-        :search-placeholder="'Search high cost claims'"
+        :search-placeholder="'Search high-cost claims'"
         :show-filter-button="false"
         :show-internal-user-actions="!isExternal"
         :internal-user-action-formatter="formatInternalUserAction"
@@ -33,7 +72,7 @@
       :model-value="showApproveDialog"
       @update:model-value="showApproveDialog = $event"
       :icon="CircleCheckBig"
-      heading="Approve High Cost Claim"
+      heading="Approve High-Cost Claim"
       :text="`Are you sure you want to approve the claim for ${selectedClaim?.drugName} with a cost of ${selectedClaim?.cost}?`"
       :actions="approveDialogActions"
     />
@@ -67,12 +106,14 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref } from 'vue';
-import { CircleCheckBig, BanknoteX, Info } from 'lucide-vue-next';
+import { ref, computed } from 'vue';
+import { CircleCheckBig, BanknoteX, Info, Hourglass, ClockFading, DollarSign, Calculator } from 'lucide-vue-next';
 import PageCard from '@/components/common/PageCard.vue';
 import Banner from '@/components/common/Banner.vue';
 import ReportDataTable from '@/components/common/ReportDataTable.vue';
 import Dialog from '@/components/ui/Dialog.vue';
+import SummaryWidget from '@/components/common/SummaryWidget.vue';
+import VueApexCharts from 'vue3-apexcharts';
 import { useUserType } from '@/composables/useUserType';
 
 const { isExternal } = useUserType();
@@ -85,9 +126,6 @@ const formatInternalUserAction = (item: any) => {
   }
 };
 
-const showApproveDialog = ref(false);
-const showRejectDialog = ref(false);
-const showRequestInfoDialog = ref(false);
 const selectedClaim = ref<any>(null);
 
 const claimsHeaders = ref([
@@ -135,76 +173,109 @@ const claimsData = ref([
   },
 ]);
 
-const handleApprove = (item: any) => {
-  selectedClaim.value = item;
-  showApproveDialog.value = true;
-};
+const claimsPendingApprovalCount = computed(() => {
+  return claimsData.value.filter(claim => claim.status === 'Pending').length;
+});
 
-const handleReject = (item: any) => {
-  selectedClaim.value = item;
-  showRejectDialog.value = true;
-};
+const totalClaimsCost = computed(() => {
+  const total = claimsData.value.reduce((sum, claim) => {
+    const cost = parseFloat(claim.cost.replace(/[^0-9.-]+/g," "));
+    return sum + (isNaN(cost) ? 0 : cost);
+  }, 0);
+  return `${total.toFixed(2)}`;
+});
 
-const handleRequestInfo = (item: any) => {
-  selectedClaim.value = item;
-  showRequestInfoDialog.value = true;
-};
+const averageClaimCost = computed(() => {
+  if (claimsData.value.length === 0) return '$0.00';
+  const total = claimsData.value.reduce((sum, claim) => {
+    const cost = parseFloat(claim.cost.replace(/[^0-9.-]+/g," "));
+    return sum + (isNaN(cost) ? 0 : cost);
+  }, 0);
+  const average = total / claimsData.value.length;
+  return `${average.toFixed(2)}`;
+});
 
-const approveDialogActions = [
-  { text: 'Cancel', onClick: () => showApproveDialog.value = false, color: 'primary', variant: 'outlined' },
-  { text: 'Approve Claim', onClick: () => {
-    console.log('Claim Approved:', selectedClaim.value);
-    showApproveDialog.value = false;
-    // Implement actual approve logic here
-  }, color: 'primary', variant: 'elevated' },
-];
-
-const rejectDialogActions = [
-  { text: 'Cancel', onClick: () => showRejectDialog.value = false, color: 'primary', variant: 'outlined' },
-  { text: 'Reject', onClick: () => {
-    console.log('Claim Rejected:', selectedClaim.value);
-    showRejectDialog.value = false;
-    // Implement actual reject logic here
-  }, type: 'destructive', variant: 'elevated' },
-];
-
-const requestInfoDialogActions = [
-  { text: 'Cancel', onClick: () => showRequestInfoDialog.value = false, color: 'primary', variant: 'outlined' },
-  { text: 'Acknowledge', onClick: () => {
-    console.log('Request Info for Claim:', selectedClaim.value);
-    showRequestInfoDialog.value = false;
-    // Implement actual request info logic here
-  }, color: 'primary', variant: 'elevated' },
-];
-
-const actionIcons = ref([
-  {
-    icon: CircleCheckBig,
-    tooltip: 'Approve',
-    onClick: handleApprove,
-    class: 'approve-icon',
-    size: 25,
+const chartOptions = computed(() => ({
+  chart: {
+    type: 'bar',
+    height: 350,
+    toolbar: { show: false },
   },
-  {
-    icon: BanknoteX,
-    tooltip: 'Reject',
-    onClick: handleReject,
-    class: 'reject-icon',
-    size: 25,
+  plotOptions: {
+    bar: {
+      horizontal: false,
+      columnWidth: '55%',
+      endingShape: 'rounded'
+    },
   },
-  {
-    icon: Info,
-    tooltip: 'Request Info',
-    onClick: handleRequestInfo,
-    class: 'info-icon',
-    size: 25,
+  dataLabels: { enabled: false },
+  stroke: { show: true, width: 2, colors: ['transparent'] },
+  xaxis: {
+    categories: top5AccountsByClaimAmount.value.categories,
+    labels: { style: { colors: 'var(--color-text-primary)' } },
   },
-]);
+  yaxis: {
+    title: { text: 'Claim Amount' },
+    labels: { style: { colors: 'var(--color-text-primary)' } },
+  },
+  fill: { opacity: 1 },
+  tooltip: {
+    y: {
+      formatter: function (val: number) {
+        return "$" + val.toFixed(2);
+      }
+    }
+  },
+  theme: { palette: 'palette1' },
+  grid: {
+    show: true,
+    borderColor: 'var(--color-border)',
+    strokeDashArray: 0,
+    position: 'back',
+    xaxis: { lines: { show: false } },
+    yaxis: { lines: { show: true } },
+    row: { colors: undefined, opacity: 0.5 },
+    column: { colors: undefined, opacity: 0.5 },
+    padding: { top: 0, right: 0, bottom: 0, left: 0 },
+  },
+}));
+
+const top5AccountsByClaimAmount = computed(() => {
+  const accountMap = new Map<string, number>();
+  claimsData.value.forEach(claim => {
+    const cost = parseFloat(claim.cost.replace(/[$,]/g, ''));
+    const currentCost = accountMap.get(claim.accountName) || 0;
+    accountMap.set(claim.accountName, currentCost + (isNaN(cost) ? 0 : cost));
+  });
+
+  const sortedAccounts = Array.from(accountMap.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5);
+
+  return {
+    categories: sortedAccounts.map(entry => entry[0]),
+    series: [{ name: 'Claim Amount', data: sortedAccounts.map(entry => entry[1]) }]
+  };
+});
 </script>
 <style lang="scss" scoped>
 @import '@/style.scss';
 
 .disclaimer-text {
   color: $color-neutral-disabled;
+}
+
+.widgets-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: $spacing-medium;
+}
+
+.chart-container {
+  border: 1px solid $color-border;
+  border-radius: 8px;
+  padding: $spacing-medium;
+  background-color: $color-neutral-white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 </style>
