@@ -66,6 +66,7 @@
             :initial-filter-pills="documentFilterPills"
             :show-selection-checkboxes="false"
             :show-row-actions="true"
+            search-placeholder="Search documents"
           />
         </div>
       </PageCard>
@@ -88,7 +89,6 @@ const documentHeaders = ref([
   { title: 'Type', key: 'type' },
   { title: 'Upload Date', key: 'uploadDate' },
   { title: 'Last Modified By', key: 'lastModifiedBy' },
-  { title: 'Status', key: 'status' },
   { title: '', key: 'actions', sortable: false }, // Empty title for actions column
 ]);
 

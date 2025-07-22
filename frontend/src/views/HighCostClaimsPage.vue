@@ -11,6 +11,7 @@
         icon-color="#FBBA13"
         :show-icon="true"
         :icon="ClockFading"
+        :clickable="false"
       />
       <SummaryWidget
         title="Total Cost"
@@ -20,6 +21,7 @@
         icon-color="#5CB85C"
         :show-icon="true"
         :icon="DollarSign"
+        :clickable="false"
       />
       <SummaryWidget
         title="Average Claim Cost"
@@ -29,6 +31,7 @@
         icon-color="#2C82CB"
         :show-icon="true"
         :icon="Calculator"
+        :clickable="false"
       />
     </div>
     <div class="mt-large chart-container mb-large">
@@ -117,6 +120,45 @@ import VueApexCharts from 'vue3-apexcharts';
 import { useUserType } from '@/composables/useUserType';
 
 const { isExternal } = useUserType();
+
+const showApproveDialog = ref(false);
+const showRejectDialog = ref(false);
+const showRequestInfoDialog = ref(false);
+
+const handleApproveClick = (item: any) => {
+  selectedClaim.value = item;
+  showApproveDialog.value = true;
+};
+
+const handleRejectClick = (item: any) => {
+  selectedClaim.value = item;
+  showRejectDialog.value = true;
+};
+
+const handleRequestInfo = (item: any) => {
+  selectedClaim.value = item;
+  showRequestInfoDialog.value = true;
+};
+
+const actionIcons = ref([
+  { icon: CircleCheckBig, tooltip: 'Approve', onClick: handleApproveClick, type: 'approve' as const },
+  { icon: BanknoteX, tooltip: 'Reject', onClick: handleRejectClick, type: 'reject' as const },
+  { icon: Info, tooltip: 'Request Info', onClick: handleRequestInfo, type: 'info' as const },
+]);
+
+const approveDialogActions = [
+  { text: 'Cancel', onClick: () => (showApproveDialog.value = false), variant: 'text' as const },
+  { text: 'Approve', onClick: () => { console.log('approved'); showApproveDialog.value = false; }, color: 'primary', variant: 'flat' as const }
+];
+
+const rejectDialogActions = [
+  { text: 'Cancel', onClick: () => (showRejectDialog.value = false), variant: 'text' as const },
+  { text: 'Reject', onClick: () => { console.log('rejected'); showRejectDialog.value = false; }, color: 'error', variant: 'flat' as const, type: 'destructive' as const }
+];
+
+const requestInfoDialogActions = [
+  { text: 'Acknowledge', onClick: () => (showRequestInfoDialog.value = false), color: 'primary', variant: 'flat' as const }
+];
 
 const formatInternalUserAction = (item: any) => {
   if (item.status === 'Pending' || item.status === 'Rejected') {

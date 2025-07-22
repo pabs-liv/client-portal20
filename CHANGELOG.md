@@ -324,7 +324,7 @@ This file documents all significant changes made to the project for future refer
 - [UI/UX] Made document type selection in `FileUploader.vue` a prop, defaulting to `true`.
 - [UI/UX] Reverted `FileUploader.vue` to use `v-radio-group` and `v-radio` components.
 - [UI/UX] Attempted to fix radio button visibility in `FileUploader.vue` by targeting `mdi-radiobox-blank` icon and setting its color. **(Issue still unresolved: Radio buttons not visible in idle state.)**
-- [UI/UX] Attempted to fix radio button visibility in `FileUploader.vue` by explicitly setting `on-icon` and `off-icon` props on `v-radio` components. **(Issue still unresolved: Radio buttons not visible in idle state.)**
+- [UI/UX] Attempted to fix radio button visibility in `FileUforleUploader.vue` by explicitly setting `on-icon` and `off-icon` props on `v-radio` components. **(Issue still unresolved: Radio buttons not visible in idle state.)**
 
 ---
 
@@ -374,5 +374,8 @@ This file documents all significant changes made to the project for future refer
 - [Bug] Fixed malformed `v-list-item` tag in `frontend/src/components/layout/Sidebar.vue`. Impact: Resolves compilation error. #vue #bugfix
 - [UI/UX] Removed `size` and `color` attributes from Lucide icons in `frontend/src/components/layout/Sidebar.vue` to ensure consistent styling via CSS. Impact: Improves icon styling consistency. #vue #ui-ux
 - [UI/UX] Added `color` property to `.nav-icon` style in `frontend/src/components/layout/Sidebar.vue` to ensure consistent icon color. Impact: Ensures correct icon color display. #vue #ui-ux
+- [Feature] Enabled action icons in `ReportDataTable` within `HighCostClaimsPage.vue` and defined `actionIcons` array with `CircleCheckBig`, `BanknoteX`, and `Info` icons and their respective handlers. Impact: Adds interactive action icons to the high-cost claims table. #vue #feature #ui-ux
+- [UI/UX] Updated `Dialog.vue` buttons to use `variant` and `color` props for consistent styling. Impact: Improves button styling in dialogs. #vue #ui-ux
+- [UI/UX] Set action icon size to 25px in `ReportDataTable.vue`. Impact: Increases icon size for better visibility. #vue #ui-ux
 
 Please append all future changes here with a date and a brief description.

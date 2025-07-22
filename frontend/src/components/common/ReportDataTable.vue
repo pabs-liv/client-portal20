@@ -32,10 +32,10 @@
               <component
                 :is="iconDef.icon"
                 v-bind="tooltipProps"
-                :size="iconDef.size || 20"
+                :size="iconDef.size || 25"
                 :stroke-width="1"
-                :class="['row-action-icon', iconDef.class, { 'mr-2': index < actionIcons.length - 1 }]"
-                :style="iconDef.style"
+                :class="['row-action-icon', iconDef.class, {'mr-2': index < actionIcons.length - 1}, {'disabled-icon': (item.status === 'Approved' && iconDef.type !== 'approve') || (item.status === 'Rejected' && iconDef.type !== 'reject')}]"
+                :style="{color: (item.status === 'Approved' && iconDef.type === 'approve') ? 'var(--color-approved)' : (item.status === 'Rejected' && iconDef.type === 'reject') ? 'var(--color-denied)' : 'var(--color-text-primary)'}"
                 @click="iconDef.onClick(item)"
               />
             </template>
@@ -107,7 +107,7 @@ interface Props {
   showSelectionCheckboxes?: boolean;
   initialFilterPills?: Pill[];
   showActionIcons?: boolean;
-  actionIcons?: { icon: any; tooltip: string; onClick: (item: any) => void; class?: string; style?: object; }[];
+  actionIcons?: { icon: any; tooltip: string; onClick: (item: any) => void; class?: string; type?: 'approve' | 'reject' | 'info'; }[];
   searchPlaceholder?: string;
   showInternalUserActions?: boolean;
   internalUserActionFormatter?: (item: any) => string;
@@ -136,27 +136,23 @@ const activeFilters = ref<Pill[]>([]);
 const selected = ref<any[]>([]);
 const activeFilterPill = ref<Pill | null>(null);
 
-const getIconClasses = (item: any, iconType: 'approve' | 'reject' | 'info') => {
-  const classes: string[] = [];
-  if (item.status === 'Approved') {
-    if (iconType === 'approve') {
-      classes.push('active-icon');
-    } else {
-      classes.push('disabled-icon');
-    }
-  } else if (item.status === 'Rejected') {
-    if (iconType === 'reject') {
-      classes.push('active-icon');
-    } else {
-      classes.push('disabled-icon');
-    }
-  } else {
-    classes.push('default-icon');
+const handleRequestInfo = (item: any) => {
+  if (item.status !== 'Approved' && item.status !== 'Rejected') {
+    console.log('Request Info:', item);
+    // Implement request info logic
   }
-  return classes;
 };
 
-const getIconStyle = (item: any, iconType: 'approve' | 'reject' | 'info') => {
+const getIconStyle = (item: any, iconClass: string) => {
+  let iconType: 'approve' | 'reject' | 'info';
+  if (iconClass.includes('approve-icon')) {
+    iconType = 'approve';
+  } else if (iconClass.includes('reject-icon')) {
+    iconType = 'reject';
+  } else {
+    iconType = 'info';
+  }
+
   if (item.status === 'Approved') {
     if (iconType === 'approve') {
       return { color: 'var(--color-approved)' };
@@ -170,7 +166,7 @@ const getIconStyle = (item: any, iconType: 'approve' | 'reject' | 'info') => {
       return { color: 'var(--color-neutral-disabled)', pointerEvents: 'none' };
     }
   }
-  return {};
+  return { color: 'var(--color-text-primary)' };
 };
 
 const handleApprove = (item: any) => {
@@ -184,13 +180,6 @@ const handleReject = (item: any) => {
   if (item.status !== 'Approved' && item.status !== 'Rejected') {
     console.log('Reject:', item);
     // Implement reject logic
-  }
-};
-
-const handleRequestInfo = (item: any) => {
-  if (item.status !== 'Approved' && item.status !== 'Rejected') {
-    console.log('Request Info:', item);
-    // Implement request info logic
   }
 };
 
@@ -331,31 +320,20 @@ const filteredItems = computed(() => {
   cursor: pointer;
   transition: color 0.2s ease;
 
-  &.approve-icon:hover {
-    color: $color-approved;
-  }
-
-  &.reject-icon:hover {
-    color: $color-denied;
-  }
-
-  &.info-icon:hover {
+  &:hover {
     color: $color-primary;
   }
 }
 
 .link {
-  color: $color-link !important;
+  color: $color-link;
   cursor: pointer;
-  text-decoration: none !important;
-
   &:hover {
-    text-decoration: underline !important;
+    text-decoration: underline;
   }
 }
 
 .disabled-icon {
-  color: $color-neutral-disabled !important;
   pointer-events: none;
   cursor: not-allowed;
 }
