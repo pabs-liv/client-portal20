@@ -193,7 +193,7 @@ This file documents all significant changes made to the project for future refer
 - Refactored `FilteringPill.vue`:
   - Updated to use Vuetify's `v-chip` with `variant="outlined"` by default.
   - Set outline color to `var(--color-primary)` and text color to `var(--color-text-primary)`.
-  - Added `isActive` prop to control active state (filled primary primary background, `var(--color-neutral-white)` text).
+- Added `isActive` prop to control active state (filled primary primary background, `var(--color-neutral-white)` text).
   - Ensured the close icon is not displayed by default by setting `closable` prop to `false` by default and removing explicit `closable` from `ReportDataTable.vue`.
 - Refactored `ReportDataTable.vue` for filter pills and table filtering:
   - Added `initialFilterPills` prop to accept an array of filter pill objects.
@@ -248,6 +248,7 @@ This file documents all significant changes made to the project for future refer
 ---
 
 ## [2025-07-18]
+### Changed
 - Successfully refactored `AccordionCard.vue` to ensure the `ReportDataTable` component renders correctly when the accordion is expanded.
 - Updated `SearchBar.vue` and `FilteringPill.vue` to use SCSS variables, ensuring consistency with the new styling standards.
 - Configured a custom Vuetify theme in `vuetify.ts` to align with the project's color palette, fixing the active state of the `FilteringPill` component.
@@ -378,4 +379,49 @@ This file documents all significant changes made to the project for future refer
 - [UI/UX] Updated `Dialog.vue` buttons to use `variant` and `color` props for consistent styling. Impact: Improves button styling in dialogs. #vue #ui-ux
 - [UI/UX] Set action icon size to 25px in `ReportDataTable.vue`. Impact: Increases icon size for better visibility. #vue #ui-ux
 
-Please append all future changes here with a date and a brief description.
+## [2025-07-23]
+### Added
+- [Component] Created `Card.vue` component in `frontend/src/components/ui/Card.vue` for standardized card styling. Impact: Provides a reusable and consistently styled card component for the application. #vue #component #ui-ux
+- [Feature] Added `PageCard` component to `frontend/src/views/BillingPage.vue` with "Statement & Invoice Explorer" heading and description. Impact: Provides a consistent page layout and clear introduction for the Billing section. #vue #component #ui-ux
+- [Feature] Added `ReportDataTable` to `frontend/src/views/BillingPage.vue` with specified columns ("Account Name", "Billing Type", "ID", "Invoice/Statement Detail", "Billing Period", "Amount", "Actions"), search bar enabled, filter button disabled, and row actions enabled. Impact: Provides data display and interaction for billing information. #vue #feature #ui-ux
+- [Feature] Added an ApexCharts area chart to `frontend/src/views/BillingPage.vue` for "Billed Amount Over Time" with smooth curve, border, and styling consistent with other charts. Impact: Provides a visual representation of billing trends. #vue #feature #charts
+- [Feature] Added `PageCard` component to `frontend/src/views/TestResultsPage.vue` with "Test Results" heading and description. Impact: Provides a consistent page layout and clear introduction for the Test Results section. #vue #component #ui-ux
+- [Feature] Added `ReportDataTable` to `frontend/src/views/TestResultsPage.vue` with specified columns ("Account Name", "Report Type", "Report", "Date Range", "Status", "Actions"), search bar enabled, and row actions enabled. Impact: Provides data display and interaction for test results. #vue #feature #ui-ux
+- [Feature] Added two `SummaryWidget` components to `frontend/src/views/TestResultsPage.vue` for "Total Reports for This Period" and "Reports Pending Approval", displayed in a grid layout above the page card. Impact: Provides a quick overview of test report metrics. #vue #feature #ui-ux
+
+### Changed
+- [UI/UX] Updated `frontend/src/views/HighCostClaimsPage.vue` to have separate dialogs for internal and external users when clicking the "Request Info" action. External users see "Send Request" and "Cancel" buttons, while internal users see an "Acknowledge" button. Impact: Provides tailored user experience based on user type for information requests. #vue #ui-ux #permissions
+- [UI/UX] Adjusted the width of the "Actions" column in `frontend/src/views/HighCostClaimsPage.vue` to `180px` to accommodate "Information Requested" text on a single line. Impact: Improves readability of the table. #vue #ui-ux
+- [UI/UX] Updated `frontend/src/views/PriorAuthsPage.vue` to include three `SummaryWidget` components ("Pending", "Approved", "Denied") above the page card, with appropriate icons and counts. Impact: Provides a quick overview of prior authorization statuses. #vue #ui-ux
+- [UI/UX] Updated `frontend/src/views/PriorAuthsPage.vue` to display an info icon for external users, which triggers a dialog with "Request Additional Information About This PA" heading and "Send Request" and "Cancel" buttons. Impact: Provides a clear mechanism for external users to request more information. #vue #ui-ux
+- [UI/UX] Added "Actions" column heading to `frontend/src/views/PriorAuthsPage.vue` and aligned it to the end. Impact: Improves clarity and alignment of the table. #vue #ui-ux
+- [UI/UX] Aligned action icons in `frontend/src/components/common/ReportDataTable.vue` to the end of the column. Impact: Improves visual consistency. #vue #ui-ux
+- [UI/UX] Updated `frontend/src/views/PriorAuthsPage.vue` to display a dialog for internal users when "Information Requested" is clicked, with "PA Information Requested" heading and "Acknowledge" button. Impact: Provides a clear mechanism for internal users to acknowledge information requests. #vue #ui-ux
+- [UI/UX] Updated `frontend/src/views/BillingPage.vue` to right-align "ID" and "Amount" columns. Impact: Improves data readability and consistency. #vue #ui-ux
+- [UI/UX] Hidden "Actions" column heading in `frontend/src/views/BillingPage.vue`. Impact: Cleans up UI for billing table. #vue #ui-ux
+- [UI/UX] Enabled filtering pills ("All", "Invoice", "Statement") in `frontend/src/views/BillingPage.vue` and wired them to filter the table by "Billing Type". Impact: Provides filtering capabilities for billing data. #vue #ui-ux
+- [UI/UX] Set search bar placeholder text to "Search invoices and statements" in `frontend/src/views/BillingPage.vue`. Impact: Improves clarity for search functionality. #vue #ui-ux
+- [UI/UX] Added `<h1>` tag "Billing" as page title in `frontend/src/views/BillingPage.vue`. Impact: Provides a clear page title. #vue #ui-ux
+- [UI/UX] Added `<h1>` tag "Added Value Programs" as page title in `frontend/src/views/AddedValuePage.vue`. Impact: Provides a clear page title. #vue #ui-ux
+- [UI/UX] Refactored `frontend/src/components/ui/Card.vue` to include a `selected` variant with primary border, no shadow, reduced text opacity, and a disabled button with "Added to Account" text. Impact: Provides a clear visual cue for selected program cards. #vue #ui-ux #component
+- [UI/UX] Set `letter-spacing: 0 !important;` for all text within `frontend/src/components/ui/Card.vue`. Impact: Ensures consistent typography. #vue #ui-ux
+- [UI/UX] Added `$spacing-small` padding to `frontend/src/components/ui/Card.vue`. Impact: Improves visual spacing within cards. #vue #ui-ux
+- [UI/UX] Updated `frontend/src/views/AddedValuePage.vue` to display specific titles and categories for program cards. Impact: Provides accurate content for program cards. #vue #ui-ux
+- [UI/UX] Refactored layout in `frontend/src/views/AddedValuePage.vue` to separate "Programs In Use" and "Available Programs" sections with appropriate spacing. Impact: Improves visual hierarchy and organization of content. #vue #ui-ux
+- [UI/UX] Limited "Programs In Use" section in `frontend/src/views/AddedValuePage.vue` to 2 cards, all with the `selected` variant. Impact: Provides a clear distinction between programs in use and available programs. #vue #ui-ux
+- [UI/UX] Limited "Available Programs" section in `frontend/src/views/AddedValuePage.vue` to "Liviniti Delivery on Demand" and "LivLite" cards. Impact: Provides accurate content for available programs. #vue #ui-ux
+- [UI/UX] Ensured `selected` class is dynamically applied to `v-card` in `frontend/src/components/ui/Card.vue`. Impact: Correctly applies selected variant styling. #vue #ui-ux
+- [UI/UX] Set the card border to primary color with 0.6 opacity and removed the card shadow for the `selected` variant in `frontend/src/components/ui/Card.vue`. Impact: Provides the intended visual cue for selected cards. #vue #ui-ux
+- [UI/UX] Added `$spacing-large` bottom margin to the page card description text in `frontend/src/components/common/PageCard.vue`. Impact: Improves visual spacing. #vue #ui-ux
+- [UI/UX] Updated `frontend/src/views/TestResultsPage.vue` to display "Approved By" and "Approved Date" columns only for internal users. Impact: Provides role-based data visibility. #vue #ui-ux #permissions
+- [UI/UX] Updated `frontend/src/views/TestResultsPage.vue` to display "Actions" column with approve/reject icons only for external users. Impact: Provides role-based action visibility. #vue #ui-ux #permissions
+- [UI/UX] Set status table data in `frontend/src/views/TestResultsPage.vue` to "Approved", "Rejected", "Pending". Impact: Provides accurate dummy data. #vue #ui-ux
+- [UI/UX] Toggled off the filter button in the search bar on `frontend/src/views/TestResultsPage.vue`. Impact: Streamlines search functionality. #vue #ui-ux
+
+### Fixed
+- [Bug] Corrected `Invalid end tag` error in `frontend/src/views/BillingPage.vue` by fixing script and style tag placement. Impact: Resolves compilation error. #vue #bugfix
+- [Bug] Corrected `Invalid end tag` error in `frontend/src/views/TestResultsPage.vue` by fixing script and style tag placement. Impact: Resolves compilation error. #vue #bugfix
+- [Bug] Fixed `ReferenceError: computed is not defined` in `frontend/src/views/TestResultsPage.vue` by importing `computed` from `vue`. Impact: Resolves runtime error. #vue #bugfix
+- [Bug] Fixed `ReferenceError: testResultsData is not defined` in `frontend/src/views/TestResultsPage.vue` by reordering variable declarations. Impact: Resolves runtime error. #vue #bugfix
+- [Bug] Fixed `TypeError: instance.update is not a function` in `frontend/src/views/TestResultsPage.vue` by explicitly selecting properties in `processedTestResultsData` instead of using `delete`. Impact: Resolves runtime error. #vue #bugfix
+- [Bug] Fixed `box-shadow` not being removed for selected card variant in `frontend/src/components/ui/Card.vue` by adding `!important` to `box-shadow: none;`. Impact: Correctly applies selected variant styling. #vue #bugfix

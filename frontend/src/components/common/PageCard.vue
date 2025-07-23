@@ -47,5 +47,6 @@ withDefaults(defineProps<Props>(), {
 
 .page-card-description {
   color: $color-text-primary;
+  margin-bottom: $spacing-large;
 }
 </style>
