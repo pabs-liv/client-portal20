@@ -187,7 +187,7 @@ const processedHeaders = computed(() =>
   props.headers.map(header => ({
     ...header,
     class: 'font-weight-bold',
-    align: header.key === 'actions' || header.key === 'eocId' || header.key === 'cost' || header.key === 'claimDate' || header.key === 'submissionDate' || header.key === 'approvedDate' ? 'end' : undefined,
+    align: header.align || (header.key === 'actions' || header.key === 'eocId' || header.key === 'cost' || header.key === 'claimDate' || header.key === 'submissionDate' || header.key === 'approvedDate' ? 'end' : undefined),
   }))
 );
 
@@ -228,6 +228,8 @@ const filteredItems = computed(() => {
       currentItems = currentItems.filter(item => item.type.toLowerCase() === activeFilterPill.value!.value.toLowerCase());
     } else if (activeFilterPill.value.type === 'status') {
       currentItems = currentItems.filter(item => item.status.toLowerCase() === activeFilterPill.value!.value.toLowerCase());
+    } else if (activeFilterPill.value.type === 'billingType') {
+      currentItems = currentItems.filter(item => item.billingType.toLowerCase() === activeFilterPill.value!.value.toLowerCase());
     }
   }
   return currentItems;

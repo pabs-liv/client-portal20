@@ -90,11 +90,11 @@
     />
 
     <Dialog
-        :model-value="showRequestInfoDialog"
-        @update:model-value="showRequestInfoDialog = $event"
+        :model-value="showInternalInfoDialog"
+        @update:model-value="showInternalInfoDialog = $event"
         :icon="Info"
         heading="Claim Information Requested"
-        :actions="requestInfoDialogActions"
+        :actions="internalInfoDialogActions"
       >
         <p class="text-body mb-small">
           Additional information about this high cost claim has been requested. Please contact the client as soon as possible.
@@ -104,6 +104,18 @@
         </p>
         <p class="text-small text-neutral-disabled">
           Requested Date: {placeholder date and time}
+        </p>
+      </Dialog>
+
+      <Dialog
+        :model-value="showExternalInfoDialog"
+        @update:model-value="showExternalInfoDialog = $event"
+        :icon="Info"
+        heading="Request Additional Information"
+        :actions="externalInfoDialogActions"
+      >
+        <p class="text-body mb-small">
+          Would like to know more about this high-cost claim? We are here to help! Submit your request to prompt your account manager to get more details about this claim.
         </p>
       </Dialog>
   </div>
@@ -123,7 +135,8 @@ const { isExternal } = useUserType();
 
 const showApproveDialog = ref(false);
 const showRejectDialog = ref(false);
-const showRequestInfoDialog = ref(false);
+const showInternalInfoDialog = ref(false);
+const showExternalInfoDialog = ref(false);
 
 const handleApproveClick = (item: any) => {
   selectedClaim.value = item;
@@ -137,7 +150,11 @@ const handleRejectClick = (item: any) => {
 
 const handleRequestInfo = (item: any) => {
   selectedClaim.value = item;
-  showRequestInfoDialog.value = true;
+  if (isExternal.value) {
+    showExternalInfoDialog.value = true;
+  } else {
+    showInternalInfoDialog.value = true;
+  }
 };
 
 const actionIcons = ref([
@@ -156,8 +173,13 @@ const rejectDialogActions = [
   { text: 'Reject', onClick: () => { console.log('rejected'); showRejectDialog.value = false; }, color: 'error', variant: 'flat' as const, type: 'destructive' as const }
 ];
 
-const requestInfoDialogActions = [
-  { text: 'Acknowledge', onClick: () => (showRequestInfoDialog.value = false), color: 'primary', variant: 'flat' as const }
+const internalInfoDialogActions = [
+  { text: 'Acknowledge', onClick: () => (showInternalInfoDialog.value = false), color: 'primary', variant: 'flat' as const }
+];
+
+const externalInfoDialogActions = [
+  { text: 'Cancel', onClick: () => (showExternalInfoDialog.value = false), variant: 'text' as const },
+  { text: 'Send Request', onClick: () => { console.log('Send Request clicked'); showExternalInfoDialog.value = false; }, color: 'primary', variant: 'flat' as const }
 ];
 
 const formatInternalUserAction = (item: any) => {
@@ -177,7 +199,7 @@ const claimsHeaders = ref([
   { title: 'Cost', key: 'cost', align: 'end' },
   { title: 'Claim Date', key: 'claimDate', align: 'end' },
   { title: 'Status', key: 'status' },
-  { title: 'Actions', key: 'actions', sortable: false, align: 'start', width: '1px' },
+  { title: 'Actions', key: 'actions', sortable: false, align: 'start', width: '180px' },
 ]);
 
 const claimsData = ref([
