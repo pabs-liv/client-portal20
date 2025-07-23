@@ -1,6 +1,39 @@
 
 <template>
   <div>
+    <h1 class="text-h1 mb-large">Prior Authorizations</h1>
+    <div class="widgets-container mb-large">
+      <SummaryWidget
+        title="Pending"
+        :count="pendingCount"
+        description="Authorizations awaiting review"
+        icon-background-color="rgba(253, 214, 113, 0.2)"
+        icon-color="#FBBA13"
+        :show-icon="true"
+        :icon="Hourglass"
+        :clickable="false"
+      />
+      <SummaryWidget
+        title="Approved"
+        :count="approvedCount"
+        description="Authorizations that have been approved"
+        icon-background-color="rgba(190, 227, 190, 0.4)"
+        icon-color="#5CB85C"
+        :show-icon="true"
+        :icon="CircleCheckBig"
+        :clickable="false"
+      />
+      <SummaryWidget
+        title="Denied"
+        :count="deniedCount"
+        description="Authorizations that have been denied"
+        icon-background-color="rgba(212, 107, 107, 0.4)"
+        icon-color="#B80909"
+        :show-icon="true"
+        :icon="XCircle"
+        :clickable="false"
+      />
+    </div>
     <PageCard
       headerText="Prior Authorizations"
       descriptionText="Review prior authorizations and stay on top of your members."
@@ -13,14 +46,48 @@
         :show-filter-pills="true"
         search-placeholder="Search prior authorizations"
         :initial-filter-pills="priorAuthFilterPills"
+        :show-action-icons="isExternal"
+        :action-icons="actionIcons"
+        :show-internal-user-actions="!isExternal"
+        :internal-user-action-formatter="formatInternalUserAction"
+        :internal-user-action-click-handler="handleInternalInfoClick"
+        :show-row-actions="false"
       />
     </PageCard>
+    <Dialog
+      :model-value="showInfoDialog"
+      @update:model-value="showInfoDialog = $event"
+      :icon="Info"
+      heading="Request Additional Information"
+      text="Would like to know more about this prior authorization? We are here to help! Submit your request to prompt your account manager to get more details about this claim."
+      :actions="infoDialogActions"
+    />
+    <Dialog
+      :model-value="showInternalInfoDialog"
+      @update:model-value="showInternalInfoDialog = $event"
+      :icon="Info"
+      heading="PA Information Requested"
+      :actions="internalInfoDialogActions"
+    >
+      <p class="text-body mb-small">
+        Additional information about this PA claim has been requested. Please contact the client as soon as possible.
+      </p>
+      <p class="text-small text-neutral-disabled mt-small">
+        Requested By: {add placeholder user name - email}
+        <br />
+        Requested Date: {placeholder date and time}
+      </p>
+    </Dialog>
   </div>
 </template>
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import PageCard from '@/components/common/PageCard.vue';
 import ReportDataTable from '@/components/common/ReportDataTable.vue';
+import SummaryWidget from '@/components/common/SummaryWidget.vue';
+import Dialog from '@/components/ui/Dialog.vue';
+import { useUserType } from '@/composables/useUserType';
+import { Hourglass, CircleCheckBig, XCircle, Info } from 'lucide-vue-next';
 
 const priorAuthHeaders = ref([
   { title: 'Account Name', key: 'accountName', width: '25%' },
@@ -28,7 +95,7 @@ const priorAuthHeaders = ref([
   { title: 'Drug Name', key: 'drugName', width: '25%' },
   { title: 'Submission Date', key: 'submissionDate', align: 'end', width: '15%' },
   { title: 'Status', key: 'status' },
-  { title: '', key: 'actions', sortable: false, align: 'end' },
+  { title: 'Actions', key: 'actions', sortable: false, align: 'end' },
 ]);
 
 const priorAuthData = ref([
@@ -110,4 +177,54 @@ const priorAuthFilterPills = ref([
   { type: 'status', value: 'Pending', label: 'Pending' },
   { type: 'status', value: 'Denied', label: 'Denied' },
 ]);
+
+const pendingCount = computed(() => priorAuthData.value.filter(item => item.status === 'Pending').length);
+const approvedCount = computed(() => priorAuthData.value.filter(item => item.status === 'Approved').length);
+const deniedCount = computed(() => priorAuthData.value.filter(item => item.status === 'Denied').length);
+
+const { isExternal } = useUserType();
+
+const showInfoDialog = ref(false);
+const showInternalInfoDialog = ref(false);
+const selectedAuth = ref<any>(null);
+
+const handleInfoClick = (item: any) => {
+  selectedAuth.value = item;
+  showInfoDialog.value = true;
+};
+
+const handleInternalInfoClick = (item: any) => {
+  selectedAuth.value = item;
+  showInternalInfoDialog.value = true;
+};
+
+const actionIcons = ref([
+  { icon: Info, tooltip: 'Request Info', onClick: handleInfoClick },
+]);
+
+const infoDialogActions = [
+  { text: 'Cancel', onClick: () => (showInfoDialog.value = false), variant: 'text' as const },
+  { text: 'Send Request', onClick: () => { console.log('Send Request clicked'); showInfoDialog.value = false; }, color: 'primary', variant: 'flat' as const }
+];
+
+const internalInfoDialogActions = [
+  { text: 'Acknowledge', onClick: () => (showInternalInfoDialog.value = false), color: 'primary', variant: 'flat' as const }
+];
+
+const formatInternalUserAction = (item: any) => {
+  if (item.status === 'Pending' || item.status === 'Denied') {
+    return 'Information Requested';
+  } else {
+    return '-';
+  }
+};
 </script>
+<style lang="scss" scoped>
+@import '@/style.scss';
+
+.widgets-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: $spacing-medium;
+}
+</style>

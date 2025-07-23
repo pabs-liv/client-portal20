@@ -69,6 +69,7 @@ defineEmits(['update:modelValue']);
   .v-card-title,
   .v-btn {
     letter-spacing: normal;
+    white-space: normal;
   }
 
   .v-card-text {
