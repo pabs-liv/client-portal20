@@ -1,8 +1,14 @@
 <template>
   <v-card class="custom-card" :class="{ selected: selected }">
-    <v-card-title v-if="title" class="text-h4">{{ title }}</v-card-title>
+    <v-card-title v-if="title" class="text-h4 d-flex justify-space-between align-start">
+      <span class="card-title-text">{{ title }}</span>
+      <div v-if="variant === 'checkbox'" @click="toggleSelection" class="ml-2 cursor-pointer flex-shrink-0">
+        <CheckSquare v-if="selected" :size="24" :stroke-width="1" />
+        <Square v-else :size="24" :stroke-width="1" />
+      </div>
+    </v-card-title>
     <v-card-subtitle v-if="subtitle">{{ subtitle }}</v-card-subtitle>
-    <v-card-text v-if="text && !selected">{{ text }}</v-card-text>
+    <v-card-text v-if="text">{{ text }}</v-card-text>
     <v-card-actions v-if="actions && actions.length && !selected">
       <v-btn
         v-for="(action, index) in actions"
@@ -21,6 +27,7 @@
 
 <script setup lang="ts">
 import { defineProps } from 'vue';
+import { CheckSquare, Square } from 'lucide-vue-next';
 
 interface Action {
   text: string;
@@ -35,15 +42,25 @@ interface Props {
   text?: string;
   actions?: Action[];
   selected?: boolean;
+  selectable?: boolean;
+  variant?: 'default' | 'checkbox';
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   title: '',
   subtitle: '',
   text: '',
   actions: () => [],
   selected: false,
+  selectable: false,
+  variant: 'default',
 });
+
+const emit = defineEmits(['update:selected']);
+
+const toggleSelection = () => {
+  emit('update:selected', !props.selected);
+};
 </script>
 
 <style lang="scss" scoped>
@@ -55,22 +72,23 @@ withDefaults(defineProps<Props>(), {
   background-color: $color-neutral-white;
   border-radius: 8px;
   padding: $spacing-small;
+  min-height: 220px;
 
   &.selected {
-    border: 1px solid rgba(15, 40, 91, 0.6);
+    border: 1px solid $color-primary !important;
     box-shadow: none !important;
-
-    .v-card-title,
-    .v-card-subtitle,
-    .v-card-text {
-      opacity: 0.8;
-    }
   }
 
   .v-card-title {
     color: $color-primary;
     font-weight: $font-weight-bold;
     letter-spacing: 0 !important;
+    line-height: 1.2;
+
+    .card-title-text {
+      white-space: normal;
+      word-break: break-word;
+    }
   }
 
   .v-card-subtitle {

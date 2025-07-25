@@ -425,3 +425,17 @@ This file documents all significant changes made to the project for future refer
 - [Bug] Fixed `ReferenceError: testResultsData is not defined` in `frontend/src/views/TestResultsPage.vue` by reordering variable declarations. Impact: Resolves runtime error. #vue #bugfix
 - [Bug] Fixed `TypeError: instance.update is not a function` in `frontend/src/views/TestResultsPage.vue` by explicitly selecting properties in `processedTestResultsData` instead of using `delete`. Impact: Resolves runtime error. #vue #bugfix
 - [Bug] Fixed `box-shadow` not being removed for selected card variant in `frontend/src/components/ui/Card.vue` by adding `!important` to `box-shadow: none;`. Impact: Correctly applies selected variant styling. #vue #bugfix
+
+---
+
+## [2025-07-24]
+### Changed
+- [UI/UX] Refactored `frontend/src/components/ui/Card.vue` to include a `variant` prop that can be set to `checkbox`.
+- [UI/UX] Replaced Vuetify's `v-checkbox` with `lucide-vue-next` icons (`CheckSquare` and `Square`) to resolve visibility issues.
+- [UI/UX] Ensured the card title wraps when it is too long and set the checkbox icon's stroke width to 1px.
+- [UI/UX] Refactored the selected card variant to show the card text and apply a primary color border.
+- [UI/UX] Set a `min-height` on the card component to ensure all cards in a row have a uniform height.
+- [UI/UX] Added a "Request Program Details" button to `frontend/src/views/AddedValuePage.vue` that only appears when a card is selected.
+- [UI/UX] Set the "Request Program Details" button to be title-cased.
+- [UI/UX] Added a global style to `frontend/src/style.scss` to make all buttons title-cased and have no letter spacing.
+- [UI/UX] Added two more cards to `frontend/src/views/AddedValuePage.vue`.

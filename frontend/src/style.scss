@@ -97,6 +97,8 @@ a {
   // Override button styles
   .v-btn {
     font-family: $font-family-base !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
     
     &.v-btn--variant-elevated {
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
