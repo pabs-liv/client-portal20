@@ -1,5 +1,5 @@
 <template>
-  <v-card class="custom-card" :class="{ selected: selected }">
+  <v-card class="custom-card" :class="{ selected: selected, flat: flat }">
     <v-card-title v-if="title" class="text-h4 d-flex justify-space-between align-start">
       <span class="card-title-text">{{ title }}</span>
       <div v-if="variant === 'checkbox'" @click="toggleSelection" class="ml-2 cursor-pointer flex-shrink-0">
@@ -44,6 +44,7 @@ interface Props {
   selected?: boolean;
   selectable?: boolean;
   variant?: 'default' | 'checkbox';
+  flat?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -54,6 +55,7 @@ const props = withDefaults(defineProps<Props>(), {
   selected: false,
   selectable: false,
   variant: 'default',
+  flat: false,
 });
 
 const emit = defineEmits(['update:selected']);
@@ -72,10 +74,17 @@ const toggleSelection = () => {
   background-color: $color-neutral-white;
   border-radius: 8px;
   padding: $spacing-small;
-  min-height: 220px;
+
+  &:not(.hug-content) {
+    min-height: 220px;
+  }
 
   &.selected {
     border: 1px solid $color-primary !important;
+    box-shadow: none !important;
+  }
+
+  &.flat {
     box-shadow: none !important;
   }
 

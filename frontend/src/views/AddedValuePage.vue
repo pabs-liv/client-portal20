@@ -34,9 +34,60 @@
       </v-row>
       <v-btn v-if="isAnyCardSelected" color="primary" rounded>Request Program Details</v-btn>
     </div>
+    <div class="account-programs">
+      <v-row>
+        <v-col cols="12" md="8" class="d-flex justify-center align-center">
+          <AccountPrescriptionCard
+            accountName="Stark Industries"
+            carrier="Blue Cross Blue Shield"
+            :livesCovered="5000"
+            startDate="01/01/2024"
+            endDate="12/31/2024"
+            routingBin="610455"
+            status="active"
+          />
+        </v-col>
+        <v-col cols="12" md="4" class="programs-column">
+          <h2 class="text-h2 programs-title">Programs</h2>
+          <div class="programs-in-use">
+            <h4 class="text-h4">In Use</h4>
+            <Card
+              title="Anti-Obesity Management Program"
+              subtitle="Wellness"
+              class="hug-content"
+              :flat="true"
+            />
+          </div>
+          <div class="programs-available">
+            <h4 class="text-h4">Available</h4>
+            <p class="text-body">Choose from the available programs below to help your clients reduce costs and improve care for their members.</p>
+            <Card
+              title="Liviniti Delivery on Demand"
+              subtitle="Savings"
+              text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+              class="hug-content"
+              variant="checkbox"
+              :selected="selectedPrograms[2]"
+              @update:selected="selectedPrograms[2] = $event"
+            />
+            <Card
+              title="LivLite"
+              subtitle="Savings"
+              text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+              class="hug-content"
+              variant="checkbox"
+              :selected="selectedPrograms[3]"
+              @update:selected="selectedPrograms[3] = $event"
+            />
+            <v-btn v-if="isAnyAvailableCardSelected" color="primary" rounded>Request Program Details</v-btn>
+          </div>
+        </v-col>
+      </v-row>
+    </div>
   </div>
 </template>
 <script setup lang="ts">
+import AccountPrescriptionCard from '@/components/common/AccountPrescriptionCard.vue';
 import PageCard from '@/components/common/PageCard.vue';
 import Card from '@/components/ui/Card.vue';
 import Select from '@/components/ui/Select.vue';
@@ -56,6 +107,8 @@ const selectedAccount = ref(null);
 const selectedPrograms = ref<boolean[]>([false, false, false, false]);
 
 const isAnyCardSelected = computed(() => selectedPrograms.value.some(selected => selected));
+
+const isAnyAvailableCardSelected = computed(() => selectedPrograms.value.slice(2).some(selected => selected));
 </script>
 <style lang="scss" scoped>
 @import '@/style.scss';
@@ -130,5 +183,22 @@ const isAnyCardSelected = computed(() => selectedPrograms.value.some(selected =>
   p {
     margin-bottom: 0;
   }
+}
+
+.programs-column {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-large;
+}
+
+.programs-title {
+  color: $color-primary;
+}
+
+.programs-in-use,
+.programs-available {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-medium;
 }
 </style>
