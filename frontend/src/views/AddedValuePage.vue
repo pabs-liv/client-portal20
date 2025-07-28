@@ -1,5 +1,22 @@
 <template>
   <div>
+    <Dialog
+      :model-value="showAccountSelectionDialog"
+      heading="Select Account to Manage"
+      :persistent="true"
+      :actions="dialogActions"
+    >
+      <Select
+        :items="accountOptions"
+        label="Select Account"
+        item-title="name"
+        item-value="id"
+        :searchable="true"
+        v-model="selectedAccount"
+        class="account-select"
+      />
+    </Dialog>
+
     <div class="account-selector mb-large">
       <div class="title">
         <h1 class="text-h1">Added Value Programs</h1>
@@ -15,9 +32,10 @@
         :searchable="true"
         v-model="selectedAccount"
         class="account-select"
+        @update:model-value="updateDisplayAccountType"
       />
     </div>
-    <div class="no-program mb-large">
+    <div class="no-program mb-large" v-if="displayAccountType === 'no-program'">
       <h2 class="text-h2">This Account Does Not Have Any Programs</h2>
       <p class="text-body">Choose from the available programs below to help your clients reduce costs and improve care for their members.</p>
       <v-row>
@@ -34,7 +52,7 @@
       </v-row>
       <v-btn v-if="isAnyCardSelected" color="primary" rounded>Request Program Details</v-btn>
     </div>
-    <div class="account-programs">
+    <div class="account-programs" v-if="displayAccountType === 'account-programs'">
       <v-row>
         <v-col cols="12" md="8" class="d-flex justify-center align-center">
           <AccountPrescriptionCard
@@ -88,11 +106,11 @@
 </template>
 <script setup lang="ts">
 import AccountPrescriptionCard from '@/components/common/AccountPrescriptionCard.vue';
-import PageCard from '@/components/common/PageCard.vue';
+import Dialog from '@/components/ui/Dialog.vue';
 import Card from '@/components/ui/Card.vue';
 import Select from '@/components/ui/Select.vue';
 import { VRow, VCol, VBtn } from 'vuetify/components';
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 
 const accountOptions = ref([
   { id: 1, name: 'Blue Cross Blue Shield' },
@@ -103,12 +121,44 @@ const accountOptions = ref([
 ]);
 
 const selectedAccount = ref(null);
+const showAccountSelectionDialog = ref(false);
+const displayAccountType = ref<string | null>(null);
+
+const dialogActions = computed(() => [
+  {
+    text: 'Continue',
+    onClick: handleAccountSelection,
+    color: 'primary',
+    variant: 'elevated',
+    disabled: !selectedAccount.value,
+  },
+]);
 
 const selectedPrograms = ref<boolean[]>([false, false, false, false]);
 
 const isAnyCardSelected = computed(() => selectedPrograms.value.some(selected => selected));
 
 const isAnyAvailableCardSelected = computed(() => selectedPrograms.value.slice(2).some(selected => selected));
+
+const handleAccountSelection = () => {
+  console.log('Selected Account:', selectedAccount.value);
+  showAccountSelectionDialog.value = false;
+  updateDisplayAccountType(selectedAccount.value);
+};
+
+const updateDisplayAccountType = (accountId: number) => {
+  if (accountId === 1) { // Blue Cross Blue Shield
+    displayAccountType.value = 'no-program';
+  } else if (accountId === 2) { // Aetna
+    displayAccountType.value = 'account-programs';
+  } else {
+    displayAccountType.value = null;
+  }
+};
+
+onMounted(() => {
+  showAccountSelectionDialog.value = true;
+});
 </script>
 <style lang="scss" scoped>
 @import '@/style.scss';

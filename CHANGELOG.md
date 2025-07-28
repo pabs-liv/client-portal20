@@ -448,3 +448,7 @@ This file documents all significant changes made to the project for future refer
 - [UI/UX] Added "In Use" and "Available" sections to the `AddedValuePage.vue` to better organize program cards.
 - [UI/UX] Implemented `gap` for spacing in the programs column on `AddedValuePage.vue` for better visual grouping.
 - [UI/UX] Added descriptive text under the "Available" heading.
+
+### Fixed
+- [Bug] Fixed issue where the "Continue" button in the account selection dialog was not disabled when no account was selected.
+- [Bug] Fixed issue where the account selection dialog could be dismissed by clicking outside, even with `persistent` set to `true`.

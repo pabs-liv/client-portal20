@@ -21,6 +21,7 @@
           :variant="action.variant || 'text'"
           :rounded="true"
           :class="{'dialog-button': true, 'text-white': action.color === 'primary' && (action.variant === 'elevated' || action.variant === 'flat') || action.type === 'destructive'}"
+          :disabled="action.disabled"
           @click="action.onClick"
         >
           {{ action.text }}
