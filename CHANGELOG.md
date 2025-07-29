@@ -477,3 +477,16 @@ This file documents all significant changes made to the project for future refer
 
 ### Known Issues
 - [UI/UX] Read-only styling for `frontend/src/components/ui/TextField.vue` is not yet fully implemented as requested (label visibility, truncation, and tooltip behavior for read-only variant require further refinement).
+
+---
+
+## [2025-07-29]
+### Changed
+- [UI/UX] Refactored the `TextField.vue` component to simplify read-only styling, using Vuetify's native `readonly` state and CSS variables for a more robust implementation. Impact: Improves code maintainability and resolves styling inconsistencies. #vue #refactor #ui-ux
+- [Feature] Added an editable "Notification threshold" field to the `SettingsPage.vue` under a new "High Cost Notification Settings" section, allowing users to configure claim limits. Impact: Enhances the configuration options available to users. #vue #feature
+- [UI/UX] Implemented "Save" and "Cancel" buttons on the "Company Information" tab in `SettingsPage.vue`. The buttons are only active when changes have been made to the form. Impact: Provides clear actions for the user and prevents accidental saves. #vue #ui-ux
+- [UI/UX] Added a snackbar notification to confirm successful saves on the `SettingsPage.vue`. Impact: Improves user feedback and experience. #vue #ui-ux
+- [Refactor] Reorganized the layout of the "Company Information" tab in `SettingsPage.vue` for better structure and consistency. Grouped related fields into containers (`general-information-container`, `high-cost-container`) and moved the action buttons to the bottom of the tab. Impact: Improves code readability and maintainability. #vue #refactor
+
+### Fixed
+- [Bug] Fixed a SASS compilation error (`Undefined variable`) in `TextField.vue` by replacing out-of-scope SCSS variables with the correct global CSS variables. Impact: Resolves a critical build error. #vue #bugfix #scss
