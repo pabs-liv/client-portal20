@@ -433,6 +433,7 @@ This file documents all significant changes made to the project for future refer
 - [Component] Created `AccountPrescriptionCard.vue` component to display PBM account details in a card format.
 - [Feature] Added a new section to `AddedValuePage.vue` with a 70/30 responsive layout to display account details and available programs.
 - [Component] Added a `flat` prop to the `Card.vue` component to provide a shadowless variant.
+- [Component] Created `AccountSelector.vue` component to encapsulate account selection logic and styling, with a slot for additional content.
 
 ### Changed
 - [UI/UX] Refactored `frontend/src/components/ui/Card.vue` to include a `variant` prop that can be set to `checkbox`.
@@ -448,6 +449,12 @@ This file documents all significant changes made to the project for future refer
 - [UI/UX] Added "In Use" and "Available" sections to the `AddedValuePage.vue` to better organize program cards.
 - [UI/UX] Implemented `gap` for spacing in the programs column on `AddedValuePage.vue` for better visual grouping.
 - [UI/UX] Added descriptive text under the "Available" heading.
+- [UI/UX] Refactored `AccountSelector.vue` to correctly position the slot content below the heading and select component.
+- [UI/UX] Added `showSlot` prop to `AccountSelector.vue` to control the visibility of the slot content.
+
+### Fixed
+- [Bug] Fixed issue where the "Continue" button in the account selection dialog was not disabled when no account was selected.
+- [Bug] Fixed issue where the account selection dialog could be dismissed by clicking outside, even with `persistent` set to `true`.
 
 ### Fixed
 - [Bug] Fixed issue where the "Continue" button in the account selection dialog was not disabled when no account was selected.

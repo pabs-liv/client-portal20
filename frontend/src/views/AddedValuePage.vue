@@ -17,24 +17,17 @@
       />
     </Dialog>
 
-    <div class="account-selector mb-large">
-      <div class="title">
-        <h1 class="text-h1">Added Value Programs</h1>
-        <p class="text-body">
-          Explore added-value programs to enrich the lives and improve the health of your members. Select an account to get started.
-        </p>
-      </div>
-      <Select
-        :items="accountOptions"
-        label="Select Account"
-        item-title="name"
-        item-value="id"
-        :searchable="true"
-        v-model="selectedAccount"
-        class="account-select"
-        @update:model-value="updateDisplayAccountType"
-      />
-    </div>
+    <AccountSelector
+      heading="Added Value Programs"
+      subheading="Explore added-value programs to enrich the lives and improve the health of your members. Select an account to get started."
+      :items="accountOptions"
+      label="Select Account"
+      item-title="name"
+      item-value="id"
+      :searchable="true"
+      v-model="selectedAccount"
+      @update:model-value="updateDisplayAccountType"
+    />
     <div class="no-program mb-large" v-if="displayAccountType === 'no-program'">
       <h2 class="text-h2">This Account Does Not Have Any Programs</h2>
       <p class="text-body">Choose from the available programs below to help your clients reduce costs and improve care for their members.</p>
@@ -108,6 +101,7 @@
 import AccountPrescriptionCard from '@/components/common/AccountPrescriptionCard.vue';
 import Dialog from '@/components/ui/Dialog.vue';
 import Card from '@/components/ui/Card.vue';
+import AccountSelector from '@/components/common/AccountSelector.vue';
 import Select from '@/components/ui/Select.vue';
 import { VRow, VCol, VBtn } from 'vuetify/components';
 import { ref, computed, onMounted } from 'vue';
