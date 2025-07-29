@@ -340,7 +340,7 @@ This file documents all significant changes made to the project for future refer
 - [Component] Created a new reusable `Dialog.vue` component using Vuetify's `v-dialog`. It supports persistent behavior, customizable icons (from Lucide), headings, text content, and action buttons via props. Impact: Provides a standardized and flexible way to implement dialogs across the application. #vue #component #ui-ux
 
 ### Changed
-- [UI/UX] Increased the size of the upload illustration in the `FileUploader` component by 50% (from 120px to 180px) to give it more prominence on the page. Impact: This improves the visual hierarchy and user focus on the upload action. #vue #ui-ux #styling
+- [UI/UX] Increased the size of the upload illustration in `FileUploader` component by 50% (from 120px to 180px) to give it more prominence on the page. Impact: This improves the visual hierarchy and user focus on the upload action. #vue #ui-ux #styling
 - [Refactor] Updated FileUploader component to use an imported image asset. Refactored `frontend/src/components/ui/FileUploader.vue` to import the upload illustration from `@/assets/UploadIllustration.png` instead of using a static path in the template. Moved the image asset from `assets/nav-icons/` to `frontend/src/assets/` to align with Vite's asset handling. This ensures the image is correctly processed and bundled during the build. Impact: Improves asset handling robustness and aligns with modern frontend development best practices for Vite projects. #vue #refactor #vite #assets
 - [UI/UX] Made radio buttons in `FileUploader.vue` visible in their idle state by increasing the border thickness to 2px and removing invalid `on-icon` and `off-icon` properties. Impact: This fixes a UI bug where the radio buttons were invisible until selected, improving usability. #vue #ui-ux #bugfix
 - [UI/UX] Attempted to fix radio button visibility in `FileUploader.vue` by directly styling the idle icon color to match the primary text color. This provides a more robust solution that works with Vuetify's default styling. Impact: This resolves the UI bug where radio buttons were not visible, ensuring a consistent and usable interface. #vue #ui-ux #bugfix
@@ -459,3 +459,21 @@ This file documents all significant changes made to the project for future refer
 ### Fixed
 - [Bug] Fixed issue where the "Continue" button in the account selection dialog was not disabled when no account was selected.
 - [Bug] Fixed issue where the account selection dialog could be dismissed by clicking outside, even with `persistent` set to `true`.
+
+## [2025-07-28]
+
+### Added
+- [Settings Page] Implemented `frontend/src/views/SettingsPage.vue` with `AccountSelector` component for account selection.
+- [Settings Page] Integrated `frontend/src/components/common/Tabs.vue` within the `AccountSelector` slot, displaying "Company Information", "User Administration", "CAA Drug Cost Reporting", and "CAA Gag Clause Attestation" tabs.
+- [UI Component] Created new reusable `frontend/src/components/ui/TextField.vue` component as a wrapper for Vuetify's `v-text-field`.
+- [Settings Page] Added "Company Information" tab content including a "General Information" heading, descriptive text, and two read-only `TextField` components for "Company name" and "Doing business as".
+
+### Changed
+- [Component] Refactored `frontend/src/components/common/AccountSelector.vue` to accept `heading` and `subheading` props for reusability.
+- [Settings Page] Implemented conditional rendering for tab content in `SettingsPage.vue`, displaying content only after an account is selected.
+
+### Fixed
+- [Bug] Resolved `[vue/compiler-sfc] Identifier 'accountOptions' has already been declared` error in `frontend/src/views/SettingsPage.vue` by removing duplicate variable declarations.
+
+### Known Issues
+- [UI/UX] Read-only styling for `frontend/src/components/ui/TextField.vue` is not yet fully implemented as requested (label visibility, truncation, and tooltip behavior for read-only variant require further refinement).
