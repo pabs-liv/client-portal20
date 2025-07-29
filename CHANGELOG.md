@@ -490,3 +490,14 @@ This file documents all significant changes made to the project for future refer
 
 ### Fixed
 - [Bug] Fixed a SASS compilation error (`Undefined variable`) in `TextField.vue` by replacing out-of-scope SCSS variables with the correct global CSS variables. Impact: Resolves a critical build error. #vue #bugfix #scss
+
+### Added
+- [Feature] Implemented the "User Administration" tab in `SettingsPage.vue`, including a `ReportDataTable` to display user information. Impact: Provides a dedicated interface for user management. #vue #feature #settings
+- [Component] Added a new `boolean-columns` prop to `ReportDataTable.vue` to automatically render specified columns as read-only checkboxes. Impact: Enhances the reusability and functionality of the data table component. #vue #component #refactor
+
+### Changed
+- [UI/UX] Updated the `ReportDataTable` in `SettingsPage.vue` to use the new `boolean-columns` prop, simplifying the template. Impact: Improves code readability and maintainability. #vue #ui-ux
+- [UI/UX] Centered the headers and content for boolean (checkbox) columns in `ReportDataTable.vue` for improved visual alignment. Impact: Fixes styling inconsistencies and improves the user experience. #vue #ui-ux #styling
+
+### Fixed
+- [Bug] Corrected multiple instances where adding new features to `SettingsPage.vue` inadvertently removed existing content or created duplicate imports. Impact: Restores full functionality to the page and prevents regressions. #vue #bugfix

@@ -52,6 +52,20 @@
             <v-btn v-if="isChanged" variant="text" @click="cancelChanges">Cancel</v-btn>
           </div>
         </div>
+        <div v-if="selectedAccount && activeTab === 'user-administration'">
+          <ReportDataTable
+            :headers="userAdminHeaders"
+            :items="userAdminData"
+            :show-search-bar="true"
+            :show-filter-button="false"
+            search-placeholder="Search users"
+            :show-row-actions="true"
+            :show-table-footer="true"
+            :show-selection-checkboxes="false"
+            :boolean-columns="['activated', 'mainPoc', 'surveyContact']"
+          >
+          </ReportDataTable>
+        </div>
         <div v-if="!selectedAccount" class="pa-4 text-center text-body">
           <p>Please select an account to view or modify settings.</p>
         </div>
@@ -67,6 +81,7 @@
 import AccountSelector from '@/components/common/AccountSelector.vue';
 import Tabs from '@/components/common/Tabs.vue';
 import TextField from '@/components/ui/TextField.vue';
+import ReportDataTable from '@/components/common/ReportDataTable.vue';
 import { ref, computed, watch } from 'vue';
 
 const accountOptions = ref([
@@ -140,6 +155,51 @@ const activeTab = ref('company-information');
 const handleTabSelected = (tabKey: string) => {
   activeTab.value = tabKey;
 };
+
+const userAdminHeaders = ref([
+  { title: 'Account Name', key: 'accountName' },
+  { title: 'User', key: 'user' },
+  { title: 'Role', key: 'role' },
+  { title: 'Email', key: 'email' },
+  { title: 'Permissions', key: 'permissions' },
+  { title: 'Activated', key: 'activated', align: 'center' },
+  { title: 'Main POC', key: 'mainPoc', align: 'center' },
+  { title: 'Survey Contact', key: 'surveyContact', align: 'center' },
+  { title: '', key: 'actions', align: 'end', sortable: false },
+]);
+
+const userAdminData = ref([
+  {
+    accountName: 'Stark Industries',
+    user: 'Tony Stark',
+    role: 'Admin',
+    email: 'tony.stark@starkindustries.com',
+    permissions: 'All',
+    activated: true,
+    mainPoc: true,
+    surveyContact: false,
+  },
+  {
+    accountName: 'Stark Industries',
+    user: 'Pepper Potts',
+    role: 'Admin',
+    email: 'pepper.potts@starkindustries.com',
+    permissions: 'All',
+    activated: true,
+    mainPoc: false,
+    surveyContact: true,
+  },
+  {
+    accountName: 'Wayne Enterprises',
+    user: 'Bruce Wayne',
+    role: 'Admin',
+    email: 'bruce.wayne@wayneenterprises.com',
+    permissions: 'All',
+    activated: true,
+    mainPoc: true,
+    surveyContact: false,
+  },
+]);
 </script>
 
 <style lang="scss" scoped>

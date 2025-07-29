@@ -67,6 +67,9 @@
           </v-list>
         </v-menu>
       </template>
+      <template v-for="col in booleanColumns" v-slot:[`item.${col}`]="{ item }">
+        <v-checkbox-btn :model-value="item[col]" readonly class="d-flex justify-center"></v-checkbox-btn>
+      </template>
       <template v-slot:no-data>
         <div class="empty-state">
           <Microscope :size="80" :stroke-width="1" class="empty-state-icon" />
@@ -112,6 +115,7 @@ interface Props {
   showInternalUserActions?: boolean;
   internalUserActionFormatter?: (item: any) => string;
   internalUserActionClickHandler?: (item: any) => void;
+  booleanColumns?: string[];
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -129,6 +133,7 @@ const props = withDefaults(defineProps<Props>(), {
   showInternalUserActions: false,
   internalUserActionFormatter: (item: any) => '-',
   internalUserActionClickHandler: () => {},
+  booleanColumns: () => [],
 });
 
 const searchTerm = ref('');
@@ -187,7 +192,9 @@ const processedHeaders = computed(() =>
   props.headers.map(header => ({
     ...header,
     class: 'font-weight-bold',
-    align: header.align || (header.key === 'actions' || header.key === 'eocId' || header.key === 'cost' || header.key === 'claimDate' || header.key === 'submissionDate' || header.key === 'approvedDate' ? 'end' : undefined),
+    align: props.booleanColumns.includes(header.key)
+      ? 'center'
+      : header.align || (header.key === 'actions' || header.key === 'eocId' || header.key === 'cost' || header.key === 'claimDate' || header.key === 'submissionDate' || header.key === 'approvedDate' ? 'end' : 'start'),
   }))
 );
 
