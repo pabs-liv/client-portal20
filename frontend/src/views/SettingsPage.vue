@@ -66,8 +66,69 @@
           >
           </ReportDataTable>
         </div>
-        <div v-if="!selectedAccount" class="pa-4 text-center text-body">
-          <p>Please select an account to view or modify settings.</p>
+        <div v-if="selectedAccount && activeTab === 'caa-drug-cost-reporting'">
+          <div class="caa-settings">
+            <div class="tab-header">
+              <h3 class="text-h3">Consolidated Appropriations Act Reporting</h3>
+              <p class="text-body">DISCLAIMER: With the reporting option 2 (D3-D8), Liviniti will be providing and/or utilizing data for the time period that the Plan Sponsor is active with Liviniti. If Plan Sponsors utilized another PBM during any of the reporting period, the Plan Sponsor will need to coordinate with each PBM.</p>
+            </div>
+            <div class="benefit-details">
+              <h3 class="text-h3">Benefit Details</h3>
+              <div class="form-row">
+                <TextField
+                  label="Group health plan #"
+                  model-value="12345678"
+                  readonly
+                />
+                <TextField
+                  label="Carve-out benefit"
+                  model-value="Pharmacy Only"
+                  readonly
+                />
+                <TextField
+                  label="Form 5500 plan #"
+                  model-value="501"
+                  readonly
+                />
+              </div>
+              <div class="form-row">
+                <Autocomplete
+                  label="States"
+                  :items="states"
+                  multiple
+                  readonly
+                  :model-value="selectedAccountData.states"
+                ></Autocomplete>
+              </div>
+              <div class="form-row">
+                <Autocomplete
+                  label="Market segment"
+                  :items="marketSegments"
+                  readonly
+                  :model-value="selectedAccountData.marketSegment"
+                ></Autocomplete>
+              </div>
+              <div class="form-row">
+                <DatePicker
+                  label="Plan year begin date"
+                  :model-value="selectedAccountData.planYearBeginDate"
+                  readonly
+                />
+                <DatePicker
+                  label="Plan year end date"
+                  :model-value="selectedAccountData.planYearEndDate"
+                  readonly
+                />
+              </div>
+              <div class="form-row">
+                <TextField
+                  label="Members as of 12/31 of the reference year"
+                  :model-value="selectedAccountData.membersAsOf"
+                  readonly
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </AccountSelector>
@@ -82,6 +143,8 @@ import AccountSelector from '@/components/common/AccountSelector.vue';
 import Tabs from '@/components/common/Tabs.vue';
 import TextField from '@/components/ui/TextField.vue';
 import ReportDataTable from '@/components/common/ReportDataTable.vue';
+import Autocomplete from '@/components/ui/Autocomplete.vue';
+import DatePicker from '@/components/ui/DatePicker.vue';
 import { ref, computed, watch } from 'vue';
 
 const accountOptions = ref([
@@ -94,19 +157,19 @@ const accountOptions = ref([
 
 const selectedAccount = ref<number | null>(null);
 
-const companyData: { [key: number]: { companyName: string; dba: string; notificationThreshold: string } } = {
-  1: { companyName: 'Stark Industries', dba: 'Stark Industries', notificationThreshold: '15000' },
-  2: { companyName: 'Wayne Enterprises', dba: 'Wayne Foundation', notificationThreshold: '25000' },
-  3: { companyName: 'Cyberdyne Systems', dba: 'Cyberdyne', notificationThreshold: '10000' },
-  4: { companyName: 'Oscorp', dba: 'Oscorp Industries', notificationThreshold: '20000' },
-  5: { companyName: 'Tyrell Corporation', dba: 'Tyrell', notificationThreshold: '30000' },
+const companyData: { [key: number]: { companyName: string; dba: string; notificationThreshold: string; groupHealthPlan: string; carveOutBenefit: string; form5500Plan: string; states: string[]; marketSegment: string; planYearBeginDate: string; planYearEndDate: string; membersAsOf: string } } = {
+  1: { companyName: 'Stark Industries', dba: 'Stark Industries', notificationThreshold: '15000', groupHealthPlan: '12345678', carveOutBenefit: 'Pharmacy Only', form5500Plan: '501', states: ['CA', 'NY'], marketSegment: 'SF Large Employer Plans', planYearBeginDate: '01/01/2025', planYearEndDate: '12/31/2025', membersAsOf: '257' },
+  2: { companyName: 'Wayne Enterprises', dba: 'Wayne Foundation', notificationThreshold: '25000', groupHealthPlan: '87654321', carveOutBenefit: 'Medical & Pharmacy', form5500Plan: '502', states: ['TX', 'FL'], marketSegment: 'Commercial Plans', planYearBeginDate: '07/01/2024', planYearEndDate: '06/30/2025', membersAsOf: '500' },
+  3: { companyName: 'Cyberdyne Systems', dba: 'Cyberdyne', notificationThreshold: '10000', groupHealthPlan: '11223344', carveOutBenefit: 'Pharmacy Only', form5500Plan: '503', states: ['IL', 'GA'], marketSegment: 'Government Plans', planYearBeginDate: '01/01/2025', planYearEndDate: '12/31/2025', membersAsOf: '100' },
+  4: { companyName: 'Oscorp', dba: 'Oscorp Industries', notificationThreshold: '20000', groupHealthPlan: '44332211', carveOutBenefit: 'Medical & Pharmacy', form5500Plan: '504', states: ['PA', 'OH'], marketSegment: 'SF Large Employer Plans', planYearBeginDate: '07/01/2024', planYearEndDate: '06/30/2025', membersAsOf: '750' },
+  5: { companyName: 'Tyrell Corporation', dba: 'Tyrell', notificationThreshold: '30000', groupHealthPlan: '99887766', carveOutBenefit: 'Pharmacy Only', form5500Plan: '505', states: ['WA', 'OR'], marketSegment: 'Commercial Plans', planYearBeginDate: '01/01/2025', planYearEndDate: '12/31/2025', membersAsOf: '300' },
 };
 
 const selectedAccountData = computed(() => {
   if (selectedAccount.value && companyData[selectedAccount.value]) {
     return companyData[selectedAccount.value];
   }
-  return { companyName: '', dba: '', notificationThreshold: '' };
+  return { companyName: '', dba: '', notificationThreshold: '', groupHealthPlan: '', carveOutBenefit: '', form5500Plan: '', states: [], marketSegment: '', planYearBeginDate: '', planYearEndDate: '', membersAsOf: '' };
 });
 
 const editableThreshold = ref('');
@@ -148,6 +211,21 @@ const settingTabs = ref([
   { label: 'User Administration', key: 'user-administration' },
   { label: 'CAA Drug Cost Reporting', key: 'caa-drug-cost-reporting' },
   { label: 'CAA Gag Clause Attestation', key: 'caa-gag-clause-attestation' },
+]);
+
+const states = ref([
+  'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
+  'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD',
+  'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ',
+  'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC',
+  'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY',
+]);
+
+const marketSegments = ref([
+  'SF Large Employer Plans',
+  'Commercial Plans',
+  'Government Plans',
+  'Individual Plans',
 ]);
 
 const activeTab = ref('company-information');
@@ -213,6 +291,7 @@ const userAdminData = ref([
 
 .general-information-container {
   margin-bottom: $spacing-large;
+  max-width: 500px;
 }
 
 .tab-header {
@@ -231,6 +310,14 @@ const userAdminData = ref([
   display: flex;
   flex-direction: row;
   gap: $spacing-medium;
+
+  @media (max-width: 768px) { /* Adjust breakpoint as needed */
+    flex-wrap: wrap;
+
+    .v-input {
+      width: 100%; /* Ensure fields take full width on mobile */
+    }
+  }
 }
 
 .form-actions {
@@ -241,6 +328,24 @@ const userAdminData = ref([
 
 .high-cost-container {
   padding-bottom: $spacing-large;
+  max-width: 500px;
   
+}
+
+.caa-settings {
+  display: flex;
+  flex-direction: column;
+
+}
+
+.benefit-details {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-medium;
+  max-width: 500px;
+
+  h3 {
+    color: $color-primary !important;
+  }
 }
 </style>
