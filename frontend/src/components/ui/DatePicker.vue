@@ -111,13 +111,9 @@ const handleDateSelection = (newDate: Date) => {
 @import '@/style.scss';
 
 .custom-date-picker {
-  .v-field__input {
-    min-height: var(--v-input-control-height, 40px); // Match TextField height
-  }
-
   .calendar-icon {
     cursor: pointer;
-    color: var(--color-text-secondary);
+    color: $color-text-secondary;
   }
 }
 </style>

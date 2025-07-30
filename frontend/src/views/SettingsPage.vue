@@ -17,19 +17,24 @@
         <div v-if="selectedAccount && activeTab === 'company-information'">
           <div class="general-information-container">
             <div class="tab-header">
-              <h3 class="text-h3">General Information</h3>
+              <div class="heading-and-button-wrapper">
+                <h3 class="text-h3">General Information</h3>
+                <Button v-if="!isEditingCompany" @click="isEditingCompany = true" label="Edit" variant="thirtiary" />
+              </div>
               <p class="text-body">Keep company information up to date.</p>
             </div>
             <div class="form-row">
               <TextField
                 label="Company name"
-                :model-value="selectedAccountData.companyName"
-                readonly
+                :model-value="editableCompanyData.companyName"
+                :readonly="!isEditingCompany"
+                @update:model-value="updateCompanyField('companyName', $event)"
               />
               <TextField
                 label="Doing business as"
-                :model-value="selectedAccountData.dba"
-                readonly
+                :model-value="editableCompanyData.dba"
+                :readonly="!isEditingCompany"
+                @update:model-value="updateCompanyField('dba', $event)"
               />
             </div>
           </div>
@@ -41,15 +46,16 @@
             <div class="form-row">
               <TextField
                 label="Notification threshold"
-                :model-value="editableThreshold"
-                @update:model-value="updateThreshold"
+                :model-value="editableCompanyData.notificationThreshold"
+                @update:model-value="updateCompanyField('notificationThreshold', $event)"
+                :readonly="!isEditingCompany"
                 prefix="$"
               />
             </div>
           </div>
-          <div class="form-actions">
-            <v-btn :disabled="!isChanged" color="primary" @click="saveChanges">Save</v-btn>
-            <v-btn v-if="isChanged" variant="text" @click="cancelChanges">Cancel</v-btn>
+          <div v-if="isEditingCompany" class="form-actions">
+            <v-btn :disabled="!isCompanyChanged" color="primary" @click="saveCompanyChanges">Save</v-btn>
+            <v-btn variant="text" @click="cancelCompanyChanges">Cancel</v-btn>
           </div>
         </div>
         <div v-if="selectedAccount && activeTab === 'user-administration'">
@@ -69,7 +75,10 @@
         <div v-if="selectedAccount && activeTab === 'caa-drug-cost-reporting'">
           <div class="caa-settings">
             <div class="tab-header">
-              <h3 class="text-h3">Consolidated Appropriations Act Reporting</h3>
+              <div class="heading-and-button-wrapper">
+                <h3 class="text-h3">Consolidated Appropriations Act Reporting</h3>
+                <Button v-if="!isEditingCaa" @click="isEditingCaa = true" label="Edit" variant="thirtiary" />
+              </div>
               <p class="text-body">DISCLAIMER: With the reporting option 2 (D3-D8), Liviniti will be providing and/or utilizing data for the time period that the Plan Sponsor is active with Liviniti. If Plan Sponsors utilized another PBM during any of the reporting period, the Plan Sponsor will need to coordinate with each PBM.</p>
             </div>
             <div class="benefit-details">
@@ -77,18 +86,21 @@
               <div class="form-row">
                 <TextField
                   label="Group health plan #"
-                  model-value="12345678"
-                  readonly
+                  :model-value="editableCaaData.groupHealthPlan"
+                  :readonly="!isEditingCaa"
+                  @update:model-value="updateCaaField('groupHealthPlan', $event)"
                 />
                 <TextField
                   label="Carve-out benefit"
-                  model-value="Pharmacy Only"
-                  readonly
+                  :model-value="editableCaaData.carveOutBenefit"
+                  :readonly="!isEditingCaa"
+                  @update:model-value="updateCaaField('carveOutBenefit', $event)"
                 />
                 <TextField
                   label="Form 5500 plan #"
-                  model-value="501"
-                  readonly
+                  :model-value="editableCaaData.form5500Plan"
+                  :readonly="!isEditingCaa"
+                  @update:model-value="updateCaaField('form5500Plan', $event)"
                 />
               </div>
               <div class="form-row">
@@ -96,37 +108,79 @@
                   label="States"
                   :items="states"
                   multiple
-                  readonly
-                  :model-value="selectedAccountData.states"
+                  :readonly="!isEditingCaa"
+                  :model-value="editableCaaData.states"
+                  @update:model-value="updateCaaField('states', $event)"
                 ></Autocomplete>
               </div>
               <div class="form-row">
                 <Autocomplete
                   label="Market segment"
                   :items="marketSegments"
-                  readonly
-                  :model-value="selectedAccountData.marketSegment"
+                  :readonly="!isEditingCaa"
+                  :model-value="editableCaaData.marketSegment"
+                  @update:model-value="updateCaaField('marketSegment', $event)"
                 ></Autocomplete>
               </div>
               <div class="form-row">
                 <DatePicker
                   label="Plan year begin date"
-                  :model-value="selectedAccountData.planYearBeginDate"
-                  readonly
+                  :model-value="editableCaaData.planYearBeginDate"
+                  :readonly="!isEditingCaa"
+                  @update:model-value="updateCaaField('planYearBeginDate', $event)"
                 />
                 <DatePicker
                   label="Plan year end date"
-                  :model-value="selectedAccountData.planYearEndDate"
-                  readonly
+                  :model-value="editableCaaData.planYearEndDate"
+                  :readonly="!isEditingCaa"
+                  @update:model-value="updateCaaField('planYearEndDate', $event)"
                 />
               </div>
               <div class="form-row">
                 <TextField
                   label="Members as of 12/31 of the reference year"
-                  :model-value="selectedAccountData.membersAsOf"
-                  readonly
+                  :model-value="editableCaaData.membersAsOf"
+                  :readonly="!isEditingCaa"
+                  @update:model-value="updateCaaField('membersAsOf', $event)"
+                  hint="Report the number of members as of 12/31. Enter 0 if there aren’t any members."
+                  persistent-hint
                 />
               </div>
+            </div>
+            <div class="plan-sponsor-details">
+              <h3 class="text-h3">Plan Sponsor Details</h3>
+              <div class="form-row">
+                <TextField
+                  label="Plan sponsor name"
+                  :model-value="editableCaaData.planSponsorLegalName"
+                  :readonly="!isEditingCaa"
+                  @update:model-value="updateCaaField('planSponsorLegalName', $event)"
+                />
+                <TextField
+                  label="Plan Sponsor EIN"
+                  :model-value="editableCaaData.planSponsorEin"
+                  :readonly="!isEditingCaa"
+                  @update:model-value="updateCaaField('planSponsorEin', $event)"
+                />
+              </div>
+              <div class="form-row">
+                <TextField
+                  label="TPA name"
+                  :model-value="editableCaaData.tpaName"
+                  :readonly="!isEditingCaa"
+                  @update:model-value="updateCaaField('tpaName', $event)"
+                />
+                <TextField
+                  label="TPA EIN"
+                  :model-value="editableCaaData.tpaEin"
+                  :readonly="!isEditingCaa"
+                  @update:model-value="updateCaaField('tpaEin', $event)"
+                />
+              </div>
+            </div>
+            <div v-if="isEditingCaa" class="form-actions">
+              <v-btn :disabled="!isCaaChanged" color="primary" @click="saveCaaChanges">Save</v-btn>
+              <v-btn variant="text" @click="cancelCaaChanges">Cancel</v-btn>
             </div>
           </div>
         </div>
@@ -145,6 +199,7 @@ import TextField from '@/components/ui/TextField.vue';
 import ReportDataTable from '@/components/common/ReportDataTable.vue';
 import Autocomplete from '@/components/ui/Autocomplete.vue';
 import DatePicker from '@/components/ui/DatePicker.vue';
+import Button from '@/components/ui/Button.vue';
 import { ref, computed, watch } from 'vue';
 
 const accountOptions = ref([
@@ -157,32 +212,96 @@ const accountOptions = ref([
 
 const selectedAccount = ref<number | null>(null);
 
-const companyData: { [key: number]: { companyName: string; dba: string; notificationThreshold: string; groupHealthPlan: string; carveOutBenefit: string; form5500Plan: string; states: string[]; marketSegment: string; planYearBeginDate: string; planYearEndDate: string; membersAsOf: string } } = {
-  1: { companyName: 'Stark Industries', dba: 'Stark Industries', notificationThreshold: '15000', groupHealthPlan: '12345678', carveOutBenefit: 'Pharmacy Only', form5500Plan: '501', states: ['CA', 'NY'], marketSegment: 'SF Large Employer Plans', planYearBeginDate: '01/01/2025', planYearEndDate: '12/31/2025', membersAsOf: '257' },
-  2: { companyName: 'Wayne Enterprises', dba: 'Wayne Foundation', notificationThreshold: '25000', groupHealthPlan: '87654321', carveOutBenefit: 'Medical & Pharmacy', form5500Plan: '502', states: ['TX', 'FL'], marketSegment: 'Commercial Plans', planYearBeginDate: '07/01/2024', planYearEndDate: '06/30/2025', membersAsOf: '500' },
-  3: { companyName: 'Cyberdyne Systems', dba: 'Cyberdyne', notificationThreshold: '10000', groupHealthPlan: '11223344', carveOutBenefit: 'Pharmacy Only', form5500Plan: '503', states: ['IL', 'GA'], marketSegment: 'Government Plans', planYearBeginDate: '01/01/2025', planYearEndDate: '12/31/2025', membersAsOf: '100' },
-  4: { companyName: 'Oscorp', dba: 'Oscorp Industries', notificationThreshold: '20000', groupHealthPlan: '44332211', carveOutBenefit: 'Medical & Pharmacy', form5500Plan: '504', states: ['PA', 'OH'], marketSegment: 'SF Large Employer Plans', planYearBeginDate: '07/01/2024', planYearEndDate: '06/30/2025', membersAsOf: '750' },
-  5: { companyName: 'Tyrell Corporation', dba: 'Tyrell', notificationThreshold: '30000', groupHealthPlan: '99887766', carveOutBenefit: 'Pharmacy Only', form5500Plan: '505', states: ['WA', 'OR'], marketSegment: 'Commercial Plans', planYearBeginDate: '01/01/2025', planYearEndDate: '12/31/2025', membersAsOf: '300' },
+const companyData: { [key: number]: { companyName: string; dba: string; notificationThreshold: string; groupHealthPlan: string; carveOutBenefit: string; form5500Plan: string; states: string[]; marketSegment: string; planYearBeginDate: string; planYearEndDate: string; membersAsOf: string; planSponsorLegalName: string; planSponsorEin: string; tpaName: string; tpaEin: string } } = {
+  1: { companyName: 'Stark Industries', dba: 'Stark Industries', notificationThreshold: '15000', groupHealthPlan: '12345678', carveOutBenefit: 'Pharmacy Only', form5500Plan: '501', states: ['CA', 'NY'], marketSegment: 'SF Large Employer Plans', planYearBeginDate: '01/01/2025', planYearEndDate: '12/31/2025', membersAsOf: '257', planSponsorLegalName: 'Stark Industries Inc.', planSponsorEin: '12-3456789', tpaName: 'Allied Benefit Solutions', tpaEin: '36879958' },
+  2: { companyName: 'Wayne Enterprises', dba: 'Wayne Foundation', notificationThreshold: '25000', groupHealthPlan: '87654321', carveOutBenefit: 'Medical & Pharmacy', form5500Plan: '502', states: ['TX', 'FL'], marketSegment: 'Commercial Plans', planYearBeginDate: '07/01/2024', planYearEndDate: '06/30/2025', membersAsOf: '500', planSponsorLegalName: 'Wayne Enterprises LLC', planSponsorEin: '98-7654321', tpaName: 'Allied Benefit Solutions', tpaEin: '36879958' },
+  3: { companyName: 'Cyberdyne Systems', dba: 'Cyberdyne', notificationThreshold: '10000', groupHealthPlan: '11223344', carveOutBenefit: 'Pharmacy Only', form5500Plan: '503', states: ['IL', 'GA'], marketSegment: 'Government Plans', planYearBeginDate: '01/01/2025', planYearEndDate: '12/31/2025', membersAsOf: '100', planSponsorLegalName: 'Cyberdyne Systems Corp.', planSponsorEin: '11-2233445', tpaName: 'Allied Benefit Solutions', tpaEin: '36879958' },
+  4: { companyName: 'Oscorp', dba: 'Oscorp Industries', notificationThreshold: '20000', groupHealthPlan: '44332211', carveOutBenefit: 'Medical & Pharmacy', form5500Plan: '504', states: ['PA', 'OH'], marketSegment: 'SF Large Employer Plans', planYearBeginDate: '07/01/2024', planYearEndDate: '06/30/2025', membersAsOf: '750', planSponsorLegalName: 'Oscorp Industries', planSponsorEin: '44-3322110', tpaName: 'Allied Benefit Solutions', tpaEin: '36879958' },
+  5: { companyName: 'Tyrell Corporation', dba: 'Tyrell', notificationThreshold: '30000', groupHealthPlan: '99887766', carveOutBenefit: 'Pharmacy Only', form5500Plan: '505', states: ['WA', 'OR'], marketSegment: 'Commercial Plans', planYearBeginDate: '01/01/2025', planYearEndDate: '12/31/2025', membersAsOf: '300', planSponsorLegalName: 'Tyrell Corporation', planSponsorEin: '99-8877665', tpaName: 'Allied Benefit Solutions', tpaEin: '36879958' },
 };
 
 const selectedAccountData = computed(() => {
   if (selectedAccount.value && companyData[selectedAccount.value]) {
     return companyData[selectedAccount.value];
   }
-  return { companyName: '', dba: '', notificationThreshold: '', groupHealthPlan: '', carveOutBenefit: '', form5500Plan: '', states: [], marketSegment: '', planYearBeginDate: '', planYearEndDate: '', membersAsOf: '' };
+  return { companyName: '', dba: '', notificationThreshold: '', groupHealthPlan: '', carveOutBenefit: '', form5500Plan: '', states: [], marketSegment: '', planYearBeginDate: '', planYearEndDate: '', membersAsOf: '', planSponsorLegalName: '', planSponsorEin: '', tpaName: '', tpaEin: '' };
 });
 
 const editableThreshold = ref('');
 const isChanged = ref(false);
 const showSnackbar = ref(false);
 
+const isEditingCompany = ref(false);
+const isCompanyChanged = ref(false);
+
+const editableCompanyData = ref({
+  companyName: '',
+  dba: '',
+  notificationThreshold: '',
+});
+
+const isEditingCaa = ref(false);
+const isCaaChanged = ref(false);
+
+const editableCaaData = ref({
+  groupHealthPlan: '',
+  carveOutBenefit: '',
+  form5500Plan: '',
+  states: [],
+  marketSegment: '',
+  planYearBeginDate: '',
+  planYearEndDate: '',
+  membersAsOf: '',
+  planSponsorLegalName: '',
+  planSponsorEin: '',
+  tpaName: '',
+  tpaEin: '',
+});
+
 watch(selectedAccount, (newVal) => {
   if (newVal && companyData[newVal]) {
     editableThreshold.value = companyData[newVal].notificationThreshold;
     isChanged.value = false;
+    // Initialize Company data
+    editableCompanyData.value = {
+      companyName: companyData[newVal].companyName,
+      dba: companyData[newVal].dba,
+      notificationThreshold: companyData[newVal].notificationThreshold,
+    };
+    isEditingCompany.value = false;
+    isCompanyChanged.value = false;
+    // Initialize CAA data
+    editableCaaData.value = { ...companyData[newVal] };
+    isEditingCaa.value = false;
+    isCaaChanged.value = false;
   } else {
     editableThreshold.value = '';
     isChanged.value = false;
+    // Reset Company data
+    editableCompanyData.value = {
+      companyName: '',
+      dba: '',
+      notificationThreshold: '',
+    };
+    isEditingCompany.value = false;
+    isCompanyChanged.value = false;
+    // Reset CAA data
+    editableCaaData.value = {
+      groupHealthPlan: '',
+      carveOutBenefit: '',
+      form5500Plan: '',
+      states: [],
+      marketSegment: '',
+      planYearBeginDate: '',
+      planYearEndDate: '',
+      membersAsOf: '',
+      planSponsorLegalName: '',
+      planSponsorEin: '',
+      tpaName: '',
+      tpaEin: '',
+    };
+    isEditingCaa.value = false;
+    isCaaChanged.value = false;
   }
 }, { immediate: true });
 
@@ -191,18 +310,51 @@ const updateThreshold = (newValue: string) => {
   isChanged.value = true;
 };
 
-const saveChanges = () => {
+const updateCompanyField = (field: string, value: any) => {
+  (editableCompanyData.value as any)[field] = value;
+  isCompanyChanged.value = true;
+};
+
+const updateCaaField = (field: string, value: any) => {
+  (editableCaaData.value as any)[field] = value;
+  isCaaChanged.value = true;
+};
+
+const saveCompanyChanges = () => {
   if (selectedAccount.value) {
-    companyData[selectedAccount.value].notificationThreshold = editableThreshold.value;
-    isChanged.value = false;
+    Object.assign(companyData[selectedAccount.value], editableCompanyData.value);
+    isCompanyChanged.value = false;
+    isEditingCompany.value = false;
     showSnackbar.value = true;
   }
 };
 
-const cancelChanges = () => {
+const saveCaaChanges = () => {
   if (selectedAccount.value) {
-    editableThreshold.value = companyData[selectedAccount.value].notificationThreshold;
-    isChanged.value = false;
+    Object.assign(companyData[selectedAccount.value], editableCaaData.value);
+    isCaaChanged.value = false;
+    isEditingCaa.value = false;
+    showSnackbar.value = true;
+  }
+};
+
+const cancelCompanyChanges = () => {
+  if (selectedAccount.value) {
+    editableCompanyData.value = {
+      companyName: companyData[selectedAccount.value].companyName,
+      dba: companyData[selectedAccount.value].dba,
+      notificationThreshold: companyData[selectedAccount.value].notificationThreshold,
+    };
+    isCompanyChanged.value = false;
+    isEditingCompany.value = false;
+  }
+};
+
+const cancelCaaChanges = () => {
+  if (selectedAccount.value) {
+    editableCaaData.value = { ...companyData[selectedAccount.value] };
+    isCaaChanged.value = false;
+    isEditingCaa.value = false;
   }
 };
 
@@ -301,7 +453,6 @@ const userAdminData = ref([
   margin-bottom: $spacing-large;
 
   h3 {
-    color: $color-primary !important;
     margin-bottom: 0;
   }
 }
@@ -310,14 +461,6 @@ const userAdminData = ref([
   display: flex;
   flex-direction: row;
   gap: $spacing-medium;
-
-  @media (max-width: 768px) { /* Adjust breakpoint as needed */
-    flex-wrap: wrap;
-
-    .v-input {
-      width: 100%; /* Ensure fields take full width on mobile */
-    }
-  }
 }
 
 .form-actions {
@@ -335,7 +478,22 @@ const userAdminData = ref([
 .caa-settings {
   display: flex;
   flex-direction: column;
+  gap: $spacing-large;
 
+  .tab-header {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-small;
+    margin-bottom: $spacing-large;
+
+    h3 {
+      margin-bottom: 0;
+    }
+
+    p {
+      flex-basis: 100%;
+    }
+  }
 }
 
 .benefit-details {
@@ -343,9 +501,18 @@ const userAdminData = ref([
   flex-direction: column;
   gap: $spacing-medium;
   max-width: 500px;
+  margin-bottom: $spacing-large;
 
   h3 {
-    color: $color-primary !important;
+    
   }
+}
+
+.plan-sponsor-details {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-medium;
+  max-width: 500px;
+  margin-bottom: $spacing-large;
 }
 </style>

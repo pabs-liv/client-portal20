@@ -136,31 +136,6 @@ This file documents all significant changes made to the project for future refer
 ---
 
 ## [2025-07-10]
-- Established root styling in `frontend/src/style.css`.
-- Defined a global color palette with CSS variables, including primary, neutral, success, warning, and error colors.
-- Added background/surface color variations for success, warning, and error states.
-- Set 'Lato' as the default font family and imported it from Google Fonts.
-- Defined typography styles for headings (H1, H2, H3, H4) and paragraph text (`p`, `.p2`).
-- Established a 4pt grid system with CSS variables for consistent spacing (`--spacing-nano` to `--spacing-xlarge`).
-- Added a root padding variable (`--root-padding`) and applied it to `frontend/src/App.vue` for consistent page padding.
-- Created `frontend/src/components/common/Banner.vue` component with customizable icon, optional button, and circular background for the icon with white color.
-- Installed `lucide-vue-next` for icon support.
-- Created and moved `frontend/src/components/common/Button.vue` component with multiple variants and optional icon.
-- Created `frontend/src/components/common/SummaryWidget.vue` component with customizable icon, circular background, icon color, and `h4` title.
-- Created `frontend/src/components/common/ReportExplorer.vue` placeholder component.
-- Created `frontend/src/components/common/ImplementationStatusChart.vue` component using `vue3-apexcharts` for horizontal bar charts.
-- Installed `vue3-apexcharts` and `apexcharts` libraries.
-- Registered `vue3-apexcharts` globally in `frontend/src/main.ts`.
-- Created `frontend/src/components/common/RecentActivityFeed.vue` placeholder component.
-- Refactored `frontend/src/components/common/ReportExplorer.vue` to accept a `reports` prop and dynamically render the table.
-- Refactored `frontend/src/components/common/ImplementationStatusChart.vue` to include a customizable `h3` header, a border, and display chart grid lines with x-axis values. Also, set specific colors for each bar using `fillColor` in the series data.
-- Refactored `frontend/src/views/HomePage.vue` layout: moved `ImplementationStatusChart` below summary widgets in a two-column layout, removed `RecentActivityFeed` component.
-- Created `frontend/src/components/common/UpcomingImplementationsTable.vue` with Vuetify data table and dummy data, and integrated it into `HomePage.vue`.
-- Recreated `frontend/src/components/common/QuickAccessCard.vue` and added it back to `HomePage.vue`.
-
----
-
-## [2025-07-10]
 - Recreated `frontend/src/components/common/RecentActivityFeed.vue` component to accept an `activities` prop and dynamically render the activity list.
 - Re-added `RecentActivityFeed` component to `frontend/src/views/HomePage.vue` with sample data.
 
@@ -517,3 +492,17 @@ This file documents all significant changes made to the project for future refer
 - [Refactor] Replaced direct `v-autocomplete` usage with the new `Autocomplete.vue` component in `SettingsPage.vue`. Impact: Improves code organization and leverages custom component styling. #vue #refactor
 - [Refactor] Integrated `DatePicker.vue` components into `SettingsPage.vue` for "Plan year begin date" and "Plan year end date". Impact: Standardizes date input and improves UI consistency. #vue #refactor
 - [Feature] Added "Market segment" and "Members as of 12/31 of the reference year" fields to the "CAA Drug Cost Reporting" tab in `SettingsPage.vue`. Impact: Expands data capture for CAA reporting. #vue #feature
+
+---
+
+## [2025-07-30]
+### Changed
+- [UI/UX] Refactored `Button.vue`, `Autocomplete.vue`, and `DatePicker.vue` to consistently use SCSS variables for styling. Impact: Ensures consistent theming and easier management of styles. #vue #refactor #styling
+- [UI/UX] Updated `Button.vue` to use the `Pencil` icon for the `thirtiary` variant, with specified size and stroke width. Impact: Improves visual representation of the edit action. #vue #ui-ux
+- [UI/UX] Adjusted the layout of the `tab-header` in `SettingsPage.vue` to correctly position the "Edit" button next to the heading. Impact: Improves visual hierarchy and user experience. #vue #ui-ux
+- [Refactor] Moved `.heading-and-button-wrapper` styling to `style.scss` for global reusability. Impact: Promotes consistent layout patterns across the application. #refactor #styling
+- [Feature] Implemented editing and saving functionality for the "Company Information" tab in `SettingsPage.vue`, including fields for company name, DBA, and notification threshold. Impact: Enables users to modify company-specific settings. #vue #feature
+- [Feature] Added "Plan Sponsor Details" section to the "CAA Drug Cost Reporting" tab in `SettingsPage.vue`, including fields for legal name, EIN, TPA name, and TPA EIN. Impact: Expands data capture for CAA reporting. #vue #feature
+
+### Fixed
+- [Bug] Resolved "Undefined variable" errors in `Autocomplete.vue` and `DatePicker.vue` by adding `$color-text-secondary` to `style.scss`. Impact: Fixes critical build errors and ensures proper styling. #vue #bugfix #scss

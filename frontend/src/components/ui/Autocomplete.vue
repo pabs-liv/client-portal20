@@ -50,13 +50,9 @@ defineEmits(['update:modelValue']);
 @import '@/style.scss';
 
 .custom-autocomplete {
-  .v-field__input {
-    min-height: var(--v-input-control-height, 40px); // Match TextField height
-  }
-
   .v-field__append-inner {
     .v-icon {
-      color: var(--color-text-secondary);
+      color: $color-text-secondary;
     }
   }
 }

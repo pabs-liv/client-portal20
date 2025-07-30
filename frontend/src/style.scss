@@ -9,6 +9,7 @@ $color-primary-dark: #0A1F4A;
 $color-neutral-white: #FFFFFF;
 $color-neutral-disabled: #858585;
 $color-text-primary: #1A1A1A;
+$color-text-secondary: #6B6B6B; // Added secondary text color
 $color-border: #E0E0E0;
 
 // Status Colors
@@ -172,6 +173,7 @@ a {
   font-size: $font-size-h3 !important;
   font-weight: $font-weight-bold !important;
   line-height: $line-height-tight !important;
+  color: $color-primary !important;
 }
 
 .text-h4 {
@@ -193,4 +195,24 @@ a {
   font-size: $font-size-small !important;
   font-weight: $font-weight-normal !important;
   line-height: $line-height-tight !important;
+}
+
+.form-row {
+  display: flex;
+  flex-direction: row;
+  gap: $spacing-medium;
+
+  @media (max-width: 768px) { /* Adjust breakpoint as needed */
+    flex-wrap: wrap;
+
+    .v-input {
+      width: 100%; /* Ensure fields take full width on mobile */
+    }
+  }
+}
+
+.heading-and-button-wrapper {
+  display: flex;
+  align-items: center;
+  gap: $spacing-small;
 }
