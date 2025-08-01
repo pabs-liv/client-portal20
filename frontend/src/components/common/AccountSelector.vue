@@ -14,6 +14,7 @@
         :item-value="itemValue"
         :searchable="searchable"
         :model-value="modelValue"
+        :variant="variant"
         class="account-select"
         @update:model-value="$emit('update:modelValue', $event)"
       />
@@ -40,6 +41,7 @@ interface Props {
   searchable: boolean;
   modelValue: any;
   showSlot?: boolean;
+  variant?: string;
 }
 
 withDefaults(defineProps<Props>(), {

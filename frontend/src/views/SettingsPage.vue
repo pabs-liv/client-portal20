@@ -11,6 +11,7 @@
       :searchable="true"
       v-model="selectedAccount"
       :show-slot="true"
+      variant="outlined"
     >
       <div class="account-settings">
         <Tabs :tabs="settingTabs" @tab-selected="handleTabSelected" />
@@ -503,9 +504,7 @@ const userAdminData = ref([
   max-width: 500px;
   margin-bottom: $spacing-large;
 
-  h3 {
-    
-  }
+  
 }
 
 .plan-sponsor-details {

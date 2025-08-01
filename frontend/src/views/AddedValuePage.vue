@@ -14,6 +14,7 @@
         :searchable="true"
         v-model="selectedAccount"
         class="account-select"
+        variant="outlined"
       />
     </Dialog>
 
@@ -27,6 +28,7 @@
       :searchable="true"
       v-model="selectedAccount"
       @update:model-value="updateDisplayAccountType"
+      variant="outlined"
     />
     <div class="no-program mb-large" v-if="displayAccountType === 'no-program'">
       <h2 class="text-h2">This Account Does Not Have Any Programs</h2>
