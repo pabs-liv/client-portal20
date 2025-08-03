@@ -6,7 +6,7 @@
     :item-title="itemTitle"
     :item-value="itemValue"
     :label="label"
-    :single-line="true"
+    :variant="variant"
     :hide-selected="false"
     :no-data-text="noDataText"
     :menu-props="{ offsetY: true, eager: true }"
@@ -20,7 +20,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import { ChevronDown, XCircle } from 'lucide-vue-next';
+import { ChevronDown } from 'lucide-vue-next';
 
 interface Props {
   items: any[];
@@ -30,6 +30,7 @@ interface Props {
   itemTitle?: string;
   itemValue?: string;
   noDataText?: string;
+  variant?: 'filled' | 'outlined' | 'plain' | 'underlined' | 'solo';
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -38,6 +39,7 @@ const props = withDefaults(defineProps<Props>(), {
   itemTitle: 'title',
   itemValue: 'value',
   noDataText: 'No data available',
+  variant: 'outlined',
 });
 
 const internalSearch = ref<string>('');

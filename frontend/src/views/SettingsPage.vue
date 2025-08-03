@@ -185,6 +185,36 @@
             </div>
           </div>
         </div>
+        <div v-if="selectedAccount && activeTab === 'caa-gag-clause-attestation'">
+          <div class="tab-header">
+            <div class="heading-and-button-wrapper">
+              <h3 class="text-h3">CAA Gag Clause Prohibition Compliance Attestation</h3>
+              <Button v-if="!isEditingGagClause" @click="isEditingGagClause = true" label="Edit" variant="thirtiary" />
+            </div>
+          </div>
+          <div class="CAA-config">
+            <v-form>
+              <div class="form-row">
+                <div>
+                  <p>Do you authorize Liviniti to submit the CAA Gag Clause Prohibition Compliance Attestation on your behalf?</p>
+                  <p class="disclaimer">By selecting Yes, you authorize Liviniti to submit the CAA Gag Clause Prohibition Compliance Attestation on your behalf, for a charge of $250, for this calendar year.</p>
+                </div>
+              </div>
+              <v-item-group v-model="editableGagClauseData.authorize" mandatory>
+                <v-item v-slot="{ isSelected, toggle }" value="yes">
+                  <v-btn :color="isSelected ? 'primary' : ''" @click="toggle">Yes</v-btn>
+                </v-item>
+                <v-item v-slot="{ isSelected, toggle }" value="no">
+                  <v-btn :color="isSelected ? 'primary' : ''" @click="toggle">No</v-btn>
+                </v-item>
+              </v-item-group>
+              <div v-if="isEditingGagClause" class="form-actions">
+                <v-btn :disabled="!isGagClauseChanged" color="primary" @click="saveGagClauseChanges">Save</v-btn>
+                <v-btn variant="text" @click="cancelGagClauseChanges">Cancel</v-btn>
+              </div>
+            </v-form>
+          </div>
+        </div>
       </div>
     </AccountSelector>
     <v-snackbar v-model="showSnackbar" :timeout="3000" color="success">
@@ -213,12 +243,12 @@ const accountOptions = ref([
 
 const selectedAccount = ref<number | null>(null);
 
-const companyData: { [key: number]: { companyName: string; dba: string; notificationThreshold: string; groupHealthPlan: string; carveOutBenefit: string; form5500Plan: string; states: string[]; marketSegment: string; planYearBeginDate: string; planYearEndDate: string; membersAsOf: string; planSponsorLegalName: string; planSponsorEin: string; tpaName: string; tpaEin: string } } = {
-  1: { companyName: 'Stark Industries', dba: 'Stark Industries', notificationThreshold: '15000', groupHealthPlan: '12345678', carveOutBenefit: 'Pharmacy Only', form5500Plan: '501', states: ['CA', 'NY'], marketSegment: 'SF Large Employer Plans', planYearBeginDate: '01/01/2025', planYearEndDate: '12/31/2025', membersAsOf: '257', planSponsorLegalName: 'Stark Industries Inc.', planSponsorEin: '12-3456789', tpaName: 'Allied Benefit Solutions', tpaEin: '36879958' },
-  2: { companyName: 'Wayne Enterprises', dba: 'Wayne Foundation', notificationThreshold: '25000', groupHealthPlan: '87654321', carveOutBenefit: 'Medical & Pharmacy', form5500Plan: '502', states: ['TX', 'FL'], marketSegment: 'Commercial Plans', planYearBeginDate: '07/01/2024', planYearEndDate: '06/30/2025', membersAsOf: '500', planSponsorLegalName: 'Wayne Enterprises LLC', planSponsorEin: '98-7654321', tpaName: 'Allied Benefit Solutions', tpaEin: '36879958' },
-  3: { companyName: 'Cyberdyne Systems', dba: 'Cyberdyne', notificationThreshold: '10000', groupHealthPlan: '11223344', carveOutBenefit: 'Pharmacy Only', form5500Plan: '503', states: ['IL', 'GA'], marketSegment: 'Government Plans', planYearBeginDate: '01/01/2025', planYearEndDate: '12/31/2025', membersAsOf: '100', planSponsorLegalName: 'Cyberdyne Systems Corp.', planSponsorEin: '11-2233445', tpaName: 'Allied Benefit Solutions', tpaEin: '36879958' },
-  4: { companyName: 'Oscorp', dba: 'Oscorp Industries', notificationThreshold: '20000', groupHealthPlan: '44332211', carveOutBenefit: 'Medical & Pharmacy', form5500Plan: '504', states: ['PA', 'OH'], marketSegment: 'SF Large Employer Plans', planYearBeginDate: '07/01/2024', planYearEndDate: '06/30/2025', membersAsOf: '750', planSponsorLegalName: 'Oscorp Industries', planSponsorEin: '44-3322110', tpaName: 'Allied Benefit Solutions', tpaEin: '36879958' },
-  5: { companyName: 'Tyrell Corporation', dba: 'Tyrell', notificationThreshold: '30000', groupHealthPlan: '99887766', carveOutBenefit: 'Pharmacy Only', form5500Plan: '505', states: ['WA', 'OR'], marketSegment: 'Commercial Plans', planYearBeginDate: '01/01/2025', planYearEndDate: '12/31/2025', membersAsOf: '300', planSponsorLegalName: 'Tyrell Corporation', planSponsorEin: '99-8877665', tpaName: 'Allied Benefit Solutions', tpaEin: '36879958' },
+const companyData: { [key: number]: { companyName: string; dba: string; notificationThreshold: string; groupHealthPlan: string; carveOutBenefit: string; form5500Plan: string; states: string[]; marketSegment: string; planYearBeginDate: string; planYearEndDate: string; membersAsOf: string; planSponsorLegalName: string; planSponsorEin: string; tpaName: string; tpaEin: string; authorize: string | null } } = {
+  1: { companyName: 'Stark Industries', dba: 'Stark Industries', notificationThreshold: '15000', groupHealthPlan: '12345678', carveOutBenefit: 'Pharmacy Only', form5500Plan: '501', states: ['CA', 'NY'], marketSegment: 'SF Large Employer Plans', planYearBeginDate: '01/01/2025', planYearEndDate: '12/31/2025', membersAsOf: '257', planSponsorLegalName: 'Stark Industries Inc.', planSponsorEin: '12-3456789', tpaName: 'Allied Benefit Solutions', tpaEin: '36879958', authorize: null },
+  2: { companyName: 'Wayne Enterprises', dba: 'Wayne Foundation', notificationThreshold: '25000', groupHealthPlan: '87654321', carveOutBenefit: 'Medical & Pharmacy', form5500Plan: '502', states: ['TX', 'FL'], marketSegment: 'Commercial Plans', planYearBeginDate: '07/01/2024', planYearEndDate: '06/30/2025', membersAsOf: '500', planSponsorLegalName: 'Wayne Enterprises LLC', planSponsorEin: '98-7654321', tpaName: 'Allied Benefit Solutions', tpaEin: '36879958', authorize: null },
+  3: { companyName: 'Cyberdyne Systems', dba: 'Cyberdyne', notificationThreshold: '10000', groupHealthPlan: '11223344', carveOutBenefit: 'Pharmacy Only', form5500Plan: '503', states: ['IL', 'GA'], marketSegment: 'Government Plans', planYearBeginDate: '01/01/2025', planYearEndDate: '12/31/2025', membersAsOf: '100', planSponsorLegalName: 'Cyberdyne Systems Corp.', planSponsorEin: '11-2233445', tpaName: 'Allied Benefit Solutions', tpaEin: '36879958', authorize: null },
+  4: { companyName: 'Oscorp', dba: 'Oscorp Industries', notificationThreshold: '20000', groupHealthPlan: '44332211', carveOutBenefit: 'Medical & Pharmacy', form5500Plan: '504', states: ['PA', 'OH'], marketSegment: 'SF Large Employer Plans', planYearBeginDate: '07/01/2024', planYearEndDate: '06/30/2025', membersAsOf: '750', planSponsorLegalName: 'Oscorp Industries', planSponsorEin: '44-3322110', tpaName: 'Allied Benefit Solutions', tpaEin: '36879958', authorize: null },
+  5: { companyName: 'Tyrell Corporation', dba: 'Tyrell', notificationThreshold: '30000', groupHealthPlan: '99887766', carveOutBenefit: 'Pharmacy Only', form5500Plan: '505', states: ['WA', 'OR'], marketSegment: 'Commercial Plans', planYearBeginDate: '01/01/2025', planYearEndDate: '12/31/2025', membersAsOf: '300', planSponsorLegalName: 'Tyrell Corporation', planSponsorEin: '99-8877665', tpaName: 'Allied Benefit Solutions', tpaEin: '36879958', authorize: null },
 };
 
 const selectedAccountData = computed(() => {
@@ -243,6 +273,13 @@ const editableCompanyData = ref({
 
 const isEditingCaa = ref(false);
 const isCaaChanged = ref(false);
+
+const isEditingGagClause = ref(false);
+const isGagClauseChanged = ref(false);
+
+const editableGagClauseData = ref({
+  authorize: null as string | null,
+});
 
 const editableCaaData = ref({
   groupHealthPlan: '',
@@ -272,9 +309,26 @@ watch(selectedAccount, (newVal) => {
     isEditingCompany.value = false;
     isCompanyChanged.value = false;
     // Initialize CAA data
-    editableCaaData.value = { ...companyData[newVal] };
+    editableCaaData.value = {
+      groupHealthPlan: companyData[newVal].groupHealthPlan,
+      carveOutBenefit: companyData[newVal].carveOutBenefit,
+      form5500Plan: companyData[newVal].form5500Plan,
+      states: companyData[newVal].states,
+      marketSegment: companyData[newVal].marketSegment,
+      planYearBeginDate: companyData[newVal].planYearBeginDate,
+      planYearEndDate: companyData[newVal].planYearEndDate,
+      membersAsOf: companyData[newVal].membersAsOf,
+      planSponsorLegalName: companyData[newVal].planSponsorLegalName,
+      planSponsorEin: companyData[newVal].planSponsorEin,
+      tpaName: companyData[newVal].tpaName,
+      tpaEin: companyData[newVal].tpaEin,
+    };
     isEditingCaa.value = false;
     isCaaChanged.value = false;
+    // Initialize Gag Clause data
+    editableGagClauseData.value = { authorize: companyData[newVal].authorize };
+    isEditingGagClause.value = false;
+    isGagClauseChanged.value = false;
   } else {
     editableThreshold.value = '';
     isChanged.value = false;
@@ -303,6 +357,10 @@ watch(selectedAccount, (newVal) => {
     };
     isEditingCaa.value = false;
     isCaaChanged.value = false;
+    // Reset Gag Clause data
+    editableGagClauseData.value = { authorize: null };
+    isEditingGagClause.value = false;
+    isGagClauseChanged.value = false;
   }
 }, { immediate: true });
 
@@ -321,6 +379,11 @@ const updateCaaField = (field: string, value: any) => {
   isCaaChanged.value = true;
 };
 
+const updateGagClauseField = (field: string, value: any) => {
+  (editableGagClauseData.value as any)[field] = value;
+  isGagClauseChanged.value = true;
+};
+
 const saveCompanyChanges = () => {
   if (selectedAccount.value) {
     Object.assign(companyData[selectedAccount.value], editableCompanyData.value);
@@ -335,6 +398,15 @@ const saveCaaChanges = () => {
     Object.assign(companyData[selectedAccount.value], editableCaaData.value);
     isCaaChanged.value = false;
     isEditingCaa.value = false;
+    showSnackbar.value = true;
+  }
+};
+
+const saveGagClauseChanges = () => {
+  if (selectedAccount.value) {
+    Object.assign(companyData[selectedAccount.value], editableGagClauseData.value);
+    isGagClauseChanged.value = false;
+    isEditingGagClause.value = false;
     showSnackbar.value = true;
   }
 };
@@ -356,6 +428,14 @@ const cancelCaaChanges = () => {
     editableCaaData.value = { ...companyData[selectedAccount.value] };
     isCaaChanged.value = false;
     isEditingCaa.value = false;
+  }
+};
+
+const cancelGagClauseChanges = () => {
+  if (selectedAccount.value) {
+    editableGagClauseData.value = { authorize: companyData[selectedAccount.value].authorize };
+    isGagClauseChanged.value = false;
+    isEditingGagClause.value = false;
   }
 };
 

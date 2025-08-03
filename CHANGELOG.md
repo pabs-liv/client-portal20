@@ -51,7 +51,7 @@ This file documents all significant changes made to the project for future refer
 - Created and moved `frontend/src/components/common/Button.vue` component with multiple variants and optional icon.
 - Created `frontend/src/components/common/SummaryWidget.vue` component with customizable icon, circular background, and icon color.
 - Created `frontend/src/components/common/ReportExplorer.vue` placeholder component.
-- Updated `frontend/src/views/HomePage.vue` to include `Banner`, `SummaryWidget`, and `ReportExplorer` components with appropriate props and styling.
+- Updated `frontend/src/views/HomePage.vue` to include `Banner`, `SummaryWidget`, and `ReportExplorer` components with appropriate props and styling, and removed problematic HTML comments.
 
 ---
 
@@ -88,7 +88,7 @@ This file documents all significant changes made to the project for future refer
 - Created `frontend/src/components/common/ImplementationStatusChart.vue` component using `vue3-apexcharts` for horizontal bar charts.
 - Installed `vue3-apexcharts` and `apexcharts` libraries.
 - Registered `vue3-apexcharts` globally in `frontend/src/main.ts`.
-- Updated `frontend/src/views/HomePage.vue` to include `Banner`, `SummaryWidget`, `ReportExplorer`, and `ImplementationStatusChart` components with appropriate props and styling, and removed problematic HTML comments.
+- Updated `frontend/src/views/HomePage.vue` to include `Banner`, `SummaryWidget`, `ReportExplorer`, `ImplementationStatusChart` components with appropriate props and styling, and removed problematic HTML comments.
 
 ---
 
@@ -340,19 +340,19 @@ This file documents all significant changes made to the project for future refer
 - [UI/UX] Set `search-placeholder` to "Search prior authorizations" in `frontend/src/views/PriorAuthsPage.vue`. Impact: Improves clarity for search functionality. #vue #ui-ux
 - [UI/UX] Hid "Actions" column header and aligned table data submenu to the end in `frontend/src/views/ApprovalsPage.vue`. Impact: Cleans up UI while retaining functionality. #vue #ui-ux
 - [UI/UX] Updated `priorAuthHeaders` in `frontend/src/views/PriorAuthsPage.vue` to include "Account Name", "EOC ID", "Drug Name", "Submission Date", and "Status" columns. Added 10 dummy records to `priorAuthData`. Impact: Provides more comprehensive data display for prior authorizations. #vue #ui-ux
-- [UI/UX] Aligned "Submission Date" column (heading and data) to the right in `frontend/src/views/PriorAuthsPage.vue`. Impact: Improves data readability and consistency. #vue #ui-ux
-- [UI/UX] Adjusted column widths for "Submission Date", "Account Name", and "Drug Name" in `frontend/src/views/PriorAuthsPage.vue`. Impact: Optimizes table layout for better readability. #vue #ui-ux
-- [UI/UX] Removed "Ad-Hoc" type from `reportItems` data and `reportFilterPills` in `frontend/src/views/ReportsPage.vue`. Impact: Streamlines data and filtering options. #vue #ui-ux
-- [UI/UX] Conditionally displayed "Approved By" and "Approved Date" columns for external users in `frontend/src/views/ReportsPage.vue`. Impact: Tailors data display based on user type. #vue #ui-ux #permissions
-- [UI/UX] Set donut chart in `frontend/src/components/common/ReportStatusChart.vue` to use `palette2` by removing hardcoded colors. Impact: Applies consistent color palette. #vue #ui-ux
-- [UI/UX] Updated `ReportsByTypeChart.vue` to use `palette2` and removed hardcoded colors. Impact: Applies consistent color palette. #vue #ui-ux
-- [Bug] Fixed `TypeError: Cannot read properties of undefined (reading 'title')` in `frontend/src/components/layout/Sidebar.vue` by refactoring `v-for` and `v-if` logic. Impact: Resolves critical rendering error. #vue #bugfix
-- [Bug] Fixed malformed `v-list-item` tag in `frontend/src/components/layout/Sidebar.vue`. Impact: Resolves compilation error. #vue #bugfix
-- [UI/UX] Removed `size` and `color` attributes from Lucide icons in `frontend/src/components/layout/Sidebar.vue` to ensure consistent styling via CSS. Impact: Improves icon styling consistency. #vue #ui-ux
-- [UI/UX] Added `color` property to `.nav-icon` style in `frontend/src/components/layout/Sidebar.vue` to ensure consistent icon color. Impact: Ensures correct icon color display. #vue #ui-ux
-- [Feature] Enabled action icons in `ReportDataTable` within `HighCostClaimsPage.vue` and defined `actionIcons` array with `CircleCheckBig`, `BanknoteX`, and `Info` icons and their respective handlers. Impact: Adds interactive action icons to the high-cost claims table. #vue #feature #ui-ux
-- [UI/UX] Updated `Dialog.vue` buttons to use `variant` and `color` props for consistent styling. Impact: Improves button styling in dialogs. #vue #ui-ux
-- [UI/UX] Set action icon size to 25px in `ReportDataTable.vue`. Impact: Increases icon size for better visibility. #vue #ui-ux
+- [UI/UX] Aligned "Submission Date" column (heading and data) to the right in `frontend/src/views/PriorAuthsPage.vue`. Impact: Improves data readability and consistency.
+- [UI/UX] Adjusted column widths for "Submission Date", "Account Name", and "Drug Name" in `frontend/src/views/PriorAuthsPage.vue`. Impact: Optimizes table layout for better readability.
+- [UI/UX] Removed "Ad-Hoc" type from `reportItems` data and `reportFilterPills` in `frontend/src/views/ReportsPage.vue`. Impact: Streamlines data and filtering options.
+- [UI/UX] Conditionally displayed "Approved By" and "Approved Date" columns for external users in `frontend/src/views/ReportsPage.vue`. Impact: Tailors data display based on user type.
+- [UI/UX] Set donut chart in `frontend/src/components/common/ReportStatusChart.vue` to use `palette2` by removing hardcoded colors. Impact: Applies consistent color palette.
+- [UI/UX] Updated `ReportsByTypeChart.vue` to use `palette2` and removed hardcoded colors. Impact: Applies consistent color palette.
+- [Bug] Fixed `TypeError: Cannot read properties of undefined (reading 'title')` in `frontend/src/components/layout/Sidebar.vue` by refactoring `v-for` and `v-if` logic. Impact: Resolves critical rendering error.
+- [Bug] Fixed malformed `v-list-item` tag in `frontend/src/components/layout/Sidebar.vue`. Impact: Resolves compilation error.
+- [UI/UX] Removed `size` and `color` attributes from Lucide icons in `frontend/src/components/layout/Sidebar.vue` to ensure consistent styling via CSS. Impact: Improves icon styling consistency.
+- [UI/UX] Added `color` property to `.nav-icon` style in `frontend/src/components/layout/Sidebar.vue` to ensure consistent icon color. Impact: Ensures correct icon color display.
+- [Feature] Enabled action icons in `ReportDataTable` within `HighCostClaimsPage.vue` and defined `actionIcons` array with `CircleCheckBig`, `BanknoteX`, and `Info` icons and their respective handlers. Impact: Adds interactive action icons to the high-cost claims table.
+- [UI/UX] Updated `Dialog.vue` buttons to use `variant` and `color` props for consistent styling. Impact: Improves button styling in dialogs.
+- [UI/UX] Set action icon size to 25px in `ReportDataTable.vue`. Impact: Increases icon size for better visibility.
 
 ## [2025-07-23]
 ### Added
@@ -383,23 +383,23 @@ This file documents all significant changes made to the project for future refer
 - [UI/UX] Added `$spacing-small` padding to `frontend/src/components/ui/Card.vue`. Impact: Improves visual spacing within cards. #vue #ui-ux
 - [UI/UX] Updated `frontend/src/views/AddedValuePage.vue` to display specific titles and categories for program cards. Impact: Provides accurate content for program cards. #vue #ui-ux
 - [UI/UX] Refactored layout in `frontend/src/views/AddedValuePage.vue` to separate "Programs In Use" and "Available Programs" sections with appropriate spacing. Impact: Improves visual hierarchy and organization of content. #vue #ui-ux
-- [UI/UX] Limited "Programs In Use" section in `frontend/src/views/AddedValuePage.vue` to 2 cards, all with the `selected` variant. Impact: Provides a clear distinction between programs in use and available programs. #vue #ui-ux
-- [UI/UX] Limited "Available Programs" section in `frontend/src/views/AddedValuePage.vue` to "Liviniti Delivery on Demand" and "LivLite" cards. Impact: Provides accurate content for available programs. #vue #ui-ux
-- [UI/UX] Ensured `selected` class is dynamically applied to `v-card` in `frontend/src/components/ui/Card.vue`. Impact: Correctly applies selected variant styling. #vue #ui-ux
-- [UI/UX] Set the card border to primary color with 0.6 opacity and removed the card shadow for the `selected` variant in `frontend/src/components/ui/Card.vue`. Impact: Provides the intended visual cue for selected cards. #vue #ui-ux
-- [UI/UX] Added `$spacing-large` bottom margin to the page card description text in `frontend/src/components/common/PageCard.vue`. Impact: Improves visual spacing. #vue #ui-ux
-- [UI/UX] Updated `frontend/src/views/TestResultsPage.vue` to display "Approved By" and "Approved Date" columns only for internal users. Impact: Provides role-based data visibility. #vue #ui-ux #permissions
-- [UI/UX] Updated `frontend/src/views/TestResultsPage.vue` to display "Actions" column with approve/reject icons only for external users. Impact: Provides role-based action visibility. #vue #ui-ux #permissions
-- [UI/UX] Set status table data in `frontend/src/views/TestResultsPage.vue` to "Approved", "Rejected", "Pending". Impact: Provides accurate dummy data. #vue #ui-ux
-- [UI/UX] Toggled off the filter button in the search bar on `frontend/src/views/TestResultsPage.vue`. Impact: Streamlines search functionality. #vue #ui-ux
+- [UI/UX] Limited "Programs In Use" section in `frontend/src/views/AddedValuePage.vue` to 2 cards, all with the `selected` variant. Impact: Provides a clear distinction between programs in use and available programs.
+- [UI/UX] Limited "Available Programs" section in `frontend/src/views/AddedValuePage.vue` to "Liviniti Delivery on Demand" and "LivLite" cards. Impact: Provides accurate content for available programs.
+- [UI/UX] Ensured `selected` class is dynamically applied to `v-card` in `frontend/src/components/ui/Card.vue`. Impact: Correctly applies selected variant styling.
+- [UI/UX] Set the card border to primary color with 0.6 opacity and removed the card shadow for the `selected` variant in `frontend/src/components/ui/Card.vue`. Impact: Provides the intended visual cue for selected cards.
+- [UI/UX] Added `$spacing-large` bottom margin to the page card description text in `frontend/src/components/common/PageCard.vue`. Impact: Improves visual spacing.
+- [UI/UX] Updated `frontend/src/views/TestResultsPage.vue` to display "Approved By" and "Approved Date" columns only for internal users. Impact: Provides role-based data visibility.
+- [UI/UX] Updated `frontend/src/views/TestResultsPage.vue` to display "Actions" column with approve/reject icons only for external users. Impact: Provides role-based action visibility.
+- [UI/UX] Set status table data in `frontend/src/views/TestResultsPage.vue` to "Approved", "Rejected", "Pending". Impact: Provides accurate dummy data.
+- [UI/UX] Toggled off the filter button in the search bar on `frontend/src/views/TestResultsPage.vue`. Impact: Streamlines search functionality.
 
 ### Fixed
-- [Bug] Corrected `Invalid end tag` error in `frontend/src/views/BillingPage.vue` by fixing script and style tag placement. Impact: Resolves compilation error. #vue #bugfix
-- [Bug] Corrected `Invalid end tag` error in `frontend/src/views/TestResultsPage.vue` by fixing script and style tag placement. Impact: Resolves compilation error. #vue #bugfix
-- [Bug] Fixed `ReferenceError: computed is not defined` in `frontend/src/views/TestResultsPage.vue` by importing `computed` from `vue`. Impact: Resolves runtime error. #vue #bugfix
-- [Bug] Fixed `ReferenceError: testResultsData is not defined` in `frontend/src/views/TestResultsPage.vue` by reordering variable declarations. Impact: Resolves runtime error. #vue #bugfix
-- [Bug] Fixed `TypeError: instance.update is not a function` in `frontend/src/views/TestResultsPage.vue` by explicitly selecting properties in `processedTestResultsData` instead of using `delete`. Impact: Resolves runtime error. #vue #bugfix
-- [Bug] Fixed `box-shadow` not being removed for selected card variant in `frontend/src/components/ui/Card.vue` by adding `!important` to `box-shadow: none;`. Impact: Correctly applies selected variant styling. #vue #bugfix
+- [Bug] Corrected `Invalid end tag` error in `frontend/src/views/BillingPage.vue` by fixing script and style tag placement. Impact: Resolves compilation error.
+- [Bug] Corrected `Invalid end tag` error in `frontend/src/views/TestResultsPage.vue` by fixing script and style tag placement. Impact: Resolves compilation error.
+- [Bug] Fixed `ReferenceError: computed is not defined` in `frontend/src/views/TestResultsPage.vue` by importing `computed` from `vue`. Impact: Resolves runtime error.
+- [Bug] Fixed `ReferenceError: testResultsData is not defined` in `frontend/src/views/TestResultsPage.vue` by reordering variable declarations. Impact: Resolves runtime error.
+- [Bug] Fixed `TypeError: instance.update is not a function` in `frontend/src/views/TestResultsPage.vue` by explicitly selecting properties in `processedTestResultsData` instead of using `delete`. Impact: Resolves runtime error.
+- [Bug] Fixed `box-shadow` not being removed for selected card variant in `frontend/src/components/ui/Card.vue` by adding `!important` to `box-shadow: none;`. Impact: Correctly applies selected variant styling.
 
 ---
 
@@ -434,6 +434,8 @@ This file documents all significant changes made to the project for future refer
 ### Fixed
 - [Bug] Fixed issue where the "Continue" button in the account selection dialog was not disabled when no account was selected.
 - [Bug] Fixed issue where the account selection dialog could be dismissed by clicking outside, even with `persistent` set to `true`.
+
+---
 
 ## [2025-07-28]
 
@@ -506,3 +508,29 @@ This file documents all significant changes made to the project for future refer
 
 ### Fixed
 - [Bug] Resolved "Undefined variable" errors in `Autocomplete.vue` and `DatePicker.vue` by adding `$color-text-secondary` to `style.scss`. Impact: Fixes critical build errors and ensures proper styling. #vue #bugfix #scss
+
+---
+
+## [2025-08-02]
+### Added
+- [Settings Page] Added "CAA Gag Clause Attestation" tab content in `frontend/src/views/SettingsPage.vue`.
+  - Included an `h3` header "CAA Gag Clause Prohibition Compliance Attestation".
+  - Wrapped the header in `.heading-and-button-wrapper` with an edit button and placed inside `.tab-header` for consistency.
+  - Added a `.CAA-config` container and a `v-form` within the tab.
+  - Added text "Do you authorize Liviniti to submit the CAA Gag Clause Prohibition Compliance Attestation on your behalf?" and a disclaimer.
+  - Implemented a `v-item-group` with "Yes" and "No" options (mandatory variant).
+  - Added save and cancel buttons for the Gag Clause section.
+- [Styling] Added global styling for the `.disclaimer` class in `frontend/src/style.scss` (font-size: `$font-size-small`, color: `$color-text-secondary`).
+
+### Changed
+- [Component] Refactored `frontend/src/components/ui/Select.vue` to revert from `v-combobox` back to `v-select` to ensure correct behavior with the `searchable` prop and `modelValue` validation. This also fixed the issue where `selectedAccount` was being set to `null` in `AddedValuePage.vue`.
+- [Settings Page] Updated `companyData` type in `frontend/src/views/SettingsPage.vue` to include the `authorize` property for the Gag Clause Attestation.
+- [Settings Page] Modified data initialization for `editableCaaData` in `frontend/src/views/SettingsPage.vue` to ensure all relevant fields are correctly initialized.
+- [Settings Page] Implemented `isEditingGagClause` and `isGagClauseChanged` reactive variables in `frontend/src/views/SettingsPage.vue`.
+- [Settings Page] Added `editableGagClauseData` with an `authorize` property in `frontend/src/views/SettingsPage.vue`.
+- [Settings Page] Updated `watch` logic for `selectedAccount` in `frontend/src/views/SettingsPage.vue` to correctly initialize and reset `editableGagClauseData`.
+- [Settings Page] Added `updateGagClauseField`, `saveGagClauseChanges`, and `cancelGagClauseChanges` functions in `frontend/src/views/SettingsPage.vue` to manage the Gag Clause Attestation data.
+
+### Fixed
+- [Bug] Resolved issue where tab content was not displaying in `frontend/src/views/SettingsPage.vue` due to incorrect `selectedAccount` values caused by `v-combobox` behavior in `Select.vue`.
+- [Bug] Fixed `AddedValuePage.vue` functionality by reverting `Select.vue` to `v-select`, which ensures `selectedAccount` holds a valid `itemValue` from `accountOptions`.
