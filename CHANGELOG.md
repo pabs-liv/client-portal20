@@ -534,3 +534,13 @@ This file documents all significant changes made to the project for future refer
 ### Fixed
 - [Bug] Resolved issue where tab content was not displaying in `frontend/src/views/SettingsPage.vue` due to incorrect `selectedAccount` values caused by `v-combobox` behavior in `Select.vue`.
 - [Bug] Fixed `AddedValuePage.vue` functionality by reverting `Select.vue` to `v-select`, which ensures `selectedAccount` holds a valid `itemValue` from `accountOptions`.
+
+---
+
+## [2025-08-04]
+### Fixed
+- [Bug] Resolved an issue where the `Select.vue` component was not being displayed on the `SettingsPage.vue` due to a missing import. This also involved correcting the `reportingPeriod` data and fixing the reset logic for the Gag Clause section to ensure data consistency.
+- [UI/UX] Corrected the layout of the date picker fields in the "CAA Gag Clause Attestation" tab to ensure they span the full width of their container, matching the other fields in the row.
+
+### Changed
+- [UI/UX] Updated the "CAA Gag Clause Attestation" tab on the `SettingsPage.vue` to group the "Reporting Period" heading and its corresponding fields into a single section with a vertical layout and consistent spacing.

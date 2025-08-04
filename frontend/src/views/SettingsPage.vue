@@ -200,14 +200,40 @@
                   <p class="disclaimer">By selecting Yes, you authorize Liviniti to submit the CAA Gag Clause Prohibition Compliance Attestation on your behalf, for a charge of $250, for this calendar year.</p>
                 </div>
               </div>
-              <v-item-group v-model="editableGagClauseData.authorize" mandatory>
-                <v-item v-slot="{ isSelected, toggle }" value="yes">
-                  <v-btn :color="isSelected ? 'primary' : ''" @click="toggle">Yes</v-btn>
-                </v-item>
-                <v-item v-slot="{ isSelected, toggle }" value="no">
-                  <v-btn :color="isSelected ? 'primary' : ''" @click="toggle">No</v-btn>
-                </v-item>
+              <v-item-group v-model="editableGagClauseData.authorize" mandatory class="mt-small">
+                <div class="form-row">
+                  <v-item v-slot="{ isSelected, toggle }" value="yes">
+                    <v-btn :color="isSelected ? 'primary' : ''" @click="toggle">Yes</v-btn>
+                  </v-item>
+                  <v-item v-slot="{ isSelected, toggle }" value="no">
+                    <v-btn :color="isSelected ? 'primary' : ''" @click="toggle">No</v-btn>
+                  </v-item>
+                </div>
               </v-item-group>
+              <div class="reporting-period">
+                <h4 class="text-h4">Reporting Period</h4>
+                <div class="form-row reporting-period-row">
+                  <Select
+                    label="Select period"
+                    :items="periodOptions"
+                    v-model="editableGagClauseData.reportingPeriod"
+                    :readonly="!isEditingGagClause"
+                    @update:model-value="updateGagClauseField('reportingPeriod', $event)"
+                  />
+                  <DatePicker
+                    label="Eff. start date - Starting coverage"
+                    v-model="editableGagClauseData.effectiveStartDate"
+                    :readonly="!isEditingGagClause"
+                    @update:model-value="updateGagClauseField('effectiveStartDate', $event)"
+                  />
+                  <DatePicker
+                    label="Eff. end date - Starting coverage"
+                    v-model="editableGagClauseData.effectiveEndDate"
+                    :readonly="!isEditingGagClause"
+                    @update:model-value="updateGagClauseField('effectiveEndDate', $event)"
+                  />
+                </div>
+              </div>
               <div v-if="isEditingGagClause" class="form-actions">
                 <v-btn :disabled="!isGagClauseChanged" color="primary" @click="saveGagClauseChanges">Save</v-btn>
                 <v-btn variant="text" @click="cancelGagClauseChanges">Cancel</v-btn>
@@ -230,6 +256,7 @@ import TextField from '@/components/ui/TextField.vue';
 import ReportDataTable from '@/components/common/ReportDataTable.vue';
 import Autocomplete from '@/components/ui/Autocomplete.vue';
 import DatePicker from '@/components/ui/DatePicker.vue';
+import Select from '@/components/ui/Select.vue';
 import Button from '@/components/ui/Button.vue';
 import { ref, computed, watch } from 'vue';
 
@@ -243,12 +270,12 @@ const accountOptions = ref([
 
 const selectedAccount = ref<number | null>(null);
 
-const companyData: { [key: number]: { companyName: string; dba: string; notificationThreshold: string; groupHealthPlan: string; carveOutBenefit: string; form5500Plan: string; states: string[]; marketSegment: string; planYearBeginDate: string; planYearEndDate: string; membersAsOf: string; planSponsorLegalName: string; planSponsorEin: string; tpaName: string; tpaEin: string; authorize: string | null } } = {
-  1: { companyName: 'Stark Industries', dba: 'Stark Industries', notificationThreshold: '15000', groupHealthPlan: '12345678', carveOutBenefit: 'Pharmacy Only', form5500Plan: '501', states: ['CA', 'NY'], marketSegment: 'SF Large Employer Plans', planYearBeginDate: '01/01/2025', planYearEndDate: '12/31/2025', membersAsOf: '257', planSponsorLegalName: 'Stark Industries Inc.', planSponsorEin: '12-3456789', tpaName: 'Allied Benefit Solutions', tpaEin: '36879958', authorize: null },
-  2: { companyName: 'Wayne Enterprises', dba: 'Wayne Foundation', notificationThreshold: '25000', groupHealthPlan: '87654321', carveOutBenefit: 'Medical & Pharmacy', form5500Plan: '502', states: ['TX', 'FL'], marketSegment: 'Commercial Plans', planYearBeginDate: '07/01/2024', planYearEndDate: '06/30/2025', membersAsOf: '500', planSponsorLegalName: 'Wayne Enterprises LLC', planSponsorEin: '98-7654321', tpaName: 'Allied Benefit Solutions', tpaEin: '36879958', authorize: null },
-  3: { companyName: 'Cyberdyne Systems', dba: 'Cyberdyne', notificationThreshold: '10000', groupHealthPlan: '11223344', carveOutBenefit: 'Pharmacy Only', form5500Plan: '503', states: ['IL', 'GA'], marketSegment: 'Government Plans', planYearBeginDate: '01/01/2025', planYearEndDate: '12/31/2025', membersAsOf: '100', planSponsorLegalName: 'Cyberdyne Systems Corp.', planSponsorEin: '11-2233445', tpaName: 'Allied Benefit Solutions', tpaEin: '36879958', authorize: null },
-  4: { companyName: 'Oscorp', dba: 'Oscorp Industries', notificationThreshold: '20000', groupHealthPlan: '44332211', carveOutBenefit: 'Medical & Pharmacy', form5500Plan: '504', states: ['PA', 'OH'], marketSegment: 'SF Large Employer Plans', planYearBeginDate: '07/01/2024', planYearEndDate: '06/30/2025', membersAsOf: '750', planSponsorLegalName: 'Oscorp Industries', planSponsorEin: '44-3322110', tpaName: 'Allied Benefit Solutions', tpaEin: '36879958', authorize: null },
-  5: { companyName: 'Tyrell Corporation', dba: 'Tyrell', notificationThreshold: '30000', groupHealthPlan: '99887766', carveOutBenefit: 'Pharmacy Only', form5500Plan: '505', states: ['WA', 'OR'], marketSegment: 'Commercial Plans', planYearBeginDate: '01/01/2025', planYearEndDate: '12/31/2025', membersAsOf: '300', planSponsorLegalName: 'Tyrell Corporation', planSponsorEin: '99-8877665', tpaName: 'Allied Benefit Solutions', tpaEin: '36879958', authorize: null },
+const companyData: { [key: number]: { companyName: string; dba: string; notificationThreshold: string; groupHealthPlan: string; carveOutBenefit: string; form5500Plan: string; states: string[]; marketSegment: string; planYearBeginDate: string; planYearEndDate: string; membersAsOf: string; planSponsorLegalName: string; planSponsorEin: string; tpaName: string; tpaEin: string; authorize: string | null; reportingPeriod: string | null; effectiveStartDate: string | null; effectiveEndDate: string | null } } = {
+  1: { companyName: 'Stark Industries', dba: 'Stark Industries', notificationThreshold: '15000', groupHealthPlan: '12345678', carveOutBenefit: 'Pharmacy Only', form5500Plan: '501', states: ['CA', 'NY'], marketSegment: 'SF Large Employer Plans', planYearBeginDate: '01/01/2025', planYearEndDate: '12/31/2025', membersAsOf: '257', planSponsorLegalName: 'Stark Industries Inc.', planSponsorEin: '12-3456789', tpaName: 'Allied Benefit Solutions', tpaEin: '36879958', authorize: null, reportingPeriod: 'plan-year', effectiveStartDate: '01/01/2025', effectiveEndDate: '12/31/2025' },
+  2: { companyName: 'Wayne Enterprises', dba: 'Wayne Foundation', notificationThreshold: '25000', groupHealthPlan: '87654321', carveOutBenefit: 'Medical & Pharmacy', form5500Plan: '502', states: ['TX', 'FL'], marketSegment: 'Commercial Plans', planYearBeginDate: '07/01/2024', planYearEndDate: '06/30/2025', membersAsOf: '500', planSponsorLegalName: 'Wayne Enterprises LLC', planSponsorEin: '98-7654321', tpaName: 'Allied Benefit Solutions', tpaEin: '36879958', authorize: null, reportingPeriod: 'benefit-period', effectiveStartDate: '07/01/2024', effectiveEndDate: '09/30/2024' },
+  3: { companyName: 'Cyberdyne Systems', dba: 'Cyberdyne', notificationThreshold: '10000', groupHealthPlan: '11223344', carveOutBenefit: 'Pharmacy Only', form5500Plan: '503', states: ['IL', 'GA'], marketSegment: 'Government Plans', planYearBeginDate: '01/01/2025', planYearEndDate: '12/31/2025', membersAsOf: '100', planSponsorLegalName: 'Cyberdyne Systems Corp.', planSponsorEin: '11-2233445', tpaName: 'Allied Benefit Solutions', tpaEin: '36879958', authorize: null, reportingPeriod: 'plan-year', effectiveStartDate: '01/01/2025', effectiveEndDate: '01/31/2025' },
+  4: { companyName: 'Oscorp', dba: 'Oscorp Industries', notificationThreshold: '20000', groupHealthPlan: '44332211', carveOutBenefit: 'Medical & Pharmacy', form5500Plan: '504', states: ['PA', 'OH'], marketSegment: 'SF Large Employer Plans', planYearBeginDate: '07/01/2024', planYearEndDate: '06/30/2025', membersAsOf: '750', planSponsorLegalName: 'Oscorp Industries', planSponsorEin: '44-3322110', tpaName: 'Allied Benefit Solutions', tpaEin: '36879958', authorize: null, reportingPeriod: 'benefit-period', effectiveStartDate: '07/01/2024', effectiveEndDate: '06/30/2025' },
+  5: { companyName: 'Tyrell Corporation', dba: 'Tyrell', notificationThreshold: '30000', groupHealthPlan: '99887766', carveOutBenefit: 'Pharmacy Only', form5500Plan: '505', states: ['WA', 'OR'], marketSegment: 'Commercial Plans', planYearBeginDate: '01/01/2025', planYearEndDate: '12/31/2025', membersAsOf: '300', planSponsorLegalName: 'Tyrell Corporation', planSponsorEin: '99-8877665', tpaName: 'Allied Benefit Solutions', tpaEin: '36879958', authorize: null, reportingPeriod: 'plan-year', effectiveStartDate: '01/01/2025', effectiveEndDate: '03/31/2025' },
 };
 
 const selectedAccountData = computed(() => {
@@ -279,6 +306,9 @@ const isGagClauseChanged = ref(false);
 
 const editableGagClauseData = ref({
   authorize: null as string | null,
+  reportingPeriod: 'plan-year' as string | null,
+  effectiveStartDate: null as string | null,
+  effectiveEndDate: null as string | null,
 });
 
 const editableCaaData = ref({
@@ -326,7 +356,7 @@ watch(selectedAccount, (newVal) => {
     isEditingCaa.value = false;
     isCaaChanged.value = false;
     // Initialize Gag Clause data
-    editableGagClauseData.value = { authorize: companyData[newVal].authorize };
+    editableGagClauseData.value = { authorize: companyData[newVal].authorize, reportingPeriod: companyData[newVal].reportingPeriod, effectiveStartDate: companyData[newVal].effectiveStartDate, effectiveEndDate: companyData[newVal].effectiveEndDate };
     isEditingGagClause.value = false;
     isGagClauseChanged.value = false;
   } else {
@@ -358,7 +388,7 @@ watch(selectedAccount, (newVal) => {
     isEditingCaa.value = false;
     isCaaChanged.value = false;
     // Reset Gag Clause data
-    editableGagClauseData.value = { authorize: null };
+    editableGagClauseData.value = { authorize: null, reportingPeriod: null, effectiveStartDate: null, effectiveEndDate: null };
     isEditingGagClause.value = false;
     isGagClauseChanged.value = false;
   }
@@ -433,7 +463,12 @@ const cancelCaaChanges = () => {
 
 const cancelGagClauseChanges = () => {
   if (selectedAccount.value) {
-    editableGagClauseData.value = { authorize: companyData[selectedAccount.value].authorize };
+    editableGagClauseData.value = {
+      authorize: companyData[selectedAccount.value].authorize,
+      reportingPeriod: companyData[selectedAccount.value].reportingPeriod,
+      effectiveStartDate: companyData[selectedAccount.value].effectiveStartDate,
+      effectiveEndDate: companyData[selectedAccount.value].effectiveEndDate,
+    };
     isGagClauseChanged.value = false;
     isEditingGagClause.value = false;
   }
@@ -459,6 +494,11 @@ const marketSegments = ref([
   'Commercial Plans',
   'Government Plans',
   'Individual Plans',
+]);
+
+const periodOptions = ref([
+  { title: 'Plan year', value: 'plan-year' },
+  { title: 'Benefit period', value: 'benefit-period' },
 ]);
 
 const activeTab = ref('company-information');
@@ -594,4 +634,38 @@ const userAdminData = ref([
   max-width: 500px;
   margin-bottom: $spacing-large;
 }
+
+.CAA-config {
+  .form-row {
+    .v-select {
+      .v-field {
+        flex-grow: 1;
+        width: 100%;
+      }
+    }
+
+    .v-input {
+      flex-grow: 1;
+      width: 100%;
+      min-width: 0;
+    }
+  }
+
+  }
+  
+
+  .reporting-period {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-large;
+    margin-top: $spacing-xlarge;
+  }
+
+  .reporting-period-row {
+    & > * {
+      flex: 1;
+    }
+  }
+
+
 </style>
