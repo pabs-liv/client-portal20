@@ -234,6 +234,138 @@
                   />
                 </div>
               </div>
+              <div class="report-entity-details">
+                <h4 class="text-h4">Reporting Entity Details</h4>
+                <div class="form-row">
+                  <TextField
+                    label="Reporting entitiy type"
+                    :readonly="!isEditingGagClause"
+                  />
+                  <TextField
+                    label="Repor entity name"
+                    :readonly="!isEditingGagClause"
+                  />
+                  <TextField
+                    label="Employer identification number (EIN)"
+                    :readonly="!isEditingGagClause"
+                  />
+                </div>
+                <div class="form-row">
+                  <Select
+                    label="Attestation agreement"
+                    :items="[]"
+                    :readonly="!isEditingGagClause"
+                  />
+                  <Select
+                    label="Agreement types"
+                    :items="[]"
+                    :readonly="!isEditingGagClause"
+                  />
+                </div>
+              </div>
+              <div class="reporting-entity-mailing-address">
+                <h4 class="text-h4">Reporting Entity Mailing Address</h4>
+                <div class="form-row">
+                  <TextField
+                    label="Reporting entity mailing address 1"
+                    :readonly="!isEditingGagClause"
+                  />
+                  <TextField
+                    label="Reporting entity mailing address 2"
+                    :readonly="!isEditingGagClause"
+                  />
+                </div>
+                <div class="form-row">
+                  <TextField
+                    label="City"
+                    :readonly="!isEditingGagClause"
+                  />
+                  <Select
+                    label="State"
+                    :items="states"
+                    :readonly="!isEditingGagClause"
+                  />
+                  <TextField
+                    label="Zip code"
+                    :readonly="!isEditingGagClause"
+                  />
+                </div>
+              </div>
+              <div class="reporting-primary-contacts">
+                <h4 class="text-h4">Reporting Primary Contact</h4>
+                <div class="form-row">
+                  <TextField
+                    label="First name"
+                    :readonly="!isEditingGagClause"
+                  />
+                  <TextField
+                    label="Last name"
+                    :readonly="!isEditingGagClause"
+                  />
+                </div>
+                <div class="form-row">
+                  <TextField
+                    label="Email"
+                    :readonly="!isEditingGagClause"
+                  />
+                  <TextField
+                    label="Phone number"
+                    :readonly="!isEditingGagClause"
+                  />
+                </div>
+              </div>
+              <div class="billing-contact">
+                <h4 class="text-h4">Billing Contact</h4>
+                <div class="form-row">
+                  <TextField
+                    label="Organization"
+                    :readonly="!isEditingGagClause"
+                  />
+                  <TextField
+                    label="First name"
+                    :readonly="!isEditingGagClause"
+                  />
+                  <TextField
+                    label="Last name"
+                    :readonly="!isEditingGagClause"
+                  />
+                </div>
+                <div class="form-row">
+                  <TextField
+                    label="Email"
+                    :readonly="!isEditingGagClause"
+                  />
+                  <TextField
+                    label="Phone number"
+                    :readonly="!isEditingGagClause"
+                  />
+                </div>
+              </div>
+              <div class="disclaimer-box">
+                <p>In connection with this service provided by Liviniti to Client, Client hereby acknowledges and affirms its agreements/obligations, including the following:</p>
+                <ul>
+                  <li>Client shall timely pay Liviniti two-hundred and fifty dollars ($250) for submitting the Federal Gag Clause Prohibition Compliance Attestation on Client’s behalf.</li>
+                  <li>Client shall indemnify and hold harmless Liviniti for any and all damages resulting directly or indirectly from the following:</li>
+                  <ul>
+                    <li>Fees, penalties, costs, fines, assessed by CMS and/or the federal government related to the submission of the Federal Gag Clause Prohibition Compliance Attestation that are attributed to Client’s actions.</li>
+                    <li>Damages related to inaccurate or incomplete information provided by Client to Liviniti.</li>
+                    <li>Damages related to a late or incomplete submission that is caused by Client.</li>
+                    <li>Damages related to any action taken by Liviniti at the direction of Client.</li>
+                    <li>Any other costs or expenses associated with these services.</li>
+                  </ul>
+                </ul>
+              </div>
+              <div class="electronic-signature">
+                <h4 class="text-h4">Electronic Signature</h4>
+                <Banner
+                  variant="info"
+                  message="Each individual signing this form represents and warrants that he/she is signing with full and complete authority to bind the party on whose behalf he/she is signing with respect to the matters contained herein."
+                />
+                <TextField
+                  label="e-Signature"
+                  :readonly="!isEditingGagClause"
+                />
+              </div>
               <div v-if="isEditingGagClause" class="form-actions">
                 <v-btn :disabled="!isGagClauseChanged" color="primary" @click="saveGagClauseChanges">Save</v-btn>
                 <v-btn variant="text" @click="cancelGagClauseChanges">Cancel</v-btn>
@@ -258,6 +390,7 @@ import Autocomplete from '@/components/ui/Autocomplete.vue';
 import DatePicker from '@/components/ui/DatePicker.vue';
 import Select from '@/components/ui/Select.vue';
 import Button from '@/components/ui/Button.vue';
+import Banner from '@/components/common/Banner.vue';
 import { ref, computed, watch } from 'vue';
 
 const accountOptions = ref([
@@ -499,6 +632,8 @@ const marketSegments = ref([
 const periodOptions = ref([
   { title: 'Plan year', value: 'plan-year' },
   { title: 'Benefit period', value: 'benefit-period' },
+  { title: 'Quarterly', value: 'quarterly' },
+  { title: 'Monthly', value: 'monthly' },
 ]);
 
 const activeTab = ref('company-information');
@@ -665,6 +800,59 @@ const userAdminData = ref([
     & > * {
       flex: 1;
     }
+  }
+
+  .report-entity-details {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-medium;
+    margin-top: $spacing-xlarge;
+  }
+
+  .reporting-entity-mailing-address {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-medium;
+    margin-top: $spacing-xlarge;
+  }
+
+  .reporting-primary-contacts {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-medium;
+    margin-top: $spacing-xlarge;
+  }
+
+  .billing-contact {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-medium;
+    margin-top: $spacing-xlarge;
+  }
+
+  .disclaimer-box {
+    border: 1px solid $color-primary;
+    border-radius: $spacing-nano;
+    padding: $spacing-medium;
+    margin-top: $spacing-xlarge;
+    background-color: $color-information-background;
+
+    p,
+    ul {
+      font-size: $font-size-small;
+      color: $color-text-primary;
+    }
+
+    ul {
+      padding-left: $spacing-medium;
+    }
+  }
+
+  .electronic-signature {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-medium;
+    margin-top: $spacing-xlarge;
   }
 
 

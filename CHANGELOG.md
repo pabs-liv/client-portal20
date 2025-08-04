@@ -538,9 +538,17 @@ This file documents all significant changes made to the project for future refer
 ---
 
 ## [2025-08-04]
-### Fixed
-- [Bug] Resolved an issue where the `Select.vue` component was not being displayed on the `SettingsPage.vue` due to a missing import. This also involved correcting the `reportingPeriod` data and fixing the reset logic for the Gag Clause section to ensure data consistency.
-- [UI/UX] Corrected the layout of the date picker fields in the "CAA Gag Clause Attestation" tab to ensure they span the full width of their container, matching the other fields in the row.
+### Added
+- [Settings Page] Added "Reporting Entity Details", "Reporting Entity Mailing Address", "Reporting Primary Contact", "Billing Contact", a disclaimer box, and an "Electronic Signature" section to the "CAA Gag Clause Attestation" tab in `frontend/src/views/SettingsPage.vue`.
+- [Styling] Added a new `$color-information-background` variable to `frontend/src/style.scss`.
 
 ### Changed
 - [UI/UX] Updated the "CAA Gag Clause Attestation" tab on the `SettingsPage.vue` to group the "Reporting Period" heading and its corresponding fields into a single section with a vertical layout and consistent spacing.
+- [Settings Page] Added "Quarterly" and "Monthly" options to the "Select period" dropdown in the "CAA Gag Clause Attestation" tab.
+- [UI/UX] Refactored the `info` variant of the `Banner.vue` component to use the new `$color-information-background`.
+- [UI/UX] Updated the styling for the disclaimer box on the `SettingsPage.vue` to use the new information background color, adjust corner rounding, and set the text color.
+
+### Fixed
+- [Bug] Resolved an issue where the `Select.vue` component was not being displayed on the `SettingsPage.vue` due to a missing import. This also involved correcting the `reportingPeriod` data and fixing the reset logic for the Gag Clause section to ensure data consistency.
+- [UI/UX] Corrected the layout of the date picker fields in the "CAA Gag Clause Attestation" tab to ensure they span the full width of their container, matching the other fields in the row.
+- [Bug] Fixed a SASS compilation error in `SettingsPage.vue` by using a valid `border-radius` variable for the disclaimer box.

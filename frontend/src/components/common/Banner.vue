@@ -87,8 +87,8 @@ const iconComponent = computed(() => {
 /* Variant Styles */
 .banner.info {
   border-color: $color-primary;
-  background-color: transparent;
-  color: inherit;
+  background-color: $color-information-background;
+  color: $color-text-primary;
 }
 
 .banner.info .icon-wrapper {
