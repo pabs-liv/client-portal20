@@ -541,14 +541,31 @@ This file documents all significant changes made to the project for future refer
 ### Added
 - [Settings Page] Added "Reporting Entity Details", "Reporting Entity Mailing Address", "Reporting Primary Contact", "Billing Contact", a disclaimer box, and an "Electronic Signature" section to the "CAA Gag Clause Attestation" tab in `frontend/src/views/SettingsPage.vue`.
 - [Styling] Added a new `$color-information-background` variable to `frontend/src/style.scss`.
+- [Settings Page] Added "Claim Edit Rules" tab to `frontend/src/views/SettingsPage.vue` with a `ReportDataTable` component, including dummy data, "Rule Name", "Rule Status", "Rule Action", "Created By", "Created Date", and "Rule Change Log" columns.
 
 ### Changed
 - [UI/UX] Updated the "CAA Gag Clause Attestation" tab on the `SettingsPage.vue` to group the "Reporting Period" heading and its corresponding fields into a single section with a vertical layout and consistent spacing.
 - [Settings Page] Added "Quarterly" and "Monthly" options to the "Select period" dropdown in the "CAA Gag Clause Attestation" tab.
 - [UI/UX] Refactored the `info` variant of the `Banner.vue` component to use the new `$color-information-background`.
 - [UI/UX] Updated the styling for the disclaimer box on the `SettingsPage.vue` to use the new information background color, adjust corner rounding, and set the text color.
+- [UI/UX] Disabled submenu actions for the "Claim Edit Rules" table.
+- [Component] Modified `ReportDataTable.vue` to include a dynamic slot passthrough for `item` slots, ensuring custom content from parent components is rendered correctly within the `v-data-table`.
 
 ### Fixed
 - [Bug] Resolved an issue where the `Select.vue` component was not being displayed on the `SettingsPage.vue` due to a missing import. This also involved correcting the `reportingPeriod` data and fixing the reset logic for the Gag Clause section to ensure data consistency.
 - [UI/UX] Corrected the layout of the date picker fields in the "CAA Gag Clause Attestation" tab to ensure they span the full width of their container, matching the other fields in the row.
 - [Bug] Fixed a SASS compilation error in `SettingsPage.vue` by using a valid `border-radius` variable for the disclaimer box.
+- [Bug] Fixed an issue where the "View Log" link in the "Claim Edit Rules" table was not clickable and not displaying correctly by implementing a dynamic slot passthrough in `ReportDataTable.vue` and reverting the link to use the `text-link` class.
+
+## [2025-08-04]
+### Added
+- [Feature] Implemented "View Log" link in "Claim Edit Rules" table within `SettingsPage.vue`.
+- [UI/UX] Integrated `Dialog.vue` to display detailed change log information in a table format when the "View Log" link is clicked.
+- [Refactor] Updated `claimEditRulesHeaders` to use `ruleChangeLog` as the key for the "Change Log" column to correctly map with `ReportDataTable`'s slot.
+- [Refactor] Updated `claimEditRulesData` to include structured `changeLogDetails` for the dialog.
+- [Styling] Added `.link` styling to `SettingsPage.vue` to ensure the "View Log" text appears as a clickable link.
+- [Component] Modified `ReportDataTable.vue` to directly render the content passed to its `item.ruleChangeLog` slot, ensuring the link is visible and clickable.
+- [UI/UX] Updated `Dialog.vue` to display a `ReportDataTable` for change log details, accepting `tableHeaders` and `tableItems` props.
+- [UI/UX] Increased `max-width` of `Dialog.vue` to `800px` for better table display.
+- [UI/UX] Changed the dialog button text to "Done" and set it as a primary elevated button.
+- [UI/UX] Toggled off the filter button in the "Claim Edit Rules" data table.

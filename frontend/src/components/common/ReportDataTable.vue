@@ -70,6 +70,12 @@
       <template v-for="col in booleanColumns" v-slot:[`item.${col}`]="{ item }">
         <v-checkbox-btn :model-value="item[col]" readonly class="d-flex justify-center"></v-checkbox-btn>
       </template>
+      <template v-slot:item.ruleChangeLog="{ item }">
+        <slot name="item.ruleChangeLog" :item="item"></slot>
+      </template>
+      <template v-for="(_, name) in $slots" v-slot:[`item.${name}`]="slotData">
+        <slot :name="`item.${name}`" v-bind="slotData" />
+      </template>
       <template v-slot:no-data>
         <div class="empty-state">
           <Microscope :size="80" :stroke-width="1" class="empty-state-icon" />

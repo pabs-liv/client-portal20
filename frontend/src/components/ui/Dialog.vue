@@ -3,7 +3,7 @@
     :model-value="modelValue"
     :persistent="persistent"
     @update:model-value="$emit('update:modelValue', $event)"
-    max-width="500"
+    max-width="800"
   >
     <v-card class="pa-medium dialog-card">
       <v-card-title class="d-flex align-center">
@@ -11,7 +11,17 @@
         <span class="text-h3 text-primary">{{ heading }}</span>
       </v-card-title>
       <v-card-text class="text-body dialog-text">
-        <slot>{{ text }}</slot>
+        <ReportDataTable
+          v-if="tableItems && tableItems.length > 0"
+          :headers="tableHeaders"
+          :items="tableItems"
+          :show-search-bar="false"
+          :show-filter-button="false"
+          :show-row-actions="false"
+          :show-table-footer="false"
+          :show-selection-checkboxes="false"
+        />
+        <slot v-else></slot>
       </v-card-text>
       <v-card-actions class="justify-end">
         <v-btn
@@ -34,6 +44,13 @@
 <script setup lang="ts">
 import { defineProps, defineEmits } from 'vue';
 import { Icon as LucideIcon } from 'lucide-vue-next';
+import ReportDataTable from '@/components/common/ReportDataTable.vue';
+
+interface Header {
+  title: string;
+  key: string;
+  [key: string]: any;
+}
 
 interface Action {
   text: string;
@@ -48,13 +65,15 @@ interface Props {
   persistent?: boolean;
   icon?: LucideIcon;
   heading: string;
-  text?: string;
+  tableHeaders?: Header[];
+  tableItems?: any[];
   actions?: Action[];
 }
 
 withDefaults(defineProps<Props>(), {
   persistent: false,
-  text: '',
+  tableHeaders: () => [],
+  tableItems: () => [],
   actions: () => [],
 });
 
