@@ -569,3 +569,29 @@ This file documents all significant changes made to the project for future refer
 - [UI/UX] Increased `max-width` of `Dialog.vue` to `800px` for better table display.
 - [UI/UX] Changed the dialog button text to "Done" and set it as a primary elevated button.
 - [UI/UX] Toggled off the filter button in the "Claim Edit Rules" data table.
+
+## [2025-08-05]
+### Added
+- [Feature] Implemented implementation tracker in `frontend/src/views/PlanExplorerPage.vue` using `v-timeline`.
+- [UI/UX] Refactored `PlanExplorerPage.vue` to display `v-timeline` within a `PageCard` that appears only when an account is selected.
+- [UI/UX] Dynamically set `PageCard` header to the selected account's name.
+- [UI/UX] Implemented a two-column layout (30/70 split) within `PageCard` for timeline and details.
+- [UI/UX] Added `activeTimelineItem` to display details of the selected timeline step in the right column.
+- [UI/UX] Added hover effect (light shadow and pointer cursor) to timeline cards to indicate clickability.
+- [UI/UX] Removed default shadow from timeline cards to make hover effect more distinct.
+- [UI/UX] Aligned timeline content to the left by changing `v-timeline` `side` prop to `"start"`.
+- [UI/UX] Removed unused CSS for `v-timeline-item__opposite`.
+- [UI/UX] Added active state styling to timeline cards (primary color border on click).
+- [UI/UX] Ensured `v-card-text` in timeline cards has no letter spacing.
+- [Refactor] Enhanced `implementationSteps` data with `startDate`, `endDate`, `assignedTo`, and `notes`.
+- [UI/UX] Displayed `startDate`, `endDate`, `assignedTo` in the right column.
+- [UI/UX] Added `v-progress-circular` to the right column to visually represent the progress of the active timeline step.
+- [UI/UX] Increased `v-progress-circular` size to `100` and `width` to `10`.
+- [UI/UX] Set `v-progress-circular` color based on status (`success` for completed, `primary` for in-progress/pending) and `bg-color` to `grey-lighten-3`.
+- [UI/UX] Changed status display to `v-chip` with `flat` variant and dynamic colors.
+- [UI/UX] Made `v-chip` status text uppercase.
+- [UI/UX] Swapped `v-chip` and `v-progress-circular` positions, with `v-chip` below.
+- [UI/UX] Applied spacing between `v-chip` and `v-progress-circular` using `gap` on parent container with `$spacing-xsmall`.
+- [UI/UX] Refactored `.timeline-details-card` layout to group heading and description vertically, with `v-progress-circular` and `v-chip` to the right, aligned to the middle.
+- [UI/UX] Added a rounded border to the `.timeline-details-card`.
+- [UI/UX] Applied spacing between `timeline-text-content` elements using `gap` with `$spacing-medium`.
