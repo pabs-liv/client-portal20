@@ -61,6 +61,7 @@
       heading="Request Additional Information"
       text="Would like to know more about this prior authorization? We are here to help! Submit your request to prompt your account manager to get more details about this claim."
       :actions="infoDialogActions"
+      :show-secondary-button="true"
     />
     <Dialog
       :model-value="showInternalInfoDialog"
@@ -203,8 +204,8 @@ const actionIcons = ref([
 ]);
 
 const infoDialogActions = [
-  { text: 'Cancel', onClick: () => (showInfoDialog.value = false), variant: 'text' as const },
-  { text: 'Send Request', onClick: () => { console.log('Send Request clicked'); showInfoDialog.value = false; }, color: 'primary', variant: 'flat' as const }
+  { text: 'Cancel', onClick: () => (showInfoDialog.value = false), styleType: 'secondary' },
+  { text: 'Send Request', onClick: () => { console.log('Send Request clicked'); showInfoDialog.value = false; }, styleType: 'primary' }
 ];
 
 const internalInfoDialogActions = [

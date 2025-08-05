@@ -25,12 +25,12 @@
       </v-card-text>
       <v-card-actions class="justify-end">
         <v-btn
-          v-for="(action, index) in actions"
+          v-for="(action, index) in (showSecondaryButton ? actions : [actions[actions.length - 1]])"
           :key="index"
-          :color="action.type === 'destructive' ? 'error' : action.color"
-          :variant="action.variant || 'text'"
+          :color="action.styleType === 'primary' ? 'primary' : action.styleType === 'secondary' ? 'primary' : action.type === 'destructive' ? 'error' : action.color"
+          :variant="action.styleType === 'primary' ? 'elevated' : action.styleType === 'secondary' ? 'outlined' : action.variant || 'text'"
           :rounded="true"
-          :class="{'dialog-button': true, 'text-white': action.color === 'primary' && (action.variant === 'elevated' || action.variant === 'flat') || action.type === 'destructive'}"
+          :class="{'dialog-button': true, 'text-white': action.styleType === 'primary' || action.type === 'destructive'}"
           :disabled="action.disabled"
           @click="action.onClick"
         >
@@ -58,6 +58,7 @@ interface Action {
   color?: string;
   variant?: 'text' | 'flat' | 'elevated' | 'tonal' | 'outlined' | 'plain';
   type?: 'default' | 'destructive';
+  styleType?: 'primary' | 'secondary' | 'text' | 'destructive';
 }
 
 interface Props {
@@ -68,6 +69,7 @@ interface Props {
   tableHeaders?: Header[];
   tableItems?: any[];
   actions?: Action[];
+  showSecondaryButton?: boolean;
 }
 
 withDefaults(defineProps<Props>(), {
@@ -75,6 +77,7 @@ withDefaults(defineProps<Props>(), {
   tableHeaders: () => [],
   tableItems: () => [],
   actions: () => [],
+  showSecondaryButton: false,
 });
 
 defineEmits(['update:modelValue']);

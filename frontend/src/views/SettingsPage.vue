@@ -441,7 +441,11 @@
       heading="Change Log Details"
       :table-headers="changeLogTableHeaders"
       :table-items="currentChangeLogData"
-      :actions="[{ text: 'Done', onClick: () => showChangeLogDialog = false, color: 'primary', variant: 'elevated' }]"
+      :actions="[
+        { text: 'Cancel', onClick: () => showChangeLogDialog = false, styleType: 'secondary' },
+        { text: 'Done', onClick: () => showChangeLogDialog = false, styleType: 'primary' }
+      ]"
+      :show-secondary-button="false"
     />
   </div>
 </template>
