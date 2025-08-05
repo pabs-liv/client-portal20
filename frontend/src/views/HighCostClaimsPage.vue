@@ -76,18 +76,22 @@
       @update:model-value="showApproveDialog = $event"
       :icon="CircleCheckBig"
       heading="Approve High-Cost Claim"
-      :text="`Are you sure you want to approve the claim for ${selectedClaim?.drugName} with a cost of ${selectedClaim?.cost}?`"
       :actions="approveDialogActions"
-    />
+      :show-secondary-button="true"
+    >
+      <p class="text-body">Are you sure you want to approve the high-cost claim for {{ selectedClaim?.accountName }}? This action cannot be undone</p>
+    </Dialog>
 
     <Dialog
       :model-value="showRejectDialog"
       @update:model-value="showRejectDialog = $event"
       :icon="BanknoteX"
       heading="Reject Claim"
-      :text="`Are you sure you want to reject the claim for ${selectedClaim?.drugName}?`"
       :actions="rejectDialogActions"
-    />
+      :show-secondary-button="true"
+    >
+      <p class="text-body">Are you sure you want to reject the claim for {{ selectedClaim?.drugName }}?</p>
+    </Dialog>
 
     <Dialog
         :model-value="showInternalInfoDialog"
@@ -95,6 +99,7 @@
         :icon="Info"
         heading="Claim Information Requested"
         :actions="internalInfoDialogActions"
+        :show-secondary-button="true"
       >
         <p class="text-body mb-small">
           Additional information about this high cost claim has been requested. Please contact the client as soon as possible.
@@ -113,6 +118,7 @@
         :icon="Info"
         heading="Request Additional Information"
         :actions="externalInfoDialogActions"
+        :show-secondary-button="true"
       >
         <p class="text-body mb-small">
           Would like to know more about this high-cost claim? We are here to help! Submit your request to prompt your account manager to get more details about this claim.
@@ -164,21 +170,22 @@ const actionIcons = ref([
 ]);
 
 const approveDialogActions = [
-  { text: 'Cancel', onClick: () => (showApproveDialog.value = false), variant: 'text' as const },
-  { text: 'Approve', onClick: () => { console.log('approved'); showApproveDialog.value = false; }, color: 'primary', variant: 'flat' as const }
+  { text: 'Cancel', onClick: () => (showApproveDialog.value = false), styleType: 'secondary' },
+  { text: 'Approve', onClick: () => { console.log('approved'); showApproveDialog.value = false; }, styleType: 'primary' }
 ];
 
 const rejectDialogActions = [
-  { text: 'Cancel', onClick: () => (showRejectDialog.value = false), variant: 'text' as const },
+  { text: 'Cancel', onClick: () => (showRejectDialog.value = false), styleType: 'secondary' },
   { text: 'Reject', onClick: () => { console.log('rejected'); showRejectDialog.value = false; }, color: 'error', variant: 'flat' as const, type: 'destructive' as const }
 ];
 
 const internalInfoDialogActions = [
+  { text: 'Cancel', onClick: () => (showInternalInfoDialog.value = false), styleType: 'secondary' },
   { text: 'Acknowledge', onClick: () => (showInternalInfoDialog.value = false), color: 'primary', variant: 'flat' as const }
 ];
 
 const externalInfoDialogActions = [
-  { text: 'Cancel', onClick: () => (showExternalInfoDialog.value = false), variant: 'text' as const },
+  { text: 'Cancel', onClick: () => (showExternalInfoDialog.value = false), styleType: 'secondary' },
   { text: 'Send Request', onClick: () => { console.log('Send Request clicked'); showExternalInfoDialog.value = false; }, color: 'primary', variant: 'flat' as const }
 ];
 

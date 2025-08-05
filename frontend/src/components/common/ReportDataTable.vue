@@ -26,7 +26,7 @@
     >
 
       <template v-slot:item.actions="{ item }">
-        <div v-if="showActionIcons" class="d-flex align-center justify-end">
+        <div v-if="showActionIcons" class="d-flex align-center justify-start">
           <v-tooltip v-for="(iconDef, index) in actionIcons" :key="index" :text="iconDef.tooltip">
             <template v-slot:activator="{ props: tooltipProps }">
               <component

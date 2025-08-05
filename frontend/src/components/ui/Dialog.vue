@@ -11,17 +11,7 @@
         <span class="text-h3 text-primary">{{ heading }}</span>
       </v-card-title>
       <v-card-text class="text-body dialog-text">
-        <ReportDataTable
-          v-if="tableItems && tableItems.length > 0"
-          :headers="tableHeaders"
-          :items="tableItems"
-          :show-search-bar="false"
-          :show-filter-button="false"
-          :show-row-actions="false"
-          :show-table-footer="false"
-          :show-selection-checkboxes="false"
-        />
-        <slot v-else></slot>
+        <slot></slot>
       </v-card-text>
       <v-card-actions class="justify-end">
         <v-btn
@@ -44,7 +34,6 @@
 <script setup lang="ts">
 import { defineProps, defineEmits } from 'vue';
 import { Icon as LucideIcon } from 'lucide-vue-next';
-import ReportDataTable from '@/components/common/ReportDataTable.vue';
 
 interface Header {
   title: string;
@@ -66,16 +55,12 @@ interface Props {
   persistent?: boolean;
   icon?: LucideIcon;
   heading: string;
-  tableHeaders?: Header[];
-  tableItems?: any[];
   actions?: Action[];
   showSecondaryButton?: boolean;
 }
 
 withDefaults(defineProps<Props>(), {
   persistent: false,
-  tableHeaders: () => [],
-  tableItems: () => [],
   actions: () => [],
   showSecondaryButton: false,
 });

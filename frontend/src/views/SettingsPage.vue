@@ -439,14 +439,22 @@
       :model-value="showChangeLogDialog"
       @update:model-value="showChangeLogDialog = $event"
       heading="Change Log Details"
-      :table-headers="changeLogTableHeaders"
-      :table-items="currentChangeLogData"
       :actions="[
         { text: 'Cancel', onClick: () => showChangeLogDialog = false, styleType: 'secondary' },
         { text: 'Done', onClick: () => showChangeLogDialog = false, styleType: 'primary' }
       ]"
       :show-secondary-button="false"
-    />
+    >
+      <ReportDataTable
+        :headers="changeLogTableHeaders"
+        :items="currentChangeLogData"
+        :show-search-bar="false"
+        :show-filter-button="false"
+        :show-row-actions="false"
+        :show-table-footer="false"
+        :show-selection-checkboxes="false"
+      />
+    </Dialog>
   </div>
 </template>
 

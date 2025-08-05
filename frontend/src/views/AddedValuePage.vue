@@ -1,23 +1,5 @@
 <template>
   <div>
-    <Dialog
-      :model-value="showAccountSelectionDialog"
-      heading="Select Account to Manage"
-      :persistent="true"
-      :actions="dialogActions"
-    >
-      <Select
-        :items="accountOptions"
-        label="Select Account"
-        item-title="name"
-        item-value="id"
-        :searchable="true"
-        v-model="selectedAccount"
-        class="account-select"
-        variant="outlined"
-      />
-    </Dialog>
-
     <AccountSelector
       heading="Added Value Programs"
       subheading="Explore added-value programs to enrich the lives and improve the health of your members. Select an account to get started."
@@ -117,30 +99,13 @@ const accountOptions = ref([
 ]);
 
 const selectedAccount = ref(null);
-const showAccountSelectionDialog = ref(false);
 const displayAccountType = ref<string | null>(null);
-
-const dialogActions = computed(() => [
-  {
-    text: 'Continue',
-    onClick: handleAccountSelection,
-    color: 'primary',
-    variant: 'elevated',
-    disabled: !selectedAccount.value,
-  },
-]);
 
 const selectedPrograms = ref<boolean[]>([false, false, false, false]);
 
 const isAnyCardSelected = computed(() => selectedPrograms.value.some(selected => selected));
 
 const isAnyAvailableCardSelected = computed(() => selectedPrograms.value.slice(2).some(selected => selected));
-
-const handleAccountSelection = () => {
-  console.log('Selected Account:', selectedAccount.value);
-  showAccountSelectionDialog.value = false;
-  updateDisplayAccountType(selectedAccount.value);
-};
 
 const updateDisplayAccountType = (accountId: number) => {
   if (accountId === 1) { // Blue Cross Blue Shield
@@ -151,10 +116,6 @@ const updateDisplayAccountType = (accountId: number) => {
     displayAccountType.value = null;
   }
 };
-
-onMounted(() => {
-  showAccountSelectionDialog.value = true;
-});
 </script>
 <style lang="scss" scoped>
 @import '@/style.scss';

@@ -125,15 +125,16 @@ const filteredDocumentItems = computed(() => {
 
 const uploadedDocumentHeaders = ref([
   { title: 'Document Name', key: 'documentName' },
+  { title: 'Document Type', key: 'documentType' },
   { title: 'Upload Date', key: 'uploadDate' },
   { title: 'Uploaded By', key: 'uploadedBy' },
   { title: '', key: 'actions', sortable: false }, // Empty title for actions column
 ]);
 
 const uploadedDocumentItems = ref([
-  { id: 1, documentName: 'Uploaded Document 1.pdf', uploadDate: '2025-07-19', uploadedBy: 'User A', url: '#' },
-  { id: 2, documentName: 'Uploaded Document 2.xls', uploadDate: '2025-07-19', uploadedBy: 'User B', url: '#' },
-  { id: 3, documentName: 'Uploaded Document 3.docx', uploadDate: '2025-07-20', uploadedBy: 'User A', url: '#' },
+  { id: 1, documentName: 'Uploaded Document 1.pdf', documentType: 'PHI', uploadDate: '2025-07-19', uploadedBy: 'User A', url: '#' },
+  { id: 2, documentName: 'Uploaded Document 2.xls', documentType: 'Accounting/General', uploadDate: '2025-07-19', uploadedBy: 'User B', url: '#' },
+  { id: 3, documentName: 'Uploaded Document 3.docx', documentType: 'Notifications', uploadDate: '2025-07-20', uploadedBy: 'User A', url: '#' },
 ]);
 </script>
 
