@@ -58,7 +58,7 @@
     >
       <input type="file" ref="fileInput" style="display: none" @change="handleFileChange" />
       <div class="dropzone-content">
-        <img :src="uploadIllustration" alt="Upload Icon" class="upload-icon" />
+        <img :src="UploadIllustration" alt="Upload Icon" class="upload-icon" />
         <p class="drag-drop-text">Drag and drop or click to <span class="upload-link">upload file</span></p>
         <p class="important-text">
           <span class="important-label">Important:</span> The name of the document you upload will display on the client
@@ -72,7 +72,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import uploadIllustration from '@/assets/UploadIllustration.png';
+import UploadIllustration from '@/assets/UploadIllustration.png';
 
 interface Props {
   showDocumentTypeSelection?: boolean;

@@ -595,3 +595,11 @@ This file documents all significant changes made to the project for future refer
 - [UI/UX] Refactored `.timeline-details-card` layout to group heading and description vertically, with `v-progress-circular` and `v-chip` to the right, aligned to the middle.
 - [UI/UX] Added a rounded border to the `.timeline-details-card`.
 - [UI/UX] Applied spacing between `timeline-text-content` elements using `gap` with `$spacing-medium`.
+
+## [2025-08-08]
+
+### Fixed
+- [Bug] Fixed an issue in `FileUploader.vue` where the component was attempting to import a capitalized version of the illustration asset (`UploadIllustration.png` instead of `uploadIllustration.png`), causing a mismatch with the actual filename and breaking the image display. The import statement has been corrected to use the correct lowercase filename, and the template has been updated to match. Impact: This resolves the broken image link in the file uploader, ensuring the illustration now displays correctly. #vue #bugfix #assets
+- [Bug] Corrected the alignment of action icons in the `ReportDataTable` component. The icons were previously misaligned with the 'Actions' column header. The component was updated to right-align the icons by default, and a new `actionsClass` prop was added to allow for alignment overrides on a case-by-case basis. Impact: This ensures consistent and correct alignment of action icons in all data tables, improving the overall UI polish. #vue #bugfix #ui-ux
+- [Bug] Fixed a bug in the `Dialog.vue` component where the `text` prop was defined but not rendered. The component was updated to display the content of the `text` prop, allowing dialogs to show descriptive text as intended. Impact: This restores the ability to display informational text in dialogs, improving their usability. #vue #bugfix #component
+- [Bug] Resolved a critical bug in `SettingsPage.vue` where the 'Save' button remained disabled after editing fields in the 'Company Information' and 'CAA Drug Cost Reporting' tabs. This was caused by missing `updateCompanyField` and `updateCaaField` functions. These functions were implemented to correctly update the component's state and enable the 'Save' button when changes are made. Impact: This restores the core functionality of the settings page, allowing users to save their changes. #vue #bugfix #settings

@@ -67,6 +67,7 @@
         :show-internal-user-actions="!isExternal"
         :internal-user-action-formatter="formatInternalUserAction"
         :internal-user-action-click-handler="handleRequestInfo"
+        actions-class="justify-start"
       >
       </ReportDataTable>
     </PageCard>

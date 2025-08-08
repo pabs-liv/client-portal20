@@ -11,6 +11,7 @@
         <span class="text-h3 text-primary">{{ heading }}</span>
       </v-card-title>
       <v-card-text class="text-body dialog-text">
+        <p v-if="text">{{ text }}</p>
         <slot></slot>
       </v-card-text>
       <v-card-actions class="justify-end">
@@ -55,6 +56,7 @@ interface Props {
   persistent?: boolean;
   icon?: LucideIcon;
   heading: string;
+  text?: string;
   actions?: Action[];
   showSecondaryButton?: boolean;
 }

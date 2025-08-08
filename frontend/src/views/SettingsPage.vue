@@ -759,6 +759,16 @@ watch(selectedAccount, (newVal) => {
   }
 }, { immediate: true });
 
+const updateCompanyField = (field: string, value: any) => {
+  (editableCompanyData.value as any)[field] = value;
+  isCompanyChanged.value = true;
+};
+
+const updateCaaField = (field: string, value: any) => {
+  (editableCaaData.value as any)[field] = value;
+  isCaaChanged.value = true;
+};
+
 const updateGagClauseField = (field: string, value: any) => {
   (editableGagClauseData.value as any)[field] = value;
   isGagClauseChanged.value = true;

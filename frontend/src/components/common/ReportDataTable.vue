@@ -26,7 +26,7 @@
     >
 
       <template v-slot:item.actions="{ item }">
-        <div v-if="showActionIcons" class="d-flex align-center justify-start">
+        <div v-if="showActionIcons" class="d-flex align-center" :class="actionsClass">
           <v-tooltip v-for="(iconDef, index) in actionIcons" :key="index" :text="iconDef.tooltip">
             <template v-slot:activator="{ props: tooltipProps }">
               <component
@@ -117,6 +117,7 @@ interface Props {
   initialFilterPills?: Pill[];
   showActionIcons?: boolean;
   actionIcons?: { icon: any; tooltip: string; onClick: (item: any) => void; class?: string; type?: 'approve' | 'reject' | 'info'; }[];
+  actionsClass?: string;
   searchPlaceholder?: string;
   showInternalUserActions?: boolean;
   internalUserActionFormatter?: (item: any) => string;
@@ -135,6 +136,7 @@ const props = withDefaults(defineProps<Props>(), {
   initialFilterPills: () => [],
   showActionIcons: false,
   actionIcons: () => [],
+  actionsClass: 'justify-end',
   searchPlaceholder: 'Search by report name, report type, or keyword',
   showInternalUserActions: false,
   internalUserActionFormatter: (item: any) => '-',
