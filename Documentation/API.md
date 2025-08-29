@@ -24,6 +24,8 @@ This document outlines the necessary API endpoints and data structures required 
     "userType": "external"
   }
   ```
+- **Approach**
+  - This will be reworked to use Auth0, we won't be using AspNetUsers going forward
 
 ### 1.2. Login
 
@@ -44,6 +46,8 @@ This document outlines the necessary API endpoints and data structures required 
     "userType": "internal"
   }
   ```
+- **Approach**
+  - This will be reworked to use Auth0, we won't be using AspNetUsers going forward
 
 ### 1.3. Logout
 
@@ -56,7 +60,9 @@ This document outlines the necessary API endpoints and data structures required 
     "success": true
   }
   ```
-
+- **Approach**
+  - This will be reworked to use Auth0, we won't be using AspNetUsers going forward
+    
 ---
 
 ## 2. Home Page (`/`)
@@ -146,7 +152,16 @@ This document outlines the necessary API endpoints and data structures required 
   - `type` (string, optional): The type of report to filter by (e.g., 'quarterly', 'monthly').
   - `status` (string, optional): The status of the report to filter by (e.g., 'pending approval').
 - **Response Body:** See `reportExplorer.items` in the Home Page Data section for the structure of a report item.
-
+- **Approach**
+  - ReportTypes - dbo.ReportTypes
+  - Reports - dbo.Reports
+  - Need to determine if we want to move these tables over to Solo 1 PbmOperations
+  - Think report status is only for Liviniti employees - based on dbo.Reports.IsApproved
+  - - We don't have a Pending Approval, options are IsApproved 1 or 0, so Approved = 1 or Pending Approval = 0
+  - Probably want to add discriminator to the query parameters so users can look for Quarterly reports from Q1 2024, etc. - dbo.Reports.Discriminator
+  - dbo.Reports.IsDeleted should be taken into account when showing reports, this does happen for reports that need to be corrected
+ 
+    
 ---
 
 ## 4. Approvals (`/approvals`)
@@ -157,6 +172,13 @@ This document outlines the necessary API endpoints and data structures required 
 - **Method:** `GET`
 - **Description:** Retrieves a list of all items awaiting approval.
 - **Response Body:** Similar to the reports endpoint, but filtered for items with a "Pending Approval" status.
+- **Approach**
+  - ReportTypes - dbo.ReportTypes
+  - Pull all Reports based on a selected Discriminator - dbo.Reports/dbo.Reports.Discriminator
+  - Need to determine if we want to move these tables over to Solo 1 PbmOperations
+  - dbo.Reports.IsDeleted should be taken into account when showing reports, this does happen for reports that need to be corrected
+  - Will want to show who approved and when - dbo.Reports.ApprovedBy/dbo.Reports.EditedDate
+  - Probably want to add a filter for reports that have not been approved, but have ability to see all so they can see which ones they've already approved
 
 ---
 
