@@ -348,6 +348,8 @@ This document outlines the necessary API endpoints and data structures required 
     "success": true
   }
   ```
+  - **Approach**
+  - Need to specify which fields show here. I think it's account name, DBA, legal name, address and high cost claim amount. All should be pulled from ACT.Accounts and ACT.AccountAddressXRef
 
 ### 8.3. Get User Administration Data
 
@@ -369,6 +371,8 @@ This document outlines the necessary API endpoints and data structures required 
     }
   ]
   ```
+  - **Approach**
+  - This will all be based on Auth0 and redesign of contacts
 
 ### 8.4. Get Claim Edit Rules
 
