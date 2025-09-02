@@ -160,7 +160,6 @@ This document outlines the necessary API endpoints and data structures required 
   - - We don't have a Pending Approval, options are IsApproved 1 or 0, so Approved = 1 or Pending Approval = 0
   - Probably want to add discriminator to the query parameters so users can look for Quarterly reports from Q1 2024, etc. - dbo.Reports.Discriminator
   - dbo.Reports.IsDeleted should be taken into account when showing reports, this does happen for reports that need to be corrected
- 
     
 ---
 
@@ -308,6 +307,8 @@ This document outlines the necessary API endpoints and data structures required 
     { "id": 1, "documentName": "2025 Benefit Guide", "type": "pdf", "uploadDate": "2025-01-15", "lastModifiedBy": "Admin", "status": "Published", "category": "All Documents" }
   ]
   ```
+  - **Approach**
+  - Do we want to move Documents over to PbmOperations
 
 ### 7.2. Upload Document
 
@@ -323,6 +324,7 @@ This document outlines the necessary API endpoints and data structures required 
   }
   ```
 
+ 
 ---
 
 ## 8. Settings (`/settings`)
