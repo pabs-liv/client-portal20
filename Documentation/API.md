@@ -212,6 +212,11 @@ This document outlines the necessary API endpoints and data structures required 
       "series": [{ "name": "Claim Amount", "data": [2500, 1500, 1000] }]
     }
   }
+  - **Approach**
+  - Could use PbmOperations.PHI.PriorAuthorizationsAgadia by checking the IngredientCost for the list of claims with PAs
+  - Account high cost notification amount - ACT.Accounts.HighCostClaimNotifyAmount
+  - Claims that show here should be any claims with IngredientCost over the set HighCostClaimNotifyAmount
+  
   ```
 
 ### 5.2. Update High-Cost Claim Status
@@ -231,7 +236,12 @@ This document outlines the necessary API endpoints and data structures required 
     "success": true
   }
   ```
-
+  - **Approach**
+  - Could use PbmOperations.PHI.PriorAuthorizationsAgadia by checking the IngredientCost for the list of claims with PAs
+  - If NextStep = Client Sign-off > this means it's ready for review by client (we shoudl show the approve, reject and request info buttons)
+  - Otherwise, think we could use Outcome for Approved or Denied
+  - Do we want to move dbo.HighCostClaims from PbmCustomers to PbmOperations? This tells us if it's been approved/denied by client
+    
 ---
 
 ## 6. Prior Authorizations (`/prior-auths`)
@@ -260,6 +270,12 @@ This document outlines the necessary API endpoints and data structures required 
     }
   }
   ```
+  - **Approach**
+  - Use PbmOperations.PHI.PriorAuthorizationsAgadia by AccountId for all PAs
+  - EocId = EocId
+  - DrugName = ServiceName
+  - Status = Outcome
+  - Submission Date = EventStartDate  
 
 ### 6.2. Request Information for Prior Authorization
 
@@ -272,7 +288,9 @@ This document outlines the necessary API endpoints and data structures required 
     "success": true
   }
   ```
-
+ - **Approach**
+ - Do we want to move HighCostClaimCommunications over to PbmOperations? This tracks communications when user requests info
+    
 ---
 
 ## 7. Documents (`/documents`)
