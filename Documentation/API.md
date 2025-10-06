@@ -146,7 +146,7 @@ This document outlines the necessary API endpoints and data structures required 
 
 - **Endpoint:** `/api/reports`
 - **Method:** `GET`
-- **Description:** Retrieves a list of all reports.
+- **Description:** Retrieves a list of all reports that have been approved (dbo.Reports.IsApproved = 1).
 - **Query Parameters:**
   - `search` (string, optional): A search term to filter reports by name, type, or keyword.
   - `type` (string, optional): The type of report to filter by (e.g., 'quarterly', 'monthly').
@@ -155,12 +155,13 @@ This document outlines the necessary API endpoints and data structures required 
 - **Approach**
   - ReportTypes - dbo.ReportTypes
   - Reports - dbo.Reports
-  - Need to determine if we want to move these tables over to Solo 1 PbmOperations
-  - Think report status is only for Liviniti employees - based on dbo.Reports.IsApproved
+  - We want to move these tables over to Solo 1 PbmOperations
   - - We don't have a Pending Approval, options are IsApproved 1 or 0, so Approved = 1 or Pending Approval = 0
-  - Probably want to add discriminator to the query parameters so users can look for Quarterly reports from Q1 2024, etc. - dbo.Reports.Discriminator
+  - Want to add discriminator to the query parameters so users can look for Quarterly reports from Q1 2024, etc. - dbo.Reports.Discriminator
   - dbo.Reports.IsDeleted should be taken into account when showing reports, this does happen for reports that need to be corrected
-    
+
+**Should add in call to ApproveReports - this would set the IsApproved = 1, EntryBy and EntryDate
+**    
 ---
 
 ## 4. Approvals (`/approvals`)
@@ -169,15 +170,15 @@ This document outlines the necessary API endpoints and data structures required 
 
 - **Endpoint:** `/api/approvals`
 - **Method:** `GET`
-- **Description:** Retrieves a list of all items awaiting approval.
-- **Response Body:** Similar to the reports endpoint, but filtered for items with a "Pending Approval" status.
+- **Description:** Retrieves a list of all items regardless of IsApproved flag.
+- **Response Body:** Similar to the reports endpoint, but shows all reports regardless of IsApproved flag.
 - **Approach**
   - ReportTypes - dbo.ReportTypes
-  - Pull all Reports based on a selected Discriminator - dbo.Reports/dbo.Reports.Discriminator
-  - Need to determine if we want to move these tables over to Solo 1 PbmOperations
+  - Pull all Reports based on a selected Type and Discriminator - dbo.Reports/dbo.Reports.Discriminator, i.e. Quarterly Q1 2025
+  - We want to move these tables over to Solo 1 PbmOperations
   - dbo.Reports.IsDeleted should be taken into account when showing reports, this does happen for reports that need to be corrected
-  - Will want to show who approved and when - dbo.Reports.ApprovedBy/dbo.Reports.EditedDate
-  - Probably want to add a filter for reports that have not been approved, but have ability to see all so they can see which ones they've already approved
+  - Will want to return who approved and when - dbo.Reports.ApprovedBy/dbo.Reports.EditedDate
+  - Will want to include IsApproved flag so we can show if the report has been approved, by who, etc. on the front-end
 
 ---
 
