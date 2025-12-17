@@ -57,6 +57,17 @@
             </template>
           </ReportDataTable>
         </div>
+        <div v-else-if="selectedTabKey === 'MAC Appeals'">
+          <ReportDataTable
+            :headers="macAppealsHeaders"
+            :items="filteredDocumentItems"
+            :show-search-bar="true"
+            :show-filter-pills="false"
+            :show-selection-checkboxes="false"
+            :show-row-actions="true"
+            search-placeholder="Search MAC appeals"
+          />
+        </div>
         <div v-else>
           <ReportDataTable
             :headers="documentHeaders"
@@ -100,11 +111,17 @@ const allDocumentItems = ref([
   { id: 5, documentName: 'Annual Review Summary', type: 'csv', uploadDate: '2025-02-28', lastModifiedBy: 'Analyst', status: 'Published', category: 'Billing' },
   { id: 6, documentName: 'HIPAA Compliance Doc', type: 'pdf', uploadDate: '2025-06-01', lastModifiedBy: 'Admin', status: 'Published', category: 'PHI Documents' },
   { id: 7, documentName: 'New User Onboarding', type: 'doc', uploadDate: '2025-07-01', lastModifiedBy: 'Admin', status: 'Draft', category: 'Document Uploader' },
+  { id: 8, documentName: 'MAC Appeal - Case #12345', type: 'pdf', uploadDate: '2025-06-15', lastModifiedBy: 'Admin', status: 'Published', category: 'MAC Appeals' },
+  { id: 9, documentName: 'MAC Appeal - Case #12346', type: 'pdf', uploadDate: '2025-07-02', lastModifiedBy: 'Admin', status: 'Published', category: 'MAC Appeals' },
+  { id: 10, documentName: 'MAC Appeal - Case #12347', type: 'pdf', uploadDate: '2025-07-18', lastModifiedBy: 'Admin', status: 'Published', category: 'MAC Appeals' },
+  { id: 11, documentName: 'MAC Appeal - Case #12348', type: 'pdf', uploadDate: '2025-07-25', lastModifiedBy: 'Admin', status: 'Published', category: 'MAC Appeals' },
+  { id: 12, documentName: 'MAC Appeal - Case #12349', type: 'pdf', uploadDate: '2025-08-01', lastModifiedBy: 'Admin', status: 'Published', category: 'MAC Appeals' },
 ]);
 
 const documentTabs = ref([
   { label: 'All Documents', key: 'All Documents' },
   { label: 'PHI Documents', key: 'PHI Documents' },
+  { label: 'MAC Appeals', key: 'MAC Appeals' },
   { label: 'Billing', key: 'Billing' },
   { label: 'Notifications', key: 'Notifications' },
   { label: 'Document Uploader', key: 'Document Uploader' },
@@ -122,6 +139,12 @@ const filteredDocumentItems = computed(() => {
   }
   return allDocumentItems.value.filter(item => item.category === selectedTabKey.value);
 });
+
+const macAppealsHeaders = ref([
+  { title: 'File Name', key: 'documentName' },
+  { title: 'Date Added', key: 'uploadDate', align: 'end' },
+  { title: '', key: 'actions', sortable: false }, // Empty title for actions column
+]);
 
 const uploadedDocumentHeaders = ref([
   { title: 'Document Name', key: 'documentName' },

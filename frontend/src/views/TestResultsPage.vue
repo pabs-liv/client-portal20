@@ -136,7 +136,7 @@ const processedTestResultsHeaders = computed(() => {
 
 const testResultsData = ref([
   {
-    accountName: 'Blue Cross Blue Shield',
+    accountName: 'Company A',
     reportType: 'Configuration',
     report: 'Plan Design 2025',
     dateRange: '2025-01-01 - 2025-12-31',
@@ -145,7 +145,7 @@ const testResultsData = ref([
     approvedDate: '2025-07-20',
   },
   {
-    accountName: 'Aetna',
+    accountName: 'Company B',
     reportType: 'Formulary',
     report: 'Formulary Review Q1',
     dateRange: '2025-01-01 - 2025-03-31',
@@ -154,7 +154,7 @@ const testResultsData = ref([
     approvedDate: '-',
   },
   {
-    accountName: 'Cigna',
+    accountName: 'Company C',
     reportType: 'Benefit Design',
     report: 'Benefit Design Update',
     dateRange: '2025-07-01 - 2025-07-31',
@@ -163,7 +163,7 @@ const testResultsData = ref([
     approvedDate: '2025-07-21',
   },
   {
-    accountName: 'UnitedHealthcare',
+    accountName: 'Company D',
     reportType: 'Configuration',
     report: 'Network Setup 2025',
     dateRange: '2025-01-01 - 2025-12-31',
@@ -172,7 +172,7 @@ const testResultsData = ref([
     approvedDate: '2025-07-22',
   },
   {
-    accountName: 'Humana',
+    accountName: 'Company E',
     reportType: 'Formulary',
     report: 'Formulary Review Q2',
     dateRange: '2025-04-01 - 2025-06-30',
@@ -181,7 +181,7 @@ const testResultsData = ref([
     approvedDate: '-',
   },
   {
-    accountName: 'Kaiser Permanente',
+    accountName: 'Company F',
     reportType: 'Benefit Design',
     report: 'Benefit Design Audit',
     dateRange: '2025-01-01 - 2025-06-30',
@@ -190,7 +190,7 @@ const testResultsData = ref([
     approvedDate: '2025-07-23',
   },
   {
-    accountName: 'Anthem',
+    accountName: 'Company G',
     reportType: 'Configuration',
     report: 'Claim Rules Test',
     dateRange: '2025-07-15 - 2025-07-20',
@@ -199,7 +199,7 @@ const testResultsData = ref([
     approvedDate: '2025-07-24',
   },
   {
-    accountName: 'Molina Healthcare',
+    accountName: 'Company H',
     reportType: 'Formulary',
     report: 'Formulary Review Q3',
     dateRange: '2025-07-01 - 2025-09-30',
@@ -208,7 +208,7 @@ const testResultsData = ref([
     approvedDate: '-',
   },
   {
-    accountName: 'Centene',
+    accountName: 'Company I',
     reportType: 'Benefit Design',
     report: 'Benefit Design Proposal',
     dateRange: '2025-08-01 - 2025-08-31',
@@ -217,7 +217,7 @@ const testResultsData = ref([
     approvedDate: '2025-07-25',
   },
   {
-    accountName: 'WellCare',
+    accountName: 'Company J',
     reportType: 'Configuration',
     report: 'System Integration Test',
     dateRange: '2025-07-01 - 2025-07-05',

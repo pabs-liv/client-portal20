@@ -71,16 +71,16 @@ const reportHeaders = computed(() => {
 });
 
 const reportItems = ref([
-  { id: 1, accountName: 'Acme Corp', reportName: 'Monthly Value Report', type: 'Monthly', reportingPeriod: 'July 2025', approvedBy: 'John Doe', approvedDate: '2025-07-10', status: 'Completed' },
-  { id: 2, accountName: 'Globex Inc.', reportName: 'Quarterly Executive Summary', type: 'Quarterly', reportingPeriod: 'Q2 2025', approvedBy: 'Jane Smith', approvedDate: '2025-07-05', status: 'Approved' },
-  
-  { id: 4, accountName: 'Umbrella Corp', reportName: 'Rebate Report', type: 'Rebate', reportingPeriod: '2024', approvedBy: 'Alice Brown', approvedDate: '2025-01-15', status: 'Pending Approval' },
-  { id: 5, accountName: 'Initech', reportName: 'CAA Report', type: 'CAA', reportingPeriod: '2025', approvedBy: 'Bob White', approvedDate: '2025-03-20', status: 'Draft' },
-  { id: 6, accountName: 'Weyland-Yutani', reportName: 'Colony Expansion Plan', type: 'Annual', reportingPeriod: '2024', approvedBy: 'Ellen Ripley', approvedDate: '2025-02-01', status: 'Approved' },
-  { id: 7, accountName: 'Tyrell Corp', reportName: 'Replicant Production Metrics', type: 'Monthly', reportingPeriod: 'July 2025', approvedBy: 'Rick Deckard', approvedDate: '2025-07-18', status: 'Completed' },
-  { id: 8, accountName: 'Omni Consumer Products', reportName: 'RoboCop Project Status', type: 'Quarterly', reportingPeriod: 'Q2 2025', approvedBy: 'Clarence Boddicker', approvedDate: '2025-06-10', status: 'Pending Approval' },
-  { id: 9, accountName: 'Stark Industries', reportName: 'Arc Reactor Efficiency', type: 'Ad-Hoc', reportingPeriod: 'N/A', approvedBy: 'Tony Stark', approvedDate: '2025-07-20', status: 'Processing' },
-  { id: 10, accountName: 'Wayne Enterprises', reportName: 'Bat-Gadget Inventory', type: 'Monthly', reportingPeriod: 'July 2025', approvedBy: 'Bruce Wayne', approvedDate: '2025-07-19', status: 'Approved' },
+  { id: 1, accountName: 'Company A', reportName: 'Monthly Value Report', type: 'Monthly', reportingPeriod: 'July 2025', approvedBy: 'John Doe', approvedDate: '2025-07-10', status: 'Completed' },
+  { id: 2, accountName: 'Company B', reportName: 'Quarterly Executive Summary', type: 'Quarterly', reportingPeriod: 'Q2 2025', approvedBy: 'Jane Smith', approvedDate: '2025-07-05', status: 'Approved' },
+
+  { id: 4, accountName: 'Company C', reportName: 'Rebate Report', type: 'Rebate', reportingPeriod: '2024', approvedBy: 'Alice Brown', approvedDate: '2025-01-15', status: 'Pending Approval' },
+  { id: 5, accountName: 'Company D', reportName: 'CAA Report', type: 'CAA', reportingPeriod: '2025', approvedBy: 'Bob White', approvedDate: '2025-03-20', status: 'Draft' },
+  { id: 6, accountName: 'Company E', reportName: 'Colony Expansion Plan', type: 'Annual', reportingPeriod: '2024', approvedBy: 'Ellen Ripley', approvedDate: '2025-02-01', status: 'Approved' },
+  { id: 7, accountName: 'Company F', reportName: 'Replicant Production Metrics', type: 'Monthly', reportingPeriod: 'July 2025', approvedBy: 'Rick Deckard', approvedDate: '2025-07-18', status: 'Completed' },
+  { id: 8, accountName: 'Company G', reportName: 'RoboCop Project Status', type: 'Quarterly', reportingPeriod: 'Q2 2025', approvedBy: 'Clarence Boddicker', approvedDate: '2025-06-10', status: 'Pending Approval' },
+  { id: 9, accountName: 'Company H', reportName: 'Arc Reactor Efficiency', type: 'Ad-Hoc', reportingPeriod: 'N/A', approvedBy: 'Tony Stark', approvedDate: '2025-07-20', status: 'Processing' },
+  { id: 10, accountName: 'Company I', reportName: 'Bat-Gadget Inventory', type: 'Monthly', reportingPeriod: 'July 2025', approvedBy: 'Bruce Wayne', approvedDate: '2025-07-19', status: 'Approved' },
 ]);
 
 const reportFilterPills = ref([

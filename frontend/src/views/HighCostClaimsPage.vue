@@ -212,7 +212,7 @@ const claimsHeaders = ref([
 
 const claimsData = ref([
   {
-    accountName: 'Blue Cross Blue Shield',
+    accountName: 'Company A',
     eocId: 'EOC12345',
     drugName: 'Drug A',
     cost: '$1,200.00',
@@ -220,7 +220,7 @@ const claimsData = ref([
     status: 'Pending',
   },
   {
-    accountName: 'Aetna',
+    accountName: 'Company B',
     eocId: 'EOC67890',
     drugName: 'Drug B',
     cost: '$800.00',
@@ -228,7 +228,7 @@ const claimsData = ref([
     status: 'Approved',
   },
   {
-    accountName: 'Cigna',
+    accountName: 'Company C',
     eocId: 'EOC11223',
     drugName: 'Drug C',
     cost: '$2,500.00',
@@ -236,7 +236,7 @@ const claimsData = ref([
     status: 'Pending',
   },
   {
-    accountName: 'UnitedHealthcare',
+    accountName: 'Company D',
     eocId: 'EOC44556',
     drugName: 'Drug D',
     cost: '$1,500.00',

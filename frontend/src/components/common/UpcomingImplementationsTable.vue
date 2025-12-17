@@ -44,13 +44,13 @@ const headers = ref([
 ]);
 
 const items = ref([
-  { accountName: 'Acme Corp', implementationStatus: 'Pending Documents', goLiveDate: '2025-07-20' },
-  { accountName: 'Globex Inc.', implementationStatus: 'Clinical Setup', goLiveDate: '2025-08-05' },
-  { accountName: 'Soylent Corp', implementationStatus: 'Systems Configuration', goLiveDate: '2025-08-15' },
-  { accountName: 'Umbrella Corp', implementationStatus: 'Eligibility Review', goLiveDate: '2025-09-01' },
-  { accountName: 'Weyland-Yutani', implementationStatus: 'Card Production', goLiveDate: '2025-09-10' },
-  { accountName: 'Initech', implementationStatus: 'Pending Documents', goLiveDate: '2025-09-25' },
-  { accountName: 'Cyberdyne Systems', implementationStatus: 'Clinical Setup', goLiveDate: '2025-10-01' },
+  { accountName: 'Company A', implementationStatus: 'Pending Documents', goLiveDate: '2025-07-20' },
+  { accountName: 'Company B', implementationStatus: 'Clinical Setup', goLiveDate: '2025-08-05' },
+  { accountName: 'Company C', implementationStatus: 'Systems Configuration', goLiveDate: '2025-08-15' },
+  { accountName: 'Company D', implementationStatus: 'Eligibility Review', goLiveDate: '2025-09-01' },
+  { accountName: 'Company E', implementationStatus: 'Card Production', goLiveDate: '2025-09-10' },
+  { accountName: 'Company F', implementationStatus: 'Pending Documents', goLiveDate: '2025-09-25' },
+  { accountName: 'Company G', implementationStatus: 'Clinical Setup', goLiveDate: '2025-10-01' },
 ]);
 
 const router = useRouter();

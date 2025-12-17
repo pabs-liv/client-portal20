@@ -472,11 +472,11 @@ import Dialog from '@/components/ui/Dialog.vue';
 import { ref, computed, watch } from 'vue';
 
 const accountOptions = ref([
-  { id: 1, name: 'Stark Industries' },
-  { id: 2, name: 'Wayne Enterprises' },
-  { id: 3, name: 'Cyberdyne Systems' },
-  { id: 4, name: 'Oscorp' },
-  { id: 5, name: 'Tyrell Corporation' },
+  { id: 1, name: 'Company A' },
+  { id: 2, name: 'Company B' },
+  { id: 3, name: 'Company C' },
+  { id: 4, name: 'Company D' },
+  { id: 5, name: 'Company E' },
 ]);
 
 const selectedAccount = ref<number | null>(null);
@@ -524,11 +524,11 @@ interface CompanyData {
 }
 
 const companyData: { [key: number]: CompanyData } = {
-  1: { companyName: 'Stark Industries', dba: 'Stark Industries', notificationThreshold: '15000', groupHealthPlan: '12345678', carveOutBenefit: 'Pharmacy Only', form5500Plan: '501', states: ['CA', 'NY'], marketSegment: 'SF Large Employer Plans', planYearBeginDate: '01/01/2025', planYearEndDate: '12/31/2025', membersAsOf: '257', planSponsorLegalName: 'Stark Industries Inc.', planSponsorEin: '12-3456789', tpaName: 'Allied Benefit Solutions', tpaEin: '36879958', authorize: null, reportingPeriod: 'plan-year', effectiveStartDate: '01/01/2025', effectiveEndDate: '12/31/2025', reportingEntityType: 'Plan Sponsor', reportingEntityName: 'Stark Industries Inc.', reportingEntityEin: '12-3456789', attestationAgreement: 'Agreement A', agreementTypes: 'Type 1', mailingAddress1: '10880 Malibu Point', mailingAddress2: '', city: 'Malibu', mailingState: 'CA', zipCode: '90265', contactFirstName: 'Tony', contactLastName: 'Stark', contactEmail: 'tony.stark@starkindustries.com', contactPhoneNumber: '555-123-4567', billingOrganization: 'Stark Industries', billingFirstName: 'Pepper', billingLastName: 'Potts', billingEmail: 'pepper.potts@starkindustries.com', billingPhoneNumber: '555-987-6543', eSignature: 'Tony Stark' },
-  2: { companyName: 'Wayne Enterprises', dba: 'Wayne Foundation', notificationThreshold: '25000', groupHealthPlan: '87654321', carveOutBenefit: 'Medical & Pharmacy', form5500Plan: '502', states: ['TX', 'FL'], marketSegment: 'Commercial Plans', planYearBeginDate: '07/01/2024', planYearEndDate: '06/30/2025', membersAsOf: '500', planSponsorLegalName: 'Wayne Enterprises LLC', planSponsorEin: '98-7654321', tpaName: 'Allied Benefit Solutions', tpaEin: '36879958', authorize: null, reportingPeriod: 'benefit-period', effectiveStartDate: '07/01/2024', effectiveEndDate: '09/30/2024', reportingEntityType: 'Plan Sponsor', reportingEntityName: 'Wayne Enterprises LLC', reportingEntityEin: '98-7654321', attestationAgreement: 'Agreement B', agreementTypes: 'Type 2', mailingAddress1: '1007 Mountain Drive', mailingAddress2: '', city: 'Gotham', mailingState: 'NY', zipCode: '10001', contactFirstName: 'Bruce', contactLastName: 'Wayne', contactEmail: 'bruce.wayne@wayneenterprises.com', contactPhoneNumber: '555-234-5678', billingOrganization: 'Wayne Enterprises', billingFirstName: 'Alfred', billingLastName: 'Pennyworth', billingEmail: 'alfred.pennyworth@wayneenterprises.com', billingPhoneNumber: '555-876-5432', eSignature: 'Bruce Wayne' },
-  3: { companyName: 'Cyberdyne Systems', dba: 'Cyberdyne', notificationThreshold: '10000', groupHealthPlan: '11223344', carveOutBenefit: 'Pharmacy Only', form5500Plan: '503', states: ['IL', 'GA'], marketSegment: 'Government Plans', planYearBeginDate: '01/01/2025', planYearEndDate: '12/31/2025', membersAsOf: '100', planSponsorLegalName: 'Cyberdyne Systems Corp.', planSponsorEin: '11-2233445', tpaName: 'Allied Benefit Solutions', tpaEin: '36879958', authorize: null, reportingPeriod: 'plan-year', effectiveStartDate: '01/01/2025', effectiveEndDate: '01/31/2025', reportingEntityType: 'Plan Sponsor', reportingEntityName: 'Cyberdyne Systems Corp.', reportingEntityEin: '11-2233445', attestationAgreement: 'Agreement C', agreementTypes: 'Type 3', mailingAddress1: '21440 Chase Dr', mailingAddress2: '', city: 'Fremont', mailingState: 'CA', zipCode: '94539', contactFirstName: 'Miles', contactLastName: 'Dyson', contactEmail: 'miles.dyson@cyberdyne.com', contactPhoneNumber: '555-345-6789', billingOrganization: 'Cyberdyne Systems', billingFirstName: 'Sarah', billingLastName: 'Connor', billingEmail: 'sarah.connor@cyberdyne.com', billingPhoneNumber: '555-765-4321', eSignature: 'Miles Dyson' },
-  4: { companyName: 'Oscorp', dba: 'Oscorp Industries', notificationThreshold: '20000', groupHealthPlan: '44332211', carveOutBenefit: 'Medical & Pharmacy', form5500Plan: '504', states: ['PA', 'OH'], marketSegment: 'SF Large Employer Plans', planYearBeginDate: '07/01/2024', planYearEndDate: '06/30/2025', membersAsOf: '750', planSponsorLegalName: 'Oscorp Industries', planSponsorEin: '44-3322110', tpaName: 'Allied Benefit Solutions', tpaEin: '36879958', authorize: null, reportingPeriod: 'benefit-period', effectiveStartDate: '07/01/2024', effectiveEndDate: '06/30/2025', reportingEntityType: 'Plan Sponsor', reportingEntityName: 'Oscorp Industries', reportingEntityEin: '44-3322110', attestationAgreement: 'Agreement D', agreementTypes: 'Type 4', mailingAddress1: '200 Park Ave', mailingAddress2: '', city: 'New York', mailingState: 'NY', zipCode: '10166', contactFirstName: 'Norman', contactLastName: 'Osborn', contactEmail: 'norman.osborn@oscorp.com', contactPhoneNumber: '555-456-7890', billingOrganization: 'Oscorp', billingFirstName: 'Harry', billingLastName: 'Osborn', billingEmail: 'harry.osborn@oscorp.com', billingPhoneNumber: '555-654-3210', eSignature: 'Norman Osborn' },
-  5: { companyName: 'Tyrell Corporation', dba: 'Tyrell', notificationThreshold: '30000', groupHealthPlan: '99887766', carveOutBenefit: 'Pharmacy Only', form5500Plan: '505', states: ['WA', 'OR'], marketSegment: 'Commercial Plans', planYearBeginDate: '01/01/2025', planYearEndDate: '12/31/2025', membersAsOf: '300', planSponsorLegalName: 'Tyrell Corporation', planSponsorEin: '99-8877665', tpaName: 'Allied Benefit Solutions', tpaEin: '36879958', authorize: null, reportingPeriod: 'plan-year', effectiveStartDate: '01/01/2025', effectiveEndDate: '03/31/2025', reportingEntityType: 'Plan Sponsor', reportingEntityName: 'Tyrell Corporation', reportingEntityEin: '99-8877665', attestationAgreement: 'Agreement E', agreementTypes: 'Type 5', mailingAddress1: '1238 W 6th St', mailingAddress2: '', city: 'Los Angeles', mailingState: 'CA', zipCode: '90017', contactFirstName: 'Eldon', contactLastName: 'Tyrell', contactEmail: 'eldon.tyrell@tyrell.com', contactPhoneNumber: '555-567-8901', billingOrganization: 'Tyrell Corporation', billingFirstName: 'Rachael', billingLastName: 'Tyrell', billingEmail: 'rachael.tyrell@tyrell.com', billingPhoneNumber: '555-543-2109', eSignature: 'Eldon Tyrell' },
+  1: { companyName: 'Company A', dba: 'Company A', notificationThreshold: '15000', groupHealthPlan: '12345678', carveOutBenefit: 'Pharmacy Only', form5500Plan: '501', states: ['CA', 'NY'], marketSegment: 'SF Large Employer Plans', planYearBeginDate: '01/01/2025', planYearEndDate: '12/31/2025', membersAsOf: '257', planSponsorLegalName: 'Company A Inc.', planSponsorEin: '12-3456789', tpaName: 'Allied Benefit Solutions', tpaEin: '36879958', authorize: null, reportingPeriod: 'plan-year', effectiveStartDate: '01/01/2025', effectiveEndDate: '12/31/2025', reportingEntityType: 'Plan Sponsor', reportingEntityName: 'Company A Inc.', reportingEntityEin: '12-3456789', attestationAgreement: 'Agreement A', agreementTypes: 'Type 1', mailingAddress1: '10880 Malibu Point', mailingAddress2: '', city: 'Malibu', mailingState: 'CA', zipCode: '90265', contactFirstName: 'Tony', contactLastName: 'Stark', contactEmail: 'tony.stark@companya.com', contactPhoneNumber: '555-123-4567', billingOrganization: 'Company A', billingFirstName: 'Pepper', billingLastName: 'Potts', billingEmail: 'pepper.potts@companya.com', billingPhoneNumber: '555-987-6543', eSignature: 'Tony Stark' },
+  2: { companyName: 'Company B', dba: 'Company B Foundation', notificationThreshold: '25000', groupHealthPlan: '87654321', carveOutBenefit: 'Medical & Pharmacy', form5500Plan: '502', states: ['TX', 'FL'], marketSegment: 'Commercial Plans', planYearBeginDate: '07/01/2024', planYearEndDate: '06/30/2025', membersAsOf: '500', planSponsorLegalName: 'Company B LLC', planSponsorEin: '98-7654321', tpaName: 'Allied Benefit Solutions', tpaEin: '36879958', authorize: null, reportingPeriod: 'benefit-period', effectiveStartDate: '07/01/2024', effectiveEndDate: '09/30/2024', reportingEntityType: 'Plan Sponsor', reportingEntityName: 'Company B LLC', reportingEntityEin: '98-7654321', attestationAgreement: 'Agreement B', agreementTypes: 'Type 2', mailingAddress1: '1007 Mountain Drive', mailingAddress2: '', city: 'Gotham', mailingState: 'NY', zipCode: '10001', contactFirstName: 'Bruce', contactLastName: 'Wayne', contactEmail: 'bruce.wayne@companyb.com', contactPhoneNumber: '555-234-5678', billingOrganization: 'Company B', billingFirstName: 'Alfred', billingLastName: 'Pennyworth', billingEmail: 'alfred.pennyworth@companyb.com', billingPhoneNumber: '555-876-5432', eSignature: 'Bruce Wayne' },
+  3: { companyName: 'Company C', dba: 'Company C', notificationThreshold: '10000', groupHealthPlan: '11223344', carveOutBenefit: 'Pharmacy Only', form5500Plan: '503', states: ['IL', 'GA'], marketSegment: 'Government Plans', planYearBeginDate: '01/01/2025', planYearEndDate: '12/31/2025', membersAsOf: '100', planSponsorLegalName: 'Company C Corp.', planSponsorEin: '11-2233445', tpaName: 'Allied Benefit Solutions', tpaEin: '36879958', authorize: null, reportingPeriod: 'plan-year', effectiveStartDate: '01/01/2025', effectiveEndDate: '01/31/2025', reportingEntityType: 'Plan Sponsor', reportingEntityName: 'Company C Corp.', reportingEntityEin: '11-2233445', attestationAgreement: 'Agreement C', agreementTypes: 'Type 3', mailingAddress1: '21440 Chase Dr', mailingAddress2: '', city: 'Fremont', mailingState: 'CA', zipCode: '94539', contactFirstName: 'Miles', contactLastName: 'Dyson', contactEmail: 'miles.dyson@companyc.com', contactPhoneNumber: '555-345-6789', billingOrganization: 'Company C', billingFirstName: 'Sarah', billingLastName: 'Connor', billingEmail: 'sarah.connor@companyc.com', billingPhoneNumber: '555-765-4321', eSignature: 'Miles Dyson' },
+  4: { companyName: 'Company D', dba: 'Company D Industries', notificationThreshold: '20000', groupHealthPlan: '44332211', carveOutBenefit: 'Medical & Pharmacy', form5500Plan: '504', states: ['PA', 'OH'], marketSegment: 'SF Large Employer Plans', planYearBeginDate: '07/01/2024', planYearEndDate: '06/30/2025', membersAsOf: '750', planSponsorLegalName: 'Company D Industries', planSponsorEin: '44-3322110', tpaName: 'Allied Benefit Solutions', tpaEin: '36879958', authorize: null, reportingPeriod: 'benefit-period', effectiveStartDate: '07/01/2024', effectiveEndDate: '06/30/2025', reportingEntityType: 'Plan Sponsor', reportingEntityName: 'Company D Industries', reportingEntityEin: '44-3322110', attestationAgreement: 'Agreement D', agreementTypes: 'Type 4', mailingAddress1: '200 Park Ave', mailingAddress2: '', city: 'New York', mailingState: 'NY', zipCode: '10166', contactFirstName: 'Norman', contactLastName: 'Osborn', contactEmail: 'norman.osborn@companyd.com', contactPhoneNumber: '555-456-7890', billingOrganization: 'Company D', billingFirstName: 'Harry', billingLastName: 'Osborn', billingEmail: 'harry.osborn@companyd.com', billingPhoneNumber: '555-654-3210', eSignature: 'Norman Osborn' },
+  5: { companyName: 'Company E', dba: 'Company E', notificationThreshold: '30000', groupHealthPlan: '99887766', carveOutBenefit: 'Pharmacy Only', form5500Plan: '505', states: ['WA', 'OR'], marketSegment: 'Commercial Plans', planYearBeginDate: '01/01/2025', planYearEndDate: '12/31/2025', membersAsOf: '300', planSponsorLegalName: 'Company E Corporation', planSponsorEin: '99-8877665', tpaName: 'Allied Benefit Solutions', tpaEin: '36879958', authorize: null, reportingPeriod: 'plan-year', effectiveStartDate: '01/01/2025', effectiveEndDate: '03/31/2025', reportingEntityType: 'Plan Sponsor', reportingEntityName: 'Company E Corporation', reportingEntityEin: '99-8877665', attestationAgreement: 'Agreement E', agreementTypes: 'Type 5', mailingAddress1: '1238 W 6th St', mailingAddress2: '', city: 'Los Angeles', mailingState: 'CA', zipCode: '90017', contactFirstName: 'Eldon', contactLastName: 'Tyrell', contactEmail: 'eldon.tyrell@companye.com', contactPhoneNumber: '555-567-8901', billingOrganization: 'Company E', billingFirstName: 'Rachael', billingLastName: 'Tyrell', billingEmail: 'rachael.tyrell@companye.com', billingPhoneNumber: '555-543-2109', eSignature: 'Eldon Tyrell' },
 };
 
 const selectedAccountData = computed<CompanyData>(() => {
@@ -916,30 +916,30 @@ const userAdminHeaders = ref([
 
 const userAdminData = ref([
   {
-    accountName: 'Stark Industries',
+    accountName: 'Company A',
     user: 'Tony Stark',
     role: 'Admin',
-    email: 'tony.stark@starkindustries.com',
+    email: 'tony.stark@companya.com',
     permissions: 'All',
     activated: true,
     mainPoc: true,
     surveyContact: false,
   },
   {
-    accountName: 'Stark Industries',
+    accountName: 'Company A',
     user: 'Pepper Potts',
     role: 'Admin',
-    email: 'pepper.potts@starkindustries.com',
+    email: 'pepper.potts@companya.com',
     permissions: 'All',
     activated: true,
     mainPoc: false,
     surveyContact: true,
   },
   {
-    accountName: 'Wayne Enterprises',
+    accountName: 'Company B',
     user: 'Bruce Wayne',
     role: 'Admin',
-    email: 'bruce.wayne@wayneenterprises.com',
+    email: 'bruce.wayne@companyb.com',
     permissions: 'All',
     activated: true,
     mainPoc: true,

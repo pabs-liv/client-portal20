@@ -33,8 +33,8 @@
       <v-row>
         <v-col cols="12" md="8" class="d-flex justify-center align-center">
           <AccountPrescriptionCard
-            accountName="Stark Industries"
-            carrier="Blue Cross Blue Shield"
+            accountName="Company B"
+            carrier="Carrier A"
             :livesCovered="5000"
             startDate="01/01/2024"
             endDate="12/31/2024"
@@ -91,11 +91,11 @@ import { VRow, VCol, VBtn } from 'vuetify/components';
 import { ref, computed, onMounted } from 'vue';
 
 const accountOptions = ref([
-  { id: 1, name: 'Blue Cross Blue Shield' },
-  { id: 2, name: 'Aetna' },
-  { id: 3, name: 'Cigna' },
-  { id: 4, name: 'UnitedHealthcare' },
-  { id: 5, name: 'Humana' },
+  { id: 1, name: 'Company A' },
+  { id: 2, name: 'Company B' },
+  { id: 3, name: 'Company C' },
+  { id: 4, name: 'Company D' },
+  { id: 5, name: 'Company E' },
 ]);
 
 const selectedAccount = ref(null);
@@ -108,9 +108,9 @@ const isAnyCardSelected = computed(() => selectedPrograms.value.some(selected =>
 const isAnyAvailableCardSelected = computed(() => selectedPrograms.value.slice(2).some(selected => selected));
 
 const updateDisplayAccountType = (accountId: number) => {
-  if (accountId === 1) { // Blue Cross Blue Shield
+  if (accountId === 1) { // Company A
     displayAccountType.value = 'no-program';
-  } else if (accountId === 2) { // Aetna
+  } else if (accountId === 2) { // Company B
     displayAccountType.value = 'account-programs';
   } else {
     displayAccountType.value = null;

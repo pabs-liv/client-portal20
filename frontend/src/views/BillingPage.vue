@@ -45,7 +45,7 @@ const billingHeaders = ref([
 
 const billingData = ref([
   {
-    accountName: 'Blue Cross Blue Shield',
+    accountName: 'Company A',
     billingType: 'Invoice',
     id: 'INV001',
     detail: 'Monthly Services',
@@ -53,7 +53,7 @@ const billingData = ref([
     amount: '$1,500.00',
   },
   {
-    accountName: 'Aetna',
+    accountName: 'Company B',
     billingType: 'Statement',
     id: 'STM002',
     detail: 'Q2 Summary',
@@ -61,7 +61,7 @@ const billingData = ref([
     amount: '$3,200.00',
   },
   {
-    accountName: 'Cigna',
+    accountName: 'Company C',
     billingType: 'Invoice',
     id: 'INV003',
     detail: 'Consulting Fees',
@@ -69,7 +69,7 @@ const billingData = ref([
     amount: '$800.00',
   },
   {
-    accountName: 'UnitedHealthcare',
+    accountName: 'Company D',
     billingType: 'Statement',
     id: 'STM004',
     detail: 'Annual Report',
@@ -77,7 +77,7 @@ const billingData = ref([
     amount: '$5,000.00',
   },
   {
-    accountName: 'Humana',
+    accountName: 'Company E',
     billingType: 'Invoice',
     id: 'INV005',
     detail: 'Service Adjustment',
@@ -85,7 +85,7 @@ const billingData = ref([
     amount: '$250.00',
   },
   {
-    accountName: 'Kaiser Permanente',
+    accountName: 'Company F',
     billingType: 'Statement',
     id: 'STM006',
     detail: 'Monthly Summary',
@@ -93,7 +93,7 @@ const billingData = ref([
     amount: '$1,100.00',
   },
   {
-    accountName: 'Anthem',
+    accountName: 'Company G',
     billingType: 'Invoice',
     id: 'INV007',
     detail: 'New Client Setup',
@@ -101,7 +101,7 @@ const billingData = ref([
     amount: '$750.00',
   },
   {
-    accountName: 'Molina Healthcare',
+    accountName: 'Company H',
     billingType: 'Statement',
     id: 'STM008',
     detail: 'Q1 Review',
@@ -109,7 +109,7 @@ const billingData = ref([
     amount: '$2,900.00',
   },
   {
-    accountName: 'Centene',
+    accountName: 'Company I',
     billingType: 'Invoice',
     id: 'INV009',
     detail: 'Ad-hoc Request',
@@ -117,7 +117,7 @@ const billingData = ref([
     amount: '$400.00',
   },
   {
-    accountName: 'WellCare',
+    accountName: 'Company J',
     billingType: 'Statement',
     id: 'STM010',
     detail: 'Mid-Year Report',

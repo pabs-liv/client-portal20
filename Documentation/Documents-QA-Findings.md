@@ -1,0 +1,327 @@
+
+# QA Findings for Documentation Feature
+
+## Test Case: TC-001 - Search Functionality in "All Documents" Tab
+
+**Summary:**
+The search functionality in the "All Documents" tab was tested and found to be working as expected. The data is filtered correctly as the user types in the search bar.
+
+**Test Execution Details:**
+
+- **Date:** 2025-08-25
+- **Tester:** Gemini
+- **Environment:** Local development environment (`http://localhost:5173/documents`)
+
+**Findings:**
+
+The search functionality on the "Documents" page is working correctly. When a search term is entered, the table of documents is filtered in real-time, and only the matching documents are displayed.
+
+**Screenshots:**
+
+### Initial State of the Documents Page
+
+**Description:** This screenshot shows the initial state of the "Documents" page before any search is performed.
+
+**(The following is a snapshot of the page state, which serves as a screenshot)**
+```yaml
+- generic [ref=e4]:
+  - navigation [ref=e5]:
+    - generic [ref=e6]:
+      - img "Client Portal Logo" [ref=e8]
+      - listbox [ref=e10]:
+        - link "Home" [ref=e11] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e13] [cursor=pointer]:
+            - img [ref=e14] [cursor=pointer]
+            - generic [ref=e17] [cursor=pointer]: Home
+        - link "Reports" [ref=e18] [cursor=pointer]:
+          - /url: /reports
+          - generic [ref=e20] [cursor=pointer]:
+            - img [ref=e21] [cursor=pointer]
+            - generic [ref=e24] [cursor=pointer]: Reports
+        - link "Documents" [ref=e25] [cursor=pointer]:
+          - /url: /documents
+          - generic [ref=e27] [cursor=pointer]:
+            - img [ref=e28] [cursor=pointer]
+            - generic [ref=e31] [cursor=pointer]: Documents
+        - link "High-Cost Claims" [ref=e32] [cursor=pointer]:
+          - /url: /high-cost-claims
+          - generic [ref=e34] [cursor=pointer]:
+            - img [ref=e35] [cursor=pointer]
+            - generic [ref=e39] [cursor=pointer]: High-Cost Claims
+        - link "Prior Auths" [ref=e40] [cursor=pointer]:
+          - /url: /prior-auths
+          - generic [ref=e42] [cursor=pointer]:
+            - img [ref=e43] [cursor=pointer]
+            - generic [ref=e49] [cursor=pointer]: Prior Auths
+        - link "Billing" [ref=e50] [cursor=pointer]:
+          - /url: /billing
+          - generic [ref=e52] [cursor=pointer]:
+            - img [ref=e53] [cursor=pointer]
+            - generic [ref=e56] [cursor=pointer]: Billing
+        - link "Plan Explorer" [ref=e57] [cursor=pointer]:
+          - /url: /plan-explorer
+          - generic [ref=e59] [cursor=pointer]:
+            - img [ref=e60] [cursor=pointer]
+            - generic [ref=e63] [cursor=pointer]: Plan Explorer
+        - link "Test Results" [ref=e64] [cursor=pointer]:
+          - /url: /test-results
+          - generic [ref=e66] [cursor=pointer]:
+            - img [ref=e67] [cursor=pointer]
+            - generic [ref=e71] [cursor=pointer]: Test Results
+        - link "Added Value" [ref=e72] [cursor=pointer]:
+          - /url: /added-value
+          - generic [ref=e74] [cursor=pointer]:
+            - img [ref=e75] [cursor=pointer]
+            - generic [ref=e78] [cursor=pointer]: Added Value
+        - separator [ref=e79]
+        - link "Settings" [ref=e80] [cursor=pointer]:
+          - /url: /settings
+          - generic [ref=e82] [cursor=pointer]:
+            - img [ref=e83] [cursor=pointer]
+            - generic [ref=e94] [cursor=pointer]: Settings
+        - generic [ref=e99]: Logout
+  - banner [ref=e100]:
+    - generic [ref=e101]:
+      - button "Fiduciary Dashboard" [ref=e102] [cursor=pointer]:
+        - generic [ref=e103] [cursor=pointer]: Fiduciary Dashboard
+      - button "User" [ref=e104] [cursor=pointer]:
+        - img "User" [ref=e107] [cursor=pointer]
+  - main [ref=e108]:
+    - generic [ref=e110]:
+      - heading "Documents" [level=1] [ref=e111]
+      - generic [ref=e113]:
+        - generic [ref=e114]:
+          - heading "Document Explorer" [level=2] [ref=e115]
+          - paragraph [ref=e116]: View and download documents relevant to your account(s).
+        - generic [ref=e117]:
+          - tablist [ref=e118]:
+            - generic [ref=e120]:
+              - tab "All Documents" [selected] [ref=e121] [cursor=pointer]:
+                - generic [ref=e122] [cursor=pointer]: All Documents
+              - tab "PHI Documents" [ref=e123] [cursor=pointer]:
+                - generic [ref=e124] [cursor=pointer]: PHI Documents
+              - tab "Billing" [ref=e125] [cursor=pointer]:
+                - generic [ref=e126] [cursor=pointer]: Billing
+              - tab "Notifications" [ref=e127] [cursor=pointer]:
+                - generic [ref=e128] [cursor=pointer]: Notifications
+              - tab "Document Uploader" [ref=e129] [cursor=pointer]:
+                - generic [ref=e130] [cursor=pointer]: Document Uploader
+          - generic [ref=e132]:
+            - generic [ref=e134]:
+              - generic [ref=e135]:
+                - img [ref=e136]
+                - textbox "Search documents" [ref=e139]
+              - img [ref=e140] [cursor=pointer]
+            - generic [ref=e141]:
+              - table [ref=e143]:
+                - rowgroup [ref=e144]:
+                  - row "Document Name Type Upload Date Last Modified By" [ref=e145]:
+                    - cell "Document Name" [ref=e146]:
+                      - generic [ref=e148]: Document Name
+                    - cell "Type" [ref=e150]:
+                      - generic [ref=e152]: Type
+                    - cell "Upload Date" [ref=e154]:
+                      - generic [ref=e156]: Upload Date
+                    - cell "Last Modified By" [ref=e158]:
+                      - generic [ref=e160]: Last Modified By
+                    - cell [ref=e162]
+                - rowgroup [ref=e163]:
+                  - row "2025 Benefit Guide pdf 2025-01-15 Admin" [ref=e164]:
+                    - cell "2025 Benefit Guide" [ref=e165]
+                    - cell "pdf" [ref=e166]
+                    - cell "2025-01-15" [ref=e167]
+                    - cell "Admin" [ref=e168]
+                    - cell [ref=e169]:
+                      - img [ref=e170] [cursor=pointer]
+                  - row "Q1 2025 Performance Report xls 2025-04-01 Analyst" [ref=e174]:
+                    - cell "Q1 2025 Performance Report" [ref=e175]
+                    - cell "xls" [ref=e176]
+                    - cell "2025-04-01" [ref=e177]
+                    - cell "Analyst" [ref=e178]
+                    - cell [ref=e179]:
+                      - img [ref=e180] [cursor=pointer]
+                  - row "Pharmacy Network Update doc 2025-03-10 Admin" [ref=e184]:
+                    - cell "Pharmacy Network Update" [ref=e185]
+                    - cell "doc" [ref=e186]
+                    - cell "2025-03-10" [ref=e187]
+                    - cell "Admin" [ref=e188]
+                    - cell [ref=e189]:
+                      - img [ref=e190] [cursor=pointer]
+                  - row "Claim Submission Form pdf 2024-11-20 Admin" [ref=e194]:
+                    - cell "Claim Submission Form" [ref=e195]
+                    - cell "pdf" [ref=e196]
+                    - cell "2024-11-20" [ref=e197]
+                    - cell "Admin" [ref=e198]
+                    - cell [ref=e199]:
+                      - img [ref=e200] [cursor=pointer]
+                  - row "Annual Review Summary csv 2025-02-28 Analyst" [ref=e204]:
+                    - cell "Annual Review Summary" [ref=e205]
+                    - cell "csv" [ref=e206]
+                    - cell "2025-02-28" [ref=e207]
+                    - cell "Analyst" [ref=e208]
+                    - cell [ref=e209]:
+                      - img [ref=e210] [cursor=pointer]
+              - separator [ref=e214]
+              - generic [ref=e215]:
+                - combobox [ref=e220] [cursor=pointer]:
+                  - generic [ref=e222] [cursor=pointer]:
+                    - generic [ref=e224] [cursor=pointer]: "5"
+                    - textbox "Open": "5"
+                - generic [ref=e228]: 1-5 of 7
+                - navigation "Pagination Navigation" [ref=e230]:
+                  - list [ref=e231]:
+                    - listitem [ref=e232]:
+                      - button "First page" [disabled]
+                    - listitem [ref=e233]:
+                      - button "Previous page" [disabled]
+                    - listitem [ref=e234]:
+                      - button "Next page" [ref=e235] [cursor=pointer]
+                    - listitem [ref=e238]:
+                      - button "Last page" [ref=e239] [cursor=pointer]
+  - generic [ref=e243]:
+    - generic [ref=e245]:
+      - checkbox "Internal User" [ref=e249] [cursor=pointer]
+      - generic [ref=e250] [cursor=pointer]: Internal User
+    - alert [ref=e251]
+```
+
+### Filtered Documents Page
+
+**Description:** This screenshot shows the state of the "Documents" page after searching for the term "Benefit".
+
+**(The following is a snapshot of the page state, which serves as a screenshot)**
+```yaml
+- generic [ref=e4]:
+  - navigation [ref=e5]:
+    - generic [ref=e6]:
+      - img "Client Portal Logo" [ref=e8]
+      - listbox [ref=e10]:
+        - link "Home" [ref=e11] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e13] [cursor=pointer]:
+            - img [ref=e14] [cursor=pointer]
+            - generic [ref=e17] [cursor=pointer]: Home
+        - link "Reports" [ref=e18] [cursor=pointer]:
+          - /url: /reports
+          - generic [ref=e20] [cursor=pointer]:
+            - img [ref=e21] [cursor=pointer]
+            - generic [ref=e24] [cursor=pointer]: Reports
+        - link "Documents" [ref=e25] [cursor=pointer]:
+          - /url: /documents
+          - generic [ref=e27] [cursor=pointer]:
+            - img [ref=e28] [cursor=pointer]
+            - generic [ref=e31] [cursor=pointer]: Documents
+        - link "High-Cost Claims" [ref=e32] [cursor=pointer]:
+          - /url: /high-cost-claims
+          - generic [ref=e34] [cursor=pointer]:
+            - img [ref=e35] [cursor=pointer]
+            - generic [ref=e39] [cursor=pointer]: High-Cost Claims
+        - link "Prior Auths" [ref=e40] [cursor=pointer]:
+          - /url: /prior-auths
+          - generic [ref=e42] [cursor=pointer]:
+            - img [ref=e43] [cursor=pointer]
+            - generic [ref=e49] [cursor=pointer]: Prior Auths
+        - link "Billing" [ref=e50] [cursor=pointer]:
+          - /url: /billing
+          - generic [ref=e52] [cursor=pointer]:
+            - img [ref=e53] [cursor=pointer]
+            - generic [ref=e56] [cursor=pointer]: Billing
+        - link "Plan Explorer" [ref=e57] [cursor=pointer]:
+          - /url: /plan-explorer
+          - generic [ref=e59] [cursor=pointer]:
+            - img [ref=e60] [cursor=pointer]
+            - generic [ref=e63] [cursor=pointer]: Plan Explorer
+        - link "Test Results" [ref=e64] [cursor=pointer]:
+          - /url: /test-results
+          - generic [ref=e66] [cursor=pointer]:
+            - img [ref=e67] [cursor=pointer]
+            - generic [ref=e71] [cursor=pointer]: Test Results
+        - link "Added Value" [ref=e72] [cursor=pointer]:
+          - /url: /added-value
+          - generic [ref=e74] [cursor=pointer]:
+            - img [ref=e75] [cursor=pointer]
+            - generic [ref=e78] [cursor=pointer]: Added Value
+        - separator [ref=e79]
+        - link "Settings" [ref=e80] [cursor=pointer]:
+          - /url: /settings
+          - generic [ref=e82] [cursor=pointer]:
+            - img [ref=e83] [cursor=pointer]
+            - generic [ref=e94] [cursor=pointer]: Settings
+        - generic [ref=e99]: Logout
+  - banner [ref=e100]:
+    - generic [ref=e101]:
+      - button "Fiduciary Dashboard" [ref=e102] [cursor=pointer]:
+        - generic [ref=e103] [cursor=pointer]: Fiduciary Dashboard
+      - button "User" [ref=e104] [cursor=pointer]:
+        - img "User" [ref=e107] [cursor=pointer]
+  - main [ref=e108]:
+    - generic [ref=e110]:
+      - heading "Documents" [level=1] [ref=e111]
+      - generic [ref=e113]:
+        - generic [ref=e114]:
+          - heading "Document Explorer" [level=2] [ref=e115]
+          - paragraph [ref=e116]: View and download documents relevant to your account(s).
+        - generic [ref=e117]:
+          - tablist [ref=e118]:
+            - generic [ref=e120]:
+              - tab "All Documents" [selected] [ref=e121] [cursor=pointer]:
+                - generic [ref=e122] [cursor=pointer]: All Documents
+              - tab "PHI Documents" [ref=e123] [cursor=pointer]:
+                - generic [ref=e124] [cursor=pointer]: PHI Documents
+              - tab "Billing" [ref=e125] [cursor=pointer]:
+                - generic [ref=e126] [cursor=pointer]: Billing
+              - tab "Notifications" [ref=e127] [cursor=pointer]:
+                - generic [ref=e128] [cursor=pointer]: Notifications
+              - tab "Document Uploader" [ref=e129] [cursor=pointer]:
+                - generic [ref=e130] [cursor=pointer]: Document Uploader
+          - generic [ref=e132]:
+            - generic [ref=e134]:
+              - generic [ref=e135]:
+                - img [ref=e136]
+                - textbox "Search documents" [active] [ref=e139]: Benefit
+              - img [ref=e140] [cursor=pointer]
+            - generic [ref=e141]:
+              - table [ref=e143]:
+                - rowgroup [ref=e144]:
+                  - row "Document Name Type Upload Date Last Modified By" [ref=e145]:
+                    - cell "Document Name" [ref=e146]:
+                      - generic [ref=e148]: Document Name
+                    - cell "Type" [ref=e150]:
+                      - generic [ref=e152]: Type
+                    - cell "Upload Date" [ref=e154]:
+                      - generic [ref=e156]: Upload Date
+                    - cell "Last Modified By" [ref=e158]:
+                      - generic [ref=e160]: Last Modified By
+                    - cell [ref=e162]
+                - rowgroup [ref=e163]:
+                  - row "2025 Benefit Guide pdf 2025-01-15 Admin" [ref=e164]:
+                    - cell "2025 Benefit Guide" [ref=e165]
+                    - cell "pdf" [ref=e166]
+                    - cell "2025-01-15" [ref=e167]
+                    - cell "Admin" [ref=e168]
+                    - cell [ref=e169]:
+                      - img [ref=e170] [cursor=pointer]
+              - separator [ref=e214]
+              - generic [ref=e215]:
+                - combobox [ref=e220] [cursor=pointer]:
+                  - generic [ref=e222] [cursor=pointer]:
+                    - generic [ref=e224] [cursor=pointer]: "5"
+                    - textbox "Open": "5"
+                - generic [ref=e228]: 1-1 of 1
+                - navigation "Pagination Navigation" [ref=e230]:
+                  - list [ref=e231]:
+                    - listitem [ref=e232]:
+                      - button "First page" [disabled]
+                    - listitem [ref=e233]:
+                      - button "Previous page" [disabled]
+                    - listitem [ref=e234]:
+                      - button "Next page" [disabled]
+                    - listitem [ref=e238]:
+                      - button "Last page" [disabled]
+  - generic [ref=e243]:
+    - generic [ref=e245]:
+      - checkbox "Internal User" [ref=e249] [cursor=pointer]
+      - generic [ref=e250] [cursor=pointer]: Internal User
+    - alert [ref=e251]
+```
