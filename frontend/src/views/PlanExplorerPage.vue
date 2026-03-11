@@ -832,6 +832,161 @@
                   <textarea v-model="lcDawNotes" class="lc-daw-notes" placeholder="DAW Notes" />
                 </template>
 
+                <!-- Step 7: Billing -->
+                <template v-else-if="currentWizardStep === 6">
+
+                  <!-- EIN Number -->
+                  <div class="bl-section bl-section--no-gap">
+                    <p class="wizard-step-description">Review and confirm this account's EIN Number to ensure proper billing.</p>
+                    <div class="bl-field-narrow">
+                      <TextField
+                        v-model="blEinNumber"
+                        label="EIN Number"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="lc-section-divider" />
+
+                  <!-- Payment Method -->
+                  <div class="bl-section">
+                    <p class="lc-hcn-label">Payment Method</p>
+                    <div class="toc-toggle-group">
+                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blPaymentMethod === 'ACH' }]" @click="blPaymentMethod = 'ACH'">ACH</button>
+                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blPaymentMethod === 'Check' }]" @click="blPaymentMethod = 'Check'">Check</button>
+                    </div>
+
+                    <div v-if="blPaymentMethod === 'ACH'" class="bl-subsection">
+                      <p class="lc-hcn-label">ACH Method</p>
+                      <div class="toc-toggle-group">
+                        <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blAchMethod === 'send' }]" @click="blAchMethod = 'send'">Send to Liviniti</button>
+                        <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blAchMethod === 'debit' }]" @click="blAchMethod = 'debit'">Debited by Liviniti</button>
+                      </div>
+                      <p class="text-body bl-note">Please complete the attached form and forward to your implementation manager as soon as possible.</p>
+                      <button class="button button-primary bl-w9-btn">
+                        W-9 FORM
+                        <CloudDownload :size="16" :stroke-width="1.5" />
+                      </button>
+                    </div>
+
+                    <div v-if="blPaymentMethod === 'Check'" class="bl-subsection">
+                      <p class="text-body bl-note">Please send all checks to the following address:</p>
+                      <div class="bl-address">
+                        <p>Liviniti</p>
+                        <p>PO Box 896599</p>
+                        <p>Charlotte, NC 28289</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="lc-section-divider" />
+
+                  <!-- Responsible Party -->
+                  <div class="bl-section">
+                    <p class="lc-hcn-label">Responsible Party</p>
+                    <div class="toc-toggle-group">
+                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blResponsibleParty === 'existing' }]" @click="blResponsibleParty = 'existing'">Existing Contact</button>
+                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blResponsibleParty === 'new' }]" @click="blResponsibleParty = 'new'">New Contact</button>
+                    </div>
+                    <div class="lc-fields bl-contact-list">
+                      <div
+                        v-for="contact in blContactOptions"
+                        :key="contact"
+                        :class="['lc-field-row', 'bl-contact-row', { 'bl-contact-row--selected': blResponsibleContact === contact }]"
+                        @click="blResponsibleContact = contact"
+                      >
+                        <span class="lc-field-label">{{ contact }}</span>
+                        <Check v-if="blResponsibleContact === contact" :size="16" :stroke-width="2" class="lc-check-icon" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="lc-section-divider" />
+
+                  <!-- Billing Report Configuration -->
+                  <h4 class="text-h4 bl-section-heading">Billing Report Configuration</h4>
+
+                  <!-- Include Claim Details -->
+                  <div class="bl-section">
+                    <p class="lc-hcn-label">Include Claim Details in Billing Reports</p>
+                    <div class="toc-toggle-group">
+                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blClaimDetails === 'no' }]" @click="blClaimDetails = 'no'">No</button>
+                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blClaimDetails === 'yes' }]" @click="blClaimDetails = 'yes'">Yes</button>
+                    </div>
+
+                    <div v-if="blClaimDetails === 'yes'" class="bl-subsection">
+                      <p class="lc-hcn-label">Include PHI in Claim Details</p>
+                      <div class="toc-toggle-group">
+                        <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blIncludePhi === 'no' }]" @click="blIncludePhi = 'no'">No</button>
+                        <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blIncludePhi === 'yes' }]" @click="blIncludePhi = 'yes'">Yes</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Billing Cycle -->
+                  <div class="bl-section">
+                    <p class="lc-hcn-label">Billing Cycle</p>
+                    <div class="bl-field-narrow">
+                      <Select
+                        v-model="blBillingCycle"
+                        :items="blCycleOptions"
+                        label="Billing Cycle"
+                      />
+                    </div>
+                  </div>
+
+                  <!-- Division/Location breakdown -->
+                  <div class="bl-section">
+                    <p class="lc-hcn-label">Does reporting need to be broken down by division or location?</p>
+                    <div class="toc-toggle-group">
+                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blDivisionBreakdown === 'no' }]" @click="blDivisionBreakdown = 'no'">No</button>
+                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blDivisionBreakdown === 'yes' }]" @click="blDivisionBreakdown = 'yes'">Yes</button>
+                    </div>
+                    <div v-if="blDivisionBreakdown === 'yes'" class="bl-subsection-select">
+                      <Select
+                        v-model="blDivisionOption"
+                        :items="blDivisionOptions"
+                        label="Select option"
+                      />
+                    </div>
+                  </div>
+
+                  <!-- Member level breakdown -->
+                  <div class="bl-section">
+                    <p class="lc-hcn-label">Does reporting need to be broken down at the member level?</p>
+                    <div class="toc-toggle-group">
+                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blMemberBreakdown === 'no' }]" @click="blMemberBreakdown = 'no'">No</button>
+                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blMemberBreakdown === 'yes' }]" @click="blMemberBreakdown = 'yes'">Yes</button>
+                    </div>
+                  </div>
+
+                  <!-- Invoice breakout -->
+                  <div class="bl-section">
+                    <p class="lc-hcn-label">Do invoices need to be broken out?</p>
+                    <div class="toc-toggle-group">
+                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blInvoiceBreakout === 'no' }]" @click="blInvoiceBreakout = 'no'">No</button>
+                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blInvoiceBreakout === 'yes' }]" @click="blInvoiceBreakout = 'yes'">Yes</button>
+                    </div>
+                  </div>
+
+                  <div class="lc-section-divider" />
+
+                  <!-- Billing Notes -->
+                  <div class="bl-section">
+                    <v-textarea
+                      v-model="blNotes"
+                      label="Billing Notes"
+                      variant="outlined"
+                      density="compact"
+                      rows="3"
+                      auto-grow
+                      hide-details
+                      class="bl-notes-textarea"
+                    />
+                  </div>
+
+                </template>
+
                 <!-- Other steps: placeholder -->
                 <template v-else>
                   <div class="wizard-placeholder">
@@ -950,10 +1105,12 @@ import PageCard from '@/components/common/PageCard.vue';
 import Button from '@/components/ui/Button.vue';
 import ReportDataTable from '@/components/common/ReportDataTable.vue';
 import FilteringPill from '@/components/ui/FilteringPill.vue';
+import Select from '@/components/ui/Select.vue';
+import TextField from '@/components/ui/TextField.vue';
 import {
   Hourglass, CircleCheckBig, XCircle,
   Save as SaveIcon, LayoutList as LayoutListIcon, CircleCheck as CircleCheckIcon,
-  ArrowRight as ArrowRightIcon, Pencil, CheckSquare, Square, ChevronDown, PlusCircle, X, Check,
+  ArrowRight as ArrowRightIcon, Pencil, CheckSquare, Square, ChevronDown, PlusCircle, X, Check, CloudDownload,
 } from 'lucide-vue-next';
 import EmptyStateImg from '@/assets/EmptyState.svg';
 import { VRow, VCol, VProgressCircular } from 'vuetify/components';
@@ -1069,6 +1226,25 @@ const lcDawPenalties = ref([
     value: true,
   },
 ]);
+
+// ─── Step 7: Billing ─────────────────────────────────────────────────────────
+
+const blPaymentMethod = ref('ACH');
+const blAchMethod = ref('send');
+const blResponsibleParty = ref('existing');
+const blResponsibleContact = ref('Nick Johnson');
+const blContactOptions = ['Nick Johnson', 'Sarah Lee', 'Mark Davis'];
+const blClaimDetails = ref('yes');
+const blIncludePhi = ref('no');
+const blBillingCycle = ref('Weekly');
+const blCycleOptions = ['Weekly', 'Bi-Weekly', 'Monthly'];
+const blDivisionBreakdown = ref('no');
+const blDivisionOption = ref('');
+const blDivisionOptions = ['Division', 'Location', 'Both'];
+const blMemberBreakdown = ref('yes');
+const blInvoiceBreakout = ref('no');
+const blEinNumber = ref('111111111');
+const blNotes = ref('');
 
 const lcOverrides = [
   'Vacation Supply',
@@ -1719,9 +1895,13 @@ watch(selectedAccount, (newVal) => {
 // ─── Wizard step content (right column) ──────────────────────────────────────
 
 .wizard-step-header {
-  margin-bottom: $spacing-medium;
+  margin-bottom: $spacing-large;
   padding-bottom: $spacing-medium;
   border-bottom: 1px solid $color-border;
+}
+
+.wizard-step-body {
+  padding-top: 0;
 }
 
 .wizard-step-header-meta {
@@ -1742,7 +1922,10 @@ watch(selectedAccount, (newVal) => {
   margin-bottom: $spacing-xsmall;
 }
 
-.wizard-step-description { color: $color-text-secondary; }
+.wizard-step-description {
+  color: $color-text-secondary;
+  margin-bottom: $spacing-medium;
+}
 
 .wizard-placeholder {
   border: 1px dashed $color-border;
@@ -2657,6 +2840,87 @@ watch(selectedAccount, (newVal) => {
   &:hover {
     border-color: $color-primary;
     color: $color-primary;
+  }
+}
+
+// ─── Step 7: Billing ─────────────────────────────────────────────────────────
+
+.bl-section {
+  margin-bottom: $spacing-large;
+
+  &--no-gap {
+    margin-bottom: 0;
+  }
+}
+
+.bl-subsection {
+  margin-top: $spacing-medium;
+  margin-left: $spacing-large;
+}
+
+.bl-note {
+  color: $color-text-secondary;
+  margin: $spacing-small 0;
+}
+
+.bl-w9-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-xsmall;
+}
+
+.bl-address {
+  margin-top: $spacing-xsmall;
+  padding-left: $spacing-large;
+
+  p {
+    font-size: $font-size-body;
+    color: $color-text-primary;
+    margin: 0;
+    line-height: 1.6;
+  }
+}
+
+.bl-contact-list {
+  margin-top: $spacing-small;
+}
+
+.bl-contact-row {
+  cursor: pointer;
+
+  &:hover {
+    background-color: #f9f9f9;
+  }
+
+  &--selected .lc-field-label {
+    color: $color-primary;
+    font-weight: $font-weight-semibold;
+  }
+}
+
+.bl-section-heading {
+  margin-bottom: $spacing-large;
+}
+
+.bl-field-narrow {
+  max-width: 340px;
+}
+
+.bl-subsection-select {
+  margin-top: $spacing-small;
+  max-width: 340px;
+}
+
+.bl-notes-textarea {
+  :deep(.v-field__input) {
+    font-family: $font-family-base !important;
+    letter-spacing: 0 !important;
+  }
+
+  :deep(.v-label) {
+    font-family: $font-family-base !important;
+    letter-spacing: 0 !important;
+    color: $color-neutral-disabled !important;
   }
 }
 </style>
