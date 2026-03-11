@@ -54,6 +54,12 @@ $font-weight-semibold: 600;
 $font-weight-bold: 700;
 $line-height-tight: 120%;
 
+html,
+body {
+  overflow: auto !important; // allow document-level scroll (overrides Vuetify's overflow: hidden)
+  height: auto !important;
+}
+
 body {
   font-family: $font-family-base;
   background-color: $color-neutral-white;

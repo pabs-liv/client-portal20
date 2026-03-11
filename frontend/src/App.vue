@@ -2,7 +2,7 @@
   <v-app>
     <Sidebar />
     <Header />
-    <v-main style="overflow-y: auto;">
+    <v-main>
       <v-container fluid class="main-container">
         <router-view />
       </v-container>

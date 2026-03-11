@@ -12,8 +12,7 @@
       v-model="selectedAccount"
       :show-slot="false"
       variant="outlined"
-    >
-    </AccountSelector>
+    />
 
     <PageCard
       v-if="selectedAccount"
@@ -21,25 +20,695 @@
       description-text="Implementation progress."
     >
       <div class="plan-explorer-content">
-        <v-row>
-          <v-col cols="12" md="4">
+        <v-row :align="wizardActive && isStarkIndustries ? 'start' : undefined">
+          <!-- LEFT: Timeline -->
+          <v-col cols="12" md="3" :class="{ 'plan-col--sticky': wizardActive && isStarkIndustries }">
+            <div :class="['plan-timeline-wrapper', { 'plan-timeline-wrapper--sticky': wizardActive && isStarkIndustries }]">
             <v-timeline side="start" class="plan-timeline">
               <v-timeline-item
                 v-for="(step, index) in implementationSteps"
                 :key="index"
+                v-show="!wizardActive || !isStarkIndustries || step.title === 'Plan Setup'"
                 :dot-color="step.status === 'completed' ? 'success' : step.status === 'in-progress' ? 'primary' : 'grey-lighten-1'"
                 size="small"
+                :class="{ 'v-timeline-item--has-sub-steps': step.title === 'Plan Setup' && isStarkIndustries && step.active }"
                 @click="selectTimelineItem(step)"
               >
-                <v-card class="timeline-card" :class="{'active-card': step.active}">
+                <v-card class="timeline-card" :class="{ 'active-card': step.active }">
                   <v-card-title class="text-h4">{{ step.title }}</v-card-title>
                   <v-card-text>{{ step.description }}</v-card-text>
                 </v-card>
+
+                <!-- Wizard sub-steps nested below Plan Setup (Stark Industries only) -->
+                <div
+                  v-if="step.title === 'Plan Setup' && isStarkIndustries && step.active"
+                  class="wizard-sub-steps"
+                >
+                  <ul class="wizard-sub-step-list">
+                    <li
+                      v-for="(wStep, wIndex) in wizardSteps"
+                      :key="wIndex"
+                      :class="['wizard-sub-step-item', { 'wizard-sub-step-item--active': wizardActive && currentWizardStep === wIndex }]"
+                      @click.stop="selectWizardStep(wIndex)"
+                    >
+                      <span class="wizard-sub-step-number">{{ wIndex + 1 }}</span>
+                      <span class="wizard-sub-step-name">{{ wStep.name }}</span>
+                    </li>
+                  </ul>
+                </div>
               </v-timeline-item>
             </v-timeline>
+            </div>
           </v-col>
-          <v-col cols="12" md="8">
-            <div v-if="activeTimelineItem" class="timeline-details-card">
+
+          <!-- RIGHT: Content panel -->
+          <v-col cols="12" md="9">
+
+            <!-- Wizard step content (Stark Industries, Plan Setup active, sub-step selected) -->
+            <div v-if="wizardActive && isStarkIndustries && activeTimelineItem?.title === 'Plan Setup'">
+              <div class="wizard-step-header">
+                <div class="wizard-step-header-meta">
+                  <span class="wizard-step-counter">Step {{ currentWizardStep + 1 }} of {{ wizardSteps.length }}</span>
+                  <span v-if="wizardSteps[currentWizardStep].required" class="wizard-required-badge">Required</span>
+                </div>
+                <h2 class="text-h2 wizard-step-title">{{ wizardSteps[currentWizardStep].name }}</h2>
+                <p class="text-body wizard-step-description">{{ wizardSteps[currentWizardStep].description }}</p>
+              </div>
+
+              <div class="wizard-step-body">
+                <!-- Step 1: Account Profile -->
+                <template v-if="currentWizardStep === 0">
+
+                  <!-- Section: Account Profile -->
+                  <div class="ap-section">
+                    <div class="ap-section-header">
+                      <h4 class="text-h4">Account Profile</h4>
+                      <button v-if="!editingAccountProfile" class="button button-thirtiary" @click="startEditAccountProfile">
+                        <Pencil :size="14" :stroke-width="1.5" />Edit
+                      </button>
+                    </div>
+
+                    <div class="ap-fields">
+                      <template v-if="!editingAccountProfile">
+                        <div class="ap-field-row ap-field-row--multi ap-field-row--thirds">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Account name</span>
+                            <span class="ap-field-value">{{ accountProfile.accountName || '—' }}</span>
+                          </div>
+                          <div class="ap-field">
+                            <span class="ap-field-label">Legal Name</span>
+                            <span class="ap-field-value">{{ accountProfile.legalName || '—' }}</span>
+                          </div>
+                          <div class="ap-field">
+                            <span class="ap-field-label">DBA</span>
+                            <span class="ap-field-value">{{ accountProfile.dba || '—' }}</span>
+                          </div>
+                        </div>
+                        <div class="ap-field-row ap-field-row--multi">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Effective start date</span>
+                            <span class="ap-field-value">{{ accountProfile.effectiveStartDate || '—' }}</span>
+                          </div>
+                          <div class="ap-field">
+                            <span class="ap-field-label">Effective end date</span>
+                            <span class="ap-field-value">{{ accountProfile.effectiveEndDate || '—' }}</span>
+                          </div>
+                        </div>
+                        <div class="ap-field-row">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Status</span>
+                            <span class="ap-field-value">{{ accountProfile.status || '—' }}</span>
+                          </div>
+                        </div>
+                        <div class="ap-field-row">
+                          <div class="ap-checkbox-row">
+                            <CheckSquare v-if="accountProfile.isRxWatchtower" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                            <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                            <span class="ap-field-value">IsRxWatchtower</span>
+                          </div>
+                        </div>
+                        <div class="ap-field-row">
+                          <div class="ap-checkbox-row">
+                            <CheckSquare v-if="accountProfile.manualClaims" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                            <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                            <span class="ap-field-value">Manual Claims</span>
+                          </div>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <div class="form-row">
+                          <v-text-field v-model="editableAccountProfile.accountName" label="Account name" variant="outlined" density="compact" />
+                          <v-text-field v-model="editableAccountProfile.legalName" label="Legal Name" variant="outlined" density="compact" />
+                          <v-text-field v-model="editableAccountProfile.dba" label="DBA" variant="outlined" density="compact" />
+                        </div>
+                        <div class="form-row">
+                          <v-text-field v-model="editableAccountProfile.effectiveStartDate" label="Effective start date" variant="outlined" density="compact" placeholder="MM/DD/YYYY" />
+                          <v-text-field v-model="editableAccountProfile.effectiveEndDate" label="Effective end date" variant="outlined" density="compact" placeholder="MM/DD/YYYY" />
+                        </div>
+                        <div class="form-row">
+                          <v-select v-model="editableAccountProfile.status" :items="statusOptions" label="Status" variant="outlined" density="compact" />
+                        </div>
+                        <div class="ap-edit-checkboxes">
+                          <div class="ap-checkbox-toggle" @click="editableAccountProfile.isRxWatchtower = !editableAccountProfile.isRxWatchtower">
+                            <CheckSquare v-if="editableAccountProfile.isRxWatchtower" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                            <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                            <span class="ap-field-value">IsRxWatchtower</span>
+                          </div>
+                          <div class="ap-checkbox-toggle" @click="editableAccountProfile.manualClaims = !editableAccountProfile.manualClaims">
+                            <CheckSquare v-if="editableAccountProfile.manualClaims" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                            <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                            <span class="ap-field-value">Manual Claims</span>
+                          </div>
+                        </div>
+                        <div class="ap-section-footer">
+                          <button class="button button-primary" @click="saveAccountProfile">Save Changes</button>
+                          <button class="button button-secondary" @click="cancelEditAccountProfile">Cancel</button>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+
+                  <!-- Section: About This Company -->
+                  <div class="ap-section">
+                    <div class="ap-section-header">
+                      <h4 class="text-h4">About This Company</h4>
+                      <button v-if="!editingCompanyInfo" class="button button-thirtiary" @click="startEditCompanyInfo">
+                        <Pencil :size="14" :stroke-width="1.5" />Edit
+                      </button>
+                    </div>
+
+                    <div class="ap-fields">
+                      <template v-if="!editingCompanyInfo">
+                        <div class="ap-field-row">
+                          <div class="ap-field">
+                            <span class="ap-field-label">SIC Code</span>
+                            <span class="ap-field-value">{{ companyInfo.sicCode || '—' }}</span>
+                          </div>
+                        </div>
+                        <h5 class="ap-subsection-heading">Physical Address</h5>
+                        <div class="ap-field-row">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Address 1</span>
+                            <span class="ap-field-value">{{ companyInfo.physicalAddress1 || '—' }}</span>
+                          </div>
+                        </div>
+                        <div class="ap-field-row">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Address 2</span>
+                            <span class="ap-field-value">{{ companyInfo.physicalAddress2 || '—' }}</span>
+                          </div>
+                        </div>
+                        <div class="ap-field-row ap-field-row--multi ap-field-row--thirds">
+                          <div class="ap-field">
+                            <span class="ap-field-label">City</span>
+                            <span class="ap-field-value">{{ companyInfo.physicalCity || '—' }}</span>
+                          </div>
+                          <div class="ap-field">
+                            <span class="ap-field-label">State</span>
+                            <span class="ap-field-value">{{ companyInfo.physicalState || '—' }}</span>
+                          </div>
+                          <div class="ap-field">
+                            <span class="ap-field-label">ZIP</span>
+                            <span class="ap-field-value">{{ companyInfo.physicalZip || '—' }}</span>
+                          </div>
+                        </div>
+                        <div class="ap-field-row">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Country</span>
+                            <span class="ap-field-value">{{ companyInfo.physicalCountry || '—' }}</span>
+                          </div>
+                        </div>
+                        <h5 class="ap-subsection-heading">Mailing Address</h5>
+                        <div class="ap-field-row">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Address 1</span>
+                            <span class="ap-field-value">{{ companyInfo.mailingAddress1 || '—' }}</span>
+                          </div>
+                        </div>
+                        <div class="ap-field-row">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Address 2</span>
+                            <span class="ap-field-value">{{ companyInfo.mailingAddress2 || '—' }}</span>
+                          </div>
+                        </div>
+                        <div class="ap-field-row ap-field-row--multi ap-field-row--thirds">
+                          <div class="ap-field">
+                            <span class="ap-field-label">City</span>
+                            <span class="ap-field-value">{{ companyInfo.mailingCity || '—' }}</span>
+                          </div>
+                          <div class="ap-field">
+                            <span class="ap-field-label">State</span>
+                            <span class="ap-field-value">{{ companyInfo.mailingState || '—' }}</span>
+                          </div>
+                          <div class="ap-field">
+                            <span class="ap-field-label">ZIP</span>
+                            <span class="ap-field-value">{{ companyInfo.mailingZip || '—' }}</span>
+                          </div>
+                        </div>
+                        <div class="ap-field-row">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Country</span>
+                            <span class="ap-field-value">{{ companyInfo.mailingCountry || '—' }}</span>
+                          </div>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <div class="form-row">
+                          <v-text-field v-model="editableCompanyInfo.sicCode" label="SIC Code" variant="outlined" density="compact" />
+                        </div>
+                        <h5 class="ap-subsection-heading">Physical Address</h5>
+                        <div class="form-row">
+                          <v-text-field v-model="editableCompanyInfo.physicalAddress1" label="Address 1" variant="outlined" density="compact" />
+                        </div>
+                        <div class="form-row">
+                          <v-text-field v-model="editableCompanyInfo.physicalAddress2" label="Address 2" variant="outlined" density="compact" />
+                        </div>
+                        <div class="form-row">
+                          <v-text-field v-model="editableCompanyInfo.physicalCity" label="City" variant="outlined" density="compact" />
+                          <v-text-field v-model="editableCompanyInfo.physicalState" label="State" variant="outlined" density="compact" />
+                          <v-text-field v-model="editableCompanyInfo.physicalZip" label="ZIP" variant="outlined" density="compact" />
+                        </div>
+                        <div class="form-row">
+                          <v-text-field v-model="editableCompanyInfo.physicalCountry" label="Country" variant="outlined" density="compact" />
+                        </div>
+                        <div class="ap-mailing-header">
+                          <h5 class="ap-subsection-heading">Mailing Address</h5>
+                          <div class="ap-checkbox-toggle" @click="toggleSameAsPhysical">
+                            <CheckSquare v-if="sameAsPhysical" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                            <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                            <span class="text-small" style="color: var(--v-theme-on-surface, #1A1A1A);">Same as physical address</span>
+                          </div>
+                        </div>
+                        <div class="form-row">
+                          <v-text-field v-model="editableCompanyInfo.mailingAddress1" label="Address 1" variant="outlined" density="compact" :disabled="sameAsPhysical" />
+                        </div>
+                        <div class="form-row">
+                          <v-text-field v-model="editableCompanyInfo.mailingAddress2" label="Address 2" variant="outlined" density="compact" :disabled="sameAsPhysical" />
+                        </div>
+                        <div class="form-row">
+                          <v-text-field v-model="editableCompanyInfo.mailingCity" label="City" variant="outlined" density="compact" :disabled="sameAsPhysical" />
+                          <v-text-field v-model="editableCompanyInfo.mailingState" label="State" variant="outlined" density="compact" :disabled="sameAsPhysical" />
+                          <v-text-field v-model="editableCompanyInfo.mailingZip" label="ZIP" variant="outlined" density="compact" :disabled="sameAsPhysical" />
+                        </div>
+                        <div class="form-row">
+                          <v-text-field v-model="editableCompanyInfo.mailingCountry" label="Country" variant="outlined" density="compact" :disabled="sameAsPhysical" />
+                        </div>
+                        <div class="ap-section-footer">
+                          <button class="button button-primary" @click="saveCompanyInfo">Save Changes</button>
+                          <button class="button button-secondary" @click="cancelEditCompanyInfo">Cancel</button>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+
+                </template>
+
+                <!-- Step 2: Network Configuration -->
+                <template v-else-if="currentWizardStep === 1">
+
+                  <!-- Preferred Networks -->
+                  <div class="nc-section">
+                    <div class="nc-section-header">
+                      <h4 class="text-h4">Preferred Networks</h4>
+                      <button class="button button-primary">Add Network Link</button>
+                    </div>
+                    <ReportDataTable
+                      :headers="networkHeaders"
+                      :items="networkRows"
+                      :show-search-bar="true"
+                      :show-filter-button="false"
+                      :show-filter-pills="true"
+                      :initial-filter-pills="networkFilterPills"
+                      :show-selection-checkboxes="false"
+                      :show-row-actions="true"
+                      :show-table-footer="true"
+                      search-placeholder="Search by network name"
+                    />
+                  </div>
+
+                  <!-- Preferred Pharmacies -->
+                  <div class="nc-section">
+                    <div class="nc-section-header">
+                      <h4 class="text-h4">Preferred Pharmacies</h4>
+                    </div>
+
+                    <div class="nc-tabs">
+                      <button
+                        v-for="tab in pharmacyTabs"
+                        :key="tab"
+                        :class="['nc-tab', { 'nc-tab--active': activePharmacyTab === tab }]"
+                        @click="activePharmacyTab = tab"
+                      >{{ tab }}</button>
+                    </div>
+
+                    <div class="nc-empty-state nc-empty-state--tab">
+                      <img :src="EmptyStateImg" alt="No data" class="nc-empty-icon" />
+                      <p class="nc-empty-title">Nothing to see here</p>
+                      <p class="nc-empty-subtitle">There are no Assigned {{ activePharmacyTab }} Pharmacies.</p>
+                      <button class="button button-secondary">Assign {{ activePharmacyTab }} Pharmacies</button>
+                    </div>
+                  </div>
+
+                </template>
+
+                <!-- Step 3: Plan Design -->
+                <template v-else-if="currentWizardStep === 2">
+                  <div class="pd-header">
+                    <h4 class="text-h4">All Plans</h4>
+                    <button class="button button-primary">Create New Plan</button>
+                  </div>
+
+                  <div class="pd-accordion-list">
+                    <div
+                      v-for="plan in planDesignPlans"
+                      :key="plan.id"
+                      class="pd-accordion"
+                    >
+                      <div class="pd-accordion-header" @click="togglePlan(plan.id)">
+                        <div class="pd-accordion-header-left">
+                          <span class="pd-plan-name">{{ plan.name }}</span>
+                          <span class="pd-plan-id">ID - {{ plan.id }}</span>
+                          <span :class="['pd-status-badge', `pd-status-badge--${plan.status.toLowerCase()}`]">{{ plan.status }}</span>
+                        </div>
+                        <ChevronDown
+                          :class="['pd-accordion-chevron', { 'pd-accordion-chevron--open': expandedPlans.includes(plan.id) }]"
+                          :size="20"
+                          :stroke-width="1.5"
+                        />
+                      </div>
+                      <div v-if="expandedPlans.includes(plan.id)" class="pd-accordion-body">
+
+                        <!-- Plan Overview -->
+                        <div class="pd-section">
+                          <div class="pd-section-header">
+                            <h4 class="text-h4">Plan Overview</h4>
+                            <button class="button button-thirtiary">
+                              <Pencil :size="14" :stroke-width="1.5" /> Edit
+                            </button>
+                          </div>
+                          <div class="ap-field-row ap-field-row--multi ap-field-row--five">
+                            <div class="ap-field">
+                              <span class="ap-field-label">Plan Name</span>
+                              <span class="ap-field-value">{{ plan.name }}</span>
+                              <span class="ap-field-sub">ID - {{ plan.id }}</span>
+                            </div>
+                            <div class="ap-field">
+                              <span class="ap-field-label">Plan Status</span>
+                              <span :class="['pd-status-badge', `pd-status-badge--${plan.status.toLowerCase()}`]">{{ plan.status }}</span>
+                            </div>
+                            <div class="ap-field">
+                              <span class="ap-field-label">Eff. start date</span>
+                              <span class="ap-field-value">{{ plan.effStartDate || '—' }}</span>
+                            </div>
+                            <div class="ap-field">
+                              <span class="ap-field-label">Eff. end date</span>
+                              <span class="ap-field-value">{{ plan.effEndDate || '—' }}</span>
+                            </div>
+                            <div class="ap-field">
+                              <span class="ap-field-label">Benefit reset to $0</span>
+                              <span class="ap-field-value">{{ plan.benefitReset || '—' }}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="pd-section-divider" />
+
+                        <!-- Plan Parameters -->
+                        <div class="pd-section">
+                          <div class="pd-section-header">
+                            <h4 class="text-h4">Plan Parameters</h4>
+                          </div>
+                          <div class="pd-param-add-card">
+                            <div class="pd-param-add-icon">
+                              <PlusCircle :size="28" :stroke-width="1" />
+                            </div>
+                            <div class="pd-param-add-text">
+                              <span class="pd-param-add-title">Add Plan Parameter Option</span>
+                              <span class="pd-param-add-subtitle">Set applicable plan parameters to enforce as part of this plan's configuration.</span>
+                            </div>
+                          </div>
+
+                          <!-- OCC field shown after a parameter is added -->
+                          <div class="ap-field-row" style="margin-top: 16px;">
+                            <div class="ap-field">
+                              <span class="ap-field-label">OCC(Other coverage code)</span>
+                              <span class="ap-field-value">1 - No other c...</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="pd-section-divider" />
+
+                        <!-- Plan Max Spend Parameters -->
+                        <div class="pd-section">
+                          <div class="pd-section-header">
+                            <h4 class="text-h4">Plan Max Spend Parameters</h4>
+                          </div>
+                          <div class="pd-toggle-row">
+                            <div class="pd-toggle-text">
+                              <p class="pd-toggle-description">Enables additional configuration to set the maximum amount of money that a plan will spend on covered medications within a specific...</p>
+                              <button class="pd-show-more">Show More</button>
+                            </div>
+                            <v-switch
+                              v-model="plan.maxSpendEnabled"
+                              density="compact"
+                              hide-details
+                              color="primary"
+                              class="pd-toggle-switch"
+                            />
+                          </div>
+                        </div>
+
+                        <div class="pd-section-divider" />
+
+                        <!-- Coordination of Benefits -->
+                        <div class="pd-section">
+                          <div class="pd-section-header">
+                            <h4 class="text-h4">Coordination of Benefits</h4>
+                          </div>
+                          <div class="ap-field-row">
+                            <div class="ap-checkbox-row">
+                              <CheckSquare v-if="plan.allowSecondaryPayer" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" @click="plan.allowSecondaryPayer = !plan.allowSecondaryPayer" style="cursor:pointer" />
+                              <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" @click="plan.allowSecondaryPayer = !plan.allowSecondaryPayer" style="cursor:pointer" />
+                              <span class="ap-field-value">Allow Secondary Payer</span>
+                            </div>
+                          </div>
+                          <div class="ap-field-row">
+                            <div class="ap-field">
+                              <span class="ap-field-label">COB configuration</span>
+                              <span class="ap-field-value">{{ plan.cobConfiguration || '—' }}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Applicable Benefit Period -->
+                        <div class="pd-section">
+                          <div class="pd-section-header">
+                            <h4 class="text-h4">Applicable Benefit Period</h4>
+                            <button class="button button-thirtiary">
+                              <Pencil :size="14" :stroke-width="1.5" /> Edit
+                            </button>
+                          </div>
+                          <div class="ap-field-row">
+                            <div class="ap-field">
+                              <span class="ap-field-label">Benefit period</span>
+                            </div>
+                          </div>
+                          <div class="ap-field-row">
+                            <div class="ap-checkbox-row">
+                              <CheckSquare v-if="plan.benefitByFlag" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" @click="plan.benefitByFlag = !plan.benefitByFlag" style="cursor:pointer" />
+                              <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" @click="plan.benefitByFlag = !plan.benefitByFlag" style="cursor:pointer" />
+                              <span class="ap-field-value">Determine benefit stage by flag in eligibility file, not by accumulator data</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- BPG Configuration -->
+                        <div class="pd-section">
+                          <div class="pd-section-header">
+                            <h4 class="text-h4">BPG Configuration</h4>
+                            <button class="button button-thirtiary">
+                              <Pencil :size="14" :stroke-width="1.5" /> Edit
+                            </button>
+                          </div>
+                          <ReportDataTable
+                            :headers="bpgHeaders"
+                            :items="plan.bpgRows"
+                            :show-search-bar="false"
+                            :show-filter-pills="false"
+                            :show-selection-checkboxes="false"
+                            :show-row-actions="false"
+                            :show-table-footer="false"
+                          />
+                        </div>
+
+                        <div class="pd-section-divider" />
+
+                        <!-- Associated Plan Codes -->
+                        <div class="pd-section">
+                          <div class="pd-section-header">
+                            <h4 class="text-h4">Associated Plan Codes</h4>
+                            <button class="button button-thirtiary">
+                              <Pencil :size="14" :stroke-width="1.5" /> Edit
+                            </button>
+                          </div>
+                          <ReportDataTable
+                            :headers="planCodesHeaders"
+                            :items="plan.planCodes"
+                            :show-search-bar="false"
+                            :show-filter-pills="false"
+                            :show-selection-checkboxes="false"
+                            :show-row-actions="false"
+                            :show-table-footer="false"
+                          >
+                            <template #status="{ item }">
+                              <span :class="['pd-status-badge', `pd-status-badge--${item.status.toLowerCase()}`]">{{ item.status }}</span>
+                            </template>
+                          </ReportDataTable>
+                        </div>
+
+                        <div class="pd-section-divider" />
+
+                        <!-- Associated Benefit Codes -->
+                        <div class="pd-section">
+                          <div class="pd-section-header">
+                            <h4 class="text-h4">Associated Benefit Codes</h4>
+                            <button class="button button-thirtiary">
+                              <Pencil :size="14" :stroke-width="1.5" /> Edit
+                            </button>
+                          </div>
+                          <ReportDataTable
+                            :headers="benefitCodesHeaders"
+                            :items="plan.benefitCodes"
+                            :show-search-bar="false"
+                            :show-filter-pills="false"
+                            :show-selection-checkboxes="false"
+                            :show-row-actions="false"
+                            :show-table-footer="false"
+                          >
+                            <template #empty-state>
+                              <div class="nc-empty-state">
+                                <img :src="EmptyStateImg" alt="No data" class="nc-empty-icon" />
+                                <p class="nc-empty-title">Nothing configured yet</p>
+                                <button class="button button-secondary pd-empty-cta">Configure Benefit Codes</button>
+                              </div>
+                            </template>
+                          </ReportDataTable>
+                        </div>
+
+                        <div class="pd-section-divider" />
+
+                        <!-- Associated Accumulators -->
+                        <div class="pd-section">
+                          <div class="pd-section-header">
+                            <h4 class="text-h4">Associated Accumulators</h4>
+                            <button class="button button-thirtiary">
+                              <Pencil :size="14" :stroke-width="1.5" /> Edit
+                            </button>
+                          </div>
+                          <ReportDataTable
+                            :headers="accumulatorsHeaders"
+                            :items="plan.accumulators"
+                            :show-search-bar="false"
+                            :show-filter-pills="false"
+                            :show-selection-checkboxes="false"
+                            :show-row-actions="false"
+                            :show-table-footer="false"
+                          />
+                        </div>
+
+                        <div class="pd-section-divider" />
+
+                        <!-- Copay Structure card -->
+                        <div class="cs-card">
+                          <div class="cs-card-header">
+                            <h4 class="text-h4">Copay Structure</h4>
+                            <div class="cs-card-actions">
+                              <button class="button button-secondary">+ Add Source</button>
+                              <button class="button button-secondary">Notes</button>
+                            </div>
+                          </div>
+
+                          <div class="nc-tabs">
+                            <button
+                              v-for="tab in copayTabs"
+                              :key="tab"
+                              :class="['nc-tab', { 'nc-tab--active': activeCopayTab === tab }]"
+                              @click="activeCopayTab = tab"
+                            >{{ tab }}</button>
+                          </div>
+
+                          <div class="cs-network-header">
+                            <span class="cs-network-title">{{ activeCopayTab }} Pharmacy Network</span>
+                            <button class="button button-thirtiary">
+                              <Pencil :size="14" :stroke-width="1.5" /> Edit
+                            </button>
+                          </div>
+
+                          <ReportDataTable
+                            :headers="copayStructureHeaders"
+                            :items="copayStructureRows"
+                            :show-search-bar="false"
+                            :show-filter-pills="false"
+                            :show-selection-checkboxes="false"
+                            :show-row-actions="false"
+                            :show-table-footer="false"
+                          />
+                        </div>
+
+                      </div>
+                    </div>
+                  </div>
+                </template>
+
+                <!-- Other steps: placeholder -->
+                <template v-else>
+                  <div class="wizard-placeholder">
+                    <p class="text-body" style="color: var(--color-neutral-disabled);">
+                      Content for <strong>{{ wizardSteps[currentWizardStep].name }}</strong> coming soon.
+                    </p>
+                  </div>
+                </template>
+              </div>
+
+              <div class="wizard-footer">
+                <button class="button button-secondary" @click="wizardActive = false">Back to Overview</button>
+                <div class="wizard-footer-actions">
+                  <button v-if="currentWizardStep > 0" class="button button-secondary" @click="prevWizardStep">Previous</button>
+                  <button v-if="currentWizardStep < wizardSteps.length - 1" class="button button-primary" @click="nextWizardStep">Next</button>
+                  <button v-if="currentWizardStep === wizardSteps.length - 1" class="button button-primary">Submit for Review</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Overview card (Stark Industries, Plan Setup selected, no sub-step yet) -->
+            <div
+              v-else-if="activeTimelineItem?.title === 'Plan Setup' && isStarkIndustries"
+              class="wizard-overview"
+            >
+              <div class="wizard-overview-header">
+                <h2 class="wizard-overview-title">Client Implementation</h2>
+                <p class="wizard-overview-subtitle">
+                  This guided workflow will walk you through configuring
+                  <strong>{{ selectedAccountName.replace('Implementation Tracker for ', '') }}</strong>
+                  from start to finish.
+                </p>
+              </div>
+
+              <div class="wizard-overview-body">
+                <p class="wizard-overview-section-label">WHAT YOU'LL CONFIGURE</p>
+                <div class="wizard-steps-grid">
+                  <div v-for="(step, index) in wizardSteps" :key="index" class="wizard-grid-item">
+                    <span class="wizard-grid-number">{{ index + 1 }}</span>
+                    <span class="wizard-grid-name">{{ step.name }}</span>
+                    <span v-if="step.required" class="wizard-required-badge">Required</span>
+                  </div>
+                </div>
+                <div class="wizard-info-list">
+                  <div class="wizard-info-item">
+                    <SaveIcon :size="18" :stroke-width="1.5" class="wizard-info-icon" />
+                    <p class="text-small">Your progress is saved automatically as you move between steps. You can exit and return at any time.</p>
+                  </div>
+                  <div class="wizard-info-item">
+                    <LayoutListIcon :size="18" :stroke-width="1.5" class="wizard-info-icon" />
+                    <p class="text-small">Once started, you can jump to any step using the sidebar navigation.</p>
+                  </div>
+                  <div class="wizard-info-item">
+                    <CircleCheckIcon :size="18" :stroke-width="1.5" class="wizard-info-icon" />
+                    <p class="text-small">Required steps must be completed before you can submit for review.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="wizard-overview-footer">
+                <button class="button button-primary" @click="selectWizardStep(0)">
+                  Get Started <ArrowRightIcon :size="16" :stroke-width="2" style="margin-left: 6px;" />
+                </button>
+              </div>
+            </div>
+
+            <!-- Standard details panel (all other steps / accounts) -->
+            <div v-else-if="activeTimelineItem" class="timeline-details-card">
               <div class="d-flex justify-space-between align-center mb-small">
                 <div class="timeline-text-content d-flex flex-column timeline-text-content-gap">
                   <h3 class="text-h3">{{ activeTimelineItem.title }} Details</h3>
@@ -67,44 +736,37 @@
                   >{{ activeTimelineItem.status }}</v-chip>
                 </div>
               </div>
-
-              <Button
-                v-if="activeTimelineItem.status === 'in-progress'"
-                @click="markAsComplete(activeTimelineItem)"
-                label="Mark as Complete"
-                variant="elevated"
-                color="primary"
-              />
-              <Button
-                v-if="activeTimelineItem.status === 'pending'"
-                @click="markAsInProgress(activeTimelineItem)"
-                label="Mark as In-Progress"
-                variant="elevated"
-                color="primary"
-              />
-              <Button
-                v-if="activeTimelineItem.status === 'completed'"
-                @click="markAsPending(activeTimelineItem)"
-                label="Mark as Pending"
-                variant="outlined"
-                color="primary"
-              />
+              <Button v-if="activeTimelineItem.status === 'in-progress'" @click="markAsComplete(activeTimelineItem)" label="Mark as Complete" variant="elevated" color="primary" />
+              <Button v-if="activeTimelineItem.status === 'pending'" @click="markAsInProgress(activeTimelineItem)" label="Mark as In-Progress" variant="elevated" color="primary" />
+              <Button v-if="activeTimelineItem.status === 'completed'" @click="markAsPending(activeTimelineItem)" label="Mark as Pending" variant="outlined" color="primary" />
             </div>
+
             <div v-else class="timeline-details-placeholder">
               <p class="text-body text-neutral-disabled">Select a step on the timeline to view its details.</p>
             </div>
+
           </v-col>
         </v-row>
       </div>
     </PageCard>
   </div>
 </template>
+
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import AccountSelector from '@/components/common/AccountSelector.vue';
 import PageCard from '@/components/common/PageCard.vue';
-import { Hourglass, CircleCheckBig, XCircle } from 'lucide-vue-next';
+import Button from '@/components/ui/Button.vue';
+import ReportDataTable from '@/components/common/ReportDataTable.vue';
+import {
+  Hourglass, CircleCheckBig, XCircle,
+  Save as SaveIcon, LayoutList as LayoutListIcon, CircleCheck as CircleCheckIcon,
+  ArrowRight as ArrowRightIcon, Pencil, CheckSquare, Square, ChevronDown, PlusCircle,
+} from 'lucide-vue-next';
+import EmptyStateImg from '@/assets/EmptyState.svg';
 import { VRow, VCol, VProgressCircular } from 'vuetify/components';
+
+const STARK_INDUSTRIES_ID = 1;
 
 const accountOptions = ref([
   { id: 1, name: 'Stark Industries' },
@@ -115,16 +777,32 @@ const accountOptions = ref([
 ]);
 
 const selectedAccount = ref<number | null>(null);
+const wizardActive = ref(false);
+const currentWizardStep = ref(0);
+
+const isStarkIndustries = computed(() => selectedAccount.value === STARK_INDUSTRIES_ID);
 
 const selectedAccountName = computed(() => {
   const account = accountOptions.value.find(acc => acc.id === selectedAccount.value);
   return account ? `Implementation Tracker for ${account.name}` : '';
 });
 
+const wizardSteps = ref([
+  { name: 'Account Profile',        required: true,  description: 'Confirm the account details, set effective dates and set notes or alerts if applicable.' },
+  { name: 'Network Configuration',  required: true,  description: 'Define the pharmacy network and coverage settings for this account.' },
+  { name: 'Plan Design',            required: true,  description: 'Configure the benefit structure, cost-sharing rules, and coverage tiers.' },
+  { name: 'Transition of Care',     required: false, description: 'Set up transition of care rules for members moving from another plan.' },
+  { name: 'Programs',               required: true,  description: 'Select and configure clinical and specialty programs for this account.' },
+  { name: 'Limits & Controls',      required: false, description: 'Define quantity limits, step therapy rules, and utilization management controls.' },
+  { name: 'Billing',                required: false, description: 'Configure billing preferences, payment terms, and invoice settings.' },
+  { name: 'ID Cards',               required: false, description: 'Set up member ID card design and distribution preferences.' },
+  { name: 'Verification & Summary', required: false, description: 'Review all configuration details and submit the account setup for review.' },
+]);
+
 const implementationSteps = ref([
   {
     title: 'Plan Setup',
-    description: 'Initial setup of the plan details and configurations.',
+    description: 'Initial setup of the account configurations.',
     status: 'completed',
     icon: CircleCheckBig,
     active: true,
@@ -193,81 +871,400 @@ const implementationSteps = ref([
 const activeTimelineItem = ref<any>(null);
 
 const selectTimelineItem = (item: any) => {
-  implementationSteps.value.forEach(step => {
-    step.active = (step === item);
-  });
+  implementationSteps.value.forEach(step => { step.active = (step === item); });
   activeTimelineItem.value = item;
+  // Collapse wizard sub-steps when switching away from Plan Setup
+  if (item.title !== 'Plan Setup') {
+    wizardActive.value = false;
+  }
 };
+
+const selectWizardStep = (index: number) => {
+  currentWizardStep.value = index;
+  wizardActive.value = true;
+};
+
+const nextWizardStep = () => {
+  currentWizardStep.value++;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+const prevWizardStep = () => {
+  currentWizardStep.value--;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+// ─── Step 1 data ──────────────────────────────────────────────────────────────
+
+const statusOptions = ['Implementation', 'Active', 'Inactive', 'Pending'];
+
+const accountProfile = ref({
+  accountName: 'Stark Industries',
+  legalName: 'Stark Industries, Inc.',
+  dba: '',
+  effectiveStartDate: '03/22/2026',
+  effectiveEndDate: '',
+  testAccount: false,
+  status: 'Implementation',
+  isRxWatchtower: false,
+  manualClaims: false,
+});
+const editableAccountProfile = ref({ ...accountProfile.value });
+const editingAccountProfile = ref(false);
+const startEditAccountProfile = () => { editableAccountProfile.value = { ...accountProfile.value }; editingAccountProfile.value = true; };
+const saveAccountProfile = () => { accountProfile.value = { ...editableAccountProfile.value }; editingAccountProfile.value = false; };
+const cancelEditAccountProfile = () => { editingAccountProfile.value = false; };
+
+const companyInfo = ref({
+  sicCode: '',
+  physicalAddress1: '10880 Malibu Point',
+  physicalAddress2: '',
+  physicalCity: 'Malibu',
+  physicalState: 'CA',
+  physicalZip: '90265',
+  physicalCountry: '',
+  mailingAddress1: '',
+  mailingAddress2: '',
+  mailingCity: '',
+  mailingState: '',
+  mailingZip: '',
+  mailingCountry: '',
+});
+const editableCompanyInfo = ref({ ...companyInfo.value });
+const editingCompanyInfo = ref(false);
+const sameAsPhysical = ref(false);
+
+const toggleSameAsPhysical = () => {
+  sameAsPhysical.value = !sameAsPhysical.value;
+  if (sameAsPhysical.value) {
+    editableCompanyInfo.value.mailingAddress1 = editableCompanyInfo.value.physicalAddress1;
+    editableCompanyInfo.value.mailingAddress2 = editableCompanyInfo.value.physicalAddress2;
+    editableCompanyInfo.value.mailingCity = editableCompanyInfo.value.physicalCity;
+    editableCompanyInfo.value.mailingState = editableCompanyInfo.value.physicalState;
+    editableCompanyInfo.value.mailingZip = editableCompanyInfo.value.physicalZip;
+    editableCompanyInfo.value.mailingCountry = editableCompanyInfo.value.physicalCountry;
+  }
+};
+
+const startEditCompanyInfo = () => {
+  editableCompanyInfo.value = { ...companyInfo.value };
+  sameAsPhysical.value = false;
+  editingCompanyInfo.value = true;
+};
+const saveCompanyInfo = () => { companyInfo.value = { ...editableCompanyInfo.value }; editingCompanyInfo.value = false; };
+const cancelEditCompanyInfo = () => { editingCompanyInfo.value = false; sameAsPhysical.value = false; };
+
+// ─── Step 2: Network Configuration ───────────────────────────────────────────
+
+const networkHeaders = [
+  { title: 'Network Name', key: 'networkName' },
+  { title: 'Status',       key: 'status' },
+  { title: 'Linking Level', key: 'linkingLevel' },
+  { title: 'Linked Groups', key: 'linkedGroups' },
+  { title: 'Linked Plans',  key: 'linkedPlans' },
+  { title: 'BIN',           key: 'bin' },
+  { title: 'Eff. Start Date', key: 'effStartDate' },
+  { title: 'End Date',      key: 'endDate' },
+  { title: '',              key: 'actions', sortable: false },
+];
+
+const networkFilterPills = [
+  { type: 'status', value: 'active',     label: 'Active',     isActive: true },
+  { type: 'status', value: 'scheduled',  label: 'Scheduled',  isActive: false },
+  { type: 'status', value: 'terminated', label: 'Terminated', isActive: false },
+];
+
+const networkRows = ref([
+  { networkName: 'First Choice Broad',  status: 'active', linkingLevel: 'Account', linkedGroups: 'All', linkedPlans: 'All', bin: '—', effStartDate: '03/01/2026', endDate: '—' },
+  { networkName: 'Mail Order - Network', status: 'active', linkingLevel: 'Account', linkedGroups: 'All', linkedPlans: 'All', bin: '—', effStartDate: '03/01/2026', endDate: '—' },
+  { networkName: 'Compliance',          status: 'active', linkingLevel: 'Account', linkedGroups: 'All', linkedPlans: 'All', bin: '—', effStartDate: '03/01/2026', endDate: '—' },
+]);
+
+const pharmacyTabs = ['In-House', 'Specialty', 'Mail Order', 'Custom'];
+const activePharmacyTab = ref('In-House');
+
+// ─── Step 3: Plan Design ──────────────────────────────────────────────────────
+
+const planDesignPlans = ref([
+  {
+    id: 70953,
+    name: 'pablo test',
+    status: 'Active',
+    effStartDate: '03/06/2026',
+    effEndDate: '',
+    benefitReset: 'February 1',
+    maxSpendEnabled: false,
+    allowSecondaryPayer: false,
+    cobConfiguration: '',
+    benefitByFlag: false,
+    bpgRows: [
+      { bin: '025945', pcn: 'SSN', groupId: '1275', groupName: 'Allied Finishing, Inc', effStartDate: '03/01/2026', effEndDate: '' },
+    ],
+    planCodes: [
+      { planCode: '1423T', status: 'Active', effStartDate: '03/05/2026', effEndDate: '' },
+    ],
+    benefitCodes: [] as { benefitCode: string; description: string; effStartDate: string; effEndDate: string }[],
+    accumulators: [] as { accumulatorName: string; status: string; effStartDate: string; effEndDate: string }[],
+  },
+  {
+    id: 70954,
+    name: 'Silver Plan',
+    status: 'Active',
+    effStartDate: '03/06/2026',
+    effEndDate: '',
+    benefitReset: 'February 1',
+    maxSpendEnabled: false,
+    allowSecondaryPayer: false,
+    cobConfiguration: '',
+    benefitByFlag: false,
+    bpgRows: [
+      { bin: '025945', pcn: 'SSN', groupId: '1275', groupName: 'Allied Finishing, Inc', effStartDate: '03/01/2026', effEndDate: '' },
+    ],
+    planCodes: [
+      { planCode: '1423T', status: 'Active', effStartDate: '03/05/2026', effEndDate: '' },
+    ],
+    benefitCodes: [] as { benefitCode: string; description: string; effStartDate: string; effEndDate: string }[],
+    accumulators: [] as { accumulatorName: string; status: string; effStartDate: string; effEndDate: string }[],
+  },
+]);
+
+const expandedPlans = ref<number[]>([]);
+
+const bpgHeaders = [
+  { title: 'BIN',            key: 'bin' },
+  { title: 'PCN',            key: 'pcn' },
+  { title: 'Group ID',       key: 'groupId' },
+  { title: 'Group Name',     key: 'groupName' },
+  { title: 'Eff. Start Date', key: 'effStartDate' },
+  { title: 'Eff. End Date',  key: 'effEndDate' },
+];
+
+const planCodesHeaders = [
+  { title: 'Plan Code',       key: 'planCode' },
+  { title: 'Status',          key: 'status' },
+  { title: 'Eff. Start Date', key: 'effStartDate' },
+  { title: 'Eff. End Date',   key: 'effEndDate' },
+];
+
+const benefitCodesHeaders = [
+  { title: 'Benefit Code',    key: 'benefitCode' },
+  { title: 'Description',     key: 'description' },
+  { title: 'Eff. Start Date', key: 'effStartDate' },
+  { title: 'Eff. End Date',   key: 'effEndDate' },
+];
+
+const accumulatorsHeaders = [
+  { title: 'Accumulator Name', key: 'accumulatorName' },
+  { title: 'Status',           key: 'status' },
+  { title: 'Eff. Start Date',  key: 'effStartDate' },
+  { title: 'Eff. End Date',    key: 'effEndDate' },
+];
+
+// ─── Copay Structure ──────────────────────────────────────────────────────────
+
+const copayTabs = ['First Choice Broad', 'Standard', 'Mail Order'];
+const activeCopayTab = ref('First Choice Broad');
+
+const copayStructureHeaders = [
+  { title: '1 - 30 Day Supply',  key: 'tierName' },
+  { title: 'Formula',            key: 'formula' },
+  { title: 'Copay',              key: 'copay' },
+  { title: 'Coinsurance',        key: 'coinsurance' },
+  { title: 'Coins. Min',         key: 'coinsMin' },
+  { title: 'Coins. Max',         key: 'coinsMax' },
+  { title: 'Incentive Min',      key: 'incentiveMin' },
+  { title: 'Incentive Max',      key: 'incentiveMax' },
+  { title: 'Patient Pay Max',    key: 'patientPayMax' },
+  { title: 'Ded. Waived',        key: 'dedWaived' },
+  { title: 'OOP Waived',         key: 'oopWaived' },
+];
+
+const copayStructureRows = [
+  { tierName: 'Generic',               formula: 'Copay', copay: '$1.00', coinsurance: '2%',  coinsMin: '$1.00', coinsMax: '$3.00', incentiveMin: '$2.00', incentiveMax: '$5.00', patientPayMax: '$6.00', dedWaived: 'No',  oopWaived: 'No' },
+  { tierName: 'Brand-Preferred',       formula: '',      copay: '-',     coinsurance: '-',    coinsMin: '-',     coinsMax: '-',     incentiveMin: '-',     incentiveMax: '-',     patientPayMax: '-',     dedWaived: '',    oopWaived: '' },
+  { tierName: 'Brand-NonPreferred',    formula: '',      copay: '-',     coinsurance: '-',    coinsMin: '-',     coinsMax: '-',     incentiveMin: '-',     incentiveMax: '-',     patientPayMax: '-',     dedWaived: '',    oopWaived: '' },
+  { tierName: 'Specialty-Generic',     formula: '',      copay: '-',     coinsurance: '-',    coinsMin: '-',     coinsMax: '-',     incentiveMin: '-',     incentiveMax: '-',     patientPayMax: '-',     dedWaived: '',    oopWaived: '' },
+  { tierName: 'Specialty-Preferred',   formula: '',      copay: '-',     coinsurance: '-',    coinsMin: '-',     coinsMax: '-',     incentiveMin: '-',     incentiveMax: '-',     patientPayMax: '-',     dedWaived: '',    oopWaived: '' },
+  { tierName: 'Specialty-NonPreferred',formula: '',      copay: '-',     coinsurance: '-',    coinsMin: '-',     coinsMax: '-',     incentiveMin: '-',     incentiveMax: '-',     patientPayMax: '-',     dedWaived: '',    oopWaived: '' },
+  { tierName: 'Compound',              formula: '',      copay: '-',     coinsurance: '-',    coinsMin: '-',     coinsMax: '-',     incentiveMin: '-',     incentiveMax: '-',     patientPayMax: '-',     dedWaived: '',    oopWaived: '' },
+];
+
+const togglePlan = (id: number) => {
+  const idx = expandedPlans.value.indexOf(id);
+  if (idx === -1) {
+    expandedPlans.value.push(id);
+  } else {
+    expandedPlans.value.splice(idx, 1);
+  }
+};
+
+// ─── Timeline helpers ─────────────────────────────────────────────────────────
 
 const activeTimelineProgress = computed(() => {
   if (!activeTimelineItem.value) return 0;
-
   switch (activeTimelineItem.value.status) {
-    case 'completed':
-      return 100;
-    case 'in-progress':
-      return 50;
-    case 'pending':
-      return 0;
-    default:
-      return 0;
+    case 'completed': return 100;
+    case 'in-progress': return 50;
+    default: return 0;
   }
 });
 
 const progressCircularColor = computed(() => {
   if (!activeTimelineItem.value) return 'grey';
-
-  switch (activeTimelineItem.value.status) {
-    case 'completed':
-      return 'success';
-    case 'in-progress':
-      return 'primary';
-    case 'pending':
-      return 'primary'; // Set to primary for pending as well
-    default:
-      return 'grey';
-  }
+  return activeTimelineItem.value.status === 'completed' ? 'success' : 'primary';
 });
 
-const markAsComplete = (item: any) => {
-  item.status = 'completed';
-  item.active = true; // Keep it active after marking as complete
-  // Optionally, update other properties like endDate
-  item.endDate = new Date().toISOString().slice(0, 10); // Set current date as end date
-};
-
-const markAsInProgress = (item: any) => {
-  item.status = 'in-progress';
-  item.startDate = new Date().toISOString().slice(0, 10); // Set current date as start date
-  item.endDate = ''; // Clear end date
-};
-
-const markAsPending = (item: any) => {
-  item.status = 'pending';
-  item.startDate = ''; // Clear start date
-  item.endDate = ''; // Clear end date
-};
+const markAsComplete = (item: any) => { item.status = 'completed'; item.endDate = new Date().toISOString().slice(0, 10); };
+const markAsInProgress = (item: any) => { item.status = 'in-progress'; item.startDate = new Date().toISOString().slice(0, 10); item.endDate = ''; };
+const markAsPending = (item: any) => { item.status = 'pending'; item.startDate = ''; item.endDate = ''; };
 
 watch(selectedAccount, (newVal) => {
+  wizardActive.value = false;
+  currentWizardStep.value = 0;
   if (newVal) {
-    implementationSteps.value.forEach((step, index) => {
-      step.active = (index === 0);
-    });
+    implementationSteps.value.forEach((step, index) => { step.active = (index === 0); });
     activeTimelineItem.value = implementationSteps.value[0];
   } else {
-    implementationSteps.value.forEach(step => {
-      step.active = false;
-    });
+    implementationSteps.value.forEach(step => { step.active = false; });
     activeTimelineItem.value = null;
   }
 }, { immediate: true });
 </script>
+
 <style lang="scss" scoped>
 @import '@/style.scss';
 
+// ─── Layout ───────────────────────────────────────────────────────────────────
+
 .plan-explorer-content {
   padding: $spacing-medium;
+
+  :deep(.v-row) {
+    overflow: visible;
+  }
 }
+
+// ─── Timeline sticky wrapper ──────────────────────────────────────────────────
+
+.plan-timeline-wrapper {
+  // default: no special behavior
+}
+
+.plan-col--sticky {
+  align-self: flex-start !important;
+}
+
+.plan-timeline-wrapper--sticky {
+  @media (min-width: 960px) {
+    position: sticky;
+    top: 68px; // 48px app bar + 20px breathing room
+  }
+
+  // Suppress vertical connector line when only one item is visible
+  :deep(.v-timeline::before),
+  :deep(.v-timeline-item::before) {
+    display: none;
+  }
+}
+
+// ─── Timeline (left column) ───────────────────────────────────────────────────
+
+.plan-timeline {
+  // Pin the dot to the top for the Plan Setup item when sub-steps are expanded
+  .v-timeline-item--has-sub-steps {
+    :deep(.v-timeline-item__body) {
+      align-self: flex-start;
+    }
+    :deep(.v-timeline-item__dot) {
+      margin-top: 16px;
+    }
+  }
+
+  .v-timeline-item {
+    .timeline-card {
+      width: 100%;
+      border: 1px solid $color-border;
+      box-shadow: none;
+      cursor: pointer;
+      transition: box-shadow 0.3s ease;
+
+      &:hover { box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
+
+      .v-card-title { color: $color-primary; }
+      .v-card-text { letter-spacing: 0 !important; }
+    }
+
+    .active-card { border-color: $color-primary; }
+  }
+}
+
+// ─── Wizard sub-steps (nested below Plan Setup card) ─────────────────────────
+
+.wizard-sub-steps {
+  margin-top: $spacing-xsmall;
+  padding-left: $spacing-xsmall;
+}
+
+.wizard-sub-step-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.wizard-sub-step-item {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xsmall;
+  padding: $spacing-xsmall $spacing-small;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.15s;
+
+  &:hover { background-color: rgba($color-primary, 0.06); }
+
+  &--active {
+    background-color: rgba($color-primary, 0.1);
+
+    .wizard-sub-step-number {
+      background-color: $color-primary;
+      border-color: $color-primary;
+      color: $color-neutral-white;
+    }
+
+    .wizard-sub-step-name {
+      color: $color-primary;
+      font-weight: $font-weight-semibold;
+    }
+  }
+}
+
+.wizard-sub-step-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 1.5px solid $color-border;
+  font-family: $font-family-base;
+  font-size: 0.7rem;
+  font-weight: $font-weight-semibold;
+  color: $color-text-secondary;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.wizard-sub-step-name {
+  font-family: $font-family-base;
+  font-size: $font-size-small;
+  color: $color-text-primary;
+  line-height: 1.3;
+}
+
+// ─── Standard timeline detail panel ──────────────────────────────────────────
 
 .timeline-details-card {
   border: 1px solid $color-border;
@@ -275,49 +1272,815 @@ watch(selectedAccount, (newVal) => {
   padding: $spacing-medium;
 }
 
-.plan-timeline {
-  .v-timeline-item {
-    .timeline-card {
-      width: 100%;
-      width: 350px; /* Adjust as needed */
-      border: 1px solid $color-border;
-      box-shadow: none; /* Remove default shadow */
-      cursor: pointer;
-      transition: box-shadow 0.3s ease;
+.status-chip-uppercase { text-transform: uppercase; }
+.progress-chip-container { gap: $spacing-xsmall; }
+.timeline-text-content-gap { gap: $spacing-medium; }
 
-      &:hover {
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      }
+// ─── Wizard overview card ─────────────────────────────────────────────────────
 
-      .v-card-title {
-        color: $color-primary;
-      }
+.wizard-overview {
+  border: 1px solid $color-border;
+  border-radius: 8px;
+  overflow: hidden;
+}
 
-      .v-card-text {
-        letter-spacing: 0 !important;
-      }
-    }
+.wizard-overview-header {
+  background-color: $color-primary;
+  padding: $spacing-large $spacing-medium;
+  text-align: center;
 
-    .active-card {
-      border-color: $color-primary;
-    }
+  .wizard-overview-title {
+    font-family: $font-family-base;
+    font-size: $font-size-h2;
+    font-weight: $font-weight-bold;
+    color: $color-neutral-white;
+    margin-bottom: $spacing-xsmall;
+  }
+
+  .wizard-overview-subtitle {
+    font-family: $font-family-base;
+    font-size: $font-size-body;
+    color: rgba($color-neutral-white, 0.85);
+    line-height: 1.5;
+    strong { color: $color-neutral-white; }
   }
 }
 
-@media (max-width: 768px) {
-  .plan-timeline {
+.wizard-overview-body {
+  padding: $spacing-medium;
+  background-color: $color-neutral-white;
+}
+
+.wizard-overview-section-label {
+  font-family: $font-family-base;
+  font-size: $font-size-small;
+  font-weight: $font-weight-bold;
+  color: $color-text-secondary;
+  letter-spacing: 0.06em;
+  margin-bottom: $spacing-medium;
+}
+
+.wizard-steps-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  border: 1px solid $color-border;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: $spacing-medium;
+}
+
+.wizard-grid-item {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xsmall;
+  padding: $spacing-small $spacing-medium;
+  border-bottom: 1px solid $color-border;
+
+  &:nth-last-child(1),
+  &:nth-last-child(2) { border-bottom: none; }
+  &:nth-child(odd) { border-right: 1px solid $color-border; }
+}
+
+.wizard-grid-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1.5px solid $color-border;
+  font-family: $font-family-base;
+  font-size: $font-size-small;
+  font-weight: $font-weight-semibold;
+  color: $color-text-secondary;
+  flex-shrink: 0;
+}
+
+.wizard-grid-name {
+  font-family: $font-family-base;
+  font-size: $font-size-body;
+  color: $color-text-primary;
+  flex: 1;
+}
+
+.wizard-required-badge {
+  font-family: $font-family-base;
+  font-size: $font-size-small;
+  font-weight: $font-weight-semibold;
+  color: $color-link;
+  background-color: rgba($color-link, 0.08);
+  border-radius: 100px;
+  padding: 2px 10px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.wizard-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-small;
+  background-color: rgba($color-border, 0.3);
+  border-radius: 8px;
+  padding: $spacing-medium;
+}
+
+.wizard-info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-small;
+}
+
+.wizard-info-icon {
+  color: $color-text-secondary;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.wizard-overview-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: $spacing-medium;
+  border-top: 1px solid $color-border;
+  background-color: $color-neutral-white;
+
+  .button { display: inline-flex; align-items: center; }
+}
+
+// ─── Wizard step content (right column) ──────────────────────────────────────
+
+.wizard-step-header {
+  margin-bottom: $spacing-medium;
+  padding-bottom: $spacing-medium;
+  border-bottom: 1px solid $color-border;
+}
+
+.wizard-step-header-meta {
+  display: flex;
+  align-items: center;
+  gap: $spacing-small;
+  margin-bottom: $spacing-xsmall;
+}
+
+.wizard-step-counter {
+  font-family: $font-family-base;
+  font-size: $font-size-small;
+  color: $color-text-secondary;
+}
+
+.wizard-step-title {
+  color: $color-primary !important;
+  margin-bottom: $spacing-xsmall;
+}
+
+.wizard-step-description { color: $color-text-secondary; }
+
+.wizard-placeholder {
+  border: 1px dashed $color-border;
+  border-radius: 8px;
+  padding: $spacing-xlarge $spacing-medium;
+  text-align: center;
+  background-color: rgba($color-border, 0.15);
+}
+
+.wizard-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: $spacing-medium;
+  margin-top: $spacing-medium;
+  border-top: 1px solid $color-border;
+}
+
+.wizard-footer-actions {
+  display: flex;
+  gap: $spacing-small;
+}
+
+// ─── Step 1: Account Profile sections ────────────────────────────────────────
+
+.ap-section {
+  border: 1px solid $color-border;
+  border-radius: 8px;
+  padding: $spacing-medium;
+  margin-bottom: $spacing-medium;
+}
+
+.ap-section-header {
+  display: flex;
+  align-items: center;
+  gap: $spacing-small;
+  margin-bottom: $spacing-medium;
+  padding-bottom: $spacing-small;
+  border-bottom: 1px solid $color-border;
+}
+
+.ap-fields {
+  display: flex;
+  flex-direction: column;
+}
+
+.ap-field-row {
+  padding: $spacing-small 0;
+  border-bottom: 1px solid rgba($color-border, 0.5);
+
+  &:last-child { border-bottom: none; }
+
+  &--multi {
+    display: flex;
+    gap: $spacing-xlarge;
   }
+
+  &--thirds .ap-field { flex: 1; }
 }
 
-.status-chip-uppercase {
-  text-transform: uppercase;
+.ap-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.progress-chip-container {
+.ap-field-label {
+  font-family: $font-family-base;
+  font-size: $font-size-small;
+  color: $color-text-secondary;
+}
+
+.ap-field-value {
+  font-family: $font-family-base;
+  font-size: $font-size-body;
+  color: $color-text-primary;
+}
+
+.ap-checkbox-row {
+  display: flex;
+  align-items: center;
   gap: $spacing-xsmall;
 }
 
-.timeline-text-content-gap {
+.ap-checkbox-icon {
+  color: $color-border;
+  &--checked { color: $color-primary; }
+}
+
+.ap-mailing-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: $spacing-medium 0 $spacing-small;
+
+  .ap-subsection-heading {
+    margin: 0;
+  }
+}
+
+.ap-subsection-heading {
+  font-family: $font-family-base;
+  font-size: $font-size-body;
+  font-weight: $font-weight-semibold;
+  color: $color-primary;
+  margin: $spacing-medium 0 $spacing-small;
+}
+
+.ap-edit-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xsmall;
+  margin-top: $spacing-small;
+}
+
+.ap-checkbox-toggle {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xsmall;
+  cursor: pointer;
+  user-select: none;
+
+  &:hover .ap-checkbox-icon {
+    color: $color-primary;
+  }
+}
+
+.ap-section-footer {
+  display: flex;
+  align-items: center;
+  gap: $spacing-small;
+  margin-top: $spacing-medium;
+  padding-top: $spacing-small;
+  border-top: 1px solid $color-border;
+}
+
+// ─── Shared buttons ───────────────────────────────────────────────────────────
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-small $spacing-medium;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-family: $font-family-base;
+  font-size: $font-size-body;
+  line-height: 120%;
+  font-weight: $font-weight-normal;
+  transition: background-color 0.2s, opacity 0.2s;
+  white-space: nowrap;
+  border-radius: 100px;
+
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.button-primary {
+  background-color: $color-primary;
+  color: $color-neutral-white;
+}
+
+.button-secondary {
+  background-color: transparent;
+  border-color: $color-primary;
+  color: $color-primary;
+}
+
+.button-thirtiary {
+  background-color: transparent;
+  border: 1px solid $color-primary;
+  color: $color-primary;
+  border-radius: 4px;
+  padding: $spacing-nano $spacing-xsmall;
+  font-size: $font-size-small;
+  gap: $spacing-nano;
+}
+
+// ─── Step 2: Network Configuration ───────────────────────────────────────────
+
+.nc-section {
+  border: 1px solid $color-border;
+  border-radius: 8px;
+  padding: $spacing-medium;
+  margin-bottom: $spacing-medium;
+}
+
+.nc-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-medium;
+}
+
+.nc-table-controls {
+  display: flex;
+  align-items: center;
   gap: $spacing-medium;
+  margin-bottom: $spacing-medium;
+  flex-wrap: wrap;
+}
+
+.nc-search {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xsmall;
+  border: 1px solid $color-border;
+  border-radius: 6px;
+  padding: $spacing-xsmall $spacing-small;
+  min-width: 240px;
+}
+
+.nc-search-icon {
+  color: $color-text-secondary;
+  flex-shrink: 0;
+}
+
+.nc-search-input {
+  border: none;
+  outline: none;
+  font-family: $font-family-base;
+  font-size: $font-size-body;
+  color: $color-text-primary;
+  width: 100%;
+  background: transparent;
+
+  &::placeholder {
+    color: $color-neutral-disabled;
+  }
+}
+
+.nc-pills {
+  display: flex;
+  gap: $spacing-xsmall;
+}
+
+.nc-pill {
+  font-family: $font-family-base;
+  font-size: $font-size-small;
+  padding: $spacing-nano $spacing-small;
+  border-radius: 100px;
+  border: 1.5px solid $color-border;
+  color: $color-text-primary;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+
+  &--active {
+    background-color: $color-primary;
+    border-color: $color-primary;
+    color: $color-neutral-white;
+  }
+
+  &:not(.nc-pill--active):hover {
+    border-color: $color-primary;
+    color: $color-primary;
+  }
+}
+
+.nc-table-wrapper {
+  border: 1px solid $color-border;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: $spacing-small;
+}
+
+.nc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: $font-family-base;
+  font-size: $font-size-small;
+
+  thead tr {
+    background-color: rgba($color-border, 0.3);
+  }
+
+  th {
+    text-align: left;
+    padding: $spacing-small $spacing-medium;
+    font-weight: $font-weight-bold;
+    color: $color-text-primary;
+    border-bottom: 1px solid $color-border;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: $spacing-small $spacing-medium;
+    color: $color-text-primary;
+    border-bottom: 1px solid rgba($color-border, 0.5);
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+}
+
+.nc-table-actions {
+  color: $color-text-secondary;
+  cursor: pointer;
+  text-align: right;
+}
+
+.nc-status-badge {
+  display: inline-block;
+  padding: 2px $spacing-small;
+  border-radius: 4px;
+  font-size: $font-size-small;
+  font-weight: $font-weight-semibold;
+
+  &--active {
+    background-color: $color-success-background;
+    color: $color-success;
+  }
+}
+
+.nc-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: $spacing-small;
+}
+
+.nc-per-page-select {
+  font-family: $font-family-base;
+  font-size: $font-size-small;
+  border: 1px solid $color-border;
+  border-radius: 4px;
+  padding: 2px $spacing-xsmall;
+  margin: 0 $spacing-nano;
+}
+
+// Pharmacy tabs
+.nc-tabs {
+  display: flex;
+  border-bottom: 1px solid $color-border;
+  margin-bottom: $spacing-medium;
+  gap: 0;
+}
+
+.nc-tab {
+  font-family: $font-family-base;
+  font-size: $font-size-body;
+  color: $color-text-secondary;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: $spacing-xsmall $spacing-medium;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  margin-bottom: -1px;
+
+  &--active {
+    color: $color-primary;
+    border-bottom-color: $color-primary;
+    font-weight: $font-weight-semibold;
+  }
+
+  &:not(.nc-tab--active):hover {
+    color: $color-text-primary;
+  }
+}
+
+// ─── Step 3: Plan Design ──────────────────────────────────────────────────────
+
+.pd-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-medium;
+}
+
+
+.pd-accordion-list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-small;
+}
+
+.pd-accordion {
+  border: 1px solid $color-border;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.pd-accordion-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-small $spacing-medium;
+  cursor: pointer;
+  background-color: $color-neutral-white;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background-color: rgba($color-border, 0.3);
+  }
+}
+
+.pd-accordion-header-left {
+  display: flex;
+  align-items: center;
+  gap: $spacing-small;
+}
+
+.pd-plan-name {
+  font-family: $font-family-base;
+  font-size: $font-size-body;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.pd-plan-id {
+  font-family: $font-family-base;
+  font-size: $font-size-small;
+  color: $color-text-secondary;
+}
+
+.pd-status-badge {
+  display: inline-block;
+  align-self: flex-start;
+  width: fit-content;
+  padding: 2px $spacing-small;
+  border-radius: 4px;
+  font-size: $font-size-small;
+  font-weight: $font-weight-semibold;
+
+  &--active {
+    background-color: $color-success-background;
+    color: $color-success;
+  }
+
+  &--inactive {
+    background-color: rgba(133, 133, 133, 0.12);
+    color: $color-neutral-disabled;
+  }
+
+  &--pending {
+    background-color: $color-warning-background;
+    color: $color-warning;
+  }
+}
+
+.pd-accordion-chevron {
+  color: $color-text-secondary;
+  transition: transform 0.2s ease;
+
+  &--open {
+    transform: rotate(180deg);
+  }
+}
+
+.pd-accordion-body {
+  padding: $spacing-medium;
+  border-top: 1px solid $color-border;
+  background-color: $color-neutral-white;
+}
+
+.pd-section {
+  padding: $spacing-large 0;
+}
+
+.pd-empty-cta {
+  margin-top: $spacing-small;
+}
+
+.pd-section-header {
+  display: flex;
+  align-items: center;
+  gap: $spacing-small;
+  margin-bottom: $spacing-medium;
+}
+
+.pd-section-divider {
+  border: none;
+  border-top: 1px solid $color-border;
+  margin: 0;
+}
+
+.ap-field-row--five .ap-field {
+  flex: 1;
+}
+
+.ap-field-sub {
+  font-family: $font-family-base;
+  font-size: $font-size-small;
+  color: $color-text-secondary;
+  margin-top: 2px;
+}
+
+.pd-param-add-card {
+  display: flex;
+  align-items: center;
+  gap: $spacing-medium;
+  padding: $spacing-medium;
+  border: 1px solid $color-border;
+  border-radius: 8px;
+  cursor: pointer;
+  max-width: 400px;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+
+  &:hover {
+    border-color: $color-primary;
+    background-color: rgba($color-primary, 0.03);
+  }
+}
+
+.pd-param-add-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid $color-border;
+  color: $color-primary;
+  flex-shrink: 0;
+}
+
+.pd-param-add-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pd-param-add-title {
+  font-family: $font-family-base;
+  font-size: $font-size-body;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.pd-param-add-subtitle {
+  font-family: $font-family-base;
+  font-size: $font-size-small;
+  color: $color-text-secondary;
+  line-height: 1.4;
+}
+
+.pd-toggle-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: $spacing-medium;
+}
+
+.pd-toggle-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.pd-toggle-description {
+  font-family: $font-family-base;
+  font-size: $font-size-small;
+  color: $color-text-secondary;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.pd-show-more {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: $font-family-base;
+  font-size: $font-size-small;
+  color: $color-link;
+  cursor: pointer;
+  text-align: left;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.pd-toggle-switch {
+  flex-shrink: 0;
+  margin-top: -4px;
+}
+
+
+// Empty states
+.nc-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-large $spacing-medium;
+  gap: $spacing-xsmall;
+  text-align: center;
+
+  &--tab {
+    padding: $spacing-xlarge $spacing-medium;
+  }
+}
+
+.nc-empty-icon {
+  width: 160px;
+  margin-bottom: $spacing-small;
+}
+
+.nc-empty-title {
+  font-family: $font-family-base;
+  font-size: $font-size-body;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  margin: 0;
+}
+
+.nc-empty-subtitle {
+  font-family: $font-family-base;
+  font-size: $font-size-small;
+  color: $color-text-secondary;
+  margin: 0 0 $spacing-small;
+}
+
+// ─── Copay Structure card ─────────────────────────────────────────────────────
+
+.cs-card {
+  background-color: $color-neutral-white;
+  border: 1px solid $color-border;
+  border-radius: 8px;
+  padding: $spacing-medium;
+  margin-top: $spacing-medium;
+}
+
+.cs-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-medium;
+}
+
+.cs-card-actions {
+  display: flex;
+  gap: $spacing-xsmall;
+}
+
+.cs-network-header {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xsmall;
+  margin-bottom: $spacing-small;
+
+  .cs-network-title {
+    font-size: $font-size-body;
+    font-weight: $font-weight-semibold;
+    color: $color-primary;
+  }
 }
 </style>

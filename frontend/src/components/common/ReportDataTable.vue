@@ -77,10 +77,12 @@
         <slot :name="`item.${name}`" v-bind="slotData" />
       </template>
       <template v-slot:no-data>
-        <div class="empty-state">
-          <Microscope :size="80" :stroke-width="1" class="empty-state-icon" />
-          <p class="empty-state-text">No reports available.</p>
-        </div>
+        <slot name="empty-state">
+          <div class="empty-state">
+            <img :src="EmptyStateImg" alt="No data" class="empty-state-icon" />
+            <p class="empty-state-text">{{ emptyStateText }}</p>
+          </div>
+        </slot>
       </template>
     </v-data-table>
   </div>
@@ -90,7 +92,8 @@
 import { ref, computed, watch } from 'vue';
 import SearchBar from '../ui/SearchBar.vue';
 import FilteringPill from '../ui/FilteringPill.vue';
-import { Microscope, EllipsisVertical, CircleCheckBig, BanknoteX, Info } from 'lucide-vue-next';
+import { EllipsisVertical, CircleCheckBig, BanknoteX, Info } from 'lucide-vue-next';
+import EmptyStateImg from '@/assets/EmptyState.svg';
 
 interface Header {
   title: string;
@@ -123,6 +126,7 @@ interface Props {
   internalUserActionFormatter?: (item: any) => string;
   internalUserActionClickHandler?: (item: any) => void;
   booleanColumns?: string[];
+  emptyStateText?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -142,6 +146,7 @@ const props = withDefaults(defineProps<Props>(), {
   internalUserActionFormatter: (item: any) => '-',
   internalUserActionClickHandler: () => {},
   booleanColumns: () => [],
+  emptyStateText: 'No data available',
 });
 
 const searchTerm = ref('');
@@ -324,8 +329,8 @@ const filteredItems = computed(() => {
 }
 
 .empty-state-icon {
+  width: 160px;
   margin-bottom: $spacing-small;
-  color: $color-border;
 }
 
 .empty-state-text {
