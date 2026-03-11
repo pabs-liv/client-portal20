@@ -641,6 +641,197 @@
                   </div>
                 </template>
 
+                <!-- Step 4: Transition of Care -->
+                <template v-else-if="currentWizardStep === 3">
+                  <p class="text-body toc-intro">We understand the importance of providing the best onboarding experience to your members. As you transition, there are options available to help minimize disruption.</p>
+
+                  <!-- Historical Claims -->
+                  <div class="toc-question">
+                    <p class="toc-question-label">Will Historical Claims be provided?</p>
+                    <div class="toc-toggle-group">
+                      <button
+                        :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocHistoricalClaims === false }]"
+                        @click="tocHistoricalClaims = false"
+                      >No</button>
+                      <button
+                        :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocHistoricalClaims === true }]"
+                        @click="tocHistoricalClaims = true"
+                      >Yes</button>
+                    </div>
+                  </div>
+
+                  <div v-if="tocHistoricalClaims === false" class="toc-info-box">
+                    <p class="toc-info-text">If historical claims data is not received and a member is currently on a medication regimen that requires a Prior Authorization, the system actively observes rejected claims for 60 days post go-live, provides transition of care overrides for members with ongoing therapies, delivers written communication to disrupted members, and initiates prior authorizations. This allows an override for the member for a period of 30, 60, or 90 days.</p>
+                    <div class="toc-toggle-group">
+                      <button
+                        :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocRxWatchtower === false }]"
+                        @click="tocRxWatchtower = false"
+                      >Allow</button>
+                      <button
+                        :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocRxWatchtower === true }]"
+                        @click="tocRxWatchtower = true"
+                      >Do Not Allow</button>
+                    </div>
+                  </div>
+
+                  <!-- Prior Authorization -->
+                  <div class="toc-question">
+                    <p class="toc-question-label">Will Prior Authorization file be provided?</p>
+                    <div class="toc-toggle-group">
+                      <button
+                        :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocPriorAuth === false }]"
+                        @click="tocPriorAuth = false"
+                      >No</button>
+                      <button
+                        :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocPriorAuth === true }]"
+                        @click="tocPriorAuth = true"
+                      >Yes</button>
+                    </div>
+                  </div>
+                </template>
+
+                <!-- Step 5: Programs -->
+                <template v-else-if="currentWizardStep === 4">
+                  <h4 class="text-h4 prog-title">Configured Programs</h4>
+
+                  <!-- Filter pills -->
+                  <div class="prog-filters">
+                    <FilteringPill
+                      v-for="f in progFilters"
+                      :key="f"
+                      :is-active="progActiveFilter === f"
+                      @click="progActiveFilter = f"
+                    >{{ f }}</FilteringPill>
+                  </div>
+
+                  <ReportDataTable
+                    :headers="progHeaders"
+                    :items="filteredPrograms"
+                    :show-search-bar="true"
+                    :show-filter-button="false"
+                    :show-filter-pills="false"
+                    :show-selection-checkboxes="false"
+                    :show-row-actions="false"
+                    :show-table-footer="true"
+                    :show-expand="true"
+                    search-placeholder="Search by program name"
+                  >
+                    <template #expanded-row="{ item, columns }">
+                      <tr>
+                        <td :colspan="columns.length" class="prog-detail-td">
+                          <div class="prog-detail">
+                            <h5 class="prog-detail-title">Program Details</h5>
+                            <div class="prog-detail-cols">
+                              <div>
+                                <p class="prog-detail-label">Program Option Name</p>
+                                <p class="prog-detail-value">{{ item.optionName }}</p>
+                              </div>
+                              <div>
+                                <p class="prog-detail-label">Invoice</p>
+                                <p class="prog-detail-value">{{ item.invoice }}</p>
+                              </div>
+                            </div>
+                            <ReportDataTable
+                              :headers="progRatesHeaders"
+                              :items="item.rates"
+                              :show-search-bar="false"
+                              :show-filter-pills="false"
+                              :show-selection-checkboxes="false"
+                              :show-row-actions="false"
+                              :show-table-footer="true"
+                            />
+                            <div class="prog-detail-merp">
+                              <p class="prog-detail-label">MERP Administrator Name</p>
+                              <p class="prog-detail-value">{{ item.merpAdmin || '-' }}</p>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    </template>
+                  </ReportDataTable>
+                </template>
+
+                <!-- Step 6: Limits & Controls -->
+                <template v-else-if="currentWizardStep === 5">
+                  <p class="text-body lc-intro">Standard dispensing limitations are shown below.</p>
+
+                  <div class="toc-toggle-group lc-toggle-group">
+                    <button
+                      :class="['button', 'toc-toggle', { 'toc-toggle--selected': !lcRequestChange }]"
+                      @click="lcRequestChange = false"
+                    >Keep Standard</button>
+                    <button
+                      :class="['button', 'toc-toggle', { 'toc-toggle--selected': lcRequestChange }]"
+                      @click="lcRequestChange = true"
+                    >Request Change</button>
+                  </div>
+
+                  <div class="lc-fields">
+                    <div v-for="field in lcFields" :key="field.key" class="lc-field-row">
+                      <span class="lc-field-label">{{ field.label }}</span>
+                      <span v-if="!lcRequestChange" class="lc-field-value">{{ field.value }}</span>
+                      <input v-else v-model="field.value" class="lc-field-input" />
+                    </div>
+                  </div>
+
+                  <div class="lc-section-divider" />
+
+                  <!-- High Cost Notifications -->
+                  <p class="text-body lc-hcn-intro">Before a high cost claim exceeding the specified notify amount is processed, a notification will be sent to the indicated users below. Users will have 24 hours to acknowledge the claim before it will automatically be processed.</p>
+
+                  <div class="lc-hcn-field">
+                    <p class="lc-hcn-label">Notify threshold amount:</p>
+                    <input v-model="lcNotifyThreshold" class="lc-field-input lc-hcn-input" />
+                  </div>
+
+                  <div class="lc-hcn-field">
+                    <p class="lc-hcn-label">Who should receive high cost notifications?</p>
+                    <div
+                      v-for="(recipient, idx) in lcRecipients"
+                      :key="idx"
+                      class="lc-recipient-row"
+                    >
+                      <input v-model="lcRecipients[idx]" class="lc-field-input lc-recipient-input" />
+                      <X :size="16" :stroke-width="1.5" class="lc-recipient-remove" @click="lcRecipients.splice(idx, 1)" />
+                    </div>
+                    <button class="button lc-add-btn" @click="lcRecipients.push('')">ADD</button>
+                  </div>
+
+                  <div class="lc-section-divider" />
+
+                  <!-- Overrides & Edits -->
+                  <p class="text-body lc-hcn-intro">We recommend the standard management setup for overrides and edits, as shown below. Changes to clinical edits may impact cost savings and plan performance.</p>
+
+                  <div class="lc-fields">
+                    <div v-for="item in lcOverrides" :key="item" class="lc-field-row">
+                      <span class="lc-field-label">{{ item }}</span>
+                      <Check :size="16" :stroke-width="2" class="lc-check-icon" />
+                    </div>
+                  </div>
+
+                  <div class="lc-section-divider" />
+
+                  <!-- DAW Penalties -->
+                  <p class="text-body lc-hcn-intro">Dispense as Written standards are below, please indicate if you'd like to apply these penalties.</p>
+
+                  <div v-for="daw in lcDawPenalties" :key="daw.key" class="lc-daw-block">
+                    <h5 class="lc-daw-title">{{ daw.label }}</h5>
+                    <p class="text-body lc-daw-desc">{{ daw.description }}</p>
+                    <div class="toc-toggle-group">
+                      <button
+                        :class="['button', 'toc-toggle', { 'toc-toggle--selected': daw.value === false }]"
+                        @click="daw.value = false"
+                      >Not Applied</button>
+                      <button
+                        :class="['button', 'toc-toggle', { 'toc-toggle--selected': daw.value === true }]"
+                        @click="daw.value = true"
+                      >Applied</button>
+                    </div>
+                  </div>
+
+                  <textarea v-model="lcDawNotes" class="lc-daw-notes" placeholder="DAW Notes" />
+                </template>
+
                 <!-- Other steps: placeholder -->
                 <template v-else>
                   <div class="wizard-placeholder">
@@ -758,10 +949,11 @@ import AccountSelector from '@/components/common/AccountSelector.vue';
 import PageCard from '@/components/common/PageCard.vue';
 import Button from '@/components/ui/Button.vue';
 import ReportDataTable from '@/components/common/ReportDataTable.vue';
+import FilteringPill from '@/components/ui/FilteringPill.vue';
 import {
   Hourglass, CircleCheckBig, XCircle,
   Save as SaveIcon, LayoutList as LayoutListIcon, CircleCheck as CircleCheckIcon,
-  ArrowRight as ArrowRightIcon, Pencil, CheckSquare, Square, ChevronDown, PlusCircle,
+  ArrowRight as ArrowRightIcon, Pencil, CheckSquare, Square, ChevronDown, PlusCircle, X, Check,
 } from 'lucide-vue-next';
 import EmptyStateImg from '@/assets/EmptyState.svg';
 import { VRow, VCol, VProgressCircular } from 'vuetify/components';
@@ -780,6 +972,122 @@ const selectedAccount = ref<number | null>(null);
 const wizardActive = ref(false);
 const currentWizardStep = ref(0);
 
+// Step 4: Transition of Care
+const tocHistoricalClaims = ref<boolean | null>(false);
+const tocRxWatchtower = ref<boolean | null>(true);
+const tocPriorAuth = ref<boolean | null>(false);
+
+// ─── Step 5: Programs ─────────────────────────────────────────────────────────
+
+const progFilters = ['All', 'Active', 'Terminated'];
+const progActiveFilter = ref('All');
+
+const programs = ref([
+  {
+    id: 1,
+    name: 'Liviniti',
+    status: 'Active',
+    effStartDate: '03/01/2026',
+    effEndDate: '',
+    optionName: 'Southern Scripts',
+    invoice: 'Yes',
+    merpAdmin: '',
+    rates: [
+      { rate: 'Admin Fee',                    type: 'CLAIM',      amount: '$8',     groupBy: 'Admin Fee', payTo: '-',            comment: '-', effStartDate: '03/01/2026', effEndDate: '02/28/2027' },
+      { rate: 'Admin Fee',                    type: 'CLAIM',      amount: '$8.25',  groupBy: 'Admin Fee', payTo: '-',            comment: '-', effStartDate: '03/01/2027', effEndDate: '02/29/2028' },
+      { rate: 'Admin Fee',                    type: 'CLAIM',      amount: '$8.5',   groupBy: 'Admin Fee', payTo: '-',            comment: '-', effStartDate: '03/01/2028', effEndDate: '-' },
+      { rate: 'Southern Scripts Monthly Minimum', type: 'MONTHLYMIN', amount: '$1200', groupBy: '-',        payTo: '-',            comment: '-', effStartDate: '03/01/2026', effEndDate: '-' },
+      { rate: 'Consultant Fees',              type: 'CLAIM',      amount: '$1',     groupBy: 'Admin Fee', payTo: 'EPIC Brokers', comment: '-', effStartDate: '03/01/2026', effEndDate: '-' },
+    ],
+  },
+  {
+    id: 2,
+    name: 'RxCompass Entity',
+    status: 'Active',
+    effStartDate: '03/01/2026',
+    effEndDate: '',
+    optionName: 'RxCompass Entity',
+    invoice: 'Yes',
+    merpAdmin: '',
+    rates: [],
+  },
+  {
+    id: 3,
+    name: 'RxCompass OLP',
+    status: 'Active',
+    effStartDate: '03/01/2026',
+    effEndDate: '',
+    optionName: 'RxCompass OLP',
+    invoice: 'No',
+    merpAdmin: '',
+    rates: [],
+  },
+]);
+
+const filteredPrograms = computed(() =>
+  progActiveFilter.value === 'All'
+    ? programs.value
+    : programs.value.filter(p => p.status === progActiveFilter.value)
+);
+
+const progHeaders = [
+  { title: 'Program Name',    key: 'name' },
+  { title: 'Eff. Start Date', key: 'effStartDate' },
+  { title: 'Eff. End Date',   key: 'effEndDate' },
+];
+
+const progRatesHeaders = [
+  { title: 'Rate',             key: 'rate' },
+  { title: 'Type',             key: 'type' },
+  { title: 'Amount',           key: 'amount' },
+  { title: 'Group By',         key: 'groupBy' },
+  { title: 'Pay To',           key: 'payTo' },
+  { title: 'Comment',          key: 'comment' },
+  { title: 'Eff. Start Date',  key: 'effStartDate' },
+  { title: 'Eff. End Date',    key: 'effEndDate' },
+];
+
+// ─── Step 6: Limits & Controls ────────────────────────────────────────────────
+
+const lcRequestChange = ref(false);
+
+const lcNotifyThreshold = ref('10000');
+const lcRecipients = ref<string[]>([]);
+
+const lcDawNotes = ref('');
+const lcDawPenalties = ref([
+  {
+    key: 'daw1',
+    label: 'DAW Penalty 1',
+    description: 'The member requests a brand name drug when a generic equivalent is available and the prescriber has not indicated "dispense as written." The member pays the brand copay plus the difference between the brand and generic price.',
+    value: true,
+  },
+  {
+    key: 'daw2',
+    label: 'DAW Penalty 2',
+    description: 'The prescriber indicates "dispense as written" for a brand name drug when a generic equivalent is available. The member pays the brand copay plus the difference between the brand and generic price.',
+    value: true,
+  },
+]);
+
+const lcOverrides = [
+  'Vacation Supply',
+  'Lost/Stolen Meds',
+  'Dosage Change',
+  '2 Overrides Allowed Per Year',
+  '30 Days Supply Override',
+];
+
+const lcFields = ref([
+  { key: 'refillRetail',    label: 'Refill Too Soon – Retail',     value: '75%' },
+  { key: 'refillMail',      label: 'Refill Too Soon – Mail',       value: '80%' },
+  { key: 'maxClaimDays',    label: 'Max Claim Days',               value: '99' },
+  { key: 'maxDaySupply',    label: 'Max Day Supply',               value: '90' },
+  { key: 'maxDollarRetail', label: 'Max Dollar – Retail',          value: '$1,500' },
+  { key: 'maxDollarCmpd',   label: 'Max Dollar Per Compound',      value: '$200' },
+  { key: 'maxDollarMail',   label: 'Max Dollar – Mail',            value: '$1,500' },
+]);
+
 const isStarkIndustries = computed(() => selectedAccount.value === STARK_INDUSTRIES_ID);
 
 const selectedAccountName = computed(() => {
@@ -792,7 +1100,7 @@ const wizardSteps = ref([
   { name: 'Network Configuration',  required: true,  description: 'Define the pharmacy network and coverage settings for this account.' },
   { name: 'Plan Design',            required: true,  description: 'Configure the benefit structure, cost-sharing rules, and coverage tiers.' },
   { name: 'Transition of Care',     required: false, description: 'Set up transition of care rules for members moving from another plan.' },
-  { name: 'Programs',               required: true,  description: 'Select and configure clinical and specialty programs for this account.' },
+  { name: 'Programs',               required: false, description: 'Select and configure clinical and specialty programs for this account.' },
   { name: 'Limits & Controls',      required: false, description: 'Define quantity limits, step therapy rules, and utilization management controls.' },
   { name: 'Billing',                required: false, description: 'Configure billing preferences, payment terms, and invoice settings.' },
   { name: 'ID Cards',               required: false, description: 'Set up member ID card design and distribution preferences.' },
@@ -2080,6 +2388,274 @@ watch(selectedAccount, (newVal) => {
   .cs-network-title {
     font-size: $font-size-body;
     font-weight: $font-weight-semibold;
+    color: $color-primary;
+  }
+}
+
+// ─── Step 4: Transition of Care ───────────────────────────────────────────────
+
+.toc-intro {
+  color: $color-text-secondary;
+  margin-bottom: $spacing-large;
+}
+
+.toc-question {
+  margin-bottom: $spacing-medium;
+
+  .toc-question-label {
+    font-size: $font-size-body;
+    font-weight: $font-weight-bold;
+    color: $color-text-primary;
+    margin-bottom: $spacing-small;
+  }
+}
+
+.toc-toggle-group {
+  display: flex;
+  gap: $spacing-xsmall;
+}
+
+.toc-toggle {
+  border: 1px solid $color-border;
+  border-radius: 6px;
+  padding: 6px $spacing-medium;
+  background: $color-neutral-white;
+  color: $color-text-primary;
+  font-size: $font-size-body;
+  cursor: pointer;
+  min-width: 72px;
+
+  &--selected {
+    border-color: $color-primary;
+    color: $color-primary;
+    font-weight: $font-weight-semibold;
+  }
+}
+
+.toc-info-box {
+  background-color: #f5f5f5;
+  border-left: 3px solid $color-border;
+  border-radius: 4px;
+  padding: $spacing-medium;
+  margin-bottom: $spacing-large;
+
+  .toc-info-text {
+    font-size: $font-size-small;
+    color: $color-text-secondary;
+    font-style: italic;
+    margin-bottom: $spacing-medium;
+  }
+}
+
+// ─── Step 5: Programs ─────────────────────────────────────────────────────────
+
+.prog-title {
+  margin-bottom: $spacing-medium;
+}
+
+.prog-filters {
+  display: flex;
+  gap: $spacing-xsmall;
+  margin-bottom: $spacing-medium;
+}
+
+.prog-detail-td {
+  padding: 0 !important;
+}
+
+.prog-detail {
+  background-color: #f5f5f5;
+  padding: $spacing-medium $spacing-large;
+}
+
+.prog-detail-title {
+  font-size: $font-size-body;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+  margin-bottom: $spacing-medium;
+}
+
+.prog-detail-cols {
+  display: flex;
+  gap: $spacing-xlarge;
+  margin-bottom: $spacing-medium;
+}
+
+.prog-detail-label {
+  font-size: $font-size-small;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  margin-bottom: 2px;
+}
+
+.prog-detail-value {
+  font-size: $font-size-small;
+  color: $color-text-secondary;
+}
+
+.prog-detail-merp {
+  margin-top: $spacing-medium;
+}
+
+// ─── Step 6: Limits & Controls ────────────────────────────────────────────────
+
+.lc-intro {
+  color: $color-text-secondary;
+  font-style: italic;
+  margin-bottom: $spacing-medium;
+}
+
+.lc-toggle-group {
+  margin-bottom: $spacing-large;
+}
+
+.lc-fields {
+  border-top: 1px solid $color-border;
+}
+
+.lc-field-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-small 0;
+  border-bottom: 1px solid $color-border;
+}
+
+.lc-field-label {
+  font-size: $font-size-body;
+  color: $color-text-primary;
+}
+
+.lc-field-value {
+  font-size: $font-size-body;
+  color: $color-text-primary;
+  min-width: 80px;
+  text-align: right;
+}
+
+.lc-field-input {
+  border: 1px solid $color-border;
+  border-radius: 4px;
+  padding: 6px $spacing-small;
+  font-size: $font-size-body;
+  font-family: $font-family-base;
+  color: $color-text-primary;
+  min-width: 120px;
+  text-align: left;
+
+  &:focus {
+    outline: none;
+    border-color: $color-primary;
+  }
+}
+
+.lc-section-divider {
+  border: none;
+  border-top: 1px solid $color-border;
+  margin: $spacing-large 0;
+}
+
+.lc-hcn-intro {
+  color: $color-text-secondary;
+  font-style: italic;
+  margin-bottom: $spacing-large;
+}
+
+.lc-hcn-field {
+  margin-bottom: $spacing-large;
+}
+
+.lc-hcn-label {
+  font-size: $font-size-body;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-small;
+}
+
+.lc-hcn-input {
+  min-width: 200px;
+}
+
+.lc-recipient-row {
+  display: flex;
+  align-items: center;
+  gap: $spacing-small;
+  margin-bottom: $spacing-small;
+}
+
+.lc-recipient-input {
+  flex: 1;
+  min-width: unset;
+}
+
+.lc-recipient-remove {
+  cursor: pointer;
+  color: $color-text-secondary;
+  flex-shrink: 0;
+
+  &:hover {
+    color: $color-error;
+  }
+}
+
+.lc-check-icon {
+  color: $color-text-primary;
+  flex-shrink: 0;
+}
+
+.lc-daw-block {
+  margin-bottom: $spacing-large;
+}
+
+.lc-daw-title {
+  font-size: $font-size-body;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+  margin-bottom: $spacing-small;
+}
+
+.lc-daw-desc {
+  color: $color-text-secondary;
+  margin-bottom: $spacing-small;
+}
+
+.lc-daw-notes {
+  width: 100%;
+  border: 1px solid $color-border;
+  border-radius: 4px;
+  padding: $spacing-small;
+  font-size: $font-size-body;
+  font-family: $font-family-base;
+  color: $color-text-primary;
+  min-height: 80px;
+  resize: vertical;
+  box-sizing: border-box;
+
+  &:focus {
+    outline: none;
+    border-color: $color-primary;
+  }
+
+  &::placeholder {
+    color: $color-neutral-disabled;
+  }
+}
+
+.lc-add-btn {
+  width: 100%;
+  border: 1px solid $color-border;
+  border-radius: 20px;
+  padding: $spacing-small;
+  background: $color-neutral-white;
+  color: $color-text-primary;
+  font-size: $font-size-body;
+  font-family: $font-family-base;
+  cursor: pointer;
+  text-align: center;
+  letter-spacing: 0.05em;
+
+  &:hover {
+    border-color: $color-primary;
     color: $color-primary;
   }
 }

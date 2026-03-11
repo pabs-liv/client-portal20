@@ -23,7 +23,21 @@
       :items-per-page-props="{ color: 'var(--color-text-primary)' }"
       :show-select="showSelectionCheckboxes"
       v-model:selected="selected"
+      :show-expand="showExpand"
+      :item-value="itemValue"
     >
+      <template v-if="$slots['expanded-row']" v-slot:expanded-row="slotData">
+        <slot name="expanded-row" v-bind="slotData" />
+      </template>
+      <template v-if="showExpand" v-slot:item.data-table-expand="{ internalItem, isExpanded, toggleExpand }">
+        <component
+          :is="isExpanded(internalItem) ? ChevronDown : ChevronRight"
+          :size="16"
+          :stroke-width="1.5"
+          class="expand-chevron"
+          @click="toggleExpand(internalItem)"
+        />
+      </template>
 
       <template v-slot:item.actions="{ item }">
         <div v-if="showActionIcons" class="d-flex align-center" :class="actionsClass">
@@ -92,7 +106,7 @@
 import { ref, computed, watch } from 'vue';
 import SearchBar from '../ui/SearchBar.vue';
 import FilteringPill from '../ui/FilteringPill.vue';
-import { EllipsisVertical, CircleCheckBig, BanknoteX, Info } from 'lucide-vue-next';
+import { EllipsisVertical, CircleCheckBig, BanknoteX, Info, ChevronRight, ChevronDown } from 'lucide-vue-next';
 import EmptyStateImg from '@/assets/EmptyState.svg';
 
 interface Header {
@@ -127,6 +141,8 @@ interface Props {
   internalUserActionClickHandler?: (item: any) => void;
   booleanColumns?: string[];
   emptyStateText?: string;
+  showExpand?: boolean;
+  itemValue?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -147,6 +163,8 @@ const props = withDefaults(defineProps<Props>(), {
   internalUserActionClickHandler: () => {},
   booleanColumns: () => [],
   emptyStateText: 'No data available',
+  showExpand: false,
+  itemValue: 'id',
 });
 
 const searchTerm = ref('');
@@ -201,15 +219,19 @@ const handleReject = (item: any) => {
   }
 };
 
-const processedHeaders = computed(() => 
-  props.headers.map(header => ({
+const processedHeaders = computed(() => {
+  const mapped = props.headers.map(header => ({
     ...header,
     class: 'font-weight-bold',
     align: props.booleanColumns.includes(header.key)
       ? 'center'
       : header.align || (header.key === 'actions' || header.key === 'eocId' || header.key === 'cost' || header.key === 'claimDate' || header.key === 'submissionDate' || header.key === 'approvedDate' ? 'end' : 'start'),
-  }))
-);
+  }));
+  if (props.showExpand) {
+    mapped.unshift({ key: 'data-table-expand', title: '', class: 'font-weight-bold', align: 'start' });
+  }
+  return mapped;
+});
 
 watch(() => props.initialFilterPills, (newVal) => {
   if (newVal && newVal.length > 0) {
@@ -316,6 +338,11 @@ const filteredItems = computed(() => {
 .my-table :deep(.v-checkbox .v-selection-control__on-icon) {
   color: $color-primary !important;
   opacity: 1 !important;
+}
+
+.expand-chevron {
+  cursor: pointer;
+  color: $color-text-secondary;
 }
 
 .empty-state {

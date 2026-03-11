@@ -596,6 +596,24 @@ This file documents all significant changes made to the project for future refer
 - [UI/UX] Added a rounded border to the `.timeline-details-card`.
 - [UI/UX] Applied spacing between `timeline-text-content` elements using `gap` with `$spacing-medium`.
 
+## [2026-03-11]
+
+### Added
+- [Feature] **PlanExplorerPage** — Added "Associated Benefit Codes" section inside the Plan Design accordion (Step 3). Displays an empty state with bold "Nothing configured yet" title and a "Configure Benefit Codes" secondary CTA button. Uses `ReportDataTable` with columns: Benefit Code, Description, Eff. Start Date, Eff. End Date. #vue #plan-explorer #accordion
+- [Feature] **PlanExplorerPage** — Added "Associated Accumulators" section inside the Plan Design accordion (Step 3). Displays "No data available" empty state. Uses `ReportDataTable` with columns: Accumulator Name, Status, Eff. Start Date, Eff. End Date. #vue #plan-explorer #accordion
+- [Feature] **PlanExplorerPage** — Added "Copay Structure" card inside the plan accordion body (below all sections). Includes tabbed navigation (First Choice Broad, Standard, Mail Order), a network sub-header with Edit button, and "+ Add Source" / "Notes" action buttons. Table columns: 1-30 Day Supply, Formula, Copay, Coinsurance, Coins. Min/Max, Incentive Min/Max, Patient Pay Max, Ded. Waived, OOP Waived. #vue #plan-explorer #accordion
+- [Feature] **PlanExplorerPage** — Added "Silver Plan" as a second mock plan accordion entry in the Plan Design step to demonstrate multi-plan display. #vue #plan-explorer #mock-data
+
+### Changed
+- [Change] **PlanExplorerPage** — "Create New Plan" button changed from secondary to primary to improve visual hierarchy and consistency. #vue #plan-explorer #ui
+- [Change] **PlanExplorerPage** — Wizard Next/Previous navigation now resets scroll position to the top of the page (smooth scroll). Prevents users from landing mid-page when switching steps. #vue #plan-explorer #ux
+- [Change] **ReportDataTable** — Added `emptyStateText` prop (default: `"No data available"`) to allow per-instance customization of the empty state message. Added `empty-state` named slot to allow full empty state override from the parent. #vue #component #reusable
+
+### Fixed
+- [Bug] **PlanExplorerPage** — Wizard mode (Stark Industries) now hides the 5 non-active implementation step cards in the left timeline column, reducing visual noise when the wizard is active. Steps reappear when exiting wizard mode or switching accounts. #vue #plan-explorer #wizard
+
+---
+
 ## [2025-08-08]
 
 ### Fixed
