@@ -359,10 +359,11 @@
 
                 <!-- Step 3: Plan Design -->
                 <template v-else-if="currentWizardStep === 2">
-                  <div class="pd-header">
-                    <h4 class="text-h4">All Plans</h4>
-                    <button class="button button-primary">Create New Plan</button>
-                  </div>
+                  <div class="ap-section">
+                    <div class="ap-section-header ap-section-header--space-between">
+                      <h4 class="text-h4">All Plans</h4>
+                      <button class="button button-primary">Create New Plan</button>
+                    </div>
 
                   <div class="pd-accordion-list">
                     <div
@@ -645,60 +646,69 @@
                       </div>
                     </div>
                   </div>
+                  </div>
                 </template>
 
                 <!-- Step 4: Transition of Care -->
                 <template v-else-if="currentWizardStep === 3">
-                  <p class="text-body toc-intro">We understand the importance of providing the best onboarding experience to your members. As you transition, there are options available to help minimize disruption.</p>
-
-                  <!-- Historical Claims -->
-                  <div class="toc-question">
-                    <p class="toc-question-label">Will Historical Claims be provided?</p>
-                    <div class="toc-toggle-group">
-                      <button
-                        :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocHistoricalClaims === false }]"
-                        @click="tocHistoricalClaims = false"
-                      >No</button>
-                      <button
-                        :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocHistoricalClaims === true }]"
-                        @click="tocHistoricalClaims = true"
-                      >Yes</button>
+                  <div class="ap-section">
+                    <div class="ap-section-header">
+                      <h4 class="text-h4">Transition of Care</h4>
                     </div>
-                  </div>
+                    <p class="text-body toc-intro">We understand the importance of providing the best onboarding experience to your members. As you transition, there are options available to help minimize disruption.</p>
 
-                  <div v-if="tocHistoricalClaims === false" class="toc-info-box">
-                    <p class="toc-info-text">If historical claims data is not received and a member is currently on a medication regimen that requires a Prior Authorization, the system actively observes rejected claims for 60 days post go-live, provides transition of care overrides for members with ongoing therapies, delivers written communication to disrupted members, and initiates prior authorizations. This allows an override for the member for a period of 30, 60, or 90 days.</p>
-                    <div class="toc-toggle-group">
-                      <button
-                        :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocRxWatchtower === false }]"
-                        @click="tocRxWatchtower = false"
-                      >Allow</button>
-                      <button
-                        :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocRxWatchtower === true }]"
-                        @click="tocRxWatchtower = true"
-                      >Do Not Allow</button>
+                    <!-- Historical Claims -->
+                    <div class="toc-question">
+                      <p class="toc-question-label">Will Historical Claims be provided?</p>
+                      <div class="toc-toggle-group">
+                        <button
+                          :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocHistoricalClaims === false }]"
+                          @click="tocHistoricalClaims = false"
+                        >No</button>
+                        <button
+                          :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocHistoricalClaims === true }]"
+                          @click="tocHistoricalClaims = true"
+                        >Yes</button>
+                      </div>
                     </div>
-                  </div>
 
-                  <!-- Prior Authorization -->
-                  <div class="toc-question">
-                    <p class="toc-question-label">Will Prior Authorization file be provided?</p>
-                    <div class="toc-toggle-group">
-                      <button
-                        :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocPriorAuth === false }]"
-                        @click="tocPriorAuth = false"
-                      >No</button>
-                      <button
-                        :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocPriorAuth === true }]"
-                        @click="tocPriorAuth = true"
-                      >Yes</button>
+                    <div v-if="tocHistoricalClaims === false" class="toc-info-box">
+                      <p class="toc-info-text">If historical claims data is not received and a member is currently on a medication regimen that requires a Prior Authorization, the system actively observes rejected claims for 60 days post go-live, provides transition of care overrides for members with ongoing therapies, delivers written communication to disrupted members, and initiates prior authorizations. This allows an override for the member for a period of 30, 60, or 90 days.</p>
+                      <div class="toc-toggle-group">
+                        <button
+                          :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocRxWatchtower === false }]"
+                          @click="tocRxWatchtower = false"
+                        >Allow</button>
+                        <button
+                          :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocRxWatchtower === true }]"
+                          @click="tocRxWatchtower = true"
+                        >Do Not Allow</button>
+                      </div>
+                    </div>
+
+                    <!-- Prior Authorization -->
+                    <div class="toc-question">
+                      <p class="toc-question-label">Will Prior Authorization file be provided?</p>
+                      <div class="toc-toggle-group">
+                        <button
+                          :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocPriorAuth === false }]"
+                          @click="tocPriorAuth = false"
+                        >No</button>
+                        <button
+                          :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocPriorAuth === true }]"
+                          @click="tocPriorAuth = true"
+                        >Yes</button>
+                      </div>
                     </div>
                   </div>
                 </template>
 
                 <!-- Step 5: Programs -->
                 <template v-else-if="currentWizardStep === 4">
-                  <h4 class="text-h4 prog-title">Configured Programs</h4>
+                  <div class="ap-section">
+                    <div class="ap-section-header ap-section-header--space-between">
+                      <h4 class="text-h4">Configured Programs</h4>
+                    </div>
 
                   <!-- Filter pills -->
                   <div class="prog-filters">
@@ -755,10 +765,15 @@
                       </tr>
                     </template>
                   </ReportDataTable>
+                  </div>
                 </template>
 
                 <!-- Step 6: Limits & Controls -->
                 <template v-else-if="currentWizardStep === 5">
+                  <div class="ap-section">
+                    <div class="ap-section-header">
+                      <h4 class="text-h4">Limits &amp; Controls</h4>
+                    </div>
                   <p class="text-body lc-intro">Standard dispensing limitations are shown below.</p>
 
                   <div class="toc-toggle-group lc-toggle-group">
@@ -836,10 +851,15 @@
                   </div>
 
                   <textarea v-model="lcDawNotes" class="lc-daw-notes" placeholder="DAW Notes" />
+                  </div>
                 </template>
 
                 <!-- Step 7: Billing -->
                 <template v-else-if="currentWizardStep === 6">
+                  <div class="ap-section">
+                    <div class="ap-section-header">
+                      <h4 class="text-h4">Billing</h4>
+                    </div>
 
                   <!-- EIN Number -->
                   <div class="bl-section bl-section--no-gap">
@@ -995,14 +1015,19 @@
                       class="bl-notes-textarea"
                     />
                   </div>
+                  </div>
 
                 </template>
 
                 <!-- Step 8: ID Cards -->
                 <template v-else-if="currentWizardStep === 7">
+                  <div class="ap-section">
+                    <div class="ap-section-header">
+                      <h4 class="text-h4">ID Cards</h4>
+                    </div>
 
                   <!-- Vendor -->
-                  <div class="bl-section">
+                  <div class="bl-section bl-section--no-gap">
                     <div class="id-two-col-row">
                       <Select
                         v-model="idVendorType"
@@ -1075,6 +1100,8 @@
                         />
                       </div>
                     </div>
+
+                    <div class="lc-section-divider" />
 
                     <!-- Mailing Preference -->
                     <h4 class="text-h4 bl-section-heading">Mailing Preference</h4>
@@ -1264,6 +1291,7 @@
                     </div>
 
                   </div>
+                  </div>
 
                 </template>
 
@@ -1340,7 +1368,6 @@
                   <div v-for="(step, index) in wizardSteps" :key="index" class="wizard-grid-item">
                     <span class="wizard-grid-number">{{ index + 1 }}</span>
                     <span class="wizard-grid-name">{{ step.name }}</span>
-                    <span v-if="step.required" class="wizard-required-badge">Required</span>
                   </div>
                 </div>
                 <div class="wizard-info-list">
@@ -2202,9 +2229,12 @@ watch(selectedAccount, (newVal) => {
   padding: $spacing-small $spacing-medium;
   border-bottom: 1px solid $color-border;
 
-  &:nth-last-child(1),
-  &:nth-last-child(2) { border-bottom: none; }
   &:nth-child(odd) { border-right: 1px solid $color-border; }
+  &:last-child {
+    grid-column: 1 / -1;
+    border-bottom: none;
+    border-right: none;
+  }
 }
 
 .wizard-grid-number {
@@ -2346,19 +2376,19 @@ watch(selectedAccount, (newVal) => {
   margin-bottom: $spacing-medium;
   padding-bottom: $spacing-small;
   border-bottom: 1px solid $color-border;
+
+  &--space-between {
+    justify-content: space-between;
+  }
 }
 
 .ap-fields {
   display: flex;
   flex-direction: column;
+  gap: 32px;
 }
 
 .ap-field-row {
-  padding: $spacing-small 0;
-  border-bottom: 1px solid rgba($color-border, 0.5);
-
-  &:last-child { border-bottom: none; }
-
   &--multi {
     display: flex;
     gap: $spacing-xlarge;
@@ -2439,8 +2469,6 @@ watch(selectedAccount, (newVal) => {
   align-items: center;
   gap: $spacing-small;
   margin-top: $spacing-medium;
-  padding-top: $spacing-small;
-  border-top: 1px solid $color-border;
 }
 
 // ─── Shared buttons ───────────────────────────────────────────────────────────

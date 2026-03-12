@@ -4,6 +4,23 @@ This file documents all significant changes made to the project for future refer
 
 ---
 
+## [2026-03-12] (session 2)
+
+### Plan Explorer — Wizard UI consistency
+- **All steps wrapped in `ap-section` card** (bordered card, 8px radius, consistent padding):
+  - Step 2: Network Configuration (already had card treatment)
+  - Step 3: Plan Design — wrapped in card; "Create New Plan" button right-aligned via `ap-section-header--space-between`
+  - Step 4: Transition of Care — wrapped in card with "Transition of Care" heading
+  - Step 5: Programs — wrapped in card with "Configured Programs" heading
+  - Step 6: Limits & Controls — wrapped in card with "Limits & Controls" heading
+  - Step 7: Billing — wrapped in card with "Billing" heading
+  - Step 8: ID Cards — wrapped in card with "ID Cards" heading; divider added above Mailing Preference; vendor row gap reduced
+- **`ap-section-header`** — added `justify-content: space-between` via `--space-between` modifier; default keeps items left-aligned
+- **Step 1 Account Profile** — removed row dividers; set row gap to 32px; removed footer border-top divider
+- **Step 9 Verification & Summary** — step 9 grid item now spans both columns in the overview grid; removed Required badges from overview grid
+
+---
+
 ## [2026-03-12]
 
 ### Plan Explorer — Step 8: ID Cards (Carrier enhancements)
