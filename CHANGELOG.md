@@ -4,6 +4,38 @@ This file documents all significant changes made to the project for future refer
 
 ---
 
+## [2026-03-12]
+
+### Plan Explorer — Step 8: ID Cards (Carrier enhancements)
+- Added **Carrier Branding Information** card shown when Vendor Type = "Carrier"
+  - Displays Liviniti logo (`/icons/Liviniti-logo.svg`, copied from Downloads)
+  - Info table with Customer Service #, Help Desk #, Website URL, Rx BIN, Rx PCN, Rx Group Number, Effective Date
+  - Download Kit button (secondary, with `CloudDownload` icon) in card header row alongside heading
+  - File hint text below button: "Includes print-ready templates · PDF + logo file · 4.2 MB"
+- Added **Walgreens disclaimer** banner above the branding card (warning variant style: amber border, amber icon circle, light amber background)
+  - Text: "Please Note: Walgreens is unable to process Cardholder IDs and Group Numbers that contain special characters, i.e. dashes."
+
+### Plan Explorer — Step 9: Verification & Summary (new)
+- Implemented full Step 9 replacing placeholder
+  - Computed `wizardCompletionPercent` based on steps with `status === 'complete'`
+  - Completion percentage displayed in amber (green at 100%)
+  - Step list showing all 8 steps with: left border color (green/amber/gray), status badge, Edit button
+- Added `status` field to all `wizardSteps` entries (all default to `'not-started'`)
+
+### Plan Explorer — Wizard navigation & completion flow
+- Added **Mark as Complete** button to wizard footer (all steps 1–9); hidden once step is marked complete
+- Clicking Mark as Complete sets step `status = 'complete'` and auto-advances to next step
+- **Next** button marks step as `'in-progress'` if it was `'not-started'`
+- Footer layout: Previous on left · Mark as Complete + Next/Finish on right
+- Renamed "Submit for Review" → **"Finish Plan Setup"** on step 9
+- "Finish Plan Setup" exits wizard and navigates to **Contract Status** timeline item
+- Removed "Back to Overview" button from wizard footer
+- Removed status action buttons (Mark as Complete/Pending/In-Progress) from timeline details card
+- Removed "Assigned To" field from timeline details card
+- Sidebar step list: completed steps show **green checkmark** icon and green text instead of number
+
+---
+
 
 
 ## [2025-07-08]

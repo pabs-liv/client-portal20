@@ -48,10 +48,16 @@
                     <li
                       v-for="(wStep, wIndex) in wizardSteps"
                       :key="wIndex"
-                      :class="['wizard-sub-step-item', { 'wizard-sub-step-item--active': wizardActive && currentWizardStep === wIndex }]"
+                      :class="['wizard-sub-step-item', {
+                        'wizard-sub-step-item--active': wizardActive && currentWizardStep === wIndex,
+                        'wizard-sub-step-item--complete': wStep.status === 'complete',
+                      }]"
                       @click.stop="selectWizardStep(wIndex)"
                     >
-                      <span class="wizard-sub-step-number">{{ wIndex + 1 }}</span>
+                      <span class="wizard-sub-step-number">
+                        <Check v-if="wStep.status === 'complete'" :size="12" :stroke-width="2.5" />
+                        <template v-else>{{ wIndex + 1 }}</template>
+                      </span>
                       <span class="wizard-sub-step-name">{{ wStep.name }}</span>
                     </li>
                   </ul>
@@ -862,11 +868,6 @@
                         <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blAchMethod === 'send' }]" @click="blAchMethod = 'send'">Send to Liviniti</button>
                         <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blAchMethod === 'debit' }]" @click="blAchMethod = 'debit'">Debited by Liviniti</button>
                       </div>
-                      <p class="text-body bl-note">Please complete the attached form and forward to your implementation manager as soon as possible.</p>
-                      <button class="button button-primary bl-w9-btn">
-                        W-9 FORM
-                        <CloudDownload :size="16" :stroke-width="1.5" />
-                      </button>
                     </div>
 
                     <div v-if="blPaymentMethod === 'Check'" class="bl-subsection">
@@ -876,6 +877,16 @@
                         <p>PO Box 896599</p>
                         <p>Charlotte, NC 28289</p>
                       </div>
+                    </div>
+
+                    <div class="bl-subsection">
+                      <FileUploader :show-document-type-selection="false">
+                        <template #label>
+                          <p class="bl-upload-label">
+                            Upload <a href="#" class="bl-upload-link" @click.prevent>W-9 form</a> or drag and drop
+                          </p>
+                        </template>
+                      </FileUploader>
                     </div>
                   </div>
 
@@ -987,6 +998,303 @@
 
                 </template>
 
+                <!-- Step 8: ID Cards -->
+                <template v-else-if="currentWizardStep === 7">
+
+                  <!-- Vendor -->
+                  <div class="bl-section">
+                    <div class="id-two-col-row">
+                      <Select
+                        v-model="idVendorType"
+                        :items="idVendorTypeOptions"
+                        label="Vendor type"
+                      />
+                      <TextField
+                        v-if="idVendorType === 'Internal'"
+                        model-value="Liviniti"
+                        label="Vendor name"
+                        :readonly="true"
+                      />
+                      <Autocomplete
+                        v-else-if="idVendorType === 'Carrier'"
+                        v-model="idCarrierVendorName"
+                        :items="idCarrierVendorOptions"
+                        label="Vendor name"
+                      />
+                    </div>
+                  </div>
+
+                  <!-- Internal-only fields -->
+                  <div v-if="idVendorType === 'Internal'" class="id-internal-fields">
+
+                    <!-- Combine Rx + File upload -->
+                    <div class="bl-section">
+                      <v-checkbox
+                        v-model="idCombineRxMedical"
+                        label="Combine Rx and Medical information"
+                        color="primary"
+                        density="compact"
+                        hide-details
+                      />
+                    </div>
+
+                    <div class="bl-section">
+                      <p class="lc-hcn-label">ID Card file upload</p>
+                      <FileUploader :show-document-type-selection="false" />
+                    </div>
+
+                    <!-- Send cards + Days to send -->
+                    <div class="bl-section">
+                      <div class="id-two-col-row id-two-col-row--checkbox-pair">
+                        <v-checkbox
+                          v-model="idSendCards"
+                          label="Send cards"
+                          color="primary"
+                          density="compact"
+                          hide-details
+                        />
+                        <TextField
+                          v-if="idSendCards"
+                          v-model="idDaysToSend"
+                          label="Days to send cards before"
+                        />
+                      </div>
+                    </div>
+
+                    <!-- Processing ID + Person code characters -->
+                    <div class="bl-section">
+                      <div class="id-two-col-row">
+                        <Select
+                          v-model="idProcessingId"
+                          :items="idProcessingIdOptions"
+                          label="Processing ID"
+                        />
+                        <TextField
+                          v-model="idPersonCodeChars"
+                          label="Person code characters"
+                        />
+                      </div>
+                    </div>
+
+                    <!-- Mailing Preference -->
+                    <h4 class="text-h4 bl-section-heading">Mailing Preference</h4>
+
+                    <div class="bl-section">
+                      <div class="id-two-col-row">
+                        <Select
+                          v-model="idInitialMailing"
+                          :items="idMailingOptions"
+                          label="Initial mailing preference"
+                          hint="Optional"
+                          persistent-hint
+                        />
+                        <Select
+                          v-model="idAdditionalCard"
+                          :items="idMailingOptions"
+                          label="Additional/new card"
+                          hint="Optional"
+                          persistent-hint
+                        />
+                      </div>
+                    </div>
+
+                    <!-- Attention -->
+                    <div class="bl-section">
+                      <TextField
+                        v-model="idAttention"
+                        label="Attention"
+                        hint="Optional"
+                        persistent-hint
+                      />
+                    </div>
+
+                    <!-- Mailing address -->
+                    <div class="bl-section">
+                      <TextField
+                        v-model="idMailingAddress"
+                        label="Mailing address"
+                        hint="Optional"
+                        persistent-hint
+                      />
+                    </div>
+
+                    <!-- Notes/Special instructions -->
+                    <div class="bl-section">
+                      <TextField
+                        v-model="idNotes"
+                        label="Notes/Special instructions"
+                        hint="Optional"
+                        persistent-hint
+                      />
+                    </div>
+
+                    <!-- Auto-generate cards -->
+                    <div class="bl-section">
+                      <p class="id-autogen-heading">Automatically generate cards when any of the following occur:</p>
+                      <div class="id-autogen-grid">
+                        <div class="id-autogen-item">
+                          <v-checkbox v-model="idAutoGenCards.nameChange" label="Name Change" color="primary" density="compact" hide-details />
+                        </div>
+                        <div class="id-autogen-item">
+                          <v-checkbox v-model="idAutoGenCards.addressChange" color="primary" density="compact" hide-details>
+                            <template #label>
+                              <span>Address Change <span class="id-autogen-sublabel">(Primary Cardholder ONLY)</span></span>
+                            </template>
+                          </v-checkbox>
+                        </div>
+                        <div class="id-autogen-item">
+                          <v-checkbox v-model="idAutoGenCards.dependentChange" color="primary" density="compact" hide-details>
+                            <template #label>
+                              <span>Dependent Change <span class="id-autogen-sublabel">(Added/Removed)</span></span>
+                            </template>
+                          </v-checkbox>
+                        </div>
+                        <div class="id-autogen-item">
+                          <v-checkbox v-model="idAutoGenCards.locationChange" label="Location Change" color="primary" density="compact" hide-details />
+                        </div>
+                        <div class="id-autogen-item">
+                          <v-checkbox v-model="idAutoGenCards.effectiveDateChange" label="Effective Date Change" color="primary" density="compact" hide-details />
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Effective dates -->
+                    <div class="bl-section">
+                      <div class="id-two-col-row">
+                        <DatePicker v-model="idEffectiveStart" label="Effective start date" />
+                        <DatePicker v-model="idEffectiveEnd" label="Effective end date" />
+                      </div>
+                    </div>
+
+                  </div>
+
+                  <!-- Carrier-only fields -->
+                  <div v-else-if="idVendorType === 'Carrier'" class="id-internal-fields">
+
+                    <!-- Carrier disclaimer -->
+                    <div class="bl-section">
+                      <div class="id-carrier-kit__disclaimer">
+                        <div class="id-carrier-kit__disclaimer-icon">
+                          <TriangleAlert :size="16" :stroke-width="1.5" />
+                        </div>
+                        <span><strong>Please Note:</strong> Walgreens is unable to process Cardholder IDs and Group Numbers that contain special characters, i.e. dashes.</span>
+                      </div>
+                    </div>
+
+                    <!-- Carrier branding kit info -->
+                    <div class="bl-section">
+                      <div class="id-carrier-kit">
+                        <div class="id-carrier-kit__info">
+                          <div class="id-carrier-kit__header">
+                            <p class="lc-hcn-label">
+                              Carrier Branding Information
+                              <span class="id-carrier-kit__optional">(Optional)</span>
+                            </p>
+                            <div class="id-carrier-kit__download">
+                              <button class="button button-secondary id-carrier-kit__btn" @click="downloadCarrierKit">
+                                <CloudDownload :size="16" :stroke-width="1.5" />
+                                Download Kit
+                              </button>
+                              <span class="id-carrier-kit__hint">Includes print-ready templates · PDF + logo file · 4.2 MB</span>
+                            </div>
+                          </div>
+                          <div class="id-carrier-kit__logo-wrap">
+                            <img src="/icons/Liviniti-logo.svg" alt="Liviniti Logo" class="id-carrier-kit__logo" />
+                          </div>
+                          <p class="wizard-step-description">
+                            Please provide the following information when producing your own ID cards:
+                          </p>
+                          <table class="id-carrier-kit__table">
+                            <tbody>
+                              <tr>
+                                <td class="id-carrier-kit__table-label">Liviniti Customer Service Phone Number:</td>
+                                <td class="id-carrier-kit__table-value">1.800.710.9341</td>
+                              </tr>
+                              <tr>
+                                <td class="id-carrier-kit__table-label">Liviniti Help Desk Phone Number:</td>
+                                <td class="id-carrier-kit__table-value">1.800.710.9341</td>
+                              </tr>
+                              <tr>
+                                <td class="id-carrier-kit__table-label">Liviniti Website URL:</td>
+                                <td class="id-carrier-kit__table-value">www.liviniti.com</td>
+                              </tr>
+                              <tr>
+                                <td class="id-carrier-kit__table-label">Rx BIN:</td>
+                                <td class="id-carrier-kit__table-value">015433</td>
+                              </tr>
+                              <tr>
+                                <td class="id-carrier-kit__table-label">Rx PCN:</td>
+                                <td class="id-carrier-kit__table-value">SSN</td>
+                              </tr>
+                              <tr>
+                                <td class="id-carrier-kit__table-label">Rx Group Number:</td>
+                                <td class="id-carrier-kit__table-value id-carrier-kit__table-value--note">The Rx Group # will mirror the Group # assigned by your administrator.</td>
+                              </tr>
+                              <tr>
+                                <td class="id-carrier-kit__table-label">Effective Date:</td>
+                                <td class="id-carrier-kit__table-value id-carrier-kit__table-value--note">The member's effective date.</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Processing ID + Person code characters -->
+                    <div class="bl-section">
+                      <div class="id-two-col-row">
+                        <Select
+                          v-model="idProcessingId"
+                          :items="idProcessingIdOptions"
+                          label="Processing ID"
+                        />
+                        <TextField
+                          v-model="idPersonCodeChars"
+                          label="Person code characters"
+                        />
+                      </div>
+                    </div>
+
+                    <!-- Effective dates -->
+                    <div class="bl-section">
+                      <div class="id-two-col-row">
+                        <DatePicker v-model="idEffectiveStart" label="Effective start date" />
+                        <DatePicker v-model="idEffectiveEnd" label="Effective end date" />
+                      </div>
+                    </div>
+
+                  </div>
+
+                </template>
+
+                <!-- Step 9: Verification & Summary -->
+                <template v-else-if="currentWizardStep === 8">
+                  <p class="vs-completion" :class="{ 'vs-completion--done': wizardCompletionPercent === 100 }">
+                    {{ wizardCompletionPercent }}% Complete
+                  </p>
+                  <div class="vs-step-list">
+                    <div
+                      v-for="(step, index) in wizardSteps.slice(0, 8)"
+                      :key="index"
+                      class="vs-step-row"
+                      :class="`vs-step-row--${step.status}`"
+                    >
+                      <span class="vs-step-number">{{ index + 1 }}</span>
+                      <span class="vs-step-name">{{ step.name }}</span>
+                      <div class="vs-step-actions">
+                        <span class="vs-step-badge" :class="`vs-step-badge--${step.status}`">
+                          {{ step.status === 'complete' ? 'Complete' : step.status === 'in-progress' ? 'In Progress' : 'Not Started' }}
+                        </span>
+                        <button
+                          v-if="step.status !== 'complete'"
+                          class="button vs-edit-btn"
+                          @click="currentWizardStep = index"
+                        >Edit</button>
+                      </div>
+                    </div>
+                  </div>
+                </template>
+
                 <!-- Other steps: placeholder -->
                 <template v-else>
                   <div class="wizard-placeholder">
@@ -998,11 +1306,16 @@
               </div>
 
               <div class="wizard-footer">
-                <button class="button button-secondary" @click="wizardActive = false">Back to Overview</button>
+                <button v-if="currentWizardStep > 0" class="button button-secondary" @click="prevWizardStep">Previous</button>
+                <span v-else></span>
                 <div class="wizard-footer-actions">
-                  <button v-if="currentWizardStep > 0" class="button button-secondary" @click="prevWizardStep">Previous</button>
+                  <button
+                    v-if="wizardSteps[currentWizardStep].status !== 'complete'"
+                    class="button button-secondary"
+                    @click="markCurrentStepComplete"
+                  >Mark as Complete</button>
                   <button v-if="currentWizardStep < wizardSteps.length - 1" class="button button-primary" @click="nextWizardStep">Next</button>
-                  <button v-if="currentWizardStep === wizardSteps.length - 1" class="button button-primary">Submit for Review</button>
+                  <button v-if="currentWizardStep === wizardSteps.length - 1" class="button button-primary" @click="finishPlanSetup">Finish Plan Setup</button>
                 </div>
               </div>
             </div>
@@ -1061,7 +1374,6 @@
                   <p class="text-body">{{ activeTimelineItem.description }}</p>
                   <p class="text-body mb-xsmall"><strong>Start Date:</strong> {{ activeTimelineItem.startDate }}</p>
                   <p class="text-body mb-xsmall"><strong>End Date:</strong> {{ activeTimelineItem.endDate }}</p>
-                  <p class="text-body mb-xsmall"><strong>Assigned To:</strong> {{ activeTimelineItem.assignedTo }}</p>
                 </div>
                 <div class="d-flex flex-column align-center progress-chip-container">
                   <v-progress-circular
@@ -1082,9 +1394,6 @@
                   >{{ activeTimelineItem.status }}</v-chip>
                 </div>
               </div>
-              <Button v-if="activeTimelineItem.status === 'in-progress'" @click="markAsComplete(activeTimelineItem)" label="Mark as Complete" variant="elevated" color="primary" />
-              <Button v-if="activeTimelineItem.status === 'pending'" @click="markAsInProgress(activeTimelineItem)" label="Mark as In-Progress" variant="elevated" color="primary" />
-              <Button v-if="activeTimelineItem.status === 'completed'" @click="markAsPending(activeTimelineItem)" label="Mark as Pending" variant="outlined" color="primary" />
             </div>
 
             <div v-else class="timeline-details-placeholder">
@@ -1107,10 +1416,13 @@ import ReportDataTable from '@/components/common/ReportDataTable.vue';
 import FilteringPill from '@/components/ui/FilteringPill.vue';
 import Select from '@/components/ui/Select.vue';
 import TextField from '@/components/ui/TextField.vue';
+import FileUploader from '@/components/ui/FileUploader.vue';
+import Autocomplete from '@/components/ui/Autocomplete.vue';
+import DatePicker from '@/components/ui/DatePicker.vue';
 import {
   Hourglass, CircleCheckBig, XCircle,
   Save as SaveIcon, LayoutList as LayoutListIcon, CircleCheck as CircleCheckIcon,
-  ArrowRight as ArrowRightIcon, Pencil, CheckSquare, Square, ChevronDown, PlusCircle, X, Check, CloudDownload,
+  ArrowRight as ArrowRightIcon, Pencil, CheckSquare, Square, ChevronDown, PlusCircle, X, Check, CloudDownload, TriangleAlert,
 } from 'lucide-vue-next';
 import EmptyStateImg from '@/assets/EmptyState.svg';
 import { VRow, VCol, VProgressCircular } from 'vuetify/components';
@@ -1246,6 +1558,40 @@ const blInvoiceBreakout = ref('no');
 const blEinNumber = ref('111111111');
 const blNotes = ref('');
 
+// ─── Step 8: ID Cards ─────────────────────────────────────────────────────────
+const idVendorType = ref('Internal');
+const idVendorTypeOptions = ['Internal', 'Carrier', 'N/A'];
+const idCarrierVendorName = ref('');
+const idCarrierVendorOptions = [
+  'Aetna', 'Anthem', 'Blue Cross Blue Shield', 'Cigna', 'CVS Caremark',
+  'Express Scripts', 'Humana', 'Medco', 'OptumRx', 'United Healthcare',
+];
+const downloadCarrierKit = () => {
+  console.log('Download carrier kit');
+  // Production: trigger zip download from server
+};
+const idCombineRxMedical = ref(false);
+const idSendCards = ref(false);
+const idDaysToSend = ref('');
+const idProcessingId = ref('Cardholder ID');
+const idProcessingIdOptions = ['Cardholder ID', 'Alternate ID', 'Newtech Family ID'];
+const idPersonCodeChars = ref('3');
+const idInitialMailing = ref('');
+const idAdditionalCard = ref('');
+const idMailingOptions = ['Mail to member', 'Mail to employer', 'Mail to HR', 'No mailing'];
+const idAttention = ref('');
+const idMailingAddress = ref('');
+const idNotes = ref('');
+const idAutoGenCards = ref({
+  nameChange: true,
+  addressChange: true,
+  dependentChange: true,
+  locationChange: true,
+  effectiveDateChange: true,
+});
+const idEffectiveStart = ref('');
+const idEffectiveEnd = ref('');
+
 const lcOverrides = [
   'Vacation Supply',
   'Lost/Stolen Meds',
@@ -1272,16 +1618,21 @@ const selectedAccountName = computed(() => {
 });
 
 const wizardSteps = ref([
-  { name: 'Account Profile',        required: true,  description: 'Confirm the account details, set effective dates and set notes or alerts if applicable.' },
-  { name: 'Network Configuration',  required: true,  description: 'Define the pharmacy network and coverage settings for this account.' },
-  { name: 'Plan Design',            required: true,  description: 'Configure the benefit structure, cost-sharing rules, and coverage tiers.' },
-  { name: 'Transition of Care',     required: false, description: 'Set up transition of care rules for members moving from another plan.' },
-  { name: 'Programs',               required: false, description: 'Select and configure clinical and specialty programs for this account.' },
-  { name: 'Limits & Controls',      required: false, description: 'Define quantity limits, step therapy rules, and utilization management controls.' },
-  { name: 'Billing',                required: false, description: 'Configure billing preferences, payment terms, and invoice settings.' },
-  { name: 'ID Cards',               required: false, description: 'Set up member ID card design and distribution preferences.' },
-  { name: 'Verification & Summary', required: false, description: 'Review all configuration details and submit the account setup for review.' },
+  { name: 'Account Profile',        required: true,  status: 'not-started',  description: 'Confirm the account details, set effective dates and set notes or alerts if applicable.' },
+  { name: 'Network Configuration',  required: true,  status: 'not-started',  description: 'Define the pharmacy network and coverage settings for this account.' },
+  { name: 'Plan Design',            required: true,  status: 'not-started',  description: 'Configure the benefit structure, cost-sharing rules, and coverage tiers.' },
+  { name: 'Transition of Care',     required: false, status: 'not-started',  description: 'Set up transition of care rules for members moving from another plan.' },
+  { name: 'Programs',               required: false, status: 'not-started',  description: 'Select and configure clinical and specialty programs for this account.' },
+  { name: 'Limits & Controls',      required: false, status: 'not-started',  description: 'Define quantity limits, step therapy rules, and utilization management controls.' },
+  { name: 'Billing',                required: false, status: 'not-started',  description: 'Configure billing preferences, payment terms, and invoice settings.' },
+  { name: 'ID Cards',               required: false, status: 'not-started',  description: 'Set up member ID card design and distribution preferences.' },
+  { name: 'Verification & Summary', required: false, status: 'not-started',  description: 'Review the completion status of all configuration steps before finishing plan setup.' },
 ]);
+
+const wizardCompletionPercent = computed(() => {
+  const completed = wizardSteps.value.filter(s => s.status === 'complete').length;
+  return Math.round((completed / wizardSteps.value.length) * 100);
+});
 
 const implementationSteps = ref([
   {
@@ -1369,12 +1720,30 @@ const selectWizardStep = (index: number) => {
 };
 
 const nextWizardStep = () => {
+  if (wizardSteps.value[currentWizardStep.value].status === 'not-started') {
+    wizardSteps.value[currentWizardStep.value].status = 'in-progress';
+  }
   currentWizardStep.value++;
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
 const prevWizardStep = () => {
   currentWizardStep.value--;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+const markCurrentStepComplete = () => {
+  wizardSteps.value[currentWizardStep.value].status = 'complete';
+  if (currentWizardStep.value < wizardSteps.value.length - 1) {
+    currentWizardStep.value++;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+};
+
+const finishPlanSetup = () => {
+  wizardActive.value = false;
+  const contractStatus = implementationSteps.value.find(s => s.title === 'Contract Status');
+  if (contractStatus) selectTimelineItem(contractStatus);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
@@ -1721,6 +2090,18 @@ watch(selectedAccount, (newVal) => {
     .wizard-sub-step-name {
       color: $color-primary;
       font-weight: $font-weight-semibold;
+    }
+  }
+
+  &--complete {
+    .wizard-sub-step-number {
+      background-color: $color-success;
+      border-color: $color-success;
+      color: $color-neutral-white;
+    }
+
+    .wizard-sub-step-name {
+      color: $color-success;
     }
   }
 }
@@ -2863,10 +3244,16 @@ watch(selectedAccount, (newVal) => {
   margin: $spacing-small 0;
 }
 
-.bl-w9-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: $spacing-xsmall;
+.bl-upload-label {
+  font-size: $font-size-body;
+  color: $color-text-primary;
+
+  .bl-upload-link {
+    color: $color-link;
+    font-weight: $font-weight-semibold;
+    text-decoration: underline;
+    cursor: pointer;
+  }
 }
 
 .bl-address {
@@ -2921,6 +3308,292 @@ watch(selectedAccount, (newVal) => {
     font-family: $font-family-base !important;
     letter-spacing: 0 !important;
     color: $color-neutral-disabled !important;
+  }
+}
+
+// ─── Step 8: ID Cards ─────────────────────────────────────────────────────────
+
+.id-two-col-row {
+  display: flex;
+  gap: $spacing-medium;
+  align-items: flex-start;
+
+  > * {
+    flex: 1;
+  }
+
+  &--checkbox-pair {
+    align-items: center;
+  }
+}
+
+
+.id-autogen-heading {
+  font-size: $font-size-body;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+  margin-bottom: $spacing-medium;
+}
+
+.id-autogen-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-small $spacing-large;
+}
+
+.id-autogen-sublabel {
+  font-size: $font-size-small;
+  color: $color-text-secondary;
+  display: block;
+}
+
+.id-carrier-kit {
+  border: 1px solid $color-border;
+  border-radius: 8px;
+  padding: $spacing-medium;
+  background-color: $color-information-background;
+
+  &__logo-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: $spacing-small $spacing-medium;
+    background: $color-neutral-white;
+    border: 1px solid $color-border;
+    border-radius: 6px;
+    margin: $spacing-small 0 $spacing-medium;
+  }
+
+  &__logo {
+    height: 32px;
+    width: auto;
+  }
+
+  &__info {
+    width: 100%;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $spacing-medium;
+  }
+
+  &__download {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: $spacing-nano;
+    flex-shrink: 0;
+  }
+
+  &__hint {
+    font-size: $font-size-small;
+    color: $color-neutral-disabled;
+  }
+
+  &__optional {
+    font-weight: $font-weight-normal;
+    color: $color-neutral-disabled;
+    font-size: $font-size-small;
+    margin-left: $spacing-xsmall;
+  }
+
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: $spacing-small;
+    font-size: $font-size-small;
+
+    tr {
+      border-bottom: 1px solid $color-border;
+
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+
+    td {
+      padding: $spacing-xsmall $spacing-small;
+      vertical-align: top;
+      line-height: 1.6;
+    }
+  }
+
+  &__table-label {
+    color: $color-text-primary;
+    width: 50%;
+    padding-left: 0 !important;
+  }
+
+  &__table-value {
+    color: $color-text-primary;
+    text-align: right;
+
+    &--note {
+      color: $color-text-secondary;
+      font-style: italic;
+    }
+  }
+
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: $spacing-xsmall;
+  }
+
+  &__disclaimer {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xsmall;
+    padding: $spacing-nano $spacing-xsmall;
+    border: 1px solid $color-warning;
+    border-radius: 4px;
+    background-color: $color-warning-background;
+    font-size: $font-size-body;
+    color: $color-text-primary;
+    line-height: 1.5;
+  }
+
+  &__disclaimer-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: $color-warning;
+    flex-shrink: 0;
+
+    svg {
+      color: $color-neutral-white;
+    }
+  }
+}
+
+.id-internal-fields {
+  :deep(.v-selection-control__input input) {
+    opacity: 1 !important;
+    width: 16px !important;
+  }
+
+  :deep(.v-selection-control__wrapper) {
+    color: $color-primary !important;
+    opacity: 1 !important;
+  }
+
+  :deep(.v-checkbox .v-icon) {
+    opacity: 1 !important;
+  }
+
+  :deep(.v-checkbox .v-selection-control__off-icon) {
+    color: $color-border !important;
+    opacity: 1 !important;
+  }
+
+  :deep(.v-checkbox .v-selection-control__on-icon) {
+    color: $color-primary !important;
+    opacity: 1 !important;
+  }
+}
+
+// ─── Step 9: Verification & Summary ───────────────────────────────────────────
+
+.vs-completion {
+  font-size: $font-size-h3;
+  font-weight: $font-weight-bold;
+  color: $color-warning;
+  margin-bottom: $spacing-medium;
+
+  &--done {
+    color: $color-success;
+  }
+}
+
+.vs-step-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.vs-step-row {
+  display: flex;
+  align-items: center;
+  gap: $spacing-medium;
+  padding: $spacing-small $spacing-xsmall;
+  border-bottom: 1px solid $color-border;
+  border-left: 3px solid transparent;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &--in-progress {
+    border-left-color: $color-warning;
+  }
+
+  &--complete {
+    border-left-color: $color-success;
+  }
+
+  &--not-started {
+    border-left-color: $color-border;
+  }
+}
+
+.vs-step-number {
+  font-size: $font-size-body;
+  color: $color-text-secondary;
+  width: 20px;
+  flex-shrink: 0;
+}
+
+.vs-step-name {
+  flex: 1;
+  font-size: $font-size-body;
+  font-weight: $font-weight-semibold;
+  color: $color-primary;
+}
+
+.vs-step-actions {
+  display: flex;
+  align-items: center;
+  gap: $spacing-small;
+  flex-shrink: 0;
+}
+
+.vs-step-badge {
+  font-size: $font-size-small;
+  padding: 2px $spacing-xsmall;
+  border-radius: 100px;
+
+  &--in-progress {
+    background-color: rgba($color-warning, 0.15);
+    color: darken($color-warning, 20%);
+  }
+
+  &--complete {
+    background-color: rgba($color-success, 0.15);
+    color: darken($color-success, 10%);
+  }
+
+  &--not-started {
+    background-color: rgba($color-neutral-disabled, 0.12);
+    color: $color-neutral-disabled;
+  }
+}
+
+.vs-edit-btn {
+  border: 1px solid $color-primary;
+  border-radius: 100px;
+  background: transparent;
+  color: $color-primary;
+  padding: $spacing-nano $spacing-medium;
+  font-size: $font-size-body;
+  cursor: pointer;
+
+  &:hover {
+    background-color: rgba($color-primary, 0.05);
   }
 }
 </style>
