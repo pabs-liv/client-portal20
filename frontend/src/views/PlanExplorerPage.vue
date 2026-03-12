@@ -17,9 +17,32 @@
     <PageCard
       v-if="selectedAccount"
       :header-text="selectedAccountName"
-      description-text="Implementation progress."
+      :description-text="selectedAccountDescription"
     >
-      <div class="plan-explorer-content">
+      <!-- Wayne Enterprises: Active/fully-implemented view -->
+      <div v-if="isWayneEnterprises" class="gap-view">
+        <div class="gap-meta">
+          <Building2 :size="14" :stroke-width="1.5" class="gap-meta-icon" />
+          <span>Wayne Enterprises – 11250</span>
+          <span class="gap-meta-dot">•</span>
+          <span>Effective: 01/01/2026</span>
+        </div>
+
+        <div class="gap-search">
+          <Search :size="16" :stroke-width="1.5" class="gap-search-icon" />
+          <input class="gap-search-input" placeholder="Search for any field or value..." />
+        </div>
+
+        <div class="gap-accordion-list">
+          <div class="gap-accordion-item" v-for="section in gapSections" :key="section.label">
+            <component :is="section.icon" :size="18" :stroke-width="1.5" class="gap-accordion-icon" />
+            <span class="gap-accordion-label">{{ section.label }}</span>
+            <ChevronDown :size="18" :stroke-width="1.5" class="gap-accordion-chevron" />
+          </div>
+        </div>
+      </div>
+
+      <div v-else class="plan-explorer-content">
         <v-row :align="wizardActive && isStarkIndustries ? 'start' : undefined">
           <!-- LEFT: Timeline -->
           <v-col cols="12" md="3" :class="{ 'plan-col--sticky': wizardActive && isStarkIndustries }">
@@ -1431,6 +1454,7 @@
         </v-row>
       </div>
     </PageCard>
+
   </div>
 </template>
 
@@ -1450,11 +1474,13 @@ import {
   Hourglass, CircleCheckBig, XCircle,
   Save as SaveIcon, LayoutList as LayoutListIcon, CircleCheck as CircleCheckIcon,
   ArrowRight as ArrowRightIcon, Pencil, CheckSquare, Square, ChevronDown, PlusCircle, X, Check, CloudDownload, TriangleAlert,
+  Building2, Shield, Link2, Users, FileText, Search,
 } from 'lucide-vue-next';
 import EmptyStateImg from '@/assets/EmptyState.svg';
 import { VRow, VCol, VProgressCircular } from 'vuetify/components';
 
 const STARK_INDUSTRIES_ID = 1;
+const WAYNE_ENTERPRISES_ID = 2;
 
 const accountOptions = ref([
   { id: 1, name: 'Stark Industries' },
@@ -1638,11 +1664,27 @@ const lcFields = ref([
 ]);
 
 const isStarkIndustries = computed(() => selectedAccount.value === STARK_INDUSTRIES_ID);
+const isWayneEnterprises = computed(() => selectedAccount.value === WAYNE_ENTERPRISES_ID);
+
+const gapSections = [
+  { label: 'Account Information',  icon: Building2  },
+  { label: 'Plan Design',          icon: Shield     },
+  { label: 'Benefit Information',  icon: Link2      },
+  { label: 'Account Contacts',     icon: Users      },
+  { label: 'Third Party Vendors',  icon: FileText   },
+];
 
 const selectedAccountName = computed(() => {
   const account = accountOptions.value.find(acc => acc.id === selectedAccount.value);
-  return account ? `Implementation Tracker for ${account.name}` : '';
+  if (!account) return '';
+  return isWayneEnterprises.value
+    ? `Plan Configuration for ${account.name}`
+    : `Implementation Tracker for ${account.name}`;
 });
+
+const selectedAccountDescription = computed(() =>
+  isWayneEnterprises.value ? '' : 'Implementation progress.'
+);
 
 const wizardSteps = ref([
   { name: 'Account Profile',        required: true,  status: 'not-started',  description: 'Confirm the account details, set effective dates and set notes or alerts if applicable.' },
@@ -3623,5 +3665,97 @@ watch(selectedAccount, (newVal) => {
   &:hover {
     background-color: rgba($color-primary, 0.05);
   }
+}
+
+// ─── Wayne Enterprises: Group Account Profile (GAP) view ──────────────────────
+
+.gap-view {
+  padding: $spacing-small 0;
+}
+
+.gap-meta {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xsmall;
+  font-size: $font-size-small;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-medium;
+}
+
+.gap-meta-icon {
+  color: $color-text-secondary;
+  flex-shrink: 0;
+}
+
+.gap-meta-dot {
+  color: $color-neutral-disabled;
+}
+
+.gap-search {
+  display: flex;
+  align-items: center;
+  gap: $spacing-small;
+  border: 1px solid $color-border;
+  border-radius: 6px;
+  padding: $spacing-small $spacing-medium;
+  margin-bottom: $spacing-medium;
+  background: $color-neutral-white;
+}
+
+.gap-search-icon {
+  color: $color-neutral-disabled;
+  flex-shrink: 0;
+}
+
+.gap-search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-family: $font-family-base;
+  font-size: $font-size-body;
+  color: $color-text-primary;
+  background: transparent;
+
+  &::placeholder {
+    color: $color-neutral-disabled;
+  }
+}
+
+.gap-accordion-list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-small;
+}
+
+.gap-accordion-item {
+  display: flex;
+  align-items: center;
+  gap: $spacing-small;
+  padding: $spacing-medium;
+  border: 1px solid $color-border;
+  border-radius: 8px;
+  background: $color-neutral-white;
+  cursor: pointer;
+
+  &:hover {
+    background-color: rgba($color-primary, 0.03);
+  }
+}
+
+.gap-accordion-icon {
+  color: $color-primary;
+  flex-shrink: 0;
+}
+
+.gap-accordion-label {
+  flex: 1;
+  font-size: $font-size-body;
+  font-weight: $font-weight-semibold;
+  color: $color-primary;
+}
+
+.gap-accordion-chevron {
+  color: $color-text-secondary;
+  flex-shrink: 0;
 }
 </style>

@@ -4,6 +4,20 @@ This file documents all significant changes made to the project for future refer
 
 ---
 
+## [2026-03-12] (session 3)
+
+### Plan Explorer — Wayne Enterprises "Active" path
+- Added `WAYNE_ENTERPRISES_ID = 2` constant and `isWayneEnterprises` computed
+- Card title changes to **"Plan Configuration for {Account Name}"** for Wayne Enterprises; description removed
+- Wayne Enterprises path replaces the stepper with a **Group Account Profile (GAP) view**:
+  - Account meta line: building icon, account name/number, effective date
+  - Full-width search bar
+  - 5 collapsed accordion rows: Account Information, Plan Design, Benefit Information, Account Contacts, Third Party Vendors (with icons + chevron-down)
+  - Expanded content not implemented yet
+- All other accounts retain the existing Implementation Tracker / stepper path
+
+---
+
 ## [2026-03-12] (session 2)
 
 ### Plan Explorer — Wizard UI consistency
