@@ -69,6 +69,13 @@ const goToPlanExplorer = () => {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   background-color: $color-neutral-white;
   padding: $spacing-medium;
+  transition: background-color 0.25s ease, border-color 0.25s ease;
+
+  :global(html.dark) & {
+    background-color: var(--color-card-bg);
+    border-color: var(--color-border);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  }
 }
 
 .upcoming-implementations-table .v-card-title {

@@ -62,8 +62,10 @@
         :show-selection-checkboxes="false"
         :show-action-icons="isExternal"
         :action-icons="actionIcons"
-        :search-placeholder="'Search high-cost claims'"
+        search-placeholder="Search by account, drug name, or NDC"
         :show-filter-button="false"
+        :show-filter-pills="true"
+        :initial-filter-pills="hccStatusFilterPills"
         :show-internal-user-actions="!isExternal"
         :internal-user-action-formatter="formatInternalUserAction"
         :internal-user-action-click-handler="handleRequestInfo"
@@ -200,6 +202,14 @@ const formatInternalUserAction = (item: any) => {
 
 const selectedClaim = ref<any>(null);
 
+const hccStatusFilterPills = ref([
+  { type: 'tab', value: 'all', label: 'All', isActive: true },
+  { type: 'tab', value: 'pending', label: 'Pending' },
+  { type: 'tab', value: 'acknowledged', label: 'Acknowledged' },
+  { type: 'tab', value: 'denied', label: 'Denied' },
+  { type: 'tab', value: 'escalated', label: 'Escalated' },
+]);
+
 const claimsHeaders = ref([
   { title: 'Account Name', key: 'accountName' },
   { title: 'EOC ID', key: 'eocId', align: 'end' },
@@ -225,7 +235,7 @@ const claimsData = ref([
     drugName: 'Drug B',
     cost: '$800.00',
     claimDate: '2025-07-14',
-    status: 'Approved',
+    status: 'Acknowledged',
   },
   {
     accountName: 'Company C',
@@ -241,13 +251,19 @@ const claimsData = ref([
     drugName: 'Drug D',
     cost: '$1,500.00',
     claimDate: '2025-07-12',
-    status: 'Rejected',
+    status: 'Denied',
+  },
+  {
+    accountName: 'Company E',
+    eocId: 'EOC77889',
+    drugName: 'Drug E',
+    cost: '$3,100.00',
+    claimDate: '2025-07-11',
+    status: 'Escalated',
   },
 ]);
 
-const claimsPendingApprovalCount = computed(() => {
-  return claimsData.value.filter(claim => claim.status === 'Pending').length;
-});
+const claimsPendingApprovalCount = computed(() => claimsData.value.filter(c => c.status === 'Pending').length);
 
 const totalClaimsCost = computed(() => {
   const total = claimsData.value.reduce((sum, claim) => {

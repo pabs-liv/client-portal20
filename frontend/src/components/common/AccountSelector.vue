@@ -59,7 +59,18 @@ defineEmits(['update:modelValue']);
   border: 1px solid $color-border;
   padding: $spacing-medium;
   border-radius: 8px;
-  min-height: 80px; /* Added to give a defined height for centering */
+  min-height: 80px;
+  transition: background-color 0.25s ease, border-color 0.25s ease;
+
+  :global(html.dark) & {
+    background-color: var(--color-card-bg);
+    border-color: var(--color-border);
+    color: var(--color-text-primary);
+
+    h1, p {
+      color: var(--color-text-primary);
+    }
+  }
 
   .account-selector-header {
     display: flex;

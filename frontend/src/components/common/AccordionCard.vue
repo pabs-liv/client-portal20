@@ -50,6 +50,13 @@ const props = defineProps({
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   background-color: $color-neutral-white;
+  transition: background-color 0.25s ease, border-color 0.25s ease;
+
+  :global(html.dark) & {
+    background-color: var(--color-card-bg);
+    border-color: var(--color-border);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  }
 }
 
 .accordion-card .v-expansion-panel-title {
@@ -82,6 +89,13 @@ const props = defineProps({
 
 .accordion-card :deep(.v-expansion-panel-text__wrapper) {
   padding: 0 !important;
+}
+
+:global(html.dark) .accordion-card :deep(.v-expansion-panel),
+:global(html.dark) .accordion-card :deep(.v-expansion-panel-title),
+:global(html.dark) .accordion-card :deep(.v-expansion-panel-text) {
+  background-color: var(--color-card-bg) !important;
+  color: var(--color-text-primary) !important;
 }
 </style>
 

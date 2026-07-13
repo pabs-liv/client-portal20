@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Member Portal — Documents Page Mockup (Story #34000)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <style>
+    /* ── Portal CSS Variables (from style.css) ── */
+    :root {
+      --livi-primary: #0f285b;
+      --livi-white: #fff;
+      --app-font: 'Lato', sans-serif;
+      --headings-color-heading-primary: #0f285b;
+      --surfaces-backgrounds-pages-light-gray: #f4f4f4;
+      --surfaces-backgrounds-pages-light: #fff;
+      --borders-border-color: #e0e0e0;
+      --text-text-primary: #1a1a1a;
+      --text-text-disabled: #858585;
+      --neutral-light-300: #a3a3a3;
+      --spacing-spacing-xsmall: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--app-font);
+      background: var(--surfaces-backgrounds-pages-light-gray);
+      color: var(--text-text-primary);
+      font-size: 14px;
+    }
+
+    /* ── Header (from app-header.vue) ── */
+    .site-header {
+      background: #fff;
+      border-bottom: 1px solid var(--borders-border-color);
+    }
+
+    .desktop-header-content {
+      width: 100%;
+      max-width: 2040px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px 20px 20px;
+    }
+
+    .header-logo-wrapper {
+      display: flex;
+      align-items: center;
+    }
+
+    .header-logo-wrapper svg {
+      height: 36px;
+      width: auto;
+    }
+
+    .navbar-nav {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 20px;
+      list-style: none;
+    }
+
+    /* Nav link styles (from app-header.vue scoped CSS) */
+    .navbar-nav a {
+      font-size: 14px;
+      font-family: var(--app-font);
+      font-weight: 500;
+      color: rgba(51, 51, 51, 1);
+      text-decoration: none;
+      cursor: pointer;
+      display: block;
+      padding-bottom: 2px;
+    }
+
+    .navbar-nav li.current-menu-item a {
+      font-weight: 700;
+      padding-bottom: 2px;
+      border-bottom: 2px solid rgba(51, 51, 51, 1);
+    }
+
+    .profile-icon-wrapper {
+      display: inline-flex;
+      width: 48px;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      color: rgba(51,51,51,1);
+    }
+
+    /* ── Page Content (from style.css .page-content) ── */
+    .page-content {
+      padding: 32px 40px 64px 40px;
+      min-height: calc(100vh - 80px);
+      background-color: var(--surfaces-backgrounds-pages-light-gray);
+    }
+
+    /* ── Page Title (from style.css) ── */
+    .page-title {
+      color: var(--headings-color-heading-primary);
+      font-family: var(--app-font);
+      font-size: 29.03px;
+      font-style: normal;
+      font-weight: 700;
+      line-height: 120%;
+      margin-bottom: 20px;
+    }
+
+    /* ── Table Wrapper (from style.css .recent-claim-table-wrapper) ── */
+    .table-wrapper {
+      border-radius: var(--spacing-spacing-xsmall);
+      border: 1px solid var(--borders-border-color);
+      background: #fff;
+      padding: 20px;
+    }
+
+    /* ── Search Input (from _tables.css) ── */
+    .search-container {
+      position: relative;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .search-container i {
+      position: absolute;
+      left: 10px;
+      color: var(--neutral-light-300);
+      font-size: 18px;
+    }
+
+    .table-search-input {
+      width: 100%;
+      padding: 10px 10px 10px 36px;
+      background: #d9d9d9;
+      font-family: var(--app-font);
+      font-style: normal;
+      font-weight: 500;
+      font-size: 16px;
+      border: none;
+      outline: none;
+      color: #000;
+      border-radius: 2px;
+    }
+
+    .table-search-input::placeholder {
+      color: #666;
+    }
+
+    /* ── Bulk Action Bar (styled to match CP2.0 pattern) ── */
+    .bulk-action-bar {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--livi-primary);
+      border-radius: 6px;
+      padding: 8px 16px;
+      margin-bottom: 12px;
+    }
+
+    .bulk-action-bar.visible {
+      display: flex;
+    }
+
+    .bulk-action-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .bulk-action-count {
+      color: #fff;
+      font-family: var(--app-font);
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .bulk-action-divider {
+      width: 1px;
+      height: 16px;
+      background: rgba(255, 255, 255, 0.35);
+    }
+
+    .bulk-action-btn {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      color: #fff;
+      font-family: var(--app-font);
+      font-size: 13px;
+      padding: 4px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .bulk-action-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .bulk-clear-btn {
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.85);
+      font-family: var(--app-font);
+      font-size: 13px;
+      cursor: pointer;
+      padding: 4px 8px;
+    }
+
+    .bulk-clear-btn:hover { color: #fff; }
+
+    /* ── Table (from _tables.css .solo_table) ── */
+    .solo_table {
+      width: 100%;
+      font-family: var(--app-font);
+      font-style: normal;
+      font-weight: 500;
+      font-size: 12.8px;
+      border-collapse: collapse;
+    }
+
+    .solo_table th {
+      padding: 0.5rem 0.55rem;
+      border-bottom: 1px solid var(--livi-primary);
+      text-align: left;
+      font-size: 12.8px;
+      font-weight: 700;
+      color: var(--text-text-primary);
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    .solo_table th.sortable {
+      cursor: pointer;
+    }
+
+    .solo_table th.sortable:hover {
+      color: var(--livi-primary);
+    }
+
+    .solo_table td {
+      padding: 0.6rem 0.55rem;
+      border-bottom: 1px solid var(--borders-border-color);
+      font-size: 12.8px;
+      color: var(--text-text-primary);
+      vertical-align: middle;
+    }
+
+    .solo_table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .solo_table tbody tr:hover {
+      background: #f9f9f9;
+    }
+
+    .solo_table tbody tr.row-selected {
+      background: rgba(15, 40, 91, 0.06);
+    }
+
+    .col-check { width: 36px; }
+    .col-action { width: 48px; text-align: center; }
+
+    input[type="checkbox"] {
+      width: 15px;
+      height: 15px;
+      accent-color: var(--livi-primary);
+      cursor: pointer;
+    }
+
+    /* ── Download Button ── */
+    .dl-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--livi-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 4px;
+      margin: 0 auto;
+      font-size: 18px;
+    }
+
+    .dl-btn:hover { background: #f0f0f0; }
+
+    /* ── Empty State ── */
+    .empty-state {
+      text-align: center;
+      padding: 32px;
+      color: var(--neutral-light-300);
+      font-size: 14px;
+      font-family: var(--app-font);
+    }
+
+    /* ── Pagination Row ── */
+    .pagination-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 16px;
+    }
+
+    .per-page-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12.8px;
+      color: var(--text-text-primary);
+      font-family: var(--app-font);
+    }
+
+    .per-page-wrapper select {
+      height: 28px;
+      padding: 0 6px;
+      border: 1px solid var(--borders-border-color);
+      border-radius: 3px;
+      font-size: 12.8px;
+      font-family: var(--app-font);
+      background: #fff;
+      color: var(--text-text-primary);
+      cursor: pointer;
+    }
+
+    .pg-controls {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .pg-info {
+      font-size: 12.8px;
+      color: var(--text-text-primary);
+      font-family: var(--app-font);
+      margin-right: 8px;
+    }
+
+    .pg-btn {
+      background: #fff;
+      border: 1px solid var(--borders-border-color);
+      color: var(--text-text-primary);
+      width: 28px;
+      height: 28px;
+      border-radius: 3px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    .pg-btn:hover:not(:disabled) {
+      background: #f4f4f4;
+      border-color: var(--livi-primary);
+    }
+
+    .pg-btn:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+
+    /* ── Mockup badge ── */
+    .mockup-banner {
+      background: rgba(15,40,91,0.08);
+      border-left: 4px solid var(--livi-primary);
+      padding: 8px 16px;
+      font-size: 12px;
+      color: var(--livi-primary);
+      font-family: var(--app-font);
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="mockup-banner">
+    UI Mockup — Story #34000 · Member Portal &gt; Documents &gt; View and Download Plan Documents · For review purposes only
+  </div>
+
+  <!-- ── Header (app-header.vue desktop styles) ── -->
+  <header class="site-header" role="banner">
+    <div class="desktop-header-content">
+      <!-- Liviniti logo (inline SVG approximation) -->
+      <div class="header-logo-wrapper" aria-label="Liviniti Logo">
+        <svg viewBox="0 0 120 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <text x="0" y="26" font-family="Lato, sans-serif" font-size="22" font-weight="700" fill="#0f285b">liviniti</text>
+        </svg>
+      </div>
+
+      <!-- Nav (app-header.vue menus array + Documents added) -->
+      <nav aria-label="Main navigation">
+        <ul class="navbar-nav">
+          <li><a href="#" aria-label="Home">Home</a></li>
+          <li><a href="#" aria-label="Claim History">Claim History</a></li>
+          <li><a href="#" aria-label="Pharmacy Locator">Pharmacy Locator</a></li>
+          <li><a href="#" aria-label="Price Check">Price Check</a></li>
+          <li><a href="#" aria-label="Prior Authorization">Prior Authorization</a></li>
+          <li><a href="#" aria-label="Mail Order">Mail Order</a></li>
+          <li class="current-menu-item"><a href="#" aria-label="Documents" aria-current="page">Documents</a></li>
+          <li>
+            <span class="profile-icon-wrapper" role="button" aria-label="User Profile Menu" tabindex="0">
+              <i class="ti ti-user-circle" style="font-size:24px;" aria-hidden="true"></i>
+              <i class="ti ti-chevron-down" style="font-size:14px;" aria-hidden="true"></i>
+            </span>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ── Page Content ── -->
+  <main class="page-content" id="main-content">
+    <h1 class="page-title">Documents</h1>
+
+    <div class="table-wrapper">
+
+      <!-- Search -->
+      <div class="search-container" role="search">
+        <i class="ti ti-search" aria-hidden="true"></i>
+        <input
+          type="text"
+          id="doc-search"
+          class="table-search-input"
+          placeholder="Search by document name"
+          aria-label="Search documents by name"
+          autocomplete="off"
+        >
+      </div>
+
+      <!-- Bulk Action Bar -->
+      <div class="bulk-action-bar" id="bulk-bar" role="region" aria-live="polite" aria-label="Bulk download actions">
+        <div class="bulk-action-left">
+          <span class="bulk-action-count" id="bulk-count">0 selected</span>
+          <div class="bulk-action-divider"></div>
+          <button class="bulk-action-btn" id="bulk-download-btn" aria-label="Download selected documents">
+            <i class="ti ti-cloud-download" aria-hidden="true"></i> Download
+          </button>
+        </div>
+        <button class="bulk-clear-btn" id="bulk-clear-btn">Clear selection</button>
+      </div>
+
+      <!-- Table -->
+      <table class="solo_table" aria-label="Plan documents">
+        <thead>
+          <tr>
+            <th class="col-check">
+              <input type="checkbox" id="select-all" aria-label="Select all documents on this page">
+            </th>
+            <th class="sortable" id="sort-name" aria-sort="ascending" tabindex="0">
+              Document Name <i class="ti ti-arrows-sort" style="font-size:12px;" aria-hidden="true"></i>
+            </th>
+            <th class="col-action"></th>
+          </tr>
+        </thead>
+        <tbody id="doc-tbody">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+
+      <!-- Pagination -->
+      <div class="pagination-row" role="navigation" aria-label="Pagination">
+        <div class="per-page-wrapper">
+          Show
+          <select id="per-page" aria-label="Results per page">
+            <option value="10" selected>10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+          per page
+        </div>
+        <div class="pg-controls">
+          <span class="pg-info" id="pg-info" aria-live="polite"></span>
+          <button class="pg-btn" id="pg-first" aria-label="First page"><i class="ti ti-chevrons-left" aria-hidden="true"></i></button>
+          <button class="pg-btn" id="pg-prev" aria-label="Previous page"><i class="ti ti-chevron-left" aria-hidden="true"></i></button>
+          <button class="pg-btn" id="pg-next" aria-label="Next page"><i class="ti ti-chevron-right" aria-hidden="true"></i></button>
+          <button class="pg-btn" id="pg-last" aria-label="Last page"><i class="ti ti-chevrons-right" aria-hidden="true"></i></button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    const ALL_DOCS = [
+      'Authorization to Release Protected Health Information',
+      'First Choice',
+      'Flu Shot Flyer',
+      'HIPAA Notice of Privacy Practices',
+      'January 2026 Core Elite Abridged Formulary',
+      'January 2026 Core Elite Formulary Full Publication',
+      'Liviniti Mobile App',
+      'Liviniti Value Prop Flyer',
+      'Member FAQs',
+      'Member Welcome Flyer',
+      'Mobile App Demo Video',
+      'Postal Prescription Services Member Reference Guide',
+      'RSV Vaccine Flyer',
+    ];
+
+    let currentPage = 1;
+    let perPage = 10;
+    let searchTerm = '';
+    let sortAsc = true;
+    let selected = new Set();
+
+    function esc(s) {
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function filtered() {
+      let docs = ALL_DOCS.filter(d => d.toLowerCase().includes(searchTerm.toLowerCase()));
+      return docs.slice().sort((a, b) => sortAsc ? a.localeCompare(b) : b.localeCompare(a));
+    }
+
+    function render() {
+      const docs = filtered();
+      const total = docs.length;
+      const totalPages = Math.max(1, Math.ceil(total / perPage));
+      if (currentPage > totalPages) currentPage = totalPages;
+      const start = (currentPage - 1) * perPage;
+      const page = docs.slice(start, start + perPage);
+
+      const tbody = document.getElementById('doc-tbody');
+      if (page.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3"><div class="empty-state">No documents found</div></td></tr>';
+      } else {
+        tbody.innerHTML = page.map(function(doc) {
+          var chk = selected.has(doc) ? 'checked' : '';
+          var sel = selected.has(doc) ? 'row-selected' : '';
+          var safe = esc(doc);
+          return '<tr class="' + sel + '">' +
+            '<td class="col-check"><input type="checkbox" ' + chk + ' aria-label="Select ' + safe + '" data-doc="' + safe + '"></td>' +
+            '<td>' + safe + '</td>' +
+            '<td class="col-action"><button class="dl-btn" aria-label="Download ' + safe + '" data-dl="' + safe + '"><i class="ti ti-cloud-download" aria-hidden="true"></i></button></td>' +
+            '</tr>';
+        }).join('');
+
+        tbody.querySelectorAll('input[type="checkbox"]').forEach(function(cb) {
+          cb.addEventListener('change', function() {
+            var doc = this.getAttribute('data-doc');
+            if (this.checked) selected.add(doc); else selected.delete(doc);
+            render();
+          });
+        });
+
+        tbody.querySelectorAll('.dl-btn').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            alert('Download: ' + this.getAttribute('data-dl'));
+          });
+        });
+      }
+
+      document.getElementById('pg-info').textContent =
+        total === 0 ? '0 results' : (start + 1) + '–' + Math.min(start + perPage, total) + ' of ' + total;
+      document.getElementById('pg-first').disabled = currentPage === 1;
+      document.getElementById('pg-prev').disabled = currentPage === 1;
+      document.getElementById('pg-next').disabled = currentPage >= totalPages;
+      document.getElementById('pg-last').disabled = currentPage >= totalPages;
+
+      var selAll = document.getElementById('select-all');
+      var allSelected = docs.filter(function(d) { return selected.has(d); });
+      selAll.checked = docs.length > 0 && allSelected.length === docs.length;
+      selAll.indeterminate = allSelected.length > 0 && allSelected.length < docs.length;
+
+      var bulkBar = document.getElementById('bulk-bar');
+      if (selected.size >= 2) {
+        bulkBar.classList.add('visible');
+        document.getElementById('bulk-count').textContent = selected.size + ' selected';
+      } else {
+        bulkBar.classList.remove('visible');
+      }
+
+      var sortTh = document.getElementById('sort-name');
+      sortTh.setAttribute('aria-sort', sortAsc ? 'ascending' : 'descending');
+    }
+
+    document.getElementById('select-all').addEventListener('change', function() {
+      var docs = filtered();
+      docs.forEach(function(d) { if (this.checked) selected.add(d); else selected.delete(d); }, this);
+      render();
+    });
+
+    document.getElementById('doc-search').addEventListener('input', function() {
+      searchTerm = this.value;
+      currentPage = 1;
+      render();
+    });
+
+    document.getElementById('per-page').addEventListener('change', function() {
+      perPage = parseInt(this.value);
+      currentPage = 1;
+      render();
+    });
+
+    document.getElementById('pg-first').addEventListener('click', function() { currentPage = 1; render(); });
+    document.getElementById('pg-prev').addEventListener('click', function() { currentPage--; render(); });
+    document.getElementById('pg-next').addEventListener('click', function() { currentPage++; render(); });
+    document.getElementById('pg-last').addEventListener('click', function() {
+      currentPage = Math.ceil(filtered().length / perPage);
+      render();
+    });
+
+    document.getElementById('sort-name').addEventListener('click', function() { sortAsc = !sortAsc; render(); });
+    document.getElementById('sort-name').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); sortAsc = !sortAsc; render(); }
+    });
+
+    document.getElementById('bulk-download-btn').addEventListener('click', function() {
+      alert('Bulk download triggered for ' + selected.size + ' selected documents.');
+    });
+
+    document.getElementById('bulk-clear-btn').addEventListener('click', function() {
+      selected.clear();
+      render();
+    });
+
+    render();
+  </script>
+</body>
+</html>

@@ -110,13 +110,15 @@ const filteredNavItems = computed(() => {
 }
 
 .v-navigation-drawer {
-  border-right: 1px solid #e0e0e0 !important;
+  background-color: var(--color-bg-sidebar) !important;
+  border-right: 1px solid var(--color-border) !important;
+  transition: background-color 0.25s ease, border-color 0.25s ease;
 }
 .logo-container {
   display: flex;
   align-items: center;
-  justify-content: flex-start; /* Align to the left */
-  padding-left: 20px !important; /* Add left padding */
+  justify-content: flex-start;
+  padding-left: 20px !important;
   padding-bottom: 16px !important;
   padding-top: 16px !important;
 }
@@ -124,7 +126,7 @@ const filteredNavItems = computed(() => {
   height: 40px;
 }
 .logo-arrow {
-  color: #8A8A8A;
+  color: var(--color-text-secondary);
   margin-left: 8px;
 }
 .nav-list {
@@ -145,16 +147,27 @@ const filteredNavItems = computed(() => {
   height: 25px;
   width: 25px;
   margin-bottom: 4px;
-  color: #1f2022;
+  color: var(--color-nav-icon);
+  transition: color 0.25s ease;
 }
 .nav-title {
-  font-size: 0.75rem; /* 12px */
-  color: #1f2022;
+  font-size: 0.75rem;
+  color: var(--color-nav-title);
   font-weight: 500;
+  transition: color 0.25s ease;
+}
+.nav-item-active .nav-icon {
+  color: #0052CC;
 }
 .nav-item-active .nav-title {
   color: #0052CC;
   font-weight: bold;
+}
+
+// Dark mode: swap to a lighter blue that clears 4.5:1 on the dark sidebar bg (#13161F)
+:global(html.dark) .nav-item-active .nav-icon,
+:global(html.dark) .nav-item-active .nav-title {
+  color: #7BA7E0 !important; // 6.9:1 contrast on #13161F — WCAG AA ✓
 }
 
 </style>

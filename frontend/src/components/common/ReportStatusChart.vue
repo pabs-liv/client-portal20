@@ -6,45 +6,63 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import { useDarkMode } from '@/composables/useDarkMode';
+
+const { isDark } = useDarkMode();
 
 const series = ref([3, 1, 1, 1]);
-const chartOptions = ref({
-  chart: {
-    type: 'donut',
-  },
-  theme: {
-    palette: 'palette2',
-  },
-  labels: ['Completed', 'Approved', 'Pending', 'Draft'],
-  
-  dataLabels: {
-    enabled: false,
-  },
-  legend: {
-    position: 'bottom',
-  },
-  tooltip: {
-    y: {
-      formatter: (val: number) => `${val} Reports`,
+const chartOptions = computed(() => {
+  const textColor = isDark.value ? '#B0B8D0' : '#1A1A1A';
+  return {
+    chart: {
+      type: 'donut',
+      background: isDark.value ? '#1A1D27' : '#FFFFFF',
+      foreColor: textColor,
     },
-  },
-  plotOptions: {
-    pie: {
-      donut: {
-        labels: {
-          show: true,
-          total: {
+    theme: {
+      palette: 'palette2',
+      mode: isDark.value ? 'dark' : 'light',
+    },
+    labels: ['Completed', 'Approved', 'Pending', 'Draft'],
+    dataLabels: {
+      enabled: false,
+      style: {
+        colors: [textColor],
+      },
+    },
+    legend: {
+      position: 'bottom',
+      labels: {
+        colors: textColor,
+      },
+    },
+    tooltip: {
+      theme: isDark.value ? 'dark' : 'light',
+      y: {
+        formatter: (val: number) => `${val} Reports`,
+      },
+    },
+    grid: {
+      borderColor: isDark.value ? '#2C3147' : '#E0E0E0',
+    },
+    plotOptions: {
+      pie: {
+        donut: {
+          labels: {
             show: true,
-            label: 'Total',
-            formatter: (w: any) => {
-              return w.globals.seriesTotals.reduce((a: number, b: number) => a + b, 0);
+            total: {
+              show: true,
+              label: 'Total',
+              formatter: (w: any) => {
+                return w.globals.seriesTotals.reduce((a: number, b: number) => a + b, 0);
+              },
             },
           },
         },
       },
     },
-  },
+  };
 });
 </script>
 
@@ -59,6 +77,13 @@ const chartOptions = ref({
   height: 100%;
   display: flex;
   flex-direction: column;
+  transition: background-color 0.25s ease, border-color 0.25s ease;
+
+  :global(html.dark) & {
+    background-color: var(--color-card-bg);
+    border-color: var(--color-border);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  }
 
   h3 {
     @extend .text-h3;

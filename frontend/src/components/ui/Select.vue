@@ -15,12 +15,17 @@
     @update:search="searchable ? internalSearch = $event : null"
     :custom-filter="searchable ? customFilter : undefined"
     :menu-icon="ChevronDown"
+    :base-color="isDark ? 'rgba(255,255,255,0.6)' : undefined"
+    :bg-color="isDark ? 'var(--color-input-bg)' : undefined"
   ></v-select>
 </template>
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { ChevronDown } from 'lucide-vue-next';
+import { useDarkMode } from '@/composables/useDarkMode';
+
+const { isDark } = useDarkMode();
 
 interface Props {
   items: any[];
@@ -92,6 +97,27 @@ watch(() => props.modelValue, () => {
 
   :deep(.v-list-item--active .v-list-item-title) {
     color: $color-primary !important;
+  }
+}
+
+:global(html.dark) .v-select {
+  :deep(.v-field) {
+    background-color: var(--color-input-bg) !important;
+    color: var(--color-text-primary) !important;
+  }
+
+  :deep(.v-field__outline) {
+    --v-field-border-color: var(--color-input-border);
+  }
+
+  :deep(.v-label) {
+    color: var(--color-text-secondary) !important;
+  }
+
+  :deep(.v-select__selection-text),
+  :deep(.v-field__input),
+  :deep(.v-icon) {
+    color: var(--color-text-primary) !important;
   }
 }
 </style>

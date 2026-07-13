@@ -31,7 +31,7 @@
         :headers="processedTestResultsHeaders"
         :items="processedTestResultsData"
         :show-search-bar="true"
-        search-placeholder="Search test results"
+        search-placeholder="Search by account, report name, or status"
         :show-row-actions="true"
         :show-action-icons="isExternal"
         :action-icons="actionIcons"

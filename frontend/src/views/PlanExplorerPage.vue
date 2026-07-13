@@ -3,7 +3,7 @@
   <div>
     <AccountSelector
       heading="Plan Explorer"
-      subheading="Track account implementations. Select an account to view it's current status."
+      subheading="Track account implementations. Select an account to view its current status."
       :items="accountOptions"
       label="Select Account"
       item-title="name"
@@ -43,18 +43,17 @@
       </div>
 
       <div v-else class="plan-explorer-content">
-        <v-row :align="wizardActive && isStarkIndustries ? 'start' : undefined">
+        <v-row :align="wizardActive && isWizardAccount ? 'start' : undefined" no-gutters>
           <!-- LEFT: Timeline -->
-          <v-col cols="12" md="3" :class="{ 'plan-col--sticky': wizardActive && isStarkIndustries }">
-            <div :class="['plan-timeline-wrapper', { 'plan-timeline-wrapper--sticky': wizardActive && isStarkIndustries }]">
+          <v-col cols="12" md="auto" :class="{ 'plan-col--sticky': wizardActive && isWizardAccount }">
+            <div :class="['plan-timeline-wrapper', { 'plan-timeline-wrapper--sticky': wizardActive && isWizardAccount }]">
             <v-timeline side="start" class="plan-timeline">
               <v-timeline-item
                 v-for="(step, index) in implementationSteps"
                 :key="index"
-                v-show="!wizardActive || !isStarkIndustries || step.title === 'Plan Setup'"
                 :dot-color="step.status === 'completed' ? 'success' : step.status === 'in-progress' ? 'primary' : 'grey-lighten-1'"
                 size="small"
-                :class="{ 'v-timeline-item--has-sub-steps': step.title === 'Plan Setup' && isStarkIndustries && step.active }"
+                :class="{ 'v-timeline-item--has-sub-steps': step.title === 'Plan Setup' && isWizardAccount && step.active }"
                 @click="selectTimelineItem(step)"
               >
                 <v-card class="timeline-card" :class="{ 'active-card': step.active }">
@@ -62,9 +61,9 @@
                   <v-card-text>{{ step.description }}</v-card-text>
                 </v-card>
 
-                <!-- Wizard sub-steps nested below Plan Setup (Stark Industries only) -->
+                <!-- Wizard sub-steps nested below Plan Setup (wizard accounts only) -->
                 <div
-                  v-if="step.title === 'Plan Setup' && isStarkIndustries && step.active"
+                  v-if="step.title === 'Plan Setup' && isWizardAccount && step.active"
                   class="wizard-sub-steps"
                 >
                   <ul class="wizard-sub-step-list">
@@ -91,14 +90,13 @@
           </v-col>
 
           <!-- RIGHT: Content panel -->
-          <v-col cols="12" md="9">
+          <v-col cols="12" class="plan-col--right">
 
-            <!-- Wizard step content (Stark Industries, Plan Setup active, sub-step selected) -->
-            <div v-if="wizardActive && isStarkIndustries && activeTimelineItem?.title === 'Plan Setup'">
+            <!-- Wizard step content (wizard accounts, Plan Setup active, sub-step selected) -->
+            <div v-if="wizardActive && isWizardAccount && activeTimelineItem?.title === 'Plan Setup'">
               <div class="wizard-step-header">
                 <div class="wizard-step-header-meta">
                   <span class="wizard-step-counter">Step {{ currentWizardStep + 1 }} of {{ wizardSteps.length }}</span>
-                  <span v-if="wizardSteps[currentWizardStep].required" class="wizard-required-badge">Required</span>
                 </div>
                 <h2 class="text-h2 wizard-step-title">{{ wizardSteps[currentWizardStep].name }}</h2>
                 <p class="text-body wizard-step-description">{{ wizardSteps[currentWizardStep].description }}</p>
@@ -143,26 +141,6 @@
                             <span class="ap-field-value">{{ accountProfile.effectiveEndDate || '—' }}</span>
                           </div>
                         </div>
-                        <div class="ap-field-row">
-                          <div class="ap-field">
-                            <span class="ap-field-label">Status</span>
-                            <span class="ap-field-value">{{ accountProfile.status || '—' }}</span>
-                          </div>
-                        </div>
-                        <div class="ap-field-row">
-                          <div class="ap-checkbox-row">
-                            <CheckSquare v-if="accountProfile.isRxWatchtower" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
-                            <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
-                            <span class="ap-field-value">IsRxWatchtower</span>
-                          </div>
-                        </div>
-                        <div class="ap-field-row">
-                          <div class="ap-checkbox-row">
-                            <CheckSquare v-if="accountProfile.manualClaims" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
-                            <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
-                            <span class="ap-field-value">Manual Claims</span>
-                          </div>
-                        </div>
                       </template>
                       <template v-else>
                         <div class="form-row">
@@ -173,21 +151,6 @@
                         <div class="form-row">
                           <v-text-field v-model="editableAccountProfile.effectiveStartDate" label="Effective start date" variant="outlined" density="compact" placeholder="MM/DD/YYYY" />
                           <v-text-field v-model="editableAccountProfile.effectiveEndDate" label="Effective end date" variant="outlined" density="compact" placeholder="MM/DD/YYYY" />
-                        </div>
-                        <div class="form-row">
-                          <v-select v-model="editableAccountProfile.status" :items="statusOptions" label="Status" variant="outlined" density="compact" />
-                        </div>
-                        <div class="ap-edit-checkboxes">
-                          <div class="ap-checkbox-toggle" @click="editableAccountProfile.isRxWatchtower = !editableAccountProfile.isRxWatchtower">
-                            <CheckSquare v-if="editableAccountProfile.isRxWatchtower" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
-                            <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
-                            <span class="ap-field-value">IsRxWatchtower</span>
-                          </div>
-                          <div class="ap-checkbox-toggle" @click="editableAccountProfile.manualClaims = !editableAccountProfile.manualClaims">
-                            <CheckSquare v-if="editableAccountProfile.manualClaims" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
-                            <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
-                            <span class="ap-field-value">Manual Claims</span>
-                          </div>
                         </div>
                         <div class="ap-section-footer">
                           <button class="button button-primary" @click="saveAccountProfile">Save Changes</button>
@@ -339,20 +302,29 @@
                   <div class="nc-section">
                     <div class="nc-section-header">
                       <h4 class="text-h4">Preferred Networks</h4>
-                      <button class="button button-primary">Add Network Link</button>
+                      <button v-if="currentNetworkRows.length > 0" class="button button-primary" @click="networkLinkMode = 'add'; showNetworkLinkDialog = true">+ Add Network Link</button>
                     </div>
-                    <ReportDataTable
-                      :headers="networkHeaders"
-                      :items="networkRows"
-                      :show-search-bar="true"
-                      :show-filter-button="false"
-                      :show-filter-pills="true"
-                      :initial-filter-pills="networkFilterPills"
-                      :show-selection-checkboxes="false"
-                      :show-row-actions="true"
-                      :show-table-footer="true"
-                      search-placeholder="Search by network name"
-                    />
+                    <div v-if="currentNetworkRows.length > 0">
+                      <ReportDataTable
+                        :headers="networkHeaders"
+                        :items="currentNetworkRows"
+                        :show-search-bar="true"
+                        :show-filter-button="false"
+                        :show-filter-pills="false"
+                        :show-selection-checkboxes="false"
+                        :show-row-actions="true"
+                        :row-action-items="networkRowActions"
+                        :show-table-footer="true"
+                        search-placeholder="Search by network name"
+                        @row-action="handleNetworkRowAction"
+                      />
+                    </div>
+                    <div v-else class="nc-empty-state">
+                      <img :src="EmptyStateImg" alt="No data" class="nc-empty-icon" />
+                      <p class="nc-empty-title">Nothing to see here</p>
+                      <p class="nc-empty-subtitle">No preferred networks have been configured yet.</p>
+                      <button class="button button-secondary" @click="networkLinkMode = 'add'; showNetworkLinkDialog = true">+ Add Network Link</button>
+                    </div>
                   </div>
 
                   <!-- Preferred Pharmacies -->
@@ -370,11 +342,32 @@
                       >{{ tab }}</button>
                     </div>
 
-                    <div class="nc-empty-state nc-empty-state--tab">
+                    <!-- Populated state -->
+                    <div v-if="pharmacyData[activePharmacyTab].length > 0">
+                      <div class="nc-section-header">
+                        <span class="nc-tab-title">Assigned {{ activePharmacyTab }} Pharmacies</span>
+                        <button class="button button-primary" @click="openPharmacyDialog(activePharmacyTab)">+ Add New</button>
+                      </div>
+                      <ReportDataTable
+                        :headers="pharmacyHeadersForTab"
+                        :items="pharmacyData[activePharmacyTab]"
+                        :show-search-bar="false"
+                        :show-filter-pills="false"
+                        :show-selection-checkboxes="false"
+                        :show-row-actions="true"
+                        :row-action-items="pharmacyRowActions"
+                        :interactive-boolean-columns="pharmacyBooleanColumnsForTab"
+                        :show-table-footer="true"
+                        @row-action="handlePharmacyRowAction"
+                        @toggle-cell="handlePharmacyToggleCell"
+                      />
+                    </div>
+                    <!-- Empty state -->
+                    <div v-else class="nc-empty-state nc-empty-state--tab">
                       <img :src="EmptyStateImg" alt="No data" class="nc-empty-icon" />
                       <p class="nc-empty-title">Nothing to see here</p>
                       <p class="nc-empty-subtitle">There are no Assigned {{ activePharmacyTab }} Pharmacies.</p>
-                      <button class="button button-secondary">Assign {{ activePharmacyTab }} Pharmacies</button>
+                      <button class="button button-secondary" @click="openPharmacyDialog(activePharmacyTab)">Assign {{ activePharmacyTab }} Pharmacies</button>
                     </div>
                   </div>
 
@@ -1365,15 +1358,20 @@
                     class="button button-secondary"
                     @click="markCurrentStepComplete"
                   >Mark as Complete</button>
+                  <button
+                    v-else
+                    class="button button-secondary"
+                    @click="markCurrentStepIncomplete"
+                  >Mark as Incomplete</button>
                   <button v-if="currentWizardStep < wizardSteps.length - 1" class="button button-primary" @click="nextWizardStep">Next</button>
                   <button v-if="currentWizardStep === wizardSteps.length - 1" class="button button-primary" @click="finishPlanSetup">Finish Plan Setup</button>
                 </div>
               </div>
             </div>
 
-            <!-- Overview card (Stark Industries, Plan Setup selected, no sub-step yet) -->
+            <!-- Overview card (wizard accounts, Plan Setup selected, no sub-step yet) -->
             <div
-              v-else-if="activeTimelineItem?.title === 'Plan Setup' && isStarkIndustries"
+              v-else-if="activeTimelineItem?.title === 'Plan Setup' && isWizardAccount"
               class="wizard-overview"
             >
               <div class="wizard-overview-header">
@@ -1422,8 +1420,6 @@
                 <div class="timeline-text-content d-flex flex-column timeline-text-content-gap">
                   <h3 class="text-h3">{{ activeTimelineItem.title }} Details</h3>
                   <p class="text-body">{{ activeTimelineItem.description }}</p>
-                  <p class="text-body mb-xsmall"><strong>Start Date:</strong> {{ activeTimelineItem.startDate }}</p>
-                  <p class="text-body mb-xsmall"><strong>End Date:</strong> {{ activeTimelineItem.endDate }}</p>
                 </div>
                 <div class="d-flex flex-column align-center progress-chip-container">
                   <v-progress-circular
@@ -1456,6 +1452,493 @@
     </PageCard>
 
   </div>
+
+  <!-- ── Network Linking Dialog ──────────────────────────────────────────── -->
+  <v-dialog v-model="showNetworkLinkDialog" :max-width="networkLinkMode === 'edit' ? '800' : '620'" persistent>
+    <v-card class="nl-dialog-card">
+      <v-card-title class="nl-dialog-header">
+        <Globe :size="22" :stroke-width="1.5" class="nl-dialog-icon" />
+        <span class="text-h3 text-primary">Pharmacy Network Linking</span>
+        <v-spacer />
+        <v-btn icon variant="text" size="small" @click="closeNetworkLinkDialog"><X :size="18" /></v-btn>
+      </v-card-title>
+      <v-divider />
+
+      <v-card-text class="nl-dialog-body">
+        <!-- Step 1: linking level + dates -->
+        <div v-if="networkLinkStep === 1">
+          <p class="text-body nl-dialog-intro">
+            <template v-if="networkLinkMode === 'edit'">Review the network link details below and update the effective dates as needed. The network and linking configuration cannot be changed after creation.</template>
+            <template v-else>Start by selecting the type of linking you would like to configure. Then, set the linking effective date.</template>
+          </p>
+          <div v-if="networkLinkMode === 'edit'" class="nl-edit-field-row nl-edit-field-row--network">
+            <span class="nl-edit-field-label">Network</span>
+            <span class="nl-edit-field-value">{{ networkLinkForm.selectedNetwork }}</span>
+          </div>
+          <div class="nl-toggle-group">
+            <button
+              v-for="level in ['Account Level', 'Group Level']"
+              :key="level"
+              :class="['toc-toggle', 'nl-level-btn', { 'toc-toggle--selected': networkLinkForm.linkingLevel === level, 'nl-level-btn--disabled': networkLinkMode === 'edit' }]"
+              :disabled="networkLinkMode === 'edit'"
+              @click="networkLinkForm.linkingLevel = level"
+            >
+              <span>{{ level }}</span>
+              <Check v-if="networkLinkForm.linkingLevel === level" :size="13" :stroke-width="2.5" class="nl-level-check" />
+            </button>
+          </div>
+          <div v-if="networkLinkForm.linkingLevel === 'Account Level'" class="nl-alert">
+            <div class="nl-alert-badge"><TriangleAlert :size="20" :stroke-width="2" /></div>
+            <span><strong>Linking a network at the account level will apply to all existing and future groups and plans.</strong></span>
+          </div>
+          <div v-else class="nl-alert nl-alert--warning">
+            <div class="nl-alert-badge"><TriangleAlert :size="20" :stroke-width="2" /></div>
+            <span>Linking a network at the group level will apply to all existing and future plans under the selected group(s).<br><strong>Group level linking will override any configurations at the account level.</strong></span>
+          </div>
+          <div v-if="networkLinkForm.linkingLevel === 'Group Level'" class="nl-bpg-section">
+            <p class="text-body-2 nl-bpg-label">
+              {{ networkLinkMode === 'edit' ? 'Linked BIN, PCN, and Group number combinations' : 'Select the appropriate BIN, PCN, and Group number combinations for this plan' }}
+            </p>
+            <div class="nl-bpg-table-wrap">
+              <table class="nl-bpg-table">
+                <thead>
+                  <tr>
+                    <th class="nl-bpg-th-check">
+                      <component
+                        v-if="networkLinkMode !== 'edit'"
+                        :is="allBpgSelected ? CheckSquare : Square"
+                        :size="16" :stroke-width="1.5" class="nl-bpg-check-icon"
+                        :class="{ 'nl-bpg-check-icon--checked': allBpgSelected }"
+                        style="cursor:pointer"
+                        @click="allBpgSelected = !allBpgSelected; networkLinkForm.selectedGroupIds = allBpgSelected ? currentNetworkBpgOptions.map(r => r.id) : []"
+                      />
+                    </th>
+                    <th>BIN</th>
+                    <th>PCN</th>
+                    <th>Group Number</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-if="(networkLinkMode === 'edit' ? currentNetworkBpgOptions.filter(r => networkLinkForm.selectedGroupIds.includes(r.id)) : currentNetworkBpgOptions).length === 0">
+                    <td colspan="4" class="nl-bpg-empty">No records found</td>
+                  </tr>
+                  <tr
+                    v-for="row in (networkLinkMode === 'edit' ? currentNetworkBpgOptions.filter(r => networkLinkForm.selectedGroupIds.includes(r.id)) : currentNetworkBpgOptions)"
+                    :key="row.id"
+                    class="nl-bpg-row"
+                    :style="networkLinkMode === 'edit' ? 'cursor:default' : ''"
+                    @click="networkLinkMode !== 'edit' && (networkLinkForm.selectedGroupIds = networkLinkForm.selectedGroupIds.includes(row.id) ? networkLinkForm.selectedGroupIds.filter(id => id !== row.id) : [...networkLinkForm.selectedGroupIds, row.id])"
+                  >
+                    <td class="nl-bpg-th-check">
+                      <component
+                        :is="networkLinkForm.selectedGroupIds.includes(row.id) ? CheckSquare : Square"
+                        :size="16" :stroke-width="1.5" class="nl-bpg-check-icon"
+                        :class="{ 'nl-bpg-check-icon--checked': networkLinkForm.selectedGroupIds.includes(row.id) }"
+                      />
+                    </td>
+                    <td>{{ row.bin }}</td>
+                    <td>{{ row.pcn }}</td>
+                    <td>{{ row.groupNumber }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p v-if="networkLinkMode !== 'edit' && networkLinkTouched && !networkLinkForm.selectedGroupIds.length" class="nl-bpg-error">At least one group must be selected</p>
+          </div>
+          <div class="nl-date-row">
+            <DatePicker v-model="networkLinkForm.startDate" label="Eff. start date" variant="underlined" :readonly="networkEditStartDateReadOnly" :min="todayStr"
+              :error="networkLinkTouched && !networkLinkForm.startDate"
+              :error-messages="networkLinkTouched && !networkLinkForm.startDate ? ['Required'] : []" />
+            <DatePicker v-model="networkLinkForm.endDate" label="Eff. end date" variant="underlined"
+              :error="endDateBeforeStartError(networkLinkForm.startDate, networkLinkForm.endDate)"
+              :error-messages="endDateBeforeStartError(networkLinkForm.startDate, networkLinkForm.endDate) ? ['Must be after start date'] : []" />
+          </div>
+        </div>
+
+        <!-- Step 2: choose network -->
+        <div v-else-if="networkLinkStep === 2">
+          <p class="text-body nl-dialog-intro">Now, select the pharmacy network you would like to link.</p>
+          <div class="nl-network-grid">
+            <button
+              v-for="net in availableNetworks"
+              :key="net"
+              :class="['toc-toggle', 'nl-network-btn', { 'toc-toggle--selected': networkLinkForm.selectedNetwork === net }]"
+              @click="networkLinkForm.selectedNetwork = net"
+            >
+              <span>{{ net }}</span>
+              <Check v-if="networkLinkForm.selectedNetwork === net" :size="13" :stroke-width="2.5" class="nl-level-check" />
+            </button>
+          </div>
+        </div>
+      </v-card-text>
+
+      <v-divider />
+      <v-card-actions class="nl-dialog-footer">
+        <template v-if="networkLinkMode === 'edit'">
+          <button class="button button-secondary" @click="closeNetworkLinkDialog">Cancel</button>
+          <button class="button button-primary" @click="saveNetworkLink">Update Network</button>
+        </template>
+        <template v-else-if="networkLinkStep === 1">
+          <button class="button button-secondary" @click="closeNetworkLinkDialog">Cancel</button>
+          <button class="button button-primary" @click="advanceNetworkStep">Next</button>
+        </template>
+        <template v-else>
+          <button class="button button-secondary" @click="networkLinkStep = 1">Back</button>
+          <button class="button button-primary" :disabled="!networkLinkForm.selectedNetwork" @click="saveNetworkLink">Link Network</button>
+        </template>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
+  <!-- ── Pharmacy Dialog (all 4 types, add + edit mode) ─────────────────── -->
+  <v-dialog v-model="showPharmacyDialog" max-width="500" persistent>
+    <v-card class="nl-dialog-card">
+      <v-card-title class="nl-dialog-header">
+        <Building2 :size="22" :stroke-width="1.5" class="nl-dialog-icon" />
+        <span class="text-h3 text-primary">{{ pharmacyDialogTitle }}</span>
+        <v-spacer />
+        <v-btn icon variant="text" size="small" @click="showPharmacyDialog = false"><X :size="18" /></v-btn>
+      </v-card-title>
+      <v-divider />
+
+      <v-card-text class="nl-dialog-body">
+
+        <!-- ── EDIT MODE ──────────────────────────────────────────────────── -->
+        <template v-if="pharmacyDialogMode === 'edit'">
+
+          <!-- Mail Order edit -->
+          <template v-if="pharmacyDialogTab === 'Mail Order'">
+            <p class="text-body nl-dialog-intro">Select the applicable Mail Order vendor(s) and complete the form below to configure.</p>
+            <div class="nl-edit-field-row">
+              <span class="nl-edit-field-label">NPI</span>
+              <span class="nl-edit-field-value">{{ editingPharmacyItem?.npi || '—' }}</span>
+            </div>
+            <div class="nl-edit-field-row">
+              <span class="nl-edit-field-label">Vendor Name</span>
+              <span class="nl-edit-field-value">{{ editingPharmacyItem?.vendor || '—' }}</span>
+            </div>
+            <label class="nl-checkbox">
+              <input type="checkbox" v-model="mailOrderEditForm.noBillNoPay" class="nl-checkbox-input" />
+              <component :is="mailOrderEditForm.noBillNoPay ? CheckSquare : Square" :size="18" :stroke-width="1.5" class="nl-checkbox-icon" />
+              <span class="nl-checkbox-label">Set to no bill/no pay</span>
+            </label>
+            <label class="nl-checkbox">
+              <input type="checkbox" v-model="mailOrderEditForm.displayInPortals" class="nl-checkbox-input" />
+              <component :is="mailOrderEditForm.displayInPortals ? CheckSquare : Square" :size="18" :stroke-width="1.5" class="nl-checkbox-icon" />
+              <span class="nl-checkbox-label">Display in portals</span>
+            </label>
+            <div class="nl-date-row nl-date-row--mt">
+              <DatePicker
+                v-model="mailOrderEditForm.startDate"
+                label="Effective start date"
+                variant="underlined"
+                :min="todayStr"
+                :error="mailOrderEditTouched && !mailOrderEditForm.startDate"
+                :error-messages="mailOrderEditTouched && !mailOrderEditForm.startDate ? ['Required'] : []"
+              />
+              <DatePicker
+                v-model="mailOrderEditForm.endDate"
+                label="Effective end date"
+                variant="underlined"
+                :error="endDateBeforeStartError(mailOrderEditForm.startDate, mailOrderEditForm.endDate)"
+                :error-messages="endDateBeforeStartError(mailOrderEditForm.startDate, mailOrderEditForm.endDate) ? ['Must be after start date'] : []"
+              />
+            </div>
+            <p class="nl-date-hint">Optional - Leave blank to keep active</p>
+          </template>
+
+          <!-- In-House / Custom / Specialty edit -->
+          <template v-else>
+            <div class="nl-edit-field-row">
+              <span class="nl-edit-field-label">NPI</span>
+              <span class="nl-edit-field-value">{{ editingPharmacyItem?.ncpdp || editingPharmacyItem?.npis || '—' }}</span>
+            </div>
+            <div class="nl-edit-field-row">
+              <span class="nl-edit-field-label">Pharmacy name</span>
+              <span class="nl-edit-field-value">{{ editingPharmacyItem?.pharmacyName || '—' }}</span>
+            </div>
+            <label class="nl-checkbox">
+              <input type="checkbox" v-model="inhouseEditForm.noBillNoPay" class="nl-checkbox-input" />
+              <component :is="inhouseEditForm.noBillNoPay ? CheckSquare : Square" :size="18" :stroke-width="1.5" class="nl-checkbox-icon" />
+              <span class="nl-checkbox-label">Set to no bill/no pay</span>
+            </label>
+            <div class="nl-date-row nl-date-row--mt">
+              <DatePicker
+                v-model="inhouseEditForm.startDate"
+                label="Effective start date"
+                variant="underlined"
+                :min="todayStr"
+                :error="inhouseEditTouched && !inhouseEditForm.startDate"
+                :error-messages="inhouseEditTouched && !inhouseEditForm.startDate ? ['Required'] : []"
+              />
+              <DatePicker
+                v-model="inhouseEditForm.endDate"
+                label="Effective end date"
+                variant="underlined"
+                :error="endDateBeforeStartError(inhouseEditForm.startDate, inhouseEditForm.endDate)"
+                :error-messages="endDateBeforeStartError(inhouseEditForm.startDate, inhouseEditForm.endDate) ? ['Must be after start date'] : []"
+              />
+            </div>
+          </template>
+
+        </template>
+
+        <!-- ── ADD MODE ───────────────────────────────────────────────────── -->
+        <template v-else>
+
+          <!-- In-House -->
+          <template v-if="pharmacyDialogTab === 'In-House'">
+            <div v-for="(form, idx) in inhouseCustomForms" :key="idx" class="nl-repeatable-row">
+              <div v-if="inhouseCustomForms.length > 1" class="nl-repeatable-row-header">
+                <span class="nl-repeatable-row-label">Pharmacy {{ idx + 1 }}</span>
+                <button class="nl-remove-row-btn" @click="removeInhouseForm(idx)" title="Remove this pharmacy">
+                  <Trash2 :size="16" :stroke-width="1.75" />
+                </button>
+              </div>
+              <p class="nl-dialog-field-label">NPI</p>
+              <v-textarea
+                v-model="form.ncpdp"
+                variant="underlined"
+                density="compact"
+                :messages="inhouseAddTouched && !form.ncpdp ? '' : 'Enter one NPI per line'"
+                :error="inhouseAddTouched && !form.ncpdp"
+                :error-messages="inhouseAddTouched && !form.ncpdp ? ['Required'] : []"
+                rows="3"
+                class="nl-textarea"
+                @blur="form.npiChips = generateNpiChips(form.ncpdp)"
+              />
+              <div v-if="form.npiChips.length" class="nl-npi-chips">
+                <span v-for="chip in form.npiChips" :key="chip.npi" class="nl-npi-chip">{{ chip.name }}</span>
+              </div>
+              <label class="nl-checkbox nl-checkbox--mt">
+                <input type="checkbox" v-model="form.noBillNoPay" class="nl-checkbox-input" />
+                <component :is="form.noBillNoPay ? CheckSquare : Square" :size="18" :stroke-width="1.5" class="nl-checkbox-icon" />
+                <span class="nl-checkbox-label">Set to no bill/no pay</span>
+              </label>
+              <div class="nl-date-row nl-date-row--mt">
+                <DatePicker
+                  v-model="form.startDate"
+                  label="Effective start date"
+                  variant="underlined"
+                  :min="todayStr"
+                  :error="inhouseAddTouched && !form.startDate"
+                  :error-messages="inhouseAddTouched && !form.startDate ? ['Required'] : []"
+                />
+                <DatePicker v-model="form.endDate" label="Effective end date" variant="underlined" />
+              </div>
+              <v-divider v-if="idx < inhouseCustomForms.length - 1" class="nl-row-divider" />
+            </div>
+            <button class="nl-add-link" @click="addInhouseForm">+ Add New Pharmacy</button>
+          </template>
+
+          <!-- Specialty -->
+          <template v-else-if="pharmacyDialogTab === 'Specialty'">
+            <div v-for="(form, idx) in specialtyForms" :key="idx" class="nl-repeatable-row">
+              <div class="nl-specialty-row-header">
+                <span class="nl-dialog-field-label">Specialty pharmacy type</span>
+                <button v-if="specialtyForms.length > 1" class="nl-remove-btn" @click="specialtyForms.splice(idx, 1)">
+                  <Trash2 :size="16" :stroke-width="1.5" />
+                </button>
+              </div>
+              <div class="nl-level-btn-group nl-level-btn-group--wrap">
+                <button
+                  v-for="opt in specialtyTypeOptions"
+                  :key="opt"
+                  :class="['toc-toggle', 'nl-level-btn', { 'toc-toggle--selected': form.pharmacyType === opt }]"
+                  @click="form.pharmacyType = opt"
+                >
+                  <Check v-if="form.pharmacyType === opt" :size="13" :stroke-width="2.5" class="nl-level-check" />
+                  {{ opt }}
+                </button>
+              </div>
+              <div v-if="form.pharmacyType === 'Specific Pharmacies'" class="nl-npi-section">
+                <label class="nl-dialog-field-label">NPI</label>
+                <textarea
+                  v-model="form.npis"
+                  :class="['nl-npi-textarea', { 'nl-npi-textarea--error': specialtyNpiError(form) }]"
+                  rows="3"
+                  @blur="form.npiChips = generateNpiChips(form.npis)"
+                />
+                <p v-if="specialtyNpiError(form)" class="nl-field-error">Required</p>
+                <p v-else class="nl-npi-hint">Enter one NPI per line</p>
+                <div v-if="form.npiChips.length" class="nl-npi-chips">
+                  <span v-for="chip in form.npiChips" :key="chip.npi" class="nl-npi-chip">{{ chip.name }}</span>
+                </div>
+              </div>
+              <label class="nl-checkbox nl-checkbox--mt">
+                <input type="checkbox" v-model="form.noBillNoPay" class="nl-checkbox-input" />
+                <component :is="form.noBillNoPay ? CheckSquare : Square" :size="18" :stroke-width="1.5" class="nl-checkbox-icon" />
+                <span class="nl-checkbox-label">Set to no bill/no pay</span>
+              </label>
+              <div class="nl-date-row nl-date-row--mt">
+                <DatePicker
+                  v-model="form.startDate"
+                  label="Effective start date"
+                  variant="underlined"
+                  :min="todayStr"
+                  :error="specialtyStartDateError(form)"
+                  :error-messages="specialtyStartDateError(form) ? ['Required'] : []"
+                />
+                <DatePicker v-model="form.endDate" label="Effective end date" variant="underlined" />
+              </div>
+              <v-divider v-if="idx < specialtyForms.length - 1" class="nl-row-divider" />
+            </div>
+            <button class="nl-add-link" @click="addSpecialtyForm">+ Add new pharmacy type</button>
+          </template>
+
+          <!-- Mail Order -->
+          <template v-else-if="pharmacyDialogTab === 'Mail Order'">
+            <p class="text-body nl-dialog-intro">Select the applicable Mail Order vendor(s) and complete the form below to configure.</p>
+            <div v-for="(form, idx) in mailOrderForms" :key="idx" class="nl-repeatable-row">
+              <div v-if="mailOrderForms.length > 1" class="nl-repeatable-row-header">
+                <span class="nl-repeatable-row-label">Provider {{ idx + 1 }}</span>
+                <button class="nl-remove-row-btn" @click="removeMailOrderForm(idx)" title="Remove this provider">
+                  <Trash2 :size="16" :stroke-width="1.75" />
+                </button>
+              </div>
+              <div v-if="form.vendors.length" class="nl-vendor-chips mb-2">
+                <v-chip
+                  v-for="vendor in form.vendors"
+                  :key="vendor"
+                  variant="flat"
+                  color="primary"
+                  class="nl-autocomplete-chip"
+                >
+                  {{ vendor }}
+                  <span class="nl-chip-close ml-1" @click.stop="form.vendors = form.vendors.filter(v => v !== vendor)">
+                    <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#0F285B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                      <line x1="18" y1="6" x2="6" y2="18"/>
+                      <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                  </span>
+                </v-chip>
+              </div>
+              <p v-if="mailOrderAddTouched && !form.vendors.length" class="nl-field-error">Required</p>
+              <div class="nl-vendor-picker-wrap">
+                <div class="nl-account-search-field" :class="{ 'nl-account-search-field--active': form.showVendorList }">
+                  <input
+                    v-model="form.vendorSearch"
+                    type="text"
+                    class="nl-account-search-input"
+                    placeholder="Vendor name"
+                    @mousedown="form.showVendorList = true"
+                    @blur="hideVendorList(form)"
+                  />
+                </div>
+                <div v-if="form.showVendorList" class="nl-account-dropdown">
+                  <div
+                    v-for="vendor in filteredVendorOptions(idx)"
+                    :key="vendor"
+                    class="nl-account-option"
+                    @mousedown.prevent
+                    @click="toggleVendor(form, vendor)"
+                  >
+                    <div class="nl-acct-checkbox mr-2" :class="{ active: form.vendors.includes(vendor) }">
+                      <Check v-if="form.vendors.includes(vendor)" :size="12" :stroke-width="3" />
+                    </div>
+                    <span>{{ vendor }}</span>
+                  </div>
+                  <div v-if="filteredVendorOptions(idx).length === 0" class="nl-no-vendor-results">
+                    No vendors found
+                  </div>
+                </div>
+              </div>
+              <label class="nl-checkbox nl-checkbox--mt">
+                <input type="checkbox" v-model="form.noBillNoPay" class="nl-checkbox-input" />
+                <component :is="form.noBillNoPay ? CheckSquare : Square" :size="18" :stroke-width="1.5" class="nl-checkbox-icon" />
+                <span class="nl-checkbox-label">Set to no bill/no pay</span>
+              </label>
+              <label class="nl-checkbox">
+                <input type="checkbox" v-model="form.displayInPortals" class="nl-checkbox-input" />
+                <component :is="form.displayInPortals ? CheckSquare : Square" :size="18" :stroke-width="1.5" class="nl-checkbox-icon" />
+                <span class="nl-checkbox-label">Display in portals</span>
+              </label>
+              <div class="nl-date-row nl-date-row--mt">
+                <DatePicker
+                  v-model="form.startDate"
+                  label="Effective start date"
+                  variant="underlined"
+                  :min="todayStr"
+                  :error="mailOrderAddTouched && !form.startDate"
+                  :error-messages="mailOrderAddTouched && !form.startDate ? ['Required'] : []"
+                />
+                <DatePicker v-model="form.endDate" label="Effective end date" variant="underlined" />
+              </div>
+              <p class="nl-date-hint">Optional - Leave blank to keep active</p>
+              <v-divider v-if="idx < mailOrderForms.length - 1" class="nl-row-divider" />
+            </div>
+            <button v-if="canAddMoreMailOrders" class="nl-add-link" @click="addMailOrderForm">+ Add New Provider</button>
+          </template>
+
+          <!-- Custom -->
+          <template v-else-if="pharmacyDialogTab === 'Custom'">
+            <div v-for="(form, idx) in inhouseCustomForms" :key="idx" class="nl-repeatable-row">
+              <div v-if="inhouseCustomForms.length > 1" class="nl-repeatable-row-header">
+                <span class="nl-repeatable-row-label">Pharmacy {{ idx + 1 }}</span>
+                <button class="nl-remove-row-btn" @click="removeInhouseForm(idx)" title="Remove this pharmacy">
+                  <Trash2 :size="16" :stroke-width="1.75" />
+                </button>
+              </div>
+              <p class="nl-dialog-field-label">NPI</p>
+              <v-textarea
+                v-model="form.ncpdp"
+                variant="underlined"
+                density="compact"
+                :messages="inhouseAddTouched && !form.ncpdp ? '' : 'Enter one NPI per line'"
+                :error="inhouseAddTouched && !form.ncpdp"
+                :error-messages="inhouseAddTouched && !form.ncpdp ? ['Required'] : []"
+                rows="3"
+                class="nl-textarea"
+                @blur="form.npiChips = generateNpiChips(form.ncpdp)"
+              />
+              <div v-if="form.npiChips.length" class="nl-npi-chips">
+                <span v-for="chip in form.npiChips" :key="chip.npi" class="nl-npi-chip">{{ chip.name }}</span>
+              </div>
+              <label class="nl-checkbox nl-checkbox--mt">
+                <input type="checkbox" v-model="form.noBillNoPay" class="nl-checkbox-input" />
+                <component :is="form.noBillNoPay ? CheckSquare : Square" :size="18" :stroke-width="1.5" class="nl-checkbox-icon" />
+                <span class="nl-checkbox-label">Set to no bill/no pay</span>
+              </label>
+              <div class="nl-date-row nl-date-row--mt">
+                <DatePicker
+                  v-model="form.startDate"
+                  label="Effective start date"
+                  variant="underlined"
+                  :min="todayStr"
+                  :error="inhouseAddTouched && !form.startDate"
+                  :error-messages="inhouseAddTouched && !form.startDate ? ['Required'] : []"
+                />
+                <DatePicker v-model="form.endDate" label="Effective end date" variant="underlined" />
+              </div>
+              <v-divider v-if="idx < inhouseCustomForms.length - 1" class="nl-row-divider" />
+            </div>
+            <button class="nl-add-link" @click="addInhouseForm">+ Add New Pharmacy</button>
+          </template>
+
+        </template>
+
+      </v-card-text>
+
+      <v-divider />
+      <v-card-actions class="nl-dialog-footer">
+        <button class="button button-secondary" @click="showPharmacyDialog = false">Cancel</button>
+        <button v-if="pharmacyDialogMode === 'edit'" class="button button-primary" @click="savePharmacyEdit">Update Pharmacy</button>
+        <button v-else class="button button-primary" @click="savePharmacy">Add Pharmacies</button>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
+  <!-- ── TOAST NOTIFICATIONS ───────────────────────────────────────────── -->
+  <v-snackbar
+    v-model="toast.show"
+    :color="toast.color"
+    location="top right"
+    :timeout="3000"
+    rounded="lg"
+  >
+    {{ toast.message }}
+  </v-snackbar>
+
 </template>
 
 <script setup lang="ts">
@@ -1474,13 +1957,14 @@ import {
   Hourglass, CircleCheckBig, XCircle,
   Save as SaveIcon, LayoutList as LayoutListIcon, CircleCheck as CircleCheckIcon,
   ArrowRight as ArrowRightIcon, Pencil, CheckSquare, Square, ChevronDown, PlusCircle, X, Check, CloudDownload, TriangleAlert,
-  Building2, Shield, Link2, Users, FileText, Search,
+  Building2, Shield, Link2, Users, FileText, Search, Globe, Trash2,
 } from 'lucide-vue-next';
 import EmptyStateImg from '@/assets/EmptyState.svg';
 import { VRow, VCol, VProgressCircular } from 'vuetify/components';
 
 const STARK_INDUSTRIES_ID = 1;
 const WAYNE_ENTERPRISES_ID = 2;
+const OSCORP_ID = 4;
 
 const accountOptions = ref([
   { id: 1, name: 'Stark Industries' },
@@ -1492,6 +1976,8 @@ const accountOptions = ref([
 
 const selectedAccount = ref<number | null>(null);
 const wizardActive = ref(false);
+
+
 const currentWizardStep = ref(0);
 
 // Step 4: Transition of Care
@@ -1665,6 +2151,8 @@ const lcFields = ref([
 
 const isStarkIndustries = computed(() => selectedAccount.value === STARK_INDUSTRIES_ID);
 const isWayneEnterprises = computed(() => selectedAccount.value === WAYNE_ENTERPRISES_ID);
+const isOscorp = computed(() => selectedAccount.value === OSCORP_ID);
+const isWizardAccount = computed(() => isStarkIndustries.value || isOscorp.value);
 
 const gapSections = [
   { label: 'Account Information',  icon: Building2  },
@@ -1687,7 +2175,7 @@ const selectedAccountDescription = computed(() =>
 );
 
 const wizardSteps = ref([
-  { name: 'Account Profile',        required: true,  status: 'not-started',  description: 'Confirm the account details, set effective dates and set notes or alerts if applicable.' },
+  { name: 'Account Profile',        required: true,  status: 'not-started',  description: 'Confirm account details, set effective dates, and review or update account contacts.' },
   { name: 'Network Configuration',  required: true,  status: 'not-started',  description: 'Define the pharmacy network and coverage settings for this account.' },
   { name: 'Plan Design',            required: true,  status: 'not-started',  description: 'Configure the benefit structure, cost-sharing rules, and coverage tiers.' },
   { name: 'Transition of Care',     required: false, status: 'not-started',  description: 'Set up transition of care rules for members moving from another plan.' },
@@ -1707,7 +2195,7 @@ const implementationSteps = ref([
   {
     title: 'Plan Setup',
     description: 'Initial setup of the account configurations.',
-    status: 'completed',
+    status: 'in-progress',
     icon: CircleCheckBig,
     active: true,
     startDate: '2025-01-01',
@@ -1797,6 +2285,9 @@ const nextWizardStep = () => {
 };
 
 const prevWizardStep = () => {
+  // Always land on the previous step in read-only mode
+  editingAccountProfile.value = false;
+  editingCompanyInfo.value = false;
   currentWizardStep.value--;
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
@@ -1807,6 +2298,10 @@ const markCurrentStepComplete = () => {
     currentWizardStep.value++;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
+};
+
+const markCurrentStepIncomplete = () => {
+  wizardSteps.value[currentWizardStep.value].status = 'not-started';
 };
 
 const finishPlanSetup = () => {
@@ -1896,14 +2391,502 @@ const networkFilterPills = [
   { type: 'status', value: 'terminated', label: 'Terminated', isActive: false },
 ];
 
-const networkRows = ref([
-  { networkName: 'First Choice Broad',  status: 'active', linkingLevel: 'Account', linkedGroups: 'All', linkedPlans: 'All', bin: '—', effStartDate: '03/01/2026', endDate: '—' },
-  { networkName: 'Mail Order - Network', status: 'active', linkingLevel: 'Account', linkedGroups: 'All', linkedPlans: 'All', bin: '—', effStartDate: '03/01/2026', endDate: '—' },
-  { networkName: 'Compliance',          status: 'active', linkingLevel: 'Account', linkedGroups: 'All', linkedPlans: 'All', bin: '—', effStartDate: '03/01/2026', endDate: '—' },
-]);
+const networkRowsByAccount = ref<Record<number, any[]>>({
+  1: [
+    { networkName: 'First Choice Broad',  status: 'Scheduled', linkingLevel: 'Account', linkedGroups: 'All', linkedPlans: 'All', bin: '—', effStartDate: '09/01/2026', endDate: '—' },
+    { networkName: 'Mail Order - Network', status: 'Scheduled', linkingLevel: 'Account', linkedGroups: 'All', linkedPlans: 'All', bin: '—', effStartDate: '09/01/2026', endDate: '—' },
+    { networkName: 'Compliance',          status: 'Scheduled', linkingLevel: 'Account', linkedGroups: 'All', linkedPlans: 'All', bin: '—', effStartDate: '09/01/2026', endDate: '—' },
+  ],
+  2: [],
+  3: [],
+  4: [],
+  5: [],
+});
+
+const currentNetworkRows = computed(() =>
+  selectedAccount.value ? (networkRowsByAccount.value[selectedAccount.value] ?? []) : []
+);
 
 const pharmacyTabs = ['In-House', 'Specialty', 'Mail Order', 'Custom'];
 const activePharmacyTab = ref('In-House');
+
+// ─── Step 2: Network Linking dialog ───────────────────────────────────────────
+
+const showNetworkLinkDialog = ref(false);
+const networkLinkStep = ref(1);
+const networkLinkMode = ref<'add' | 'edit'>('add');
+const editingNetworkItem = ref<any>(null);
+const editingNetworkIndex = ref(-1);
+const networkBpgOptionsByAccount: Record<number, Array<{id: string, bin: string, pcn: string, groupNumber: string}>> = {
+  1: [{ id: 'g1', bin: '025945', pcn: 'SSN', groupNumber: '1275' }],
+  4: [{ id: 'g1', bin: '015433', pcn: 'SSN', groupNumber: 'BG3HW' }],
+};
+const currentNetworkBpgOptions = computed(() => networkBpgOptionsByAccount[selectedAccount.value] ?? []);
+const networkEditStartDateReadOnly = computed(() => {
+  if (networkLinkMode.value !== 'edit' || !networkLinkForm.value.startDate) return false;
+  return new Date(networkLinkForm.value.startDate) < new Date();
+});
+const allBpgSelected = ref(false);
+const networkLinkTouched = ref(false);
+const networkBpgHeaders = [
+  { title: 'BIN', key: 'bin', sortable: true },
+  { title: 'PCN', key: 'pcn', sortable: true },
+  { title: 'Group Number', key: 'groupNumber', sortable: true },
+];
+
+const toast = ref({ show: false, message: '', color: 'success' });
+const showToast = (message: string, color: 'success' | 'error' | 'warning') => {
+  toast.value = { show: true, message, color };
+};
+
+const todayStr = new Date().toISOString().split('T')[0];
+
+const deriveStatus = (startDate: string, endDate: string): string => {
+  if (!startDate) return 'Scheduled';
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const [sm, sd, sy] = startDate.split('/').map(Number);
+  const start = new Date(sy, sm - 1, sd);
+  if (start > today) return 'Scheduled';
+  if (endDate && endDate !== '—') {
+    const [em, ed, ey] = endDate.split('/').map(Number);
+    if (new Date(ey, em - 1, ed) < today) return 'Terminated';
+  }
+  return 'Active';
+};
+
+const networkLinkForm = ref({ linkingLevel: 'Account Level', selectedGroupIds: [] as string[], startDate: '', endDate: '', selectedNetwork: '' });
+const availableNetworks = ['First Choice Broad', 'First Choice Preferred', 'First Choice Limited', 'Mail Order - Network', 'Specialty Pharmacies', 'Variable Copay', 'SavePlus'];
+
+const closeNetworkLinkDialog = () => {
+  showNetworkLinkDialog.value = false;
+  networkLinkStep.value = 1;
+  networkLinkMode.value = 'add';
+  editingNetworkItem.value = null;
+  editingNetworkIndex.value = -1;
+  networkLinkForm.value = { linkingLevel: 'Account Level', selectedGroupIds: [], startDate: '', endDate: '', selectedNetwork: '' };
+  allBpgSelected.value = false;
+  networkLinkTouched.value = false;
+};
+
+const advanceNetworkStep = () => {
+  const groupInvalid = networkLinkForm.value.linkingLevel === 'Group Level' && !networkLinkForm.value.selectedGroupIds.length;
+  if (!networkLinkForm.value.startDate || groupInvalid) {
+    networkLinkTouched.value = true;
+    return;
+  }
+  networkLinkTouched.value = false;
+  networkLinkStep.value = 2;
+};
+
+const saveNetworkLink = () => {
+  if (!networkLinkForm.value.startDate || !selectedAccount.value ||
+      endDateBeforeStartError(networkLinkForm.value.startDate, networkLinkForm.value.endDate)) {
+    networkLinkTouched.value = true;
+    return;
+  }
+  if (!networkRowsByAccount.value[selectedAccount.value]) {
+    networkRowsByAccount.value[selectedAccount.value] = [];
+  }
+  const arr = networkRowsByAccount.value[selectedAccount.value];
+
+  if (networkLinkMode.value === 'edit' && editingNetworkIndex.value !== -1) {
+    arr[editingNetworkIndex.value] = {
+      ...editingNetworkItem.value,
+      linkingLevel: networkLinkForm.value.linkingLevel === 'Account Level' ? 'Account' : 'Group',
+      linkedGroups: networkLinkForm.value.linkingLevel === 'Account Level'
+        ? 'All'
+        : currentNetworkBpgOptions.value
+            .filter(r => networkLinkForm.value.selectedGroupIds.includes(r.id))
+            .map(r => r.groupNumber)
+            .join(', ') || '—',
+      effStartDate: networkLinkForm.value.startDate,
+      endDate: networkLinkForm.value.endDate || '—',
+    };
+  } else {
+    if (!networkLinkForm.value.selectedNetwork) return;
+    arr.push({
+      networkName: networkLinkForm.value.selectedNetwork,
+      status: deriveStatus(networkLinkForm.value.startDate, networkLinkForm.value.endDate),
+      linkingLevel: networkLinkForm.value.linkingLevel === 'Account Level' ? 'Account' : 'Group',
+      linkedGroups: networkLinkForm.value.linkingLevel === 'Account Level'
+        ? 'All'
+        : currentNetworkBpgOptions.value
+            .filter(r => networkLinkForm.value.selectedGroupIds.includes(r.id))
+            .map(r => r.groupNumber)
+            .join(', ') || '—',
+      linkedPlans: networkLinkForm.value.linkingLevel === 'Account Level' ? 'All' : '—',
+      bin: '—',
+      effStartDate: networkLinkForm.value.startDate,
+      endDate: networkLinkForm.value.endDate || '—',
+    });
+  }
+  const wasEdit = networkLinkMode.value === 'edit';
+  closeNetworkLinkDialog();
+  showToast(wasEdit ? 'Pharmacy Network Updated Successfully' : 'Pharmacy Network Linking Successful', 'success');
+};
+
+// ─── Step 2: Preferred Pharmacy dialogs ──────────────────────────────────────
+
+const pharmacyDataByAccount = ref<Record<number, Record<string, any[]>>>({
+  1: {
+    // Stark Industries — in implementation, all Scheduled with future dates
+    'In-House': [
+      { ncpdp: '1234567', pharmacyName: 'CVS Pharmacy #4821', status: 'Scheduled', noBillNoPay: false, startDate: '09/01/2026', endDate: '—' },
+      { ncpdp: '7654321', pharmacyName: 'Walgreens #1093',    status: 'Scheduled', noBillNoPay: true,  startDate: '09/01/2026', endDate: '—' },
+    ],
+    'Specialty': [
+      { pharmacyType: 'Specific Pharmacies', pharmacyName: 'Accredo Health Group', npis: '1562047839', noBillNoPay: false, status: 'Scheduled', startDate: '09/01/2026', endDate: '—' },
+    ],
+    'Mail Order': [
+      { vendor: 'PILLPACK, LLC', status: 'Scheduled', noBillNoPay: false, displayInPortals: true, startDate: '09/01/2026', endDate: '—' },
+    ],
+    'Custom': [],
+  },
+  2: { 'In-House': [], 'Specialty': [], 'Mail Order': [], 'Custom': [] },
+  3: { 'In-House': [], 'Specialty': [], 'Mail Order': [], 'Custom': [] },
+  4: {
+    // Oscorp — in implementation, all Scheduled with future dates
+    'In-House': [
+      { ncpdp: '1122334', pharmacyName: 'Rite Aid #5247',       status: 'Scheduled', noBillNoPay: false, startDate: '10/01/2026', endDate: '—' },
+      { ncpdp: '9988776', pharmacyName: 'Costco Pharmacy #1190', status: 'Scheduled', noBillNoPay: false, startDate: '10/01/2026', endDate: '—' },
+    ],
+    'Specialty': [
+      { pharmacyType: 'Specific Pharmacies', pharmacyName: 'Walgreens Specialty', npis: '1487263940', noBillNoPay: false, status: 'Scheduled', startDate: '10/01/2026', endDate: '—' },
+      { pharmacyType: 'Specific Pharmacies', pharmacyName: 'CVS Specialty',       npis: '0934718265', noBillNoPay: false, status: 'Scheduled', startDate: '10/01/2026', endDate: '—' },
+    ],
+    'Mail Order': [
+      { vendor: 'POSTAL PRESCRIPTION SERVICES', status: 'Scheduled', noBillNoPay: false, displayInPortals: false, startDate: '10/01/2026', endDate: '—' },
+    ],
+    'Custom': [],
+  },
+  5: { 'In-House': [], 'Specialty': [], 'Mail Order': [], 'Custom': [] },
+});
+
+const pharmacyData = computed(() => {
+  if (!selectedAccount.value) return { 'In-House': [], 'Specialty': [], 'Mail Order': [], 'Custom': [] };
+  return pharmacyDataByAccount.value[selectedAccount.value] ?? { 'In-House': [], 'Specialty': [], 'Mail Order': [], 'Custom': [] };
+});
+
+const pharmacyHeadersForTab = computed(() => {
+  if (activePharmacyTab.value === 'Specialty') {
+    return [
+      { title: 'Pharmacy Name(s)',   key: 'pharmacyName' },
+      { title: 'NPI',               key: 'npis' },
+      { title: 'Status',            key: 'status' },
+      { title: 'No Bill/No Pay',    key: 'noBillNoPay' },
+      { title: 'Eff. Start Date',   key: 'startDate' },
+      { title: 'Eff. End Date',     key: 'endDate' },
+      { title: '',                  key: 'actions', sortable: false },
+    ];
+  }
+  if (activePharmacyTab.value === 'Mail Order') {
+    return [
+      { title: 'Pharmacy Name(s)',   key: 'vendor' },
+      { title: 'Status',             key: 'status' },
+      { title: 'No Bill/No Pay',     key: 'noBillNoPay' },
+      { title: 'Display in Portals', key: 'displayInPortals' },
+      { title: 'Eff. Start Date',    key: 'startDate' },
+      { title: 'Eff. End Date',      key: 'endDate' },
+      { title: '',                   key: 'actions', sortable: false },
+    ];
+  }
+  return [
+    { title: 'Pharmacy Name(s)', key: 'pharmacyName' },
+    { title: 'NPI',              key: 'ncpdp' },
+    { title: 'Status',           key: 'status' },
+    { title: 'No Bill/No Pay',   key: 'noBillNoPay' },
+    { title: 'Eff. Start Date',  key: 'startDate' },
+    { title: 'Eff. End Date',    key: 'endDate' },
+    { title: '',                 key: 'actions', sortable: false },
+  ];
+});
+
+const pharmacyBooleanColumnsForTab = computed(() => {
+  if (activePharmacyTab.value === 'Mail Order') return ['noBillNoPay', 'displayInPortals'];
+  return ['noBillNoPay'];
+});
+
+const showPharmacyDialog = ref(false);
+const pharmacyDialogTab = ref('In-House');
+const pharmacyDialogMode = ref<'add' | 'edit'>('add');
+const editingPharmacyItem = ref<any>(null);
+const editingPharmacyIndex = ref(-1);
+
+const pharmacyDialogTitle = computed(() => `${pharmacyDialogTab.value} Pharmacies`);
+
+const mockPharmacyBaseNames = ['CVS Pharmacy', 'Walgreens', 'Rite Aid', 'Walmart Pharmacy', 'Kroger Pharmacy', 'Costco Pharmacy'];
+const generateNpiChips = (text: string): { npi: string; name: string }[] =>
+  text.split('\n').map(l => l.trim()).filter(Boolean)
+    .map((npi, i) => ({ npi, name: mockPharmacyBaseNames[i % mockPharmacyBaseNames.length] }));
+
+const inhouseAddTouched = ref(false);
+const inhouseEditTouched = ref(false);
+const mailOrderAddTouched = ref(false);
+const mailOrderEditTouched = ref(false);
+
+type InhouseForm = { ncpdp: string; noBillNoPay: boolean; startDate: string; endDate: string; npiChips: { npi: string; name: string }[] };
+const newInhouseForm = (): InhouseForm => ({ ncpdp: '', noBillNoPay: false, startDate: '', endDate: '', npiChips: [] });
+const inhouseCustomForms = ref<InhouseForm[]>([newInhouseForm()]);
+const addInhouseForm = () => {
+  const allValid = inhouseCustomForms.value.every(f => !!f.ncpdp && !!f.startDate);
+  if (!allValid) { inhouseAddTouched.value = true; return; }
+  inhouseAddTouched.value = false;
+  inhouseCustomForms.value.push(newInhouseForm());
+};
+const removeInhouseForm = (idx: number) => { inhouseCustomForms.value.splice(idx, 1); };
+const inhouseEditForm = ref({ noBillNoPay: false, startDate: '', endDate: '' });
+const mailOrderEditForm = ref({ noBillNoPay: false, displayInPortals: false, startDate: '', endDate: '' });
+const specialtyForms = ref([{ pharmacyType: 'Liviniti', noBillNoPay: false, npis: '', npiChips: [] as { npi: string; name: string }[], startDate: '', endDate: '' }]);
+const specialtyTouched = ref(false);
+const specialtyStartDateError = (form: { startDate: string }) =>
+  specialtyTouched.value && !form.startDate;
+const specialtyNpiError = (form: { pharmacyType: string; npis: string }) =>
+  specialtyTouched.value && form.pharmacyType === 'Specific Pharmacies' && !form.npis.trim();
+const addSpecialtyForm = () => {
+  const allValid = specialtyForms.value.every(f =>
+    !!f.startDate && (f.pharmacyType !== 'Specific Pharmacies' || !!f.npis.trim())
+  );
+  if (!allValid) {
+    specialtyTouched.value = true;
+    return;
+  }
+  specialtyTouched.value = false;
+  specialtyForms.value.push({ pharmacyType: 'Liviniti', noBillNoPay: false, npis: '', npiChips: [], startDate: '', endDate: '' });
+};
+type MailOrderForm = { vendors: string[]; noBillNoPay: boolean; displayInPortals: boolean; startDate: string; endDate: string; vendorSearch: string; showVendorList: boolean; };
+const newMailOrderForm = (): MailOrderForm => ({ vendors: [], noBillNoPay: false, displayInPortals: false, startDate: '', endDate: '', vendorSearch: '', showVendorList: false });
+const mailOrderForms = ref<MailOrderForm[]>([newMailOrderForm()]);
+const selectedMailOrderVendors = computed(() => mailOrderForms.value.flatMap(f => f.vendors));
+const filteredVendorOptions = (idx: number): string[] => {
+  const otherSelected = mailOrderForms.value.filter((_, i) => i !== idx).flatMap(f => f.vendors);
+  const available = mailOrderVendorOptions.filter(v => !otherSelected.includes(v));
+  const q = mailOrderForms.value[idx]?.vendorSearch?.toLowerCase() ?? '';
+  return q ? available.filter(v => v.toLowerCase().includes(q)) : available;
+};
+const toggleVendor = (form: MailOrderForm, vendor: string) => {
+  const i = form.vendors.indexOf(vendor);
+  if (i === -1) form.vendors.push(vendor);
+  else form.vendors.splice(i, 1);
+};
+const hideVendorList = (form: MailOrderForm) => setTimeout(() => { form.showVendorList = false; }, 150);
+const removeMailOrderForm = (idx: number) => { mailOrderForms.value.splice(idx, 1); };
+const canAddMoreMailOrders = computed(() => selectedMailOrderVendors.value.length < mailOrderVendorOptions.length);
+const addMailOrderForm = () => {
+  const allValid = mailOrderForms.value.every(f => f.vendors.length > 0 && !!f.startDate);
+  if (!allValid) { mailOrderAddTouched.value = true; return; }
+  mailOrderAddTouched.value = false;
+  mailOrderForms.value.push(newMailOrderForm());
+};
+const endDateBeforeStartError = (start: string, end: string) => {
+  if (!end || !start) return false;
+  const p = (s: string) => { const [m, d, y] = s.split('/'); return new Date(+y, +m - 1, +d); };
+  return p(end) <= p(start);
+};
+
+const specialtyTypeOptions = ['Liviniti', 'Specific Pharmacies'];
+const mailOrderVendorOptions = ['MIRX PHARMACY', 'POSTAL PRESCRIPTION SERVICES', 'DRUG SOURCE INC', 'TRUEPILL NY LLC', 'ENVISION PHARMACY', 'HEALTHDYNE', 'PILLPACK, LLC', 'PROACT PHARMACY'];
+
+const pharmacyRowActions = [
+  { label: 'Edit',   action: 'edit'   },
+  { label: 'Remove', action: 'remove' },
+];
+
+const networkRowActions = [
+  { label: 'Edit',   action: 'edit'   },
+  { label: 'Remove', action: 'remove' },
+];
+
+const openPharmacyDialog = (tab: string) => {
+  pharmacyDialogTab.value = tab;
+  pharmacyDialogMode.value = 'add';
+  editingPharmacyItem.value = null;
+  editingPharmacyIndex.value = -1;
+  inhouseCustomForms.value = [newInhouseForm()];
+  inhouseAddTouched.value = false;
+  specialtyForms.value = [{ pharmacyType: 'Liviniti', noBillNoPay: false, npis: '', npiChips: [], startDate: '', endDate: '' }];
+  specialtyTouched.value = false;
+  mailOrderForms.value = [newMailOrderForm()];
+  mailOrderAddTouched.value = false;
+  showPharmacyDialog.value = true;
+};
+
+const handlePharmacyRowAction = ({ action, item }: { action: string; item: any }) => {
+  if (action === 'remove') {
+    if (!selectedAccount.value) return;
+    const arr = pharmacyDataByAccount.value[selectedAccount.value]?.[activePharmacyTab.value];
+    if (arr) {
+      const idx = arr.indexOf(item);
+      if (idx !== -1) arr.splice(idx, 1);
+    }
+    return;
+  }
+  if (action === 'edit') {
+    pharmacyDialogTab.value = activePharmacyTab.value;
+    pharmacyDialogMode.value = 'edit';
+    editingPharmacyItem.value = item;
+    const arr = pharmacyDataByAccount.value[selectedAccount.value!]?.[activePharmacyTab.value] ?? [];
+    editingPharmacyIndex.value = arr.indexOf(item);
+    if (activePharmacyTab.value === 'Mail Order') {
+      mailOrderEditForm.value = {
+        noBillNoPay: !!item.noBillNoPay,
+        displayInPortals: !!item.displayInPortals,
+        startDate: item.startDate === '—' ? '' : item.startDate,
+        endDate: item.endDate === '—' ? '' : item.endDate,
+      };
+    } else {
+      inhouseEditForm.value = {
+        noBillNoPay: !!item.noBillNoPay,
+        startDate: item.startDate === '—' ? '' : item.startDate,
+        endDate: item.endDate === '—' ? '' : item.endDate,
+      };
+    }
+    inhouseEditTouched.value = false;
+    mailOrderEditTouched.value = false;
+    showPharmacyDialog.value = true;
+  }
+};
+
+const handlePharmacyToggleCell = ({ key, item }: { key: string; item: any }) => {
+  item[key] = !item[key];
+};
+
+const handleNetworkRowAction = ({ action, item }: { action: string; item: any }) => {
+  if (action === 'remove' && selectedAccount.value) {
+    const arr = networkRowsByAccount.value[selectedAccount.value];
+    if (arr) {
+      const idx = arr.indexOf(item);
+      if (idx !== -1) arr.splice(idx, 1);
+    }
+    return;
+  }
+  if (action === 'edit' && selectedAccount.value) {
+    const arr = networkRowsByAccount.value[selectedAccount.value] ?? [];
+    editingNetworkItem.value = item;
+    editingNetworkIndex.value = arr.indexOf(item);
+    networkLinkMode.value = 'edit';
+    const linkedGroupNumbers = item.linkingLevel === 'Group' && item.linkedGroups && item.linkedGroups !== 'All' && item.linkedGroups !== '—'
+      ? item.linkedGroups.split(',').map((g: string) => g.trim())
+      : [];
+    networkLinkForm.value = {
+      linkingLevel: item.linkingLevel === 'Account' ? 'Account Level' : 'Group Level',
+      selectedGroupIds: (networkBpgOptionsByAccount[selectedAccount.value] ?? [])
+        .filter(r => linkedGroupNumbers.includes(r.groupNumber))
+        .map(r => r.id),
+      startDate: item.effStartDate === '—' ? '' : item.effStartDate,
+      endDate: item.endDate === '—' ? '' : item.endDate,
+      selectedNetwork: item.networkName,
+    };
+    networkLinkStep.value = 1;
+    showNetworkLinkDialog.value = true;
+  }
+};
+
+const savePharmacyEdit = () => {
+  if (editingPharmacyIndex.value === -1 || !selectedAccount.value) return;
+  const arr = pharmacyDataByAccount.value[selectedAccount.value]?.[activePharmacyTab.value];
+  if (!arr) return;
+  if (activePharmacyTab.value === 'Mail Order') {
+    if (!mailOrderEditForm.value.startDate) { mailOrderEditTouched.value = true; return; }
+    mailOrderEditTouched.value = false;
+    arr[editingPharmacyIndex.value] = {
+      ...editingPharmacyItem.value,
+      noBillNoPay: mailOrderEditForm.value.noBillNoPay,
+      displayInPortals: mailOrderEditForm.value.displayInPortals,
+      startDate: mailOrderEditForm.value.startDate || '—',
+      endDate: mailOrderEditForm.value.endDate || '—',
+    };
+  } else {
+    if (!inhouseEditForm.value.startDate) { inhouseEditTouched.value = true; return; }
+    inhouseEditTouched.value = false;
+    arr[editingPharmacyIndex.value] = {
+      ...editingPharmacyItem.value,
+      noBillNoPay: inhouseEditForm.value.noBillNoPay,
+      startDate: inhouseEditForm.value.startDate || '—',
+      endDate: inhouseEditForm.value.endDate || '—',
+    };
+  }
+  showPharmacyDialog.value = false;
+  showToast('Pharmacy Updated Successfully', 'success');
+};
+
+const savePharmacy = () => {
+  if (!selectedAccount.value) return;
+  const tab = pharmacyDialogTab.value;
+  if (!pharmacyDataByAccount.value[selectedAccount.value]) {
+    pharmacyDataByAccount.value[selectedAccount.value] = { 'In-House': [], 'Specialty': [], 'Mail Order': [], 'Custom': [] };
+  }
+  const accountData = pharmacyDataByAccount.value[selectedAccount.value];
+  if (tab === 'In-House' || tab === 'Custom') {
+    const allValid = inhouseCustomForms.value.every(f => !!f.ncpdp && !!f.startDate);
+    if (!allValid) { inhouseAddTouched.value = true; return; }
+    inhouseAddTouched.value = false;
+    inhouseCustomForms.value.forEach(f => {
+      accountData[tab].push({
+        ncpdp: f.ncpdp,
+        pharmacyName: f.npiChips[0]?.name || '—',
+        status: deriveStatus(f.startDate, f.endDate),
+        noBillNoPay: f.noBillNoPay,
+        startDate: f.startDate,
+        endDate: f.endDate || '—',
+      });
+    });
+  } else if (tab === 'Specialty') {
+    const specialtyValid = specialtyForms.value.every(f =>
+      !!f.startDate && (f.pharmacyType !== 'Specific Pharmacies' || !!f.npis.trim())
+    );
+    if (!specialtyValid) {
+      specialtyTouched.value = true;
+      return;
+    }
+    specialtyForms.value.forEach(f => {
+      if (f.pharmacyType === 'Specific Pharmacies') {
+        const chips = generateNpiChips(f.npis);
+        chips.forEach(chip => {
+          accountData[tab].push({
+            pharmacyType: f.pharmacyType,
+            npis: chip.npi,
+            pharmacyName: chip.name,
+            noBillNoPay: f.noBillNoPay,
+            status: deriveStatus(f.startDate, f.endDate),
+            startDate: f.startDate,
+            endDate: f.endDate || '—',
+          });
+        });
+      } else {
+        accountData[tab].push({
+          pharmacyType: f.pharmacyType,
+          npis: '',
+          pharmacyName: 'Liviniti',
+          noBillNoPay: f.noBillNoPay,
+          status: deriveStatus(f.startDate, f.endDate),
+          startDate: f.startDate,
+          endDate: f.endDate || '—',
+        });
+      }
+    });
+  } else if (tab === 'Mail Order') {
+    const mailOrderValid = mailOrderForms.value.every(f => f.vendors.length > 0 && !!f.startDate);
+    if (!mailOrderValid) {
+      mailOrderAddTouched.value = true;
+      return;
+    }
+    mailOrderAddTouched.value = false;
+    mailOrderForms.value.forEach(f => {
+      f.vendors.forEach(vendor => {
+        accountData[tab].push({
+          vendor,
+          status: deriveStatus(f.startDate, f.endDate),
+          noBillNoPay: f.noBillNoPay,
+          displayInPortals: f.displayInPortals,
+          startDate: f.startDate,
+          endDate: f.endDate || '—',
+        });
+      });
+    });
+  }
+  showPharmacyDialog.value = false;
+  showToast('Pharmacy Added Successfully', 'success');
+};
 
 // ─── Step 3: Plan Design ──────────────────────────────────────────────────────
 
@@ -2074,6 +3057,17 @@ watch(selectedAccount, (newVal) => {
 
 .plan-col--sticky {
   align-self: flex-start !important;
+  padding: 0 !important;
+}
+
+.plan-col--right {
+  padding: 0 !important;
+  padding-left: 16px !important;
+  @media (min-width: 960px) {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
 }
 
 .plan-timeline-wrapper--sticky {
@@ -2092,6 +3086,16 @@ watch(selectedAccount, (newVal) => {
 // ─── Timeline (left column) ───────────────────────────────────────────────────
 
 .plan-timeline {
+  // The .plan-timeline class is on the v-timeline root element (which IS the CSS grid).
+  // Cap the body column at 360px and collapse the empty opposite column to 0.
+  grid-template-columns: minmax(min-content, 360px) min-content 0 !important;
+
+  // Body: fill the capped column, reduce Vuetify's 24px gap to keep cards compact
+  :deep(.v-timeline-item__body) {
+    width: 100%;
+    padding-inline-end: 8px !important;
+  }
+
   // Pin the dot to the top for the Plan Setup item when sub-steps are expanded
   .v-timeline-item--has-sub-steps {
     :deep(.v-timeline-item__body) {
@@ -2102,7 +3106,18 @@ watch(selectedAccount, (newVal) => {
     }
   }
 
+  // Zero out the empty opposite slot's padding so it takes no space
+  :deep(.v-timeline-item__opposite) {
+    padding-inline-start: 0 !important;
+    min-width: 0 !important;
+    overflow: hidden;
+  }
+
   .v-timeline-item {
+    :deep(.v-timeline-item__body) {
+      width: 100%;
+    }
+
     .timeline-card {
       width: 100%;
       border: 1px solid $color-border;
@@ -2113,7 +3128,7 @@ watch(selectedAccount, (newVal) => {
       &:hover { box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
 
       .v-card-title { color: $color-primary; }
-      .v-card-text { letter-spacing: 0 !important; }
+      .v-card-text { letter-spacing: 0 !important; white-space: normal; }
     }
 
     .active-card { border-color: $color-primary; }
@@ -3757,5 +4772,729 @@ watch(selectedAccount, (newVal) => {
 .gap-accordion-chevron {
   color: $color-text-secondary;
   flex-shrink: 0;
+}
+
+// ─── Network Link + Pharmacy Dialogs ─────────────────────────────────────────
+
+.nl-dialog-card {
+  border: 1px solid $color-border;
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+}
+
+.nl-dialog-header {
+  display: flex;
+  align-items: center;
+  gap: $spacing-small;
+  padding: $spacing-medium !important;
+  letter-spacing: normal !important;
+  white-space: normal !important;
+}
+
+.nl-dialog-icon {
+  color: $color-primary;
+  flex-shrink: 0;
+}
+
+.nl-dialog-body {
+  padding: $spacing-medium !important;
+  letter-spacing: normal !important;
+  min-height: 280px;
+  overflow-y: auto;
+  flex: 1 1 auto;
+}
+
+.nl-dialog-intro {
+  color: $color-text-secondary;
+  margin-bottom: $spacing-medium;
+}
+
+.nl-dialog-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: $spacing-small;
+  padding: $spacing-medium !important;
+}
+
+.nl-dialog-field-label {
+  font-family: $font-family-base;
+  font-size: $font-size-small;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xsmall;
+}
+
+.nl-toggle-group {
+  display: flex;
+  gap: $spacing-xsmall;
+  flex-wrap: wrap;
+  margin-bottom: $spacing-medium;
+}
+
+.nl-level-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-xsmall;
+  min-width: 120px;
+
+  &.toc-toggle--selected {
+    background-color: $color-information-background;
+  }
+
+  &.nl-level-btn--disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+}
+
+.nl-level-check {
+  color: $color-primary;
+  flex-shrink: 0;
+}
+
+.nl-network-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-xsmall;
+  margin-bottom: $spacing-small;
+}
+
+.nl-network-btn {
+  min-width: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-xsmall;
+
+  &.toc-toggle--selected {
+    background-color: $color-information-background;
+  }
+}
+
+.nl-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-xsmall;
+  background-color: rgba($color-warning, 0.08);
+  border: 1px solid rgba($color-warning, 0.3);
+  border-radius: 6px;
+  padding: $spacing-small $spacing-medium;
+  margin-bottom: $spacing-medium;
+  font-family: $font-family-base;
+  font-size: $font-size-small;
+  color: $color-text-primary;
+  line-height: 1.5;
+}
+
+.nl-alert-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: rgba($color-warning, 0.25);
+  color: darken($color-warning, 10%);
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+
+.nl-date-row {
+  display: flex;
+  gap: $spacing-medium;
+
+  > * { flex: 1; }
+
+  &--mt { margin-top: $spacing-medium; }
+}
+
+.nl-textarea {
+  margin-bottom: $spacing-medium;
+}
+
+.nl-checkbox {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xsmall;
+  cursor: pointer;
+  margin-top: $spacing-small;
+  margin-bottom: $spacing-small;
+
+  &-input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  &-icon {
+    color: $color-primary;
+    flex-shrink: 0;
+  }
+
+  &-label {
+    font-family: $font-family-base;
+    font-size: $font-size-body;
+    color: $color-text-primary;
+    user-select: none;
+  }
+}
+
+.nl-repeatable-row {
+  margin-bottom: $spacing-small;
+}
+
+.nl-row-divider {
+  margin: $spacing-medium 0;
+}
+
+.nl-add-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: $font-family-base;
+  font-size: $font-size-body;
+  color: $color-link;
+  cursor: pointer;
+  margin-top: $spacing-small;
+
+  &:hover { text-decoration: underline; }
+}
+
+.nl-specialty-row-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-xsmall;
+}
+
+.nl-remove-btn {
+  background: none;
+  border: none;
+  padding: $spacing-xsmall;
+  cursor: pointer;
+  color: $color-text-secondary;
+  display: flex;
+  align-items: center;
+  border-radius: 4px;
+
+  &:hover { color: $color-error; background-color: rgba($color-error, 0.08); }
+}
+
+.nl-level-btn-group {
+  display: flex;
+  gap: $spacing-xsmall;
+
+  &--wrap { flex-wrap: wrap; }
+}
+
+.nl-checkbox--mt {
+  margin-top: $spacing-medium;
+}
+
+.nl-dialog-intro {
+  font-family: $font-family-base;
+  font-size: $font-size-body;
+  color: $color-text-primary;
+  margin-bottom: $spacing-medium;
+  line-height: 1.5;
+}
+
+.nl-edit-field-row {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: $spacing-small;
+}
+
+.nl-edit-field-label {
+  font-family: $font-family-base;
+  font-size: $font-size-small;
+  color: $color-text-secondary;
+  margin-bottom: 2px;
+}
+
+.nl-edit-field-value {
+  font-family: $font-family-base;
+  font-size: $font-size-body;
+  color: $color-text-primary;
+  font-weight: $font-weight-semibold;
+}
+
+.nl-checkbox--mt {
+  margin-top: $spacing-medium;
+}
+
+.nl-npi-section {
+  margin-top: $spacing-medium;
+}
+
+.nl-npi-textarea {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid $color-border;
+  resize: vertical;
+  font-family: $font-family-base;
+  font-size: $font-size-body;
+  color: $color-text-primary;
+  padding: $spacing-xsmall 0;
+  outline: none;
+  background: transparent;
+
+  &:focus { border-bottom-color: $color-primary; }
+
+  &--error { border-bottom-color: $color-error; }
+}
+
+.nl-field-error {
+  font-family: $font-family-base;
+  font-size: $font-size-small;
+  color: $color-error;
+  margin-top: $spacing-xsmall;
+}
+
+.nl-npi-hint {
+  font-family: $font-family-base;
+  font-size: $font-size-small;
+  color: $color-text-secondary;
+  margin-top: $spacing-xsmall;
+}
+
+.nl-npi-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-xsmall;
+  margin-top: $spacing-small;
+}
+
+.nl-npi-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  background-color: #E8EDF5;
+  border-radius: 12px;
+  font-family: $font-family-base;
+  font-size: $font-size-small;
+  color: $color-text-primary;
+}
+
+.nl-date-hint {
+  font-family: $font-family-base;
+  font-size: $font-size-small;
+  color: $color-text-secondary;
+  margin-top: $spacing-xsmall;
+  margin-bottom: 0;
+}
+
+.nl-bpg-section {
+  margin-top: $spacing-medium;
+  margin-bottom: $spacing-small;
+}
+
+.nl-bpg-label {
+  font-family: $font-family-base;
+  font-size: $font-size-body;
+  color: $color-text-primary;
+  margin-bottom: $spacing-small;
+}
+
+.nl-bpg-table-wrap {
+  border: 1px solid $color-border;
+  border-radius: 8px;
+  overflow: hidden;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.nl-bpg-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: $font-family-base;
+  font-size: $font-size-small;
+
+  thead tr {
+    background-color: #F5F5F5;
+    border-bottom: 1px solid $color-border;
+  }
+
+  th, td {
+    padding: 10px 14px;
+    text-align: left;
+  }
+
+  th {
+    font-weight: $font-weight-semibold;
+    color: $color-text-secondary;
+    font-size: $font-size-small;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid $color-border;
+    cursor: pointer;
+
+    &:last-child { border-bottom: none; }
+    &:hover { background-color: #F5F5F5; }
+  }
+}
+
+.nl-bpg-empty {
+  padding: 20px 14px;
+  text-align: center;
+  color: $color-text-secondary;
+  font-family: $font-family-base;
+  font-size: $font-size-small;
+}
+
+.nl-bpg-error {
+  font-family: $font-family-base;
+  font-size: $font-size-small;
+  color: $color-error;
+  margin-top: $spacing-xsmall;
+}
+
+.nl-edit-field-row--network {
+  margin-bottom: $spacing-medium;
+  padding-bottom: $spacing-small;
+  border-bottom: 1px solid $color-border;
+}
+
+.nl-bpg-th-check {
+  width: 40px;
+  text-align: center !important;
+}
+
+.nl-bpg-check-icon {
+  color: $color-text-secondary;
+  display: block;
+  margin: 0 auto;
+
+  &--checked { color: $color-primary; }
+}
+
+.nc-tab-title {
+  font-family: $font-family-base;
+  font-size: $font-size-body;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+// ─── Mail Order vendor picker ──────────────────────────────────────────────────
+
+.nl-vendor-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.nl-autocomplete-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.nl-chip-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background-color: $color-neutral-white;
+  cursor: pointer;
+  flex-shrink: 0;
+  opacity: 0.9;
+
+  &:hover { opacity: 1; }
+}
+
+.nl-vendor-picker-wrap {
+  position: relative;
+  margin-bottom: $spacing-small;
+}
+
+.nl-account-search-field {
+  border: 1px solid var(--color-input-border);
+  border-radius: 4px;
+  background-color: var(--color-input-bg);
+  padding: 6px $spacing-small;
+  transition: border-color 0.15s;
+
+  &--active,
+  &:focus-within { border-color: $color-primary; }
+}
+
+.nl-account-search-input {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: $font-family-base;
+  font-size: $font-size-body;
+  color: var(--color-text-primary);
+
+  &::placeholder { color: $color-neutral-disabled; }
+}
+
+.nl-account-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  max-height: 200px;
+  overflow-y: auto;
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.nl-account-option {
+  display: flex;
+  align-items: center;
+  padding: $spacing-xsmall $spacing-small;
+  cursor: pointer;
+
+  &:hover { background-color: rgba(0, 0, 0, 0.04); }
+}
+
+.nl-acct-checkbox {
+  width: 18px;
+  height: 18px;
+  border: 2px solid $color-border;
+  border-radius: 3px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &.active {
+    background-color: $color-primary;
+    border-color: $color-primary;
+    color: $color-neutral-white;
+  }
+}
+
+.nl-no-vendor-results {
+  padding: $spacing-small;
+  color: $color-text-secondary;
+  font-size: $font-size-small;
+  text-align: center;
+}
+
+.nl-field-error {
+  color: $color-error;
+  font-size: $font-size-small;
+  margin: 2px 0 4px;
+}
+
+.nl-repeatable-row-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-small;
+}
+
+.nl-repeatable-row-label {
+  font-size: $font-size-small;
+  font-weight: $font-weight-semibold;
+  color: $color-text-secondary;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.nl-remove-row-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  color: $color-text-secondary;
+  border-radius: 4px;
+  transition: color 0.15s, background-color 0.15s;
+
+  &:hover {
+    color: $color-error;
+    background-color: rgba($color-error, 0.08);
+  }
+}
+</style>
+
+<!-- Non-scoped dark mode overrides — bypasses Vue scoping to apply correctly -->
+<style lang="scss">
+html.dark {
+  // ── Timeline cards ──────────────────────────────────────────────────────────
+  .timeline-card {
+    background-color: var(--color-card-bg) !important;
+    border-color: var(--color-border) !important;
+    color: var(--color-text-primary) !important;
+
+    .v-card-title { color: #7BA7E0 !important; }
+    .v-card-text  { color: var(--color-text-secondary) !important; }
+  }
+
+  .active-card { border-color: #7BA7E0 !important; }
+
+  // ── Timeline detail panel ───────────────────────────────────────────────────
+  .timeline-details-card {
+    background-color: var(--color-card-bg);
+    border-color: var(--color-border);
+    color: var(--color-text-primary);
+  }
+
+  // ── Wizard sub-steps ────────────────────────────────────────────────────────
+  .wizard-sub-step-name { color: var(--color-text-primary); }
+  .wizard-sub-step-number {
+    border-color: var(--color-border);
+    color: var(--color-text-secondary);
+  }
+
+  // Active step: #0F285B (navy) on dark bg is ~2.6:1 — swap to light blue (6.9:1) ✓
+  .wizard-sub-step-item--active {
+    background-color: rgba(123, 167, 224, 0.12);
+
+    .wizard-sub-step-number {
+      background-color: #7BA7E0;
+      border-color: #7BA7E0;
+      color: #0F1117; // dark text on light blue — contrast ~8:1 ✓
+    }
+
+    .wizard-sub-step-name {
+      color: #7BA7E0 !important; // 6.9:1 on dark bg ✓
+    }
+  }
+
+  // ── Wizard overview (intro card) ─────────────────────────────────────────────
+  .wizard-overview {
+    border-color: var(--color-border);
+  }
+
+  .wizard-overview-body {
+    background-color: var(--color-card-bg);
+  }
+
+  .wizard-overview-footer {
+    background-color: var(--color-card-bg);
+    border-top-color: var(--color-border);
+  }
+
+  .wizard-overview-section-label { color: var(--color-text-secondary); }
+
+  .wizard-steps-grid {
+    border-color: var(--color-border);
+  }
+
+  .wizard-grid-item {
+    border-color: var(--color-border) !important;
+  }
+
+  .wizard-grid-number {
+    border-color: var(--color-border);
+    color: var(--color-text-secondary);
+  }
+
+  .wizard-grid-name { color: var(--color-text-primary); }
+
+  .wizard-info-list {
+    background-color: rgba(255, 255, 255, 0.04);
+  }
+
+  .wizard-info-icon { color: var(--color-text-secondary); }
+
+  // ── Wizard step content ──────────────────────────────────────────────────────
+  .wizard-step-counter { color: var(--color-text-secondary); }
+  .wizard-step-title   { color: var(--color-text-primary) !important; }
+  .wizard-step-description { color: var(--color-text-secondary); }
+
+  // ── Account profile fields ───────────────────────────────────────────────────
+  .ap-section {
+    border-color: var(--color-border);
+    background-color: var(--color-card-bg);
+  }
+
+  .ap-section-header { border-color: var(--color-border); }
+
+  .ap-field-label { color: var(--color-text-secondary) !important; }
+  .ap-field-value { color: var(--color-text-primary) !important; }
+
+  .ap-fields-divider { border-color: var(--color-border); }
+
+  // ── Inputs and form elements ─────────────────────────────────────────────────
+  .ap-input, .ap-select, .ap-textarea {
+    background-color: var(--color-input-bg) !important;
+    border-color: var(--color-input-border) !important;
+    color: var(--color-text-primary) !important;
+
+    &::placeholder { color: var(--color-text-secondary); }
+    &:focus { border-color: #7BA7E0 !important; }
+  }
+
+  // ── Checkboxes / radio-style elements ───────────────────────────────────────
+  .ap-checkbox-label, .ap-radio-label { color: var(--color-text-primary); }
+
+  // ── Step section headers ─────────────────────────────────────────────────────
+  .step-section-title,
+  .ap-subsection-title,
+  .step-heading { color: var(--color-text-primary) !important; }
+
+  .step-section-divider { border-color: var(--color-border); }
+
+  // ── Review / summary panels ──────────────────────────────────────────────────
+  .review-panel, .summary-panel, .completion-panel {
+    background-color: var(--color-card-bg);
+    border-color: var(--color-border);
+    color: var(--color-text-primary);
+  }
+
+  // ── Navigation buttons ───────────────────────────────────────────────────────
+  .button-thirtiary {
+    color: var(--color-text-secondary) !important;
+    border-color: var(--color-border) !important;
+    background-color: transparent !important;
+
+    &:hover { background-color: rgba(255, 255, 255, 0.05) !important; }
+  }
+
+  // ── GAP view (Wayne Enterprises active view) ─────────────────────────────────
+  .gap-view { color: var(--color-text-primary); }
+  .gap-meta  { color: var(--color-text-secondary); }
+
+  .gap-search-input {
+    background-color: var(--color-input-bg);
+    border-color: var(--color-input-border);
+    color: var(--color-text-primary);
+  }
+
+  .gap-accordion-item {
+    border-color: var(--color-border);
+    background-color: var(--color-card-bg);
+    color: var(--color-text-primary);
+  }
+
+  .gap-accordion-label { color: var(--color-text-primary); }
+  .gap-accordion-chevron { color: var(--color-text-secondary); }
+
+  // ── General text inside plan explorer ────────────────────────────────────────
+  .plan-explorer-content h1,
+  .plan-explorer-content h2,
+  .plan-explorer-content h3,
+  .plan-explorer-content h4,
+  .plan-explorer-content p,
+  .plan-explorer-content span,
+  .plan-explorer-content label {
+    color: var(--color-text-primary);
+  }
+
+  // Vuetify timeline dot connector lines
+  .v-timeline .v-timeline-divider__after,
+  .v-timeline .v-timeline-divider__before {
+    background-color: var(--color-border) !important;
+  }
 }
 </style>

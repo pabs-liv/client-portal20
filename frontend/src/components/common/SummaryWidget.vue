@@ -1,5 +1,9 @@
 <template>
-  <div class="summary-widget" :class="{ 'clickable': clickable }">
+  <div
+    class="summary-widget"
+    :class="{ 'clickable': clickable }"
+    :style="isDark ? { backgroundColor: 'var(--color-card-bg)', borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' } : {}"
+  >
     <div v-if="showIcon" class="widget-icon-wrapper" :style="{ backgroundColor: iconBackgroundColor }">
       <component :is="icon" :stroke-width="1" class="widget-icon" />
     </div>
@@ -18,6 +22,9 @@
 <script setup>
 import { defineProps } from 'vue';
 import { Flame } from 'lucide-vue-next';
+import { useDarkMode } from '@/composables/useDarkMode';
+
+const { isDark } = useDarkMode();
 
 defineProps({
   title: {
@@ -66,6 +73,13 @@ defineProps({
   padding: $spacing-medium;
   background-color: $color-neutral-white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.25s ease, border-color 0.25s ease;
+
+  :global(html.dark) & {
+    background-color: var(--color-card-bg);
+    border-color: var(--color-border);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  }
 }
 
 .clickable {
@@ -106,4 +120,5 @@ defineProps({
 .widget-body p {
   margin: 0;
 }
+
 </style>

@@ -47,6 +47,7 @@
         :headers="reportHeaders"
         :items="reportItems"
         :show-search-bar="true"
+        search-placeholder="Search by account, report name, or type"
         :show-filter-pills="true"
         :initial-filter-pills="reportFilterPills"
         :show-selection-checkboxes="true"

@@ -7,7 +7,7 @@ $color-primary-dark: #0A1F4A;
 
 // Neutral Colors
 $color-neutral-white: #FFFFFF;
-$color-neutral-disabled: #858585;
+$color-neutral-disabled: #767676; // Minimum accessible gray — 4.54:1 contrast on white (WCAG AA)
 $color-text-primary: #1A1A1A;
 $color-text-secondary: #6B6B6B; // Added secondary text color
 $color-border: #E0E0E0;
@@ -48,24 +48,123 @@ $font-size-h2: 1.728rem;
 $font-size-h3: 1.44rem;
 $font-size-h4: 1.2rem;
 $font-size-body: 1rem;
-$font-size-small: 0.8rem;
+$font-size-small: 0.875rem; // 14px — minimum recommended for accessibility (WCAG)
 $font-weight-normal: 400;
 $font-weight-semibold: 600;
 $font-weight-bold: 700;
 $line-height-tight: 120%;
 
-html,
+// ─── CSS Custom Properties ────────────────────────────────────────────────────
+// Light mode defaults
+:root {
+  --color-bg:               #FFFFFF;
+  --color-bg-surface:       #F5F6FA;
+  --color-bg-sidebar:       #FFFFFF;
+  --color-bg-header:        #FFFFFF;
+  --color-text-primary:     #1A1A1A;
+  --color-text-secondary:   #6B6B6B;
+  --color-border:           #E0E0E0;
+  --color-nav-icon:         #1f2022;
+  --color-nav-title:        #1f2022;
+  --color-card-bg:          #FFFFFF;
+  --color-input-bg:         #FFFFFF;
+  --color-input-border:     #E0E0E0;
+  --color-scrollbar-thumb:  #C0C0C0;
+}
+
+// Dark mode overrides — applied when <html class="dark">
+html.dark {
+  --color-bg:               #0F1117;
+  --color-bg-surface:       #1A1D27;
+  --color-bg-sidebar:       #13161F;
+  --color-bg-header:        #13161F;
+  --color-text-primary:     #E8EAF0;
+  --color-text-secondary:   #9AA0B4;
+  --color-border:           #2C3147;
+  --color-nav-icon:         #B0B8D0;
+  --color-nav-title:        #B0B8D0;
+  --color-card-bg:          #1A1D27;
+  --color-input-bg:         #1E2130;
+  --color-input-border:     #2C3147;
+  --color-scrollbar-thumb:  #3A3F55;
+}
+
+html {
+  overflow-x: hidden !important;
+  overflow-y: scroll !important;
+  height: auto !important;
+}
+
 body {
-  overflow: auto !important; // allow document-level scroll (overrides Vuetify's overflow: hidden)
+  overflow: visible !important;
+  height: auto !important;
+}
+
+.v-application {
+  min-height: 100vh !important;
   height: auto !important;
 }
 
 body {
   font-family: $font-family-base;
-  background-color: $color-neutral-white;
-  color: $color-text-primary;
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
   margin: 0;
   padding: 0;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+// Vuetify v-app surface override for dark mode
+html.dark .v-application,
+html.dark .v-main,
+html.dark .v-container {
+  background-color: var(--color-bg) !important;
+  color: var(--color-text-primary) !important;
+}
+
+html.dark .v-card {
+  background-color: var(--color-card-bg) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text-primary) !important;
+}
+
+html.dark .v-data-table,
+html.dark .v-table {
+  background-color: var(--color-card-bg) !important;
+  color: var(--color-text-primary) !important;
+}
+
+html.dark .v-field {
+  background-color: var(--color-input-bg) !important;
+  color: var(--color-text-primary) !important;
+}
+
+html.dark .v-field__outline {
+  --v-field-border-color: var(--color-input-border) !important;
+}
+
+html.dark .v-select__selection,
+html.dark .v-field__input,
+html.dark .v-label {
+  color: var(--color-text-primary) !important;
+}
+
+html.dark .v-chip {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  color: var(--color-text-primary) !important;
+}
+
+html.dark .v-divider {
+  border-color: var(--color-border) !important;
+}
+
+html.dark .v-list {
+  background-color: var(--color-bg-surface) !important;
+  color: var(--color-text-primary) !important;
+}
+
+html.dark .v-list-item:hover {
+  background-color: rgba(255, 255, 255, 0.05) !important;
 }
 
 // Typography base styles
@@ -91,6 +190,13 @@ a {
   &:hover {
     text-decoration: underline;
   }
+}
+
+// Dialogs teleport outside .v-application — override separately
+.v-overlay-container .v-btn {
+  font-family: $font-family-base !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
 }
 
 // Vuetify overrides
@@ -227,4 +333,68 @@ a {
 .disclaimer {
   font-size: $font-size-small;
   color: $color-text-secondary;
+}
+
+// ─── Dark Mode: page-level surfaces ───────────────────────────────────────────
+html.dark {
+  // General text
+  h1, h2, h3, h4, h5, h6, p, span, label, td, th, li {
+    color: var(--color-text-primary);
+  }
+
+  .text-h3 {
+    color: #7BA7E0 !important; // lightened brand blue for dark backgrounds
+  }
+
+  // Surface panels and cards used in page views
+  .home-page-container,
+  .two-column-layout > *,
+  [class*="-container"],
+  [class*="-card"],
+  [class*="-panel"],
+  [class*="-section"] {
+    background-color: var(--color-bg) !important;
+    color: var(--color-text-primary) !important;
+  }
+
+  // Table rows
+  tr {
+    background-color: var(--color-card-bg) !important;
+    border-color: var(--color-border) !important;
+    color: var(--color-text-primary) !important;
+  }
+
+  th {
+    background-color: var(--color-bg-surface) !important;
+    color: var(--color-text-secondary) !important;
+    border-color: var(--color-border) !important;
+  }
+
+  // Borders everywhere
+  [class*="-border"],
+  [class*="border-"] {
+    border-color: var(--color-border) !important;
+  }
+
+  // Scrollbars
+  * {
+    scrollbar-color: var(--color-scrollbar-thumb) transparent;
+  }
+
+  // Links
+  a {
+    color: #7BA7E0;
+  }
+}
+
+// Vuetify 3.9.0-beta.1 doesn't reliably apply custom theme colors.
+// Force the primary CSS variable that Vuetify uses for all themed components.
+.v-theme--light {
+  --v-theme-primary: 15 40 91;
+}
+
+// Belt-and-suspenders: also force icon color directly
+.v-data-table .v-selection-control--dirty .v-icon,
+.v-data-table .v-checkbox-btn .v-icon {
+  color: #0F285B !important;
 }

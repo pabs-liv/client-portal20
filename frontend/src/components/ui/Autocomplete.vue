@@ -11,6 +11,27 @@
     @update:model-value="$emit('update:modelValue', $event)"
     class="custom-autocomplete"
   >
+    <template v-if="multiple" #chip="{ item, props: chipProps }">
+      <v-chip color="primary" variant="flat" class="ac-chip">
+        <span class="ac-chip-label">{{ item.title }}</span>
+        <span class="ac-chip-close" @click.stop="chipProps['onClick:close']">
+          <X :size="10" :stroke-width="2.5" />
+        </span>
+      </v-chip>
+    </template>
+    <template #item="{ item, props }">
+      <v-list-item v-bind="props" :title="item.title">
+        <template v-if="multiple" #prepend="{ isSelected }">
+          <v-list-item-action start>
+            <v-checkbox-btn
+              :model-value="isSelected"
+              density="compact"
+              tabindex="-1"
+            />
+          </v-list-item-action>
+        </template>
+      </v-list-item>
+    </template>
     <template v-if="!readonly" #append-inner>
       <ChevronDown :size="20" :stroke-width="1.5" />
     </template>
@@ -19,7 +40,7 @@
 
 <script setup lang="ts">
 import { VAutocomplete } from 'vuetify/components';
-import { ChevronDown } from 'lucide-vue-next';
+import { ChevronDown, X } from 'lucide-vue-next';
 
 defineOptions({
   inheritAttrs: false,
@@ -53,6 +74,36 @@ defineEmits(['update:modelValue']);
   .v-field__append-inner {
     .v-icon {
       color: $color-text-secondary;
+    }
+  }
+}
+
+.ac-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 8px;
+
+  .ac-chip-label {
+    color: $color-neutral-white;
+    font-size: $font-size-small;
+  }
+
+  .ac-chip-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background-color: $color-neutral-white;
+    color: $color-primary;
+    cursor: pointer;
+    flex-shrink: 0;
+    opacity: 0.9;
+
+    &:hover {
+      opacity: 1;
     }
   }
 }

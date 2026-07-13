@@ -44,7 +44,7 @@
         :show-search-bar="true"
         :show-filter-button="false"
         :show-filter-pills="true"
-        search-placeholder="Search prior authorizations"
+        search-placeholder="Search by account, EOC ID, or drug name"
         :initial-filter-pills="priorAuthFilterPills"
         :show-action-icons="isExternal"
         :action-icons="actionIcons"

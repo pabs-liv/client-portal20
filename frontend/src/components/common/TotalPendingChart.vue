@@ -22,6 +22,13 @@
   justify-content: center;
   align-items: center;
   text-align: center;
+  transition: background-color 0.25s ease, border-color 0.25s ease;
+
+  :global(html.dark) & {
+    background-color: var(--color-card-bg);
+    border-color: var(--color-border);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  }
 
   h4 {
     @extend .text-h3;

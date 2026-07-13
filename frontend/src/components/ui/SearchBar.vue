@@ -11,7 +11,7 @@
       />
     </div>
     <Button v-if="showSearchButton" variant="primary" label="Search" :showIcon="true" :icon="Search" />
-    <ListFilter v-if="showFilterButton" :stroke-width="1" class="filter-icon" />
+    <ListFilter v-if="showFilterButton" :stroke-width="1" class="filter-icon" @click="$emit('click:filter')" />
   </div>
 </template>
 
@@ -35,7 +35,7 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['update:searchTerm']);
+const emit = defineEmits(['update:searchTerm', 'click:filter']);
 
 const searchTerm = ref('');
 

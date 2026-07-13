@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div :style="{ paddingBottom: selectedAvailableIds.length > 0 ? '88px' : '0', transition: 'padding-bottom 0.3s ease' }">
     <AccountSelector
       heading="Added Value Programs"
       subheading="Explore added-value programs to enrich the lives and improve the health of your members. Select an account to get started."
@@ -9,203 +9,1192 @@
       item-value="id"
       :searchable="true"
       v-model="selectedAccount"
-      @update:model-value="updateDisplayAccountType"
       variant="outlined"
     />
-    <div class="no-program mb-large" v-if="displayAccountType === 'no-program'">
-      <h2 class="text-h2">This Account Does Not Have Any Programs</h2>
-      <p class="text-body">Choose from the available programs below to help your clients reduce costs and improve care for their members.</p>
-      <v-row>
-        <v-col cols="12" sm="6" md="3" v-for="i in 4" :key="i">
-            <Card
-              :title="['Anti-Obesity Management Program', 'Liviniti Pharmacogenomics', 'Liviniti Delivery on Demand', 'LivLite'][i - 1]"
-              :subtitle="['Wellness', 'Wellness', 'Savings', 'Savings'][i - 1]"
-              text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-              :selected="selectedPrograms[i - 1]"
-              variant="checkbox"
-              @update:selected="selectedPrograms[i - 1] = $event"
-            />
-        </v-col>
-      </v-row>
-      <v-btn v-if="isAnyCardSelected" color="primary" rounded>Request Program Details</v-btn>
-    </div>
-    <div class="account-programs" v-if="displayAccountType === 'account-programs'">
-      <v-row>
-        <v-col cols="12" md="8" class="d-flex justify-center align-center">
-          <AccountPrescriptionCard
-            accountName="Company B"
-            carrier="Carrier A"
-            :livesCovered="5000"
-            startDate="01/01/2024"
-            endDate="12/31/2024"
-            routingBin="610455"
-            status="active"
-          />
-        </v-col>
-        <v-col cols="12" md="4" class="programs-column">
-          <h2 class="text-h2 programs-title">Programs</h2>
-          <div class="programs-in-use">
-            <h4 class="text-h4">In Use</h4>
-            <Card
-              title="Anti-Obesity Management Program"
-              subtitle="Wellness"
-              class="hug-content"
-              :flat="true"
-            />
+
+    <div v-if="selectedAccountData">
+
+      <!-- ── Your Programs (table / list style) ── -->
+      <div v-if="activePrograms.length > 0" class="programs-section mb-large">
+        <div class="programs-section-header">
+          <h2 class="text-h2 section-title">Your Programs</h2>
+        </div>
+        <p class="text-body section-description">Review the programs currently active for your account.</p>
+
+        <div class="filter-pills-container">
+          <FilteringPill
+            v-for="pill in filterPills"
+            :key="pill.value"
+            :is-active="pill.value === activeFilterActive"
+            @click="activeFilterActive = pill.value"
+          >
+            {{ pill.label }}
+          </FilteringPill>
+        </div>
+
+        <div class="program-list-scroll" :style="isDark ? { borderColor: 'var(--color-border)' } : {}">
+          <div class="program-list">
+            <div
+              v-for="program in filteredActivePrograms"
+              :key="program.id"
+              class="program-list-item"
+              :style="darkRow"
+            >
+              <div class="program-list-main">
+                <div class="program-name-col">
+                  <span class="program-name" :style="isDark ? { color: '#7BA7E0' } : {}">{{ program.name }}</span>
+                  <v-chip size="x-small" variant="outlined" color="primary" class="category-chip">{{ program.category }}</v-chip>
+                </div>
+                <div class="program-desc" :style="isDark ? { color: 'var(--color-text-secondary)' } : {}">{{ program.description }}</div>
+                <button class="view-details-link" :style="isDark ? { color: '#7BA7E0' } : {}" @click.stop="toggleExpandActive(program.id)">
+                  {{ expandedActiveId === program.id ? 'Hide Details ▲' : 'View Details ▼' }}
+                </button>
+              </div>
+
+              <div v-if="expandedActiveId === program.id" class="program-expanded" :style="darkPanel">
+                <div class="detail-field">
+                  <span class="detail-label">Program Option</span>
+                  <span class="detail-value">{{ program.optionName }}</span>
+                </div>
+                <div v-if="program.selectedOptions?.length" class="detail-field detail-field--full">
+                  <span class="detail-label">Active Configuration</span>
+                  <ul class="selected-options-list">
+                    <li
+                      v-for="(opt, i) in program.selectedOptions"
+                      :key="i"
+                      class="selected-option-item"
+                      :style="isDark ? { color: 'var(--color-text-primary)' } : {}"
+                    >{{ opt }}</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="programs-available">
-            <h4 class="text-h4">Available</h4>
-            <p class="text-body">Choose from the available programs below to help your clients reduce costs and improve care for their members.</p>
-            <Card
-              title="Liviniti Delivery on Demand"
-              subtitle="Savings"
-              text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-              class="hug-content"
-              variant="checkbox"
-              :selected="selectedPrograms[2]"
-              @update:selected="selectedPrograms[2] = $event"
-            />
-            <Card
-              title="LivLite"
-              subtitle="Savings"
-              text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-              class="hug-content"
-              variant="checkbox"
-              :selected="selectedPrograms[3]"
-              @update:selected="selectedPrograms[3] = $event"
-            />
-            <v-btn v-if="isAnyAvailableCardSelected" color="primary" rounded>Request Program Details</v-btn>
+        </div>
+      </div>
+
+      <!-- ── Available Programs (tile grid) ── -->
+      <div v-if="availablePrograms.length > 0" class="programs-section mb-large">
+        <div class="programs-section-header">
+          <h2 class="text-h2 section-title">Available Programs</h2>
+        </div>
+        <p class="text-body section-description">Browse programs available to add for your account. Click a program to select it, then submit a request to learn more.</p>
+
+        <div class="filter-pills-container">
+          <FilteringPill
+            v-for="pill in filterPills"
+            :key="pill.value"
+            :is-active="pill.value === activeFilterAvailable"
+            @click="activeFilterAvailable = pill.value"
+          >
+            {{ pill.label }}
+          </FilteringPill>
+        </div>
+
+        <div class="program-tiles">
+          <div
+            v-for="program in filteredAvailablePrograms"
+            :key="program.id"
+            class="program-tile"
+            :class="{
+              'program-tile--selected': selectedAvailableIds.includes(program.id),
+              'program-tile--pending': currentPendingIds.includes(program.id)
+            }"
+            :style="isDark ? {
+              backgroundColor: 'var(--color-card-bg)',
+              borderColor: currentPendingIds.includes(program.id)
+                ? 'rgba(76, 175, 80, 0.5)'
+                : selectedAvailableIds.includes(program.id) ? '#7BA7E0' : 'var(--color-border)'
+            } : {}"
+            @click="!currentPendingIds.includes(program.id) && toggleCart(program.id)"
+            role="checkbox"
+            :aria-checked="selectedAvailableIds.includes(program.id) || currentPendingIds.includes(program.id)"
+            :aria-disabled="currentPendingIds.includes(program.id) || undefined"
+            :tabindex="currentPendingIds.includes(program.id) ? -1 : 0"
+            @keydown.space.prevent="!currentPendingIds.includes(program.id) && toggleCart(program.id)"
+            @keydown.enter.prevent="!currentPendingIds.includes(program.id) && toggleCart(program.id)"
+          >
+            <!-- Pending "Requested" badge -->
+            <div v-if="currentPendingIds.includes(program.id)" class="tile-requested-badge">
+              <Check :size="12" :stroke-width="3" />
+            </div>
+            <!-- Selected checkmark badge -->
+            <div v-else-if="selectedAvailableIds.includes(program.id)" class="tile-check-badge" :style="isDark ? { backgroundColor: '#7BA7E0', color: '#0F1117' } : {}">
+              <Check :size="12" :stroke-width="3" />
+            </div>
+
+            <div class="tile-header">
+              <span class="tile-name" :style="isDark ? { color: '#7BA7E0' } : {}">{{ program.name }}</span>
+              <v-chip size="x-small" variant="outlined" color="primary" class="category-chip">{{ program.category }}</v-chip>
+            </div>
+
+            <p class="tile-description" :style="isDark ? { color: 'var(--color-text-secondary)' } : {}">{{ program.description }}</p>
+
+            <div class="tile-footer">
+              <button
+                class="view-details-link"
+                :style="isDark ? { color: '#7BA7E0' } : {}"
+                @click.stop="openDetailModal(program)"
+              >
+                View Details
+              </button>
+              <span v-if="currentPendingIds.includes(program.id)" class="tile-requested-label">
+                <Check :size="13" :stroke-width="2.5" class="tile-added-check" /> Requested
+              </span>
+              <span v-else-if="selectedAvailableIds.includes(program.id)" class="tile-added-label" :style="isDark ? { color: '#7BA7E0' } : {}">
+                <Check :size="13" :stroke-width="2.5" class="tile-added-check" /> Added
+              </span>
+            </div>
           </div>
-        </v-col>
-      </v-row>
+        </div>
+      </div>
+
+      <!-- All enrolled state -->
+      <div v-if="activePrograms.length > 0 && availablePrograms.length === 0" class="all-enrolled-message">
+        <p class="text-body">This account is enrolled in all available programs.</p>
+      </div>
+
     </div>
+
+    <!-- ── Cart Bar ── -->
+    <Transition name="cart-slide">
+      <div
+        v-if="selectedAvailableIds.length > 0"
+        class="cart-bar"
+        :style="isDark ? { backgroundColor: '#1A2744', borderTopColor: '#2C3147' } : {}"
+      >
+        <div class="cart-bar-chips">
+          <v-chip
+            v-for="id in selectedAvailableIds"
+            :key="id"
+            size="small"
+            variant="outlined"
+            class="cart-chip"
+            :style="isDark ? { borderColor: 'rgba(255,255,255,0.3)', color: '#E8EAF0' } : {}"
+          >
+            {{ getProgramName(id) }}
+            <template #append>
+              <button class="cart-chip-close" @click.stop="removeFromCart(id)" aria-label="Remove program">
+                <X :size="11" :stroke-width="2.5" />
+              </button>
+            </template>
+          </v-chip>
+        </div>
+        <div class="cart-bar-right">
+          <span class="cart-count">{{ selectedAvailableIds.length }} {{ selectedAvailableIds.length === 1 ? 'program' : 'programs' }} selected</span>
+          <button class="cart-cta-btn" @click="showConfirmModal = true">
+            Request Program Information
+          </button>
+        </div>
+      </div>
+    </Transition>
+
+    <!-- ── View Details Modal ── -->
+    <v-dialog v-model="showDetailModal" max-width="640" :scrim="isDark ? 'rgba(0,0,0,0.7)' : undefined">
+      <v-card v-if="detailModalProgram" :style="isDark ? { backgroundColor: 'var(--color-card-bg)', color: 'var(--color-text-primary)' } : {}">
+        <v-card-title class="modal-title-row" :style="isDark ? { borderBottomColor: 'var(--color-border)' } : {}">
+          <span class="modal-program-name" :style="isDark ? { color: '#7BA7E0' } : {}">{{ detailModalProgram.name }}</span>
+          <v-chip size="x-small" variant="outlined" color="primary" class="category-chip ml-small">{{ detailModalProgram.category }}</v-chip>
+        </v-card-title>
+
+        <v-card-text class="modal-body" :style="isDark ? { color: 'var(--color-text-primary)' } : {}">
+          <p class="text-body modal-lead" :style="isDark ? { color: 'var(--color-text-secondary)' } : {}">{{ detailModalProgram.description }}</p>
+
+          <div class="modal-detail-content" v-if="detailModalProgram.details.paragraphs?.length || detailModalProgram.details.bullets?.length || detailModalProgram.details.configItems?.length">
+            <p
+              v-for="(para, i) in detailModalProgram.details.paragraphs"
+              :key="'p'+i"
+              class="detail-para"
+              :style="isDark ? { color: 'var(--color-text-primary)' } : {}"
+            >{{ para }}</p>
+
+            <ul v-if="detailModalProgram.details.bullets?.length" class="detail-bullets">
+              <li
+                v-for="(bullet, i) in detailModalProgram.details.bullets"
+                :key="'b'+i"
+                :style="isDark ? { color: 'var(--color-text-primary)' } : {}"
+              >{{ bullet }}</li>
+            </ul>
+
+            <p
+              v-for="(item, i) in detailModalProgram.details.configItems"
+              :key="'c'+i"
+              class="detail-config-item"
+              :style="isDark ? { color: 'var(--color-text-primary)' } : {}"
+            >{{ item }}</p>
+          </div>
+
+          <p v-if="detailModalProgram.details.note" class="detail-note" :style="isDark ? { backgroundColor: 'rgba(44,130,203,0.12)', color: 'var(--color-text-secondary)' } : {}">
+            {{ detailModalProgram.details.note }}
+          </p>
+        </v-card-text>
+
+        <v-card-actions class="modal-actions" :style="isDark ? { borderTopColor: 'var(--color-border)' } : {}">
+          <v-spacer />
+          <button class="modal-btn modal-btn--secondary" :style="isDark ? { color: 'var(--color-text-secondary)', borderColor: 'var(--color-border)' } : {}" @click="showDetailModal = false">
+            Close
+          </button>
+          <button
+            v-if="currentPendingIds.includes(detailModalProgram.id)"
+            class="modal-btn modal-btn--requested"
+            disabled
+          >
+            <Check :size="14" :stroke-width="2.5" /> Requested
+          </button>
+          <button
+            v-else
+            class="modal-btn modal-btn--primary"
+            :class="{ 'modal-btn--remove': selectedAvailableIds.includes(detailModalProgram.id) }"
+            @click="addFromModal(detailModalProgram.id)"
+          >
+            {{ selectedAvailableIds.includes(detailModalProgram.id) ? 'Remove from Request' : '+ Add to Request' }}
+          </button>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- ── Confirm Request Modal ── -->
+    <v-dialog v-model="showConfirmModal" max-width="480" :scrim="isDark ? 'rgba(0,0,0,0.7)' : undefined">
+      <v-card :style="isDark ? { backgroundColor: 'var(--color-card-bg)', color: 'var(--color-text-primary)' } : {}">
+        <v-card-title class="modal-title-row" :style="isDark ? { borderBottomColor: 'var(--color-border)' } : {}">
+          <span :style="isDark ? { color: 'var(--color-text-primary)' } : {}">Request Program Information</span>
+        </v-card-title>
+
+        <v-card-text class="modal-body" :style="isDark ? { color: 'var(--color-text-primary)' } : {}">
+          <p class="text-body" :style="isDark ? { color: 'var(--color-text-secondary)' } : {}">
+            You're requesting information on the following {{ selectedAvailableIds.length === 1 ? 'program' : 'programs' }}:
+          </p>
+          <ul class="confirm-program-list">
+            <li
+              v-for="id in selectedAvailableIds"
+              :key="id"
+              class="confirm-program-item"
+              :style="isDark ? { color: 'var(--color-text-primary)', borderLeftColor: '#7BA7E0' } : {}"
+            >
+              {{ getProgramName(id) }}
+            </li>
+          </ul>
+          <p class="text-body confirm-note" :style="isDark ? { color: 'var(--color-text-secondary)' } : {}">
+            A Liviniti representative will follow up with details on your selections within 2 business days.
+          </p>
+        </v-card-text>
+
+        <v-card-actions class="modal-actions" :style="isDark ? { borderTopColor: 'var(--color-border)' } : {}">
+          <v-spacer />
+          <button class="modal-btn modal-btn--secondary" :style="isDark ? { color: 'var(--color-text-secondary)', borderColor: 'var(--color-border)' } : {}" @click="showConfirmModal = false">
+            Cancel
+          </button>
+          <button class="modal-btn modal-btn--primary" @click="confirmRequest">
+            Confirm Request
+          </button>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- ── Success Snackbar ── -->
+    <v-snackbar
+      v-model="showSuccessToast"
+      color="success"
+      :timeout="4000"
+      location="bottom right"
+    >
+      <div class="toast-content">
+        <CheckCircle :size="18" :stroke-width="2" />
+        <span>Your request has been submitted. A Liviniti representative will be in touch shortly.</span>
+      </div>
+    </v-snackbar>
+
   </div>
 </template>
-<script setup lang="ts">
-import AccountPrescriptionCard from '@/components/common/AccountPrescriptionCard.vue';
-import Dialog from '@/components/ui/Dialog.vue';
-import Card from '@/components/ui/Card.vue';
-import AccountSelector from '@/components/common/AccountSelector.vue';
-import Select from '@/components/ui/Select.vue';
-import { VRow, VCol, VBtn } from 'vuetify/components';
-import { ref, computed, onMounted } from 'vue';
 
-const accountOptions = ref([
-  { id: 1, name: 'Company A' },
-  { id: 2, name: 'Company B' },
-  { id: 3, name: 'Company C' },
-  { id: 4, name: 'Company D' },
-  { id: 5, name: 'Company E' },
+<script setup lang="ts">
+import { ref, computed, watch } from 'vue';
+import AccountSelector from '@/components/common/AccountSelector.vue';
+import FilteringPill from '@/components/ui/FilteringPill.vue';
+import { Check, CheckCircle, X } from 'lucide-vue-next';
+import { useDarkMode } from '@/composables/useDarkMode';
+
+const { isDark } = useDarkMode();
+const darkRow   = computed(() => isDark.value ? { backgroundColor: 'var(--color-card-bg)', borderBottomColor: 'var(--color-border)' } : {});
+const darkPanel = computed(() => isDark.value ? { backgroundColor: 'var(--color-bg-surface)', borderTopColor: 'var(--color-border)' } : {});
+
+interface Fee {
+  rate: string;
+  type: string;
+  amount: string;
+  effStartDate: string;
+  effEndDate: string;
+}
+
+interface ProgramDetails {
+  paragraphs?: string[];
+  bullets?: string[];
+  configItems?: string[];
+  note: string;
+}
+
+interface Program {
+  id: string;
+  name: string;
+  category: string;
+  description: string;
+  optionName: string;
+  selectedOptions?: string[];
+  invoice: boolean;
+  merpAdminName: string;
+  fees: Fee[];
+  details: ProgramDetails;
+}
+
+interface Account {
+  id: number;
+  name: string;
+  carrier: string;
+  bin: string;
+  livesCovered: number;
+  startDate: string;
+  endDate: string;
+  status: string;
+  activePrograms: string[];
+}
+
+const programs: Program[] = [
+  {
+    id: 'noom',
+    name: 'Noom',
+    category: 'Wellness',
+    description: 'A clinically proven digital health program that uses psychology-based coaching and cognitive behavioral techniques to help members build lasting habits, manage weight, and improve overall wellbeing.',
+    optionName: 'Noom Standard',
+    selectedOptions: [
+      'Program tier: Noom Weight + GLP-1 Companion',
+      'Coverage: All prescription plan members aged 18 and older',
+      'Weight loss medication coverage: Included',
+      'Add-on: Noom Mood',
+    ],
+    invoice: true,
+    merpAdminName: '—',
+    fees: [
+      { rate: 'Admin Fee', type: 'CLAIM', amount: '$5.00', effStartDate: '01/01/2025', effEndDate: '—' },
+    ],
+    details: {
+      paragraphs: [
+        'Noom is a digital health platform rooted in cognitive behavioral science, designed to help members understand and change the behaviors that drive unhealthy habits. Unlike traditional diet programs, Noom focuses on the psychology behind eating and lifestyle choices — giving members the tools to make sustainable changes that last.',
+        'When enrolling in Noom, your account manager will work with you to configure program options for your group.',
+      ],
+      configItems: [
+        'Coverage eligibility — All prescription plan members aged 18 and older, or prescription plan employees only',
+        'Program tier selection — e.g., Noom Weight, Noom Weight + Diabetes Prevention Program, or GLP-1 Companion',
+        'Whether the plan includes coverage for weight loss medications alongside the program',
+        'Optional add-on: Noom Mood (mental health and stress management)',
+      ],
+      note: 'Please allow up to 30 days from the date of completed documentation and agreements for your program selection to take effect.',
+    },
+  },
+  {
+    id: 'sync-plus',
+    name: 'Sync+',
+    category: 'Wellness',
+    description: 'A comprehensive diabetes management program that combines wearable device integration, real-time health data, and GLP-1 medication coverage to help members manage Type 2 diabetes and improve long-term outcomes.',
+    optionName: 'Sync+ Standard',
+    selectedOptions: [
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit',
+      'GLP-1 medication coverage: Included (diabetes management only)',
+      'Ut enim ad minim veniam, quis nostrud exercitation',
+    ],
+    invoice: false,
+    merpAdminName: '—',
+    fees: [],
+    details: {
+      paragraphs: [
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
+        'Sync+ includes coverage for GLP-1 medications as part of the diabetes management program. This coverage is specific to members diagnosed with Type 2 diabetes and is not applicable for weight loss or obesity management outside of a diabetes diagnosis.',
+      ],
+      configItems: [
+        'Lorem ipsum dolor sit amet — consectetur adipiscing elit, sed do eiusmod tempor',
+        'GLP-1 medication coverage — Included for members with a Type 2 diabetes diagnosis; not applicable for weight management outside of a diabetes diagnosis',
+        'Lorem ipsum dolor sit amet — consectetur adipiscing elit, sed do eiusmod tempor',
+      ],
+      note: 'Please allow up to 30 days from the date of completed documentation and agreements for your program selection to take effect.',
+    },
+  },
+  {
+    id: 'liviniti-pharmacogenomics',
+    name: 'Liviniti Pharmacogenomics',
+    category: 'Wellness',
+    description: 'Genetic testing that analyzes how each member\'s DNA affects their response to medications, helping optimize drug therapy and reduce adverse reactions.',
+    optionName: 'Liviniti Pharmacogenomics Standard',
+    selectedOptions: [
+      'Testing method: Mindera Mind.Px dermal biomarker patch',
+      'Coverage: All prescription plan members',
+      'Indication: Psoriasis biologic selection',
+    ],
+    invoice: false,
+    merpAdminName: '—',
+    fees: [],
+    details: {
+      paragraphs: [
+        'The shift to personalized medicine has been in the works for quite some time now. As medications become more complex, the prescribing method of trial and failure is no longer cost effective, especially as specialty medications begin to dominate the market for complex disease states.',
+        'The Mindera Mind.Px test uses a dermal biomarker patch that takes only minutes to extract RNA allowing a genetic snapshot of the skin. This rich, patient-specific data set is then analyzed to predict the appropriate class of psoriasis biologic for an individual patient prior to therapeutic selection and treatment.',
+      ],
+      note: 'Please allow up to 30 days from the date of completed documentation and agreements for your program selection to take effect.',
+    },
+  },
+  {
+    id: 'liviniti-delivery',
+    name: 'Liviniti Delivery on Demand',
+    category: 'Savings',
+    description: 'Same-day and next-day prescription delivery connecting members with local pharmacies for convenient, fast access to their medications.',
+    optionName: 'Liviniti Delivery on Demand Standard',
+    selectedOptions: [
+      'Delivery provider: ScriptDrop',
+      'Delivery speed: Same-day and next-day',
+      'Coverage: All prescription plan members',
+      'Member co-pay responsibility: Paid directly to pharmacy prior to delivery',
+    ],
+    invoice: false,
+    merpAdminName: '—',
+    fees: [],
+    details: {
+      paragraphs: [
+        'Now offering prescription delivery to your members\' doors, from their local pharmacy. Introducing Liviniti Delivery on Demand, Powered by ScriptDrop!',
+      ],
+      bullets: [
+        'No transferring prescriptions to a new pharmacy',
+        'No need to opt into mail order',
+        'No worries if the pharmacy doesn\'t offer delivery',
+      ],
+      configItems: [
+        'We have partnered with a delivery technology company to offer secure, compliant delivery to members\' homes. Liviniti Prescription Delivery on Demand powered by ScriptDrop will deliver medications to your members!',
+        'ScriptDrop is a web application-based prescription service that allows patients to securely receive their medication at a location of their choice. They partner with HIPAA-compliant, background checked, and professional courier companies.',
+      ],
+      note: 'Please allow up to 30 days from the date of completed documentation and agreements for your program selection to take effect. Additionally, members are required to pay all member responsibility related to their prescriptions directly to the pharmacy prior to requesting delivery.',
+    },
+  },
+];
+
+const filterPills = [
+  { value: 'all',      label: 'All' },
+  { value: 'Wellness', label: 'Wellness' },
+  { value: 'Savings',  label: 'Savings' },
+];
+
+const accountOptions = ref<Account[]>([
+  { id: 1, name: 'Company A', carrier: 'Carrier A', bin: '025945', livesCovered: 1200, startDate: '09/01/2026', endDate: '12/31/2099', status: 'implementation', activePrograms: [] },
+  { id: 2, name: 'Company B', carrier: 'Carrier A', bin: '025945', livesCovered: 5000, startDate: '01/01/2026', endDate: '01/01/2099', status: 'active', activePrograms: ['noom', 'liviniti-delivery'] },
+  { id: 3, name: 'Company C', carrier: 'Carrier B', bin: '025945', livesCovered: 8500, startDate: '07/01/2024', endDate: '06/30/2025', status: 'active', activePrograms: ['noom', 'sync-plus', 'liviniti-pharmacogenomics', 'liviniti-delivery'] },
+  { id: 4, name: 'Company D', carrier: 'Carrier C', bin: '025945', livesCovered: 3200, startDate: '01/01/2025', endDate: '12/31/2025', status: 'active', activePrograms: ['liviniti-pharmacogenomics'] },
+  { id: 5, name: 'Company E', carrier: 'Carrier A', bin: '025945', livesCovered: 2800, startDate: '04/01/2024', endDate: '03/31/2025', status: 'active', activePrograms: ['noom', 'liviniti-delivery'] },
 ]);
 
-const selectedAccount = ref(null);
-const displayAccountType = ref<string | null>(null);
+const selectedAccount        = ref<number | null>(null);
+const activeFilterActive     = ref<string>('all');
+const activeFilterAvailable  = ref<string>('all');
+const selectedAvailableIds   = ref<string[]>([]);
+const expandedActiveId       = ref<string | null>(null);
+const detailModalProgram     = ref<Program | null>(null);
+const showDetailModal        = ref(false);
+const showConfirmModal       = ref(false);
+const showSuccessToast       = ref(false);
+const pendingProgramIds      = ref<Record<number, string[]>>({ 2: ['liviniti-pharmacogenomics'] });
 
-const selectedPrograms = ref<boolean[]>([false, false, false, false]);
+const selectedAccountData = computed<Account | null>(() =>
+  accountOptions.value.find(a => a.id === selectedAccount.value) ?? null
+);
 
-const isAnyCardSelected = computed(() => selectedPrograms.value.some(selected => selected));
+const activePrograms = computed<Program[]>(() =>
+  programs.filter(p => selectedAccountData.value?.activePrograms.includes(p.id))
+);
 
-const isAnyAvailableCardSelected = computed(() => selectedPrograms.value.slice(2).some(selected => selected));
+const availablePrograms = computed<Program[]>(() =>
+  programs.filter(p => !selectedAccountData.value?.activePrograms.includes(p.id))
+);
 
-const updateDisplayAccountType = (accountId: number) => {
-  if (accountId === 1) { // Company A
-    displayAccountType.value = 'no-program';
-  } else if (accountId === 2) { // Company B
-    displayAccountType.value = 'account-programs';
+const filteredActivePrograms = computed<Program[]>(() =>
+  activeFilterActive.value === 'all'
+    ? activePrograms.value
+    : activePrograms.value.filter(p => p.category === activeFilterActive.value)
+);
+
+const filteredAvailablePrograms = computed<Program[]>(() =>
+  activeFilterAvailable.value === 'all'
+    ? availablePrograms.value
+    : availablePrograms.value.filter(p => p.category === activeFilterAvailable.value)
+);
+
+const currentPendingIds = computed<string[]>(() =>
+  selectedAccount.value !== null ? (pendingProgramIds.value[selectedAccount.value] ?? []) : []
+);
+
+watch(selectedAccount, () => {
+  selectedAvailableIds.value = [];
+  expandedActiveId.value = null;
+  activeFilterActive.value = 'all';
+  activeFilterAvailable.value = 'all';
+  showDetailModal.value = false;
+  showConfirmModal.value = false;
+});
+
+const getProgramName = (id: string): string =>
+  programs.find(p => p.id === id)?.name ?? id;
+
+const toggleExpandActive = (id: string) => {
+  expandedActiveId.value = expandedActiveId.value === id ? null : id;
+};
+
+const toggleCart = (id: string) => {
+  if (selectedAvailableIds.value.includes(id)) {
+    selectedAvailableIds.value = selectedAvailableIds.value.filter(i => i !== id);
   } else {
-    displayAccountType.value = null;
+    selectedAvailableIds.value = [...selectedAvailableIds.value, id];
   }
 };
+
+const removeFromCart = (id: string) => {
+  selectedAvailableIds.value = selectedAvailableIds.value.filter(i => i !== id);
+};
+
+const openDetailModal = (program: Program) => {
+  detailModalProgram.value = program;
+  showDetailModal.value = true;
+};
+
+const addFromModal = (id: string) => {
+  toggleCart(id);
+  showDetailModal.value = false;
+};
+
+const confirmRequest = () => {
+  const acctId = selectedAccount.value!;
+  const existing = pendingProgramIds.value[acctId] ?? [];
+  pendingProgramIds.value = { ...pendingProgramIds.value, [acctId]: [...existing, ...selectedAvailableIds.value] };
+  showConfirmModal.value = false;
+  selectedAvailableIds.value = [];
+  showSuccessToast.value = true;
+};
 </script>
+
 <style lang="scss" scoped>
 @import '@/style.scss';
 
-.programs-in-use-section {
-  margin-bottom: $spacing-xlarge !important;
-}
-
-.programs-in-use h3,
-.programs-available h3 {
-  margin-bottom: $spacing-medium !important;
-}
-
-.account-selector {
+// ─── Shared section layout ────────────────────────────────────────────────────
+.filter-pills-container {
   display: flex;
-  justify-content: space-between;
-  align-items: center; /* Ensure vertical centering of items */
+  flex-wrap: wrap;
+  gap: $spacing-small;
+  margin-bottom: $spacing-medium;
+}
+
+.programs-section {
+  margin-bottom: $spacing-xlarge;
+}
+
+.programs-section {
   border: 1px solid $color-border;
-  padding: $spacing-medium;
   border-radius: 8px;
-  min-height: 80px; /* Added to give a defined height for centering */
-
-  .title {
-    display: flex;
-    flex-direction: column;
-    gap: $spacing-small;
-    flex-grow: 1; /* Allow title to take available space */
-
-    h1 {
-      margin-bottom: 0; /* Remove default h1 margin */
-    }
-
-    p {
-      margin-bottom: 0; /* Remove default p margin */
-    }
-  }
-
-  .account-select {
-    max-width: 300px; /* Adjust as needed */
-  }
+  padding: $spacing-medium;
+  background-color: $color-neutral-white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-@media (max-width: 768px) {
-  .account-selector {
-    flex-direction: column;
-    align-items: flex-start; /* Align items to start in column layout */
-    gap: $spacing-medium; /* Add gap between items in column */
-
-    .title {
-      width: 100%; /* Full width for title in mobile */
-    }
-
-    .account-select {
-      max-width: 100%; /* Full width for select in mobile */
-      width: 100%;
-    }
-  }
+.programs-section-header {
+  padding-bottom: $spacing-small;
+  margin-bottom: $spacing-medium;
+  border-bottom: 1px solid $color-border;
 }
 
-.no-program {
+.section-title {
+  color: $color-primary;
+  margin-bottom: 0;
+}
+
+.section-description {
+  margin-bottom: $spacing-medium;
+  color: $color-text-primary;
+}
+
+// ─── Your Programs: scrollable list ──────────────────────────────────────────
+.program-list-scroll {
+  max-height: calc(100vh - 320px);
+  overflow-y: auto;
+  border: 1px solid $color-border;
+  border-radius: 8px;
+}
+
+.program-list {
   display: flex;
   flex-direction: column;
+}
+
+.program-list-item {
+  background-color: $color-neutral-white;
+  border-bottom: 1px solid $color-border;
+  overflow: hidden;
+  transition: background-color 0.15s ease;
+
+  &:last-child { border-bottom: none; }
+}
+
+.program-list-main {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-small;
+  padding: $spacing-medium;
+}
+
+
+.program-name-col {
+  display: flex;
   align-items: center;
-  width: 100%;
-  margin-bottom: $spacing-large;
-  gap: $spacing-large;
-
-  h2 {
-    color: $color-primary;
-  }
-
-  p {
-    margin-bottom: 0;
-  }
+  gap: $spacing-small;
 }
 
-.programs-column {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-large;
-}
-
-.programs-title {
+.program-name {
+  font-size: $font-size-body;
+  font-weight: $font-weight-bold;
   color: $color-primary;
 }
 
-.programs-in-use,
-.programs-available {
+.category-chip { flex-shrink: 0; white-space: nowrap; }
+
+.program-desc {
+  font-size: $font-size-body;
+  color: $color-text-secondary;
+  line-height: 1.5;
+  max-width: calc(100% - 110px);
+}
+
+.view-details-link {
+  align-self: flex-end;
+  background: none;
+  border: none;
+  color: $color-primary;
+  font-size: $font-size-small;
+  cursor: pointer;
+  padding: 0;
+  white-space: nowrap;
+  &:hover { text-decoration: underline; }
+}
+
+.program-expanded {
+  border-top: 1px solid $color-border;
+  padding: $spacing-medium;
+  padding-left: calc(#{$spacing-medium} + 20px + #{$spacing-medium});
+  background-color: $color-neutral-white;
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-medium;
+}
+
+.detail-field {
   display: flex;
   flex-direction: column;
+  gap: 4px;
+  min-width: 160px;
+
+  &--full {
+    flex: 1 1 100%;
+  }
+}
+
+.detail-label {
+  font-size: $font-size-small;
+  color: $color-text-secondary;
+  font-weight: $font-weight-bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.detail-value {
+  font-size: $font-size-body;
+  color: $color-text-primary;
+}
+
+.selected-options-list {
+  list-style: none;
+  padding: 0;
+  margin: 4px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.selected-option-item {
+  font-size: $font-size-body;
+  color: $color-text-primary;
+  padding-left: $spacing-small;
+  border-left: 2px solid $color-border;
+  line-height: 1.5;
+}
+
+.fees-table {
+  border: 1px solid $color-border;
+  border-radius: 4px;
+  font-size: $font-size-small;
+  min-width: 400px;
+}
+
+// ─── Available Programs: tile grid ───────────────────────────────────────────
+.program-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
   gap: $spacing-medium;
+  align-items: stretch;
+}
+
+.program-tile {
+  position: relative;
+  background-color: $color-neutral-white;
+  border: 1.5px solid $color-border;
+  border-radius: 10px;
+  padding: $spacing-medium;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-small;
+  outline: none;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-color: $color-primary;
+  }
+
+  &:focus-visible {
+    box-shadow: 0 0 0 3px rgba($color-primary, 0.25);
+    border-color: $color-primary;
+  }
+
+  &--selected {
+    border-color: $color-primary;
+    background-color: rgba($color-primary, 0.03);
+    box-shadow: 0 2px 8px rgba($color-primary, 0.12);
+  }
+
+  &--pending {
+    border-color: rgba($color-success, 0.5);
+    background-color: rgba($color-success, 0.02);
+    cursor: default;
+    pointer-events: none;
+
+    &:hover {
+      box-shadow: none;
+      border-color: rgba($color-success, 0.5);
+    }
+
+    .view-details-link {
+      pointer-events: auto;
+    }
+  }
+}
+
+// Checkmark badge (top-right corner of selected tile)
+.tile-check-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background-color: $color-primary;
+  color: $color-neutral-white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// "Requested" badge (top-right corner of pending tile)
+.tile-requested-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background-color: $color-success;
+  color: $color-neutral-white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tile-requested-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: $font-size-small;
+  color: $color-success;
+  font-weight: $font-weight-bold;
+}
+
+.tile-header {
+  display: flex;
+  align-items: center;
+  gap: $spacing-small;
+  flex-wrap: wrap;
+  padding-right: 28px; // keep clear of check badge
+}
+
+.tile-name {
+  font-size: $font-size-body;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+  line-height: 1.3;
+}
+
+.tile-description {
+  font-size: $font-size-small;
+  color: $color-text-secondary;
+  line-height: 1.5;
+  flex: 1;
+}
+
+.tile-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: $spacing-small;
+  border-top: 1px solid $color-border;
+}
+
+.tile-added-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: $font-size-small;
+  color: $color-primary;
+  font-weight: $font-weight-bold;
+}
+
+.tile-added-check {
+  flex-shrink: 0;
+}
+
+// ─── Cart Bar (fixed bottom) ──────────────────────────────────────────────────
+.cart-bar {
+  position: fixed;
+  bottom: 0;
+  left: 120px; // sidebar width
+  right: 0;
+  z-index: 200;
+  background-color: $color-primary-dark;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding: $spacing-small $spacing-large;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-medium;
+  min-height: 68px;
+}
+
+.cart-bar-chips {
+  display: flex;
+  align-items: center;
+  gap: $spacing-small;
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.cart-chip {
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  color: $color-neutral-white !important;
+}
+
+.cart-chip-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  padding: 0;
+  margin-left: 4px;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 0;
+
+  &:hover {
+    color: $color-neutral-white;
+  }
+}
+
+.cart-bar-right {
+  display: flex;
+  align-items: center;
+  gap: $spacing-medium;
+  flex-shrink: 0;
+}
+
+.cart-count {
+  font-size: $font-size-small;
+  color: rgba(255, 255, 255, 0.75);
+  white-space: nowrap;
+}
+
+.cart-cta-btn {
+  background-color: $color-neutral-white;
+  color: $color-primary-dark;
+  border: none;
+  border-radius: 100px;
+  padding: 8px $spacing-medium;
+  font-size: $font-size-body;
+  font-weight: $font-weight-normal;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.9);
+  }
+}
+
+// Cart bar slide transition
+.cart-slide-enter-active,
+.cart-slide-leave-active {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+.cart-slide-enter-from,
+.cart-slide-leave-to {
+  transform: translateY(100%);
+  opacity: 0;
+}
+
+// ─── Modal shared styles ──────────────────────────────────────────────────────
+.modal-title-row {
+  display: flex;
+  align-items: center;
+  gap: $spacing-small;
+  padding: $spacing-medium $spacing-medium $spacing-small;
+  border-bottom: 1px solid $color-border;
+  flex-wrap: wrap;
+}
+
+.modal-program-name {
+  font-size: 1.125rem;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+}
+
+.modal-body {
+  padding: $spacing-medium !important;
+}
+
+.modal-lead {
+  color: $color-text-secondary;
+  margin-bottom: $spacing-medium;
+  line-height: 1.6;
+}
+
+.modal-detail-content {
+  margin-top: $spacing-medium;
+}
+
+.detail-para {
+  margin-bottom: $spacing-small;
+  color: $color-text-primary;
+  line-height: 1.6;
+  font-size: $font-size-body;
+}
+
+.detail-config-item {
+  margin-bottom: $spacing-small;
+  color: $color-text-primary;
+  line-height: 1.6;
+  font-size: $font-size-small;
+  padding-left: $spacing-small;
+  border-left: 2px solid $color-border;
+}
+
+.detail-bullets {
+  margin: $spacing-small 0 $spacing-small $spacing-medium;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  li {
+    color: $color-text-primary;
+    line-height: 1.5;
+    font-size: $font-size-body;
+  }
+}
+
+.detail-note {
+  margin-top: $spacing-medium;
+  padding: $spacing-small $spacing-medium;
+  background-color: $color-information-background;
+  border-left: 3px solid $color-link;
+  border-radius: 4px;
+  font-size: $font-size-small;
+  color: $color-text-secondary;
+  line-height: 1.5;
+}
+
+.modal-actions {
+  padding: $spacing-small $spacing-medium !important;
+  border-top: 1px solid $color-border;
+  gap: $spacing-small;
+}
+
+.modal-btn {
+  padding: 8px 20px;
+  border-radius: 100px;
+  font-size: $font-size-body;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &--secondary {
+    background: transparent;
+    border: 1px solid $color-border;
+    color: $color-text-secondary;
+    &:hover { background-color: rgba(0, 0, 0, 0.04); }
+  }
+
+  &--primary {
+    background-color: $color-primary;
+    border: 1px solid $color-primary;
+    color: $color-neutral-white;
+    &:hover { background-color: $color-primary-dark; border-color: $color-primary-dark; }
+  }
+
+  &--remove {
+    background-color: transparent;
+    border-color: $color-error;
+    color: $color-error;
+    &:hover { background-color: rgba($color-error, 0.06); }
+  }
+
+  &--requested {
+    background-color: rgba($color-success, 0.08);
+    border: 1px solid $color-success;
+    color: $color-success;
+    cursor: default;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+}
+
+// ─── Confirm modal program list ───────────────────────────────────────────────
+.confirm-program-list {
+  list-style: none;
+  padding: 0;
+  margin: $spacing-small 0 $spacing-medium;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-small;
+}
+
+.confirm-program-item {
+  font-size: $font-size-body;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+  padding: $spacing-small $spacing-medium;
+  border-left: 3px solid $color-primary;
+  background-color: rgba($color-primary, 0.04);
+  border-radius: 0 4px 4px 0;
+}
+
+.confirm-note {
+  color: $color-text-secondary;
+  font-size: $font-size-small;
+  line-height: 1.5;
+}
+
+// ─── Success toast ────────────────────────────────────────────────────────────
+.toast-content {
+  display: flex;
+  align-items: center;
+  gap: $spacing-small;
+}
+
+// ─── All enrolled ─────────────────────────────────────────────────────────────
+.all-enrolled-message {
+  text-align: center;
+  padding: $spacing-large;
+  color: $color-text-secondary;
+}
+
+// ─── Dark mode ────────────────────────────────────────────────────────────────
+:global(html.dark) {
+  .program-list-scroll {
+    border-color: var(--color-border);
+  }
+
+  .program-list-item {
+    background-color: var(--color-card-bg);
+    border-bottom-color: var(--color-border);
+  }
+
+  .program-name { color: #7BA7E0; }
+  .program-desc { color: var(--color-text-secondary); }
+  .view-details-link { color: #7BA7E0; }
+
+  .program-expanded {
+    background-color: var(--color-bg-surface);
+    border-top-color: var(--color-border);
+  }
+
+  .detail-value { color: var(--color-text-primary); }
+  .detail-label { color: var(--color-text-secondary); }
+  .selected-option-item { color: var(--color-text-primary); border-left-color: var(--color-border); }
+
+  .detail-note {
+    background-color: rgba(44, 130, 203, 0.12);
+    color: var(--color-text-secondary);
+  }
+
+  .fees-table { border-color: var(--color-border); }
+
+  .section-description { color: var(--color-text-primary); }
+
+  .category-chip.v-chip {
+    border-color: var(--color-border) !important;
+    color: var(--color-text-secondary) !important;
+  }
+
+  // Tiles
+  .program-tile {
+    background-color: var(--color-card-bg);
+    border-color: var(--color-border);
+
+    &:hover { border-color: #7BA7E0; }
+    &:focus-visible { box-shadow: 0 0 0 3px rgba(123, 167, 224, 0.25); border-color: #7BA7E0; }
+    &--selected { border-color: #7BA7E0 !important; background-color: rgba(123, 167, 224, 0.06); }
+  }
+
+  .tile-name { color: #7BA7E0; }
+  .tile-description { color: var(--color-text-secondary); }
+  .tile-footer { border-top-color: var(--color-border); }
+  .tile-added-label { color: #7BA7E0; }
+  .tile-requested-label { color: #81C784; }
+  .tile-requested-badge { background-color: #4CAF50; }
+
+  .program-tile--pending {
+    border-color: rgba(76, 175, 80, 0.4);
+    background-color: rgba(76, 175, 80, 0.03);
+  }
+
+  // Modal internals
+  .modal-title-row { border-bottom-color: var(--color-border); }
+  .modal-program-name { color: #7BA7E0; }
+  .modal-lead { color: var(--color-text-secondary); }
+  .detail-para, .detail-bullets li { color: var(--color-text-primary); }
+  .detail-config-item { color: var(--color-text-primary); border-left-color: var(--color-border); }
+  .modal-actions { border-top-color: var(--color-border); }
+
+  .modal-btn--secondary {
+    border-color: var(--color-border);
+    color: var(--color-text-secondary);
+    &:hover { background-color: rgba(255,255,255,0.05); }
+  }
+
+  .confirm-program-item {
+    color: #7BA7E0;
+    border-left-color: #7BA7E0;
+    background-color: rgba(123, 167, 224, 0.08);
+  }
+
+  .confirm-note { color: var(--color-text-secondary); }
 }
 </style>

@@ -1,8 +1,12 @@
 <template>
   <div class="report-data-table">
-    <div v-if="showSearchBar && items.length > 0" class="search-bar-wrapper">
-      <SearchBar @update:searchTerm="searchTerm = $event" :showFilterButton="showFilterButton" :placeholder="searchPlaceholder" />
+    <div class="search-bar-controls" v-if="(showSearchBar && items.length > 0) || $slots['advanced-filter-button']">
+      <div v-if="showSearchBar && items.length > 0" class="search-bar-wrapper">
+        <SearchBar @update:searchTerm="searchTerm = $event" :showFilterButton="showFilterButton" :placeholder="searchPlaceholder" @click:filter="emit('click:filter')" />
+      </div>
+      <slot name="advanced-filter-button" />
     </div>
+    <slot name="filter-pills" />
     <div v-if="showFilterPills && activeFilters.length > 0" class="filter-pills-container">
       <FilteringPill
         v-for="filter in activeFilters"
@@ -13,16 +17,28 @@
         {{ filter.label }}
       </FilteringPill>
     </div>
+    <div v-if="showSelectionCheckboxes && selected.length >= 2" class="bulk-action-bar">
+      <div class="bulk-action-left">
+        <span class="bulk-action-count">{{ selected.length }} selected</span>
+        <div class="bulk-action-divider"></div>
+        <button class="bulk-action-btn" @click="handleBulkDownload">Download</button>
+      </div>
+      <button class="bulk-action-btn" @click="clearSelection">Clear Selection</button>
+    </div>
     <v-data-table
       :headers="processedHeaders"
       :items="filteredItems"
       class="my-table"
-      :items-per-page="5"
+      :items-per-page="itemsPerPage"
       dense
       :hide-default-footer="!showTableFooter"
+      :items-per-page-options="itemsPerPageOptions"
       :items-per-page-props="{ color: 'var(--color-text-primary)' }"
       :show-select="showSelectionCheckboxes"
-      v-model:selected="selected"
+      :select-strategy="'all'"
+      v-model="selected"
+      v-model:sort-by="sortByState"
+      :custom-key-sort="customKeySort"
       :show-expand="showExpand"
       :item-value="itemValue"
     >
@@ -72,17 +88,39 @@
             <EllipsisVertical :stroke-width="1" v-bind="props" class="row-action-icon" />
           </template>
           <v-list>
-            <v-list-item @click="console.log('View item:', item)">
-              <v-list-item-title>View</v-list-item-title>
-            </v-list-item>
-            <v-list-item @click="console.log('Download item:', item)">
-              <v-list-item-title>Download</v-list-item-title>
-            </v-list-item>
+            <template v-if="rowActionItems.length > 0">
+              <v-list-item
+                v-for="actionItem in rowActionItems"
+                :key="actionItem.action"
+                @click="emit('row-action', { action: actionItem.action, item })"
+              >
+                <v-list-item-title>{{ actionItem.label }}</v-list-item-title>
+              </v-list-item>
+            </template>
+            <template v-else>
+              <v-list-item @click="console.log('View item:', item)">
+                <v-list-item-title>View</v-list-item-title>
+              </v-list-item>
+              <v-list-item @click="console.log('Download item:', item)">
+                <v-list-item-title>Download</v-list-item-title>
+              </v-list-item>
+            </template>
           </v-list>
         </v-menu>
       </template>
       <template v-for="col in booleanColumns" v-slot:[`item.${col}`]="{ item }">
         <v-checkbox-btn :model-value="item[col]" readonly class="d-flex justify-center"></v-checkbox-btn>
+      </template>
+      <template v-for="col in interactiveBooleanColumns" v-slot:[`item.${col}`]="{ item }">
+        <div class="interactive-bool-cell" @click.stop="emit('toggle-cell', { key: col, item })">
+          <component
+            :is="item[col] ? CheckSquare : Square"
+            :size="18"
+            :stroke-width="1.5"
+            class="interactive-bool-icon"
+            :class="{ 'interactive-bool-icon--checked': item[col] }"
+          />
+        </div>
       </template>
       <template v-slot:item.ruleChangeLog="{ item }">
         <slot name="item.ruleChangeLog" :item="item"></slot>
@@ -103,10 +141,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, nextTick } from 'vue';
 import SearchBar from '../ui/SearchBar.vue';
 import FilteringPill from '../ui/FilteringPill.vue';
-import { EllipsisVertical, CircleCheckBig, BanknoteX, Info, ChevronRight, ChevronDown } from 'lucide-vue-next';
+import { EllipsisVertical, CircleCheckBig, BanknoteX, Info, ChevronRight, ChevronDown, CheckSquare, Square } from 'lucide-vue-next';
 import EmptyStateImg from '@/assets/EmptyState.svg';
 
 interface Header {
@@ -122,6 +160,11 @@ interface Pill {
   isActive?: boolean;
 }
 
+interface RowActionItem {
+  label: string;
+  action: string;
+}
+
 interface Props {
   showSearchBar?: boolean;
   showFilterButton?: boolean;
@@ -129,6 +172,7 @@ interface Props {
   headers: Header[];
   items?: any[];
   showRowActions?: boolean;
+  rowActionItems?: RowActionItem[];
   showTableFooter?: boolean;
   showSelectionCheckboxes?: boolean;
   initialFilterPills?: Pill[];
@@ -140,10 +184,21 @@ interface Props {
   internalUserActionFormatter?: (item: any) => string;
   internalUserActionClickHandler?: (item: any) => void;
   booleanColumns?: string[];
+  interactiveBooleanColumns?: string[];
   emptyStateText?: string;
   showExpand?: boolean;
   itemValue?: string;
+  itemsPerPage?: number;
+  itemsPerPageOptions?: { value: number; title: string }[];
+  defaultSortBy?: { key: string; order: 'asc' | 'desc' }[];
+  customKeySort?: Record<string, (a: any, b: any) => number>;
 }
+
+const emit = defineEmits<{
+  'row-action': [payload: { action: string; item: any }];
+  'toggle-cell': [payload: { key: string; item: any }];
+  'click:filter': [];
+}>();
 
 const props = withDefaults(defineProps<Props>(), {
   showSearchBar: true,
@@ -151,26 +206,57 @@ const props = withDefaults(defineProps<Props>(), {
   showFilterPills: true,
   items: () => [],
   showRowActions: true,
+  rowActionItems: () => [],
   showTableFooter: true,
   showSelectionCheckboxes: true,
   initialFilterPills: () => [],
   showActionIcons: false,
   actionIcons: () => [],
   actionsClass: 'justify-end',
-  searchPlaceholder: 'Search by report name, report type, or keyword',
+  searchPlaceholder: 'Search...',
   showInternalUserActions: false,
   internalUserActionFormatter: (item: any) => '-',
   internalUserActionClickHandler: () => {},
   booleanColumns: () => [],
+  interactiveBooleanColumns: () => [],
   emptyStateText: 'No data available',
   showExpand: false,
   itemValue: 'id',
+  itemsPerPage: 10,
+  itemsPerPageOptions: () => [
+    { value: 10, title: '10' },
+    { value: 25, title: '25' },
+    { value: 50, title: '50' },
+    { value: -1, title: 'All' },
+  ],
+  defaultSortBy: () => [],
+  customKeySort: () => ({}),
 });
 
 const searchTerm = ref('');
 const activeFilters = ref<Pill[]>([]);
 const selected = ref<any[]>([]);
 const activeFilterPill = ref<Pill | null>(null);
+const sortByState = ref<{ key: string; order: 'asc' | 'desc' }[]>(
+  props.defaultSortBy.length ? [...props.defaultSortBy] : []
+);
+
+watch(sortByState, (newVal) => {
+  if (newVal.length === 0 && props.defaultSortBy.length > 0) {
+    nextTick(() => {
+      sortByState.value = [...props.defaultSortBy];
+    });
+  }
+});
+
+const handleBulkDownload = () => {
+  // Placeholder — bulk download logic to be connected later
+  console.log('Bulk download triggered for:', selected.value);
+};
+
+const clearSelection = () => {
+  selected.value = [] as any[];
+};
 
 const handleRequestInfo = (item: any) => {
   if (item.status !== 'Approved' && item.status !== 'Rejected') {
@@ -285,8 +371,15 @@ const filteredItems = computed(() => {
   /* Basic styling for the container */
 }
 
-.search-bar-wrapper {
+.search-bar-controls {
+  display: flex;
+  align-items: center;
+  gap: $spacing-small;
   margin-bottom: $spacing-medium;
+}
+
+.search-bar-wrapper {
+  flex: 1;
 }
 
 .filter-pills-container {
@@ -294,6 +387,69 @@ const filteredItems = computed(() => {
   flex-wrap: wrap;
   gap: $spacing-small;
   margin-bottom: $spacing-medium;
+}
+
+.bulk-action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: $color-primary-dark;
+  color: $color-neutral-white;
+  padding: $spacing-small $spacing-medium;
+  border-radius: 8px;
+  margin-bottom: $spacing-small;
+}
+
+.bulk-action-left {
+  display: flex;
+  align-items: center;
+  gap: $spacing-medium;
+}
+
+.bulk-action-count {
+  font-size: $font-size-body;
+  font-weight: $font-weight-bold;
+  white-space: nowrap;
+}
+
+.bulk-action-divider {
+  width: 1px;
+  height: 18px;
+  background-color: rgba(255, 255, 255, 0.4);
+}
+
+.bulk-action-btn {
+  background: transparent;
+  border: 1px solid $color-neutral-white;
+  color: $color-neutral-white;
+  padding: 4px $spacing-small;
+  border-radius: 100px;
+  font-size: $font-size-body;
+  font-weight: 400;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+  }
+}
+
+.interactive-bool-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 4px;
+
+  &:hover { background-color: rgba($color-primary, 0.06); }
+}
+
+.interactive-bool-icon {
+  color: $color-text-secondary;
+  flex-shrink: 0;
+
+  &--checked { color: $color-primary; }
 }
 
 .my-table :deep(.v-table__wrapper) {
@@ -306,6 +462,45 @@ const filteredItems = computed(() => {
   }
 }
 
+.my-table :deep(.v-data-table__th--sortable .v-data-table-header__sort-icon) {
+  opacity: 0.35 !important;
+}
+
+.my-table :deep(.v-data-table__th--sorted .v-data-table-header__sort-icon) {
+  opacity: 1 !important;
+}
+
+.my-table :deep(.v-data-table-footer) {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-top: 1px solid $color-border;
+  font-family: $font-family-base;
+  font-size: $font-size-small;
+  color: $color-text-secondary;
+}
+
+.my-table :deep(.v-data-table-footer__items-per-page) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.my-table :deep(.v-data-table-footer__items-per-page) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.my-table :deep(.v-data-table-footer__pagination) {
+  order: 2;
+  margin-left: auto;
+}
+
+.my-table :deep(.v-data-table-footer__info) {
+  order: 3;
+}
+
 .my-table :deep(.v-data-footer .v-icon) {
   color: $color-text-primary !important;
   opacity: 1 !important;
@@ -314,6 +509,13 @@ const filteredItems = computed(() => {
 .my-table :deep(.v-selection-control__input input) {
   opacity: 1 !important;
   width: 16px !important;
+  accent-color: #0F285B;
+}
+
+// Force Vuetify's theme primary CSS variable to our navy within the table
+// so checkbox icons (which use rgb(var(--v-theme-primary))) resolve correctly.
+.my-table {
+  --v-theme-primary: 15 40 91;
 }
 
 .my-table :deep(.v-selection-control__wrapper) {
@@ -325,17 +527,20 @@ const filteredItems = computed(() => {
   color: $color-primary !important;
 }
 
-.my-table :deep(.v-checkbox .v-icon) {
+.my-table :deep(.v-checkbox .v-icon),
+.my-table :deep(.v-checkbox-btn .v-icon) {
   color: $color-primary !important;
   opacity: 1 !important;
 }
 
-.my-table :deep(.v-checkbox .v-selection-control__off-icon) {
+.my-table :deep(.v-checkbox .v-selection-control__off-icon),
+.my-table :deep(.v-checkbox-btn .v-selection-control__off-icon) {
   color: $color-border !important;
   opacity: 1 !important;
 }
 
-.my-table :deep(.v-checkbox .v-selection-control__on-icon) {
+.my-table :deep(.v-checkbox .v-selection-control__on-icon),
+.my-table :deep(.v-checkbox-btn .v-selection-control__on-icon) {
   color: $color-primary !important;
   opacity: 1 !important;
 }

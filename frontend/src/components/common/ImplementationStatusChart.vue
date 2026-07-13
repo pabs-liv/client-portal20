@@ -8,6 +8,9 @@
 <script setup>
 import { ref, computed, defineProps } from 'vue';
 import apexchart from 'vue3-apexcharts';
+import { useDarkMode } from '@/composables/useDarkMode';
+
+const { isDark } = useDarkMode();
 
 const props = defineProps({
   data: {
@@ -55,67 +58,59 @@ const series = computed(() => [
   },
 ]);
 
-const chartOptions = computed(() => ({
-  chart: {
-    type: 'bar',
-    height: '100%', // Set chart height to 100%
-    toolbar: { show: false },
-  },
-  plotOptions: {
-    bar: {
-      horizontal: true,
-      dataLabels: {
-        position: 'top',
+const chartOptions = computed(() => {
+  const textColor = isDark.value ? '#B0B8D0' : '#1A1A1A';
+  const bgColor   = isDark.value ? '#1A1D27' : '#FFFFFF';
+  const gridColor = isDark.value ? '#2C3147' : '#E0E0E0';
+
+  return {
+    chart: {
+      type: 'bar',
+      height: '100%',
+      toolbar: { show: false },
+      background: bgColor,
+      foreColor: textColor,
+    },
+    plotOptions: {
+      bar: {
+        horizontal: true,
+        dataLabels: { position: 'top' },
       },
     },
-  },
-  dataLabels: {
-    enabled: true,
-    offsetX: 40,
-    style: {
-      fontSize: '12px',
-      colors: ['#fff'],
-    },
-  },
-  xaxis: {
-    categories: ['New', 'In Progress', 'Pending Action', 'Completed'],
-    labels: { show: true },
-    axisBorder: { show: false },
-    axisTicks: { show: false },
-  },
-  yaxis: {
-    labels: {
+    dataLabels: {
+      enabled: true,
+      offsetX: 40,
       style: {
         fontSize: '12px',
-        colors: ['var(--color-text-primary)'],
+        colors: [textColor],
       },
     },
-  },
-  grid: {
-    show: true,
     xaxis: {
-      lines: {
-        show: true,
-      },
+      categories: ['New', 'In Progress', 'Pending Action', 'Completed'],
+      labels: { show: true, style: { colors: textColor } },
+      axisBorder: { show: false },
+      axisTicks: { show: false },
     },
     yaxis: {
-      lines: {
-        show: false,
+      labels: {
+        style: { fontSize: '12px', colors: [textColor] },
       },
     },
-  },
-  legend: {
-    show: false, // Legend is not typically used for single series bar charts with categories
-  },
-  tooltip: {
-    enabled: true,
-    y: {
-      formatter: function (val) {
-        return val + " accounts";
-      },
+    grid: {
+      show: true,
+      borderColor: gridColor,
+      xaxis: { lines: { show: true } },
+      yaxis: { lines: { show: false } },
     },
-  },
-}));
+    legend: { show: false },
+    theme: { mode: isDark.value ? 'dark' : 'light' },
+    tooltip: {
+      enabled: true,
+      theme: isDark.value ? 'dark' : 'light',
+      y: { formatter: (val) => val + ' accounts' },
+    },
+  };
+});
 </script>
 
 <style lang="scss" scoped>
@@ -128,9 +123,16 @@ const chartOptions = computed(() => ({
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   padding: $spacing-medium;
   border: 1px solid $color-border;
-  display: flex; /* Enable flexbox for vertical alignment */
+  display: flex;
   flex-direction: column;
-  flex-grow: 1; /* Allow it to grow in height */
+  flex-grow: 1;
+  transition: background-color 0.25s ease, border-color 0.25s ease;
+
+  :global(html.dark) & {
+    background-color: var(--color-card-bg);
+    border-color: var(--color-border);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  }
 }
 
 .implementation-status-chart h3 {

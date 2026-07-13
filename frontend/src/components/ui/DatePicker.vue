@@ -3,8 +3,8 @@
     v-model="menu"
     :close-on-content-click="false"
     transition="scale-transition"
-    offset-y
     min-width="auto"
+    :z-index="3000"
   >
     <template v-slot:activator="{ props: menuProps }">
       <v-text-field
@@ -18,13 +18,14 @@
         class="custom-date-picker"
       >
         <template #append-inner>
-          <Calendar :size="20" :stroke-width="1.5" class="calendar-icon" @click="menu = !menu" />
+          <Calendar :size="20" :stroke-width="1.5" class="calendar-icon" @click.stop="readonly ? null : (menu = !menu)" />
         </template>
       </v-text-field>
     </template>
     <v-date-picker
       v-model="date"
       :color="color"
+      :min="min"
       @update:model-value="handleDateSelection"
       :readonly="readonly"
     ></v-date-picker>
@@ -47,6 +48,7 @@ interface Props {
   color?: string;
   variant?: string;
   density?: string;
+  min?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -56,6 +58,7 @@ const props = withDefaults(defineProps<Props>(), {
   color: 'primary',
   variant: 'outlined',
   density: 'compact',
+  min: undefined,
 });
 
 const emit = defineEmits(['update:modelValue']);
@@ -68,7 +71,7 @@ watch(() => props.modelValue, (newVal) => {
   if (newVal) {
     const parts = newVal.split('/');
     if (parts.length === 3) {
-      date.value = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+      date.value = new Date(parseInt(parts[2]), parseInt(parts[0]) - 1, parseInt(parts[1]));
     }
   } else {
     date.value = null;
@@ -77,10 +80,10 @@ watch(() => props.modelValue, (newVal) => {
 
 const formattedDate = computed(() => {
   if (date.value) {
-    const day = String(date.value.getDate()).padStart(2, '0');
     const month = String(date.value.getMonth() + 1).padStart(2, '0');
+    const day = String(date.value.getDate()).padStart(2, '0');
     const year = date.value.getFullYear();
-    return `${day}/${month}/${year}`;
+    return `${month}/${day}/${year}`;
   }
   return props.modelValue;
 });
@@ -88,15 +91,15 @@ const formattedDate = computed(() => {
 const handleManualInput = (value: string) => {
   const parts = value.split('/');
   if (parts.length === 3) {
-    const newDate = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+    const newDate = new Date(parseInt(parts[2]), parseInt(parts[0]) - 1, parseInt(parts[1]));
     if (!isNaN(newDate.getTime())) {
       date.value = newDate;
       emit('update:modelValue', formattedDate.value);
     } else {
-      emit('update:modelValue', value); // Emit invalid date as is
+      emit('update:modelValue', value);
     }
   } else {
-    emit('update:modelValue', value); // Emit partial or invalid date as is
+    emit('update:modelValue', value);
   }
 };
 

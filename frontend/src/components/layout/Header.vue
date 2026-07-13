@@ -1,9 +1,21 @@
 
 <template>
-  <v-app-bar app color="white" flat dense border>
+  <v-app-bar app flat dense border class="app-header">
     <v-spacer></v-spacer>
-    <v-btn variant="outlined" color="black" class="mr-2 help-button">Fiduciary Dashboard</v-btn>
-   
+
+    <v-btn
+      icon
+      variant="text"
+      class="dark-mode-toggle mr-1"
+      :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+      @click="toggleDarkMode"
+    >
+      <Sun v-if="isDark" :size="20" :stroke-width="1.5" />
+      <Moon v-else :size="20" :stroke-width="1.5" />
+    </v-btn>
+
+    <v-btn variant="outlined" class="mr-2 help-button">Fiduciary Dashboard</v-btn>
+
     <v-menu offset-y>
       <template v-slot:activator="{ props }">
         <v-btn icon v-bind="props">
@@ -25,16 +37,31 @@
 </template>
 
 <script setup lang="ts">
-import { Settings } from 'lucide-vue-next';
-// No script needed for this static component
+import { Sun, Moon } from 'lucide-vue-next';
+import { useDarkMode } from '@/composables/useDarkMode';
+
+const { isDark, toggleDarkMode } = useDarkMode();
 </script>
 
 <style lang="scss" scoped>
-.v-app-bar {
-  border-bottom: 1px solid #e0e0e0 !important;
+.app-header {
+  background-color: var(--color-bg-header) !important;
+  border-bottom: 1px solid var(--color-border) !important;
+  transition: background-color 0.25s ease, border-color 0.25s ease;
 }
+
 .help-button {
   border-radius: 100px;
-  text-transform: none; /* Enforce title case */
+  text-transform: none;
+  color: var(--color-text-primary) !important;
+  border-color: var(--color-border) !important;
+}
+
+.dark-mode-toggle {
+  color: var(--color-text-secondary) !important;
+
+  &:hover {
+    color: var(--color-text-primary) !important;
+  }
 }
 </style>
