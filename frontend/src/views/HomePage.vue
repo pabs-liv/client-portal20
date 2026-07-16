@@ -92,19 +92,38 @@
       />
     </div>
 
-    <div class="two-column-layout">
-      <PageCard headerText="Savings Story" :descriptionText="activeData.summaryLabel">
-        <SavingsBreakdownChart
-          :breakdown-items="activeData.savingsBreakdownItems"
-          :claims-counts="activeData.claimsCounts"
+    <PageCard headerText="Savings Story" :descriptionText="activeData.summaryLabel">
+      <SavingsBreakdownChart
+        :breakdown-items="activeData.savingsBreakdownItems"
+        :claims-counts="activeData.claimsCounts"
+      />
+    </PageCard>
+
+    <div class="drivers-row" :class="{ 'drivers-row--columns': selectedPeriod === 'month' }">
+      <PageCard headerText="Utilization" :descriptionText="activeData.summaryLabel">
+        <UtilizationDriversChart
+          :utilization-percent="activeData.utilization.value"
+          :utilization-delta="activeData.utilization.delta"
+          :monthly-utilization="activeData.monthlyUtilization"
+          :show-monthly-utilization="selectedPeriod === 'ytd'"
         />
       </PageCard>
 
-      <PageCard headerText="Utilization, Spend, and Volume Drivers" :descriptionText="activeData.summaryLabel">
-        <UtilizationDriversChart
-          :utilization-percent="activeData.utilization.value"
-          :dispense-rate="activeData.dispenseRate"
-          :paid-plan="activeData.paidPlan"
+      <PageCard headerText="Dispense Rate" :descriptionText="activeData.summaryLabel">
+        <CategoryTrendChart
+          :current-values="activeData.dispenseRate"
+          :monthly-data="activeData.monthlyDispenseRate"
+          :show-monthly-trend="selectedPeriod === 'ytd'"
+          unit="percent"
+        />
+      </PageCard>
+
+      <PageCard headerText="Paid Plan" :descriptionText="activeData.summaryLabel">
+        <CategoryTrendChart
+          :current-values="activeData.paidPlan"
+          :monthly-data="activeData.monthlyPaidPlan"
+          :show-monthly-trend="selectedPeriod === 'ytd'"
+          unit="dollarM"
         />
       </PageCard>
     </div>
@@ -120,6 +139,7 @@ import KpiStatCard from '../components/common/KpiStatCard.vue';
 import SummaryWidget from '../components/common/SummaryWidget.vue';
 import SavingsBreakdownChart from '../components/common/SavingsBreakdownChart.vue';
 import UtilizationDriversChart from '../components/common/UtilizationDriversChart.vue';
+import CategoryTrendChart from '../components/common/CategoryTrendChart.vue';
 import Select from '../components/ui/Select.vue';
 import SegmentedToggle from '../components/ui/SegmentedToggle.vue';
 import { CircleCheckBig, ChartNoAxesCombined, RotateCcwKey } from 'lucide-vue-next';
@@ -169,8 +189,11 @@ interface PeriodDashboardData {
   pmpm: { value: string; delta: string };
   savingsBreakdownItems: { label: string; value: string; percent: number; color: string }[];
   claimsCounts: { month: string; count: number }[];
+  monthlyUtilization?: { month: string; value: number }[];
   dispenseRate: { category: string; value: number }[];
   paidPlan: { category: string; value: number }[];
+  monthlyDispenseRate?: { month: string; Specialty: number; Generic: number; Brand: number }[];
+  monthlyPaidPlan?: { month: string; Specialty: number; Generic: number; Brand: number }[];
 }
 
 type AccountDashboardData = Record<PeriodKey, PeriodDashboardData>;
@@ -198,6 +221,14 @@ const dashboardDataByAccount: Record<string, AccountDashboardData> = {
         { month: 'May', count: 216000 },
         { month: 'Jun', count: 223000 },
       ],
+      monthlyUtilization: [
+        { month: 'Jan', value: 46 },
+        { month: 'Feb', value: 47 },
+        { month: 'Mar', value: 48 },
+        { month: 'Apr', value: 48 },
+        { month: 'May', value: 49 },
+        { month: 'Jun', value: 49 },
+      ],
       dispenseRate: [
         { category: 'Specialty', value: 1.5 },
         { category: 'Generic', value: 85.7 },
@@ -207,6 +238,22 @@ const dashboardDataByAccount: Record<string, AccountDashboardData> = {
         { category: 'Specialty', value: 24.67 },
         { category: 'Generic', value: 3.89 },
         { category: 'Brand', value: 22.82 },
+      ],
+      monthlyDispenseRate: [
+        { month: 'Jan', Specialty: 1.3, Generic: 86.4, Brand: 12.3 },
+        { month: 'Feb', Specialty: 1.4, Generic: 86.0, Brand: 12.6 },
+        { month: 'Mar', Specialty: 1.4, Generic: 85.9, Brand: 12.7 },
+        { month: 'Apr', Specialty: 1.5, Generic: 85.8, Brand: 12.7 },
+        { month: 'May', Specialty: 1.5, Generic: 85.7, Brand: 12.8 },
+        { month: 'Jun', Specialty: 1.5, Generic: 85.7, Brand: 12.7 },
+      ],
+      monthlyPaidPlan: [
+        { month: 'Jan', Specialty: 22.10, Generic: 3.55, Brand: 20.90 },
+        { month: 'Feb', Specialty: 22.80, Generic: 3.62, Brand: 21.30 },
+        { month: 'Mar', Specialty: 23.40, Generic: 3.70, Brand: 21.90 },
+        { month: 'Apr', Specialty: 23.90, Generic: 3.78, Brand: 22.20 },
+        { month: 'May', Specialty: 24.30, Generic: 3.83, Brand: 22.50 },
+        { month: 'Jun', Specialty: 24.67, Generic: 3.89, Brand: 22.82 },
       ],
     },
     month: {
@@ -262,6 +309,14 @@ const dashboardDataByAccount: Record<string, AccountDashboardData> = {
         { month: 'May', count: 13100 },
         { month: 'Jun', count: 14100 },
       ],
+      monthlyUtilization: [
+        { month: 'Jan', value: 41 },
+        { month: 'Feb', value: 42 },
+        { month: 'Mar', value: 43 },
+        { month: 'Apr', value: 43 },
+        { month: 'May', value: 44 },
+        { month: 'Jun', value: 44 },
+      ],
       dispenseRate: [
         { category: 'Specialty', value: 1.2 },
         { category: 'Generic', value: 87.1 },
@@ -271,6 +326,22 @@ const dashboardDataByAccount: Record<string, AccountDashboardData> = {
         { category: 'Specialty', value: 1.92 },
         { category: 'Generic', value: 0.31 },
         { category: 'Brand', value: 1.74 },
+      ],
+      monthlyDispenseRate: [
+        { month: 'Jan', Specialty: 1.0, Generic: 87.8, Brand: 11.2 },
+        { month: 'Feb', Specialty: 1.1, Generic: 87.5, Brand: 11.4 },
+        { month: 'Mar', Specialty: 1.1, Generic: 87.3, Brand: 11.6 },
+        { month: 'Apr', Specialty: 1.2, Generic: 87.2, Brand: 11.6 },
+        { month: 'May', Specialty: 1.2, Generic: 87.1, Brand: 11.7 },
+        { month: 'Jun', Specialty: 1.2, Generic: 87.1, Brand: 11.7 },
+      ],
+      monthlyPaidPlan: [
+        { month: 'Jan', Specialty: 1.68, Generic: 0.27, Brand: 1.52 },
+        { month: 'Feb', Specialty: 1.74, Generic: 0.28, Brand: 1.58 },
+        { month: 'Mar', Specialty: 1.80, Generic: 0.29, Brand: 1.63 },
+        { month: 'Apr', Specialty: 1.85, Generic: 0.30, Brand: 1.68 },
+        { month: 'May', Specialty: 1.89, Generic: 0.31, Brand: 1.71 },
+        { month: 'Jun', Specialty: 1.92, Generic: 0.31, Brand: 1.74 },
       ],
     },
     month: {
@@ -326,6 +397,14 @@ const dashboardDataByAccount: Record<string, AccountDashboardData> = {
         { month: 'May', count: 50400 },
         { month: 'Jun', count: 52300 },
       ],
+      monthlyUtilization: [
+        { month: 'Jan', value: 49 },
+        { month: 'Feb', value: 50 },
+        { month: 'Mar', value: 51 },
+        { month: 'Apr', value: 51 },
+        { month: 'May', value: 52 },
+        { month: 'Jun', value: 52 },
+      ],
       dispenseRate: [
         { category: 'Specialty', value: 1.8 },
         { category: 'Generic', value: 84.5 },
@@ -335,6 +414,22 @@ const dashboardDataByAccount: Record<string, AccountDashboardData> = {
         { category: 'Specialty', value: 6.12 },
         { category: 'Generic', value: 0.92 },
         { category: 'Brand', value: 5.61 },
+      ],
+      monthlyDispenseRate: [
+        { month: 'Jan', Specialty: 1.6, Generic: 85.2, Brand: 13.2 },
+        { month: 'Feb', Specialty: 1.7, Generic: 84.9, Brand: 13.4 },
+        { month: 'Mar', Specialty: 1.7, Generic: 84.7, Brand: 13.6 },
+        { month: 'Apr', Specialty: 1.8, Generic: 84.6, Brand: 13.6 },
+        { month: 'May', Specialty: 1.8, Generic: 84.5, Brand: 13.7 },
+        { month: 'Jun', Specialty: 1.8, Generic: 84.5, Brand: 13.7 },
+      ],
+      monthlyPaidPlan: [
+        { month: 'Jan', Specialty: 5.42, Generic: 0.82, Brand: 4.96 },
+        { month: 'Feb', Specialty: 5.60, Generic: 0.85, Brand: 5.13 },
+        { month: 'Mar', Specialty: 5.78, Generic: 0.87, Brand: 5.29 },
+        { month: 'Apr', Specialty: 5.92, Generic: 0.89, Brand: 5.42 },
+        { month: 'May', Specialty: 6.03, Generic: 0.91, Brand: 5.52 },
+        { month: 'Jun', Specialty: 6.12, Generic: 0.92, Brand: 5.61 },
       ],
     },
     month: {
@@ -390,6 +485,14 @@ const dashboardDataByAccount: Record<string, AccountDashboardData> = {
         { month: 'May', count: 80900 },
         { month: 'Jun', count: 83600 },
       ],
+      monthlyUtilization: [
+        { month: 'Jan', value: 44 },
+        { month: 'Feb', value: 45 },
+        { month: 'Mar', value: 46 },
+        { month: 'Apr', value: 46 },
+        { month: 'May', value: 47 },
+        { month: 'Jun', value: 47 },
+      ],
       dispenseRate: [
         { category: 'Specialty', value: 1.6 },
         { category: 'Generic', value: 85.9 },
@@ -399,6 +502,22 @@ const dashboardDataByAccount: Record<string, AccountDashboardData> = {
         { category: 'Specialty', value: 8.87 },
         { category: 'Generic', value: 1.37 },
         { category: 'Brand', value: 7.62 },
+      ],
+      monthlyDispenseRate: [
+        { month: 'Jan', Specialty: 1.4, Generic: 86.5, Brand: 12.1 },
+        { month: 'Feb', Specialty: 1.5, Generic: 86.2, Brand: 12.3 },
+        { month: 'Mar', Specialty: 1.5, Generic: 86.0, Brand: 12.5 },
+        { month: 'Apr', Specialty: 1.6, Generic: 85.9, Brand: 12.5 },
+        { month: 'May', Specialty: 1.6, Generic: 85.9, Brand: 12.5 },
+        { month: 'Jun', Specialty: 1.6, Generic: 85.9, Brand: 12.5 },
+      ],
+      monthlyPaidPlan: [
+        { month: 'Jan', Specialty: 7.85, Generic: 1.21, Brand: 6.74 },
+        { month: 'Feb', Specialty: 8.10, Generic: 1.25, Brand: 6.96 },
+        { month: 'Mar', Specialty: 8.38, Generic: 1.29, Brand: 7.20 },
+        { month: 'Apr', Specialty: 8.60, Generic: 1.33, Brand: 7.39 },
+        { month: 'May', Specialty: 8.74, Generic: 1.35, Brand: 7.51 },
+        { month: 'Jun', Specialty: 8.87, Generic: 1.37, Brand: 7.62 },
       ],
     },
     month: {
@@ -454,6 +573,14 @@ const dashboardDataByAccount: Record<string, AccountDashboardData> = {
         { month: 'May', count: 28500 },
         { month: 'Jun', count: 29500 },
       ],
+      monthlyUtilization: [
+        { month: 'Jan', value: 42 },
+        { month: 'Feb', value: 43 },
+        { month: 'Mar', value: 44 },
+        { month: 'Apr', value: 44 },
+        { month: 'May', value: 45 },
+        { month: 'Jun', value: 45 },
+      ],
       dispenseRate: [
         { category: 'Specialty', value: 1.4 },
         { category: 'Generic', value: 86.3 },
@@ -463,6 +590,22 @@ const dashboardDataByAccount: Record<string, AccountDashboardData> = {
         { category: 'Specialty', value: 3.31 },
         { category: 'Generic', value: 0.53 },
         { category: 'Brand', value: 3.03 },
+      ],
+      monthlyDispenseRate: [
+        { month: 'Jan', Specialty: 1.2, Generic: 87.0, Brand: 11.8 },
+        { month: 'Feb', Specialty: 1.3, Generic: 86.7, Brand: 12.0 },
+        { month: 'Mar', Specialty: 1.3, Generic: 86.5, Brand: 12.2 },
+        { month: 'Apr', Specialty: 1.4, Generic: 86.4, Brand: 12.2 },
+        { month: 'May', Specialty: 1.4, Generic: 86.3, Brand: 12.3 },
+        { month: 'Jun', Specialty: 1.4, Generic: 86.3, Brand: 12.3 },
+      ],
+      monthlyPaidPlan: [
+        { month: 'Jan', Specialty: 2.93, Generic: 0.47, Brand: 2.68 },
+        { month: 'Feb', Specialty: 3.02, Generic: 0.48, Brand: 2.77 },
+        { month: 'Mar', Specialty: 3.12, Generic: 0.50, Brand: 2.86 },
+        { month: 'Apr', Specialty: 3.20, Generic: 0.51, Brand: 2.93 },
+        { month: 'May', Specialty: 3.26, Generic: 0.52, Brand: 2.98 },
+        { month: 'Jun', Specialty: 3.31, Generic: 0.53, Brand: 3.03 },
       ],
     },
     month: {
@@ -518,6 +661,14 @@ const dashboardDataByAccount: Record<string, AccountDashboardData> = {
         { month: 'May', count: 46800 },
         { month: 'Jun', count: 48300 },
       ],
+      monthlyUtilization: [
+        { month: 'Jan', value: 48 },
+        { month: 'Feb', value: 49 },
+        { month: 'Mar', value: 50 },
+        { month: 'Apr', value: 50 },
+        { month: 'May', value: 51 },
+        { month: 'Jun', value: 51 },
+      ],
       dispenseRate: [
         { category: 'Specialty', value: 1.7 },
         { category: 'Generic', value: 84.9 },
@@ -527,6 +678,22 @@ const dashboardDataByAccount: Record<string, AccountDashboardData> = {
         { category: 'Specialty', value: 7.49 },
         { category: 'Generic', value: 1.16 },
         { category: 'Brand', value: 6.85 },
+      ],
+      monthlyDispenseRate: [
+        { month: 'Jan', Specialty: 1.5, Generic: 85.6, Brand: 12.9 },
+        { month: 'Feb', Specialty: 1.6, Generic: 85.3, Brand: 13.1 },
+        { month: 'Mar', Specialty: 1.6, Generic: 85.1, Brand: 13.3 },
+        { month: 'Apr', Specialty: 1.7, Generic: 85.0, Brand: 13.3 },
+        { month: 'May', Specialty: 1.7, Generic: 84.9, Brand: 13.4 },
+        { month: 'Jun', Specialty: 1.7, Generic: 84.9, Brand: 13.4 },
+      ],
+      monthlyPaidPlan: [
+        { month: 'Jan', Specialty: 6.61, Generic: 1.02, Brand: 6.05 },
+        { month: 'Feb', Specialty: 6.82, Generic: 1.06, Brand: 6.25 },
+        { month: 'Mar', Specialty: 7.05, Generic: 1.09, Brand: 6.46 },
+        { month: 'Apr', Specialty: 7.24, Generic: 1.12, Brand: 6.63 },
+        { month: 'May', Specialty: 7.38, Generic: 1.14, Brand: 6.75 },
+        { month: 'Jun', Specialty: 7.49, Generic: 1.16, Brand: 6.85 },
       ],
     },
     month: {
@@ -631,11 +798,30 @@ const executiveSummaryMessage = computed(() => {
   gap: $spacing-medium;
 }
 
-.two-column-layout {
+.drivers-row {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-large;
+}
+
+.drivers-row--columns {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: $spacing-medium;
-  align-items: start;
+  align-items: stretch;
+
+  :deep(.page-card) {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  :deep(.page-card-content) {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 }
 
 /* Responsive adjustments */
@@ -646,6 +832,10 @@ const executiveSummaryMessage = computed(() => {
 
   .kpi-container {
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+
+  .drivers-row--columns {
+    grid-template-columns: 1fr 1fr;
   }
 }
 
@@ -675,7 +865,7 @@ const executiveSummaryMessage = computed(() => {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .two-column-layout {
+  .drivers-row--columns {
     grid-template-columns: 1fr;
   }
 }

@@ -1,35 +1,45 @@
 <template>
   <div class="utilization-drivers">
     <div class="driver-block">
-      <h4 class="text-h4">Utilization</h4>
-      <apexchart type="bar" height="90" :options="utilizationOptions" :series="utilizationSeries"></apexchart>
-    </div>
-
-    <div class="driver-block">
-      <h4 class="text-h4">Dispense Rate (%)</h4>
-      <apexchart type="bar" height="150" :options="dispenseOptions" :series="dispenseSeries"></apexchart>
-    </div>
-
-    <div class="driver-block">
-      <h4 class="text-h4">Paid Plan ($M)</h4>
-      <apexchart type="bar" height="150" :options="paidPlanOptions" :series="paidPlanSeries"></apexchart>
+      <apexchart
+        v-if="showMonthlyUtilization && monthlyUtilization && monthlyUtilization.length"
+        type="bar"
+        height="160"
+        :options="monthlyUtilizationOptions"
+        :series="monthlyUtilizationSeries"
+      ></apexchart>
+      <div v-else class="utilization-donut-column">
+        <div class="donut-fixed-size">
+          <apexchart type="donut" height="180" width="180" :options="utilizationDonutOptions" :series="utilizationDonutSeries"></apexchart>
+        </div>
+        <div v-if="utilizationDelta" class="utilization-donut-delta">
+          <component :is="TrendingUp" :stroke-width="1.5" class="delta-icon" />
+          <span class="text-small">{{ utilizationDelta }} vs prior month</span>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, defineProps } from 'vue';
+import { TrendingUp } from 'lucide-vue-next';
 import { useDarkMode } from '@/composables/useDarkMode';
 
 const { isDark } = useDarkMode();
 
 interface Props {
   utilizationPercent: number;
-  dispenseRate: { category: string; value: number }[];
-  paidPlan: { category: string; value: number }[];
+  utilizationDelta?: string;
+  monthlyUtilization?: { month: string; value: number }[];
+  showMonthlyUtilization?: boolean;
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  utilizationDelta: '',
+  monthlyUtilization: () => [],
+  showMonthlyUtilization: false,
+});
 
 const baseChartConfig = computed(() => {
   const textColor = isDark.value ? '#B0B8D0' : '#1A1A1A';
@@ -37,113 +47,72 @@ const baseChartConfig = computed(() => {
   return { textColor, gridColor };
 });
 
-const utilizationSeries = computed(() => [
-  { data: [props.utilizationPercent] },
+const utilizationDonutSeries = computed(() => [
+  props.utilizationPercent,
+  100 - props.utilizationPercent,
 ]);
 
-const utilizationOptions = computed(() => {
+const utilizationDonutOptions = computed(() => {
   const { textColor } = baseChartConfig.value;
   return {
     chart: {
-      type: 'bar',
-      toolbar: { show: false },
+      type: 'donut',
       background: isDark.value ? '#1A1D27' : '#FFFFFF',
       foreColor: textColor,
     },
-    plotOptions: {
-      bar: {
-        horizontal: true,
-        barHeight: '45%',
-        dataLabels: { position: 'top' },
-      },
-    },
-    colors: ['#0F285B'],
+    colors: ['#0F285B', isDark.value ? '#2C3147' : '#E0E0E0'],
+    labels: ['Utilization', 'Remaining'],
     dataLabels: {
-      enabled: true,
-      offsetX: 24,
-      formatter: (val: number) => `${val}%`,
-      style: { fontSize: '13px', colors: [textColor] },
+      enabled: false,
     },
-    xaxis: {
-      categories: ['Utilization'],
-      max: 100,
-      labels: { show: false },
-      axisBorder: { show: false },
-      axisTicks: { show: false },
-    },
-    yaxis: {
-      labels: { show: false },
-    },
-    grid: {
+    legend: {
       show: false,
     },
-    legend: { show: false },
-    theme: { mode: isDark.value ? 'dark' : 'light' },
-    tooltip: {
-      enabled: true,
-      theme: isDark.value ? 'dark' : 'light',
-      y: { formatter: (val: number) => `${val}%` },
-    },
-  };
-});
-
-const dispenseSeries = computed(() => [
-  { name: 'Dispense Rate', data: props.dispenseRate.map((item) => item.value) },
-]);
-
-const dispenseOptions = computed(() => {
-  const { textColor, gridColor } = baseChartConfig.value;
-  return {
-    chart: {
-      type: 'bar',
-      toolbar: { show: false },
-      background: isDark.value ? '#1A1D27' : '#FFFFFF',
-      foreColor: textColor,
+    stroke: {
+      width: 0,
     },
     plotOptions: {
-      bar: {
-        horizontal: true,
-        barHeight: '55%',
-        dataLabels: { position: 'top' },
+      pie: {
+        donut: {
+          size: '72%',
+          labels: {
+            show: true,
+            name: {
+              show: true,
+              fontSize: '14px',
+              color: textColor,
+              offsetY: -4,
+            },
+            value: {
+              show: true,
+              fontSize: '24px',
+              fontWeight: 700,
+              color: '#0F285B',
+              offsetY: 4,
+              formatter: (val: string) => `${val}%`,
+            },
+            total: {
+              show: true,
+              label: 'Utilization',
+              color: textColor,
+              fontSize: '14px',
+              formatter: () => `${props.utilizationPercent}%`,
+            },
+          },
+        },
       },
     },
-    colors: ['#2C82CB'],
-    dataLabels: {
-      enabled: true,
-      offsetX: 24,
-      formatter: (val: number) => `${val}%`,
-      style: { fontSize: '12px', colors: [textColor] },
-    },
-    xaxis: {
-      categories: props.dispenseRate.map((item) => item.category),
-      max: 100,
-      labels: { style: { colors: textColor } },
-      axisBorder: { show: false },
-      axisTicks: { show: false },
-    },
-    yaxis: {
-      labels: { style: { colors: [textColor] } },
-    },
-    grid: {
-      show: true,
-      borderColor: gridColor,
-      yaxis: { lines: { show: false } },
-    },
-    legend: { show: false },
-    theme: { mode: isDark.value ? 'dark' : 'light' },
     tooltip: {
-      enabled: true,
-      theme: isDark.value ? 'dark' : 'light',
-      y: { formatter: (val: number) => `${val}%` },
+      enabled: false,
     },
   };
 });
 
-const paidPlanSeries = computed(() => [
-  { name: 'Paid Plan', data: props.paidPlan.map((item) => item.value) },
+const monthlyUtilizationSeries = computed(() => [
+  { name: 'Utilization', data: props.monthlyUtilization.map((item) => item.value) },
 ]);
 
-const paidPlanOptions = computed(() => {
+const monthlyUtilizationOptions = computed(() => {
   const { textColor, gridColor } = baseChartConfig.value;
   return {
     chart: {
@@ -154,26 +123,26 @@ const paidPlanOptions = computed(() => {
     },
     plotOptions: {
       bar: {
-        horizontal: true,
-        barHeight: '55%',
+        columnWidth: '50%',
         dataLabels: { position: 'top' },
       },
     },
     colors: ['#0F285B'],
     dataLabels: {
       enabled: true,
-      offsetX: 24,
-      formatter: (val: number) => `$${val.toFixed(2)}M`,
-      style: { fontSize: '12px', colors: [textColor] },
+      offsetY: -18,
+      formatter: (val: number) => `${val}%`,
+      style: { fontSize: '11px', colors: [textColor] },
     },
     xaxis: {
-      categories: props.paidPlan.map((item) => item.category),
+      categories: props.monthlyUtilization.map((item) => item.month),
       labels: { style: { colors: textColor } },
       axisBorder: { show: false },
       axisTicks: { show: false },
     },
     yaxis: {
-      labels: { style: { colors: [textColor] } },
+      labels: { show: false },
+      max: 100,
     },
     grid: {
       show: true,
@@ -185,7 +154,7 @@ const paidPlanOptions = computed(() => {
     tooltip: {
       enabled: true,
       theme: isDark.value ? 'dark' : 'light',
-      y: { formatter: (val: number) => `$${val.toFixed(2)}M` },
+      y: { formatter: (val: number) => `${val}%` },
     },
   };
 });
@@ -200,8 +169,34 @@ const paidPlanOptions = computed(() => {
   gap: $spacing-large;
 }
 
-.driver-block h4 {
-  margin-bottom: $spacing-small;
-  color: $color-text-primary;
+.utilization-donut-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-small;
+  width: 100%;
+}
+
+.donut-fixed-size {
+  width: 180px;
+  height: 180px;
+
+  :deep(.apexcharts-canvas) {
+    margin: 0 auto;
+  }
+}
+
+.utilization-donut-delta {
+  display: flex;
+  align-items: center;
+  gap: $spacing-nano;
+  color: $color-text-secondary;
+
+  .delta-icon {
+    width: 16px;
+    height: 16px;
+    color: $color-success;
+    flex-shrink: 0;
+  }
 }
 </style>
