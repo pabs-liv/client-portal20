@@ -1,5 +1,5 @@
 <template>
-  <div v-if="isExternal" :class="['banner', variant]">
+  <div v-if="alwaysShow || isExternal" :class="['banner', variant]">
     <div class="icon-wrapper">
       <component :is="iconComponent" :stroke-width="1" class="icon" />
     </div>
@@ -24,12 +24,14 @@ interface Props {
   infoIcon?: any; // Allow any component type
   showButton?: boolean;
   buttonProps?: object;
+  alwaysShow?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   infoIcon: () => Info,
   showButton: false,
   buttonProps: () => ({}),
+  alwaysShow: false,
 });
 
 const { isExternal } = useUserType();
