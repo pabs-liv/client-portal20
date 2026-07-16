@@ -144,13 +144,13 @@
                       </template>
                       <template v-else>
                         <div class="form-row">
-                          <v-text-field v-model="editableAccountProfile.accountName" label="Account name" variant="outlined" density="compact" />
-                          <v-text-field v-model="editableAccountProfile.legalName" label="Legal Name" variant="outlined" density="compact" />
-                          <v-text-field v-model="editableAccountProfile.dba" label="DBA" variant="outlined" density="compact" />
+                          <TextField v-model="editableAccountProfile.accountName" label="Account name" />
+                          <TextField v-model="editableAccountProfile.legalName" label="Legal Name" />
+                          <TextField v-model="editableAccountProfile.dba" label="DBA" />
                         </div>
                         <div class="form-row">
-                          <v-text-field v-model="editableAccountProfile.effectiveStartDate" label="Effective start date" variant="outlined" density="compact" placeholder="MM/DD/YYYY" />
-                          <v-text-field v-model="editableAccountProfile.effectiveEndDate" label="Effective end date" variant="outlined" density="compact" placeholder="MM/DD/YYYY" />
+                          <TextField v-model="editableAccountProfile.effectiveStartDate" label="Effective start date" placeholder="MM/DD/YYYY" />
+                          <TextField v-model="editableAccountProfile.effectiveEndDate" label="Effective end date" placeholder="MM/DD/YYYY" />
                         </div>
                         <div class="ap-section-footer">
                           <button class="button button-primary" @click="saveAccountProfile">Save Changes</button>
@@ -246,44 +246,44 @@
                       </template>
                       <template v-else>
                         <div class="form-row">
-                          <v-text-field v-model="editableCompanyInfo.sicCode" label="SIC Code" variant="outlined" density="compact" />
+                          <TextField v-model="editableCompanyInfo.sicCode" label="SIC Code" />
                         </div>
                         <h5 class="ap-subsection-heading">Physical Address</h5>
                         <div class="form-row">
-                          <v-text-field v-model="editableCompanyInfo.physicalAddress1" label="Address 1" variant="outlined" density="compact" />
+                          <TextField v-model="editableCompanyInfo.physicalAddress1" label="Address 1" />
                         </div>
                         <div class="form-row">
-                          <v-text-field v-model="editableCompanyInfo.physicalAddress2" label="Address 2" variant="outlined" density="compact" />
+                          <TextField v-model="editableCompanyInfo.physicalAddress2" label="Address 2" />
                         </div>
                         <div class="form-row">
-                          <v-text-field v-model="editableCompanyInfo.physicalCity" label="City" variant="outlined" density="compact" />
-                          <v-text-field v-model="editableCompanyInfo.physicalState" label="State" variant="outlined" density="compact" />
-                          <v-text-field v-model="editableCompanyInfo.physicalZip" label="ZIP" variant="outlined" density="compact" />
+                          <TextField v-model="editableCompanyInfo.physicalCity" label="City" />
+                          <TextField v-model="editableCompanyInfo.physicalState" label="State" />
+                          <TextField v-model="editableCompanyInfo.physicalZip" label="ZIP" />
                         </div>
                         <div class="form-row">
-                          <v-text-field v-model="editableCompanyInfo.physicalCountry" label="Country" variant="outlined" density="compact" />
+                          <TextField v-model="editableCompanyInfo.physicalCountry" label="Country" />
                         </div>
                         <div class="ap-mailing-header">
                           <h5 class="ap-subsection-heading">Mailing Address</h5>
                           <div class="ap-checkbox-toggle" @click="toggleSameAsPhysical">
                             <CheckSquare v-if="sameAsPhysical" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
                             <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
-                            <span class="text-small" style="color: var(--v-theme-on-surface, #1A1A1A);">Same as physical address</span>
+                            <span class="text-small">Same as physical address</span>
                           </div>
                         </div>
                         <div class="form-row">
-                          <v-text-field v-model="editableCompanyInfo.mailingAddress1" label="Address 1" variant="outlined" density="compact" :disabled="sameAsPhysical" />
+                          <TextField v-model="editableCompanyInfo.mailingAddress1" label="Address 1" :disabled="sameAsPhysical" />
                         </div>
                         <div class="form-row">
-                          <v-text-field v-model="editableCompanyInfo.mailingAddress2" label="Address 2" variant="outlined" density="compact" :disabled="sameAsPhysical" />
+                          <TextField v-model="editableCompanyInfo.mailingAddress2" label="Address 2" :disabled="sameAsPhysical" />
                         </div>
                         <div class="form-row">
-                          <v-text-field v-model="editableCompanyInfo.mailingCity" label="City" variant="outlined" density="compact" :disabled="sameAsPhysical" />
-                          <v-text-field v-model="editableCompanyInfo.mailingState" label="State" variant="outlined" density="compact" :disabled="sameAsPhysical" />
-                          <v-text-field v-model="editableCompanyInfo.mailingZip" label="ZIP" variant="outlined" density="compact" :disabled="sameAsPhysical" />
+                          <TextField v-model="editableCompanyInfo.mailingCity" label="City" :disabled="sameAsPhysical" />
+                          <TextField v-model="editableCompanyInfo.mailingState" label="State" :disabled="sameAsPhysical" />
+                          <TextField v-model="editableCompanyInfo.mailingZip" label="ZIP" :disabled="sameAsPhysical" />
                         </div>
                         <div class="form-row">
-                          <v-text-field v-model="editableCompanyInfo.mailingCountry" label="Country" variant="outlined" density="compact" :disabled="sameAsPhysical" />
+                          <TextField v-model="editableCompanyInfo.mailingCountry" label="Country" :disabled="sameAsPhysical" />
                         </div>
                         <div class="ap-section-footer">
                           <button class="button button-primary" @click="saveCompanyInfo">Save Changes</button>
@@ -1409,7 +1409,7 @@
 
               <div class="wizard-overview-footer">
                 <button class="button button-primary" @click="selectWizardStep(0)">
-                  Get Started <ArrowRightIcon :size="16" :stroke-width="2" style="margin-left: 6px;" />
+                  Get Started <ArrowRightIcon :size="16" :stroke-width="2" />
                 </button>
               </div>
             </div>
@@ -3357,7 +3357,7 @@ watch(selectedAccount, (newVal) => {
   border-top: 1px solid $color-border;
   background-color: $color-neutral-white;
 
-  .button { display: inline-flex; align-items: center; }
+  .button { display: inline-flex; align-items: center; gap: 6px; }
 }
 
 // ─── Wizard step content (right column) ──────────────────────────────────────
@@ -3442,7 +3442,7 @@ watch(selectedAccount, (newVal) => {
 .ap-fields {
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: $spacing-large;
 }
 
 .ap-field-row {

@@ -20,7 +20,7 @@
         :filters="activeFilterPills"
         :closable="true"
         @close:filter="handleFilterPillClose"
-        class="mb-3"
+        class="filter-pills"
       />
       <Tabs :tabs="billingTabs" @tab-selected="handleTabSelected" />
       <ReportDataTable
@@ -58,7 +58,7 @@
     >
       <template #filter-account="{ filter }">
         <p class="filter-section-label">{{ filter.label }}</p>
-        <div v-if="dialogAccounts.length > 0" class="selected-chips mb-2">
+        <div v-if="dialogAccounts.length > 0" class="selected-chips">
           <v-chip
             v-for="acct in dialogAccounts"
             :key="acct"
@@ -67,11 +67,8 @@
             class="autocomplete-chip"
           >
             {{ acct }}
-            <span class="chip-close ml-1" @click.stop="dialogAccounts = dialogAccounts.filter(a => a !== acct)">
-              <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#0F285B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18"/>
-                <line x1="6" y1="6" x2="18" y2="18"/>
-              </svg>
+            <span class="chip-close" @click.stop="dialogAccounts = dialogAccounts.filter(a => a !== acct)">
+              <X :size="12" />
             </span>
           </v-chip>
         </div>
@@ -94,7 +91,7 @@
               @mousedown.prevent
               @click="toggleAccount(account)"
             >
-              <div class="acct-checkbox mr-2" :class="{ active: dialogAccounts.includes(account) }">
+              <div class="acct-checkbox" :class="{ active: dialogAccounts.includes(account) }">
                 <Check v-if="dialogAccounts.includes(account)" :size="12" :stroke-width="3" />
               </div>
               <span>{{ account }}</span>
@@ -118,7 +115,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue';
-import { SlidersHorizontal, CloudDownload, Check } from 'lucide-vue-next';
+import { SlidersHorizontal, CloudDownload, Check, X } from 'lucide-vue-next';
 import PageCard from '@/components/common/PageCard.vue';
 import ReportDataTable from '@/components/common/ReportDataTable.vue';
 import Tabs from '@/components/common/Tabs.vue';
@@ -344,10 +341,15 @@ const advancedFiltersDialogActions = [
   margin-bottom: $spacing-small;
 }
 
+.filter-pills {
+  margin-bottom: $spacing-small;
+}
+
 .selected-chips {
   display: flex;
   flex-wrap: wrap;
   gap: $spacing-xsmall;
+  margin-bottom: $spacing-xsmall;
 }
 
 .autocomplete-chip {
@@ -364,9 +366,11 @@ const advancedFiltersDialogActions = [
   height: 14px;
   border-radius: 50%;
   background-color: $color-neutral-white;
+  color: $color-primary;
   cursor: pointer;
   flex-shrink: 0;
   opacity: 0.9;
+  margin-left: $spacing-nano;
 
   &:hover {
     opacity: 1;
@@ -433,7 +437,12 @@ const advancedFiltersDialogActions = [
   cursor: pointer;
 
   &:hover {
-    background-color: rgba(0, 0, 0, 0.04);
+    html:not(.dark) & {
+      background-color: rgba(0, 0, 0, 0.06);
+    }
+    html.dark & {
+      background-color: rgba(255, 255, 255, 0.08);
+    }
   }
 }
 
@@ -446,10 +455,11 @@ const advancedFiltersDialogActions = [
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-right: $spacing-xsmall;
 
   &.active {
-    background-color: #0F285B !important;
-    border-color: #0F285B !important;
+    background-color: $color-primary !important;
+    border-color: $color-primary !important;
     color: $color-neutral-white;
   }
 }
