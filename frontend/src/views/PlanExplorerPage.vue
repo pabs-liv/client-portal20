@@ -293,6 +293,129 @@
                     </div>
                   </div>
 
+                  <!-- Section: Client Contacts -->
+                  <v-card class="ap-contacts-card">
+                    <v-card-title class="d-flex align-center justify-space-between">
+                      <span class="text-h4">Client Contacts</span>
+                      <button v-if="apClientContacts.length > 0" class="button button-primary" @click="apShowAddContactDialog = true">+ Add Contact</button>
+                    </v-card-title>
+                    <v-card-text>
+                      <div v-if="apClientContacts.length > 0">
+                        <ReportDataTable
+                          :headers="apClientContactHeaders"
+                          :items="apClientContacts"
+                          :show-search-bar="false"
+                          :show-filter-button="false"
+                          :show-filter-pills="false"
+                          :show-selection-checkboxes="false"
+                          :show-row-actions="true"
+                          :row-action-items="apClientContactRowActions"
+                          :show-table-footer="false"
+                          @row-action="handleApClientContactRowAction"
+                        />
+                      </div>
+                      <div v-else class="nc-empty-state">
+                        <img :src="EmptyStateImg" alt="No data" class="nc-empty-icon" />
+                        <p class="nc-empty-title">Nothing to see here</p>
+                        <p class="nc-empty-subtitle">No client contacts have been added yet.</p>
+                        <button class="button button-secondary" @click="apShowAddContactDialog = true">+ Add Contact</button>
+                      </div>
+                    </v-card-text>
+                  </v-card>
+
+                  <!-- Add Client Contact Dialog -->
+                  <Dialog
+                    v-model="apShowAddContactDialog"
+                    heading="Add Client Contact"
+                    :show-secondary-button="true"
+                    :actions="apContactDialogActions"
+                  >
+                    <v-row class="mt-1">
+                      <v-col cols="6"><TextField v-model="apContactForm.firstName" label="First Name" /></v-col>
+                      <v-col cols="6"><TextField v-model="apContactForm.lastName" label="Last Name" /></v-col>
+                    </v-row>
+                    <v-row>
+                      <v-col cols="12"><TextField v-model="apContactForm.title" label="Title" /></v-col>
+                    </v-row>
+                    <v-row>
+                      <v-col cols="12"><TextField v-model="apContactForm.email" label="Email" /></v-col>
+                    </v-row>
+                    <v-row>
+                      <v-col cols="8"><TextField v-model="apContactForm.phone" label="Phone" /></v-col>
+                      <v-col cols="4"><TextField v-model="apContactForm.ext" label="Ext" /></v-col>
+                    </v-row>
+                  </Dialog>
+
+                  <!-- Edit Client Contact Dialog -->
+                  <Dialog
+                    v-model="apShowEditContactDialog"
+                    heading="Edit Client Contact"
+                    :show-secondary-button="true"
+                    :actions="apEditContactDialogActions"
+                  >
+                    <v-row class="mt-1">
+                      <v-col cols="6"><TextField v-model="apEditContactForm.firstName" label="First Name" /></v-col>
+                      <v-col cols="6"><TextField v-model="apEditContactForm.lastName" label="Last Name" /></v-col>
+                    </v-row>
+                    <v-row>
+                      <v-col cols="12"><TextField v-model="apEditContactForm.title" label="Title" /></v-col>
+                    </v-row>
+                    <v-row>
+                      <v-col cols="12"><TextField v-model="apEditContactForm.email" label="Email" /></v-col>
+                    </v-row>
+                    <v-row>
+                      <v-col cols="8"><TextField v-model="apEditContactForm.phone" label="Phone" /></v-col>
+                      <v-col cols="4"><TextField v-model="apEditContactForm.ext" label="Ext" /></v-col>
+                    </v-row>
+                  </Dialog>
+
+                  <!-- Section: Vendor Contacts -->
+                  <v-card class="ap-contacts-card">
+                    <v-card-title class="d-flex align-center justify-space-between">
+                      <span class="text-h4">Vendor Contacts</span>
+                      <button v-if="apVendorContacts.length > 0" class="button button-primary" @click="apShowVendorContactDialog = true">+ Add Contact</button>
+                    </v-card-title>
+                    <v-card-text>
+                      <div v-if="apVendorContacts.length > 0">
+                        <v-data-table
+                          :headers="apVendorContactHeaders"
+                          :items="apVendorContacts"
+                          density="compact"
+                          hide-default-footer
+                          class="ap-contacts-table"
+                        >
+                          <template #item.actions="{ item }">
+                            <v-btn icon variant="plain" size="small" color="error" @click="apRemoveVendorContact(item)">
+                              <Trash2 :size="16" :stroke-width="1.75" />
+                            </v-btn>
+                          </template>
+                        </v-data-table>
+                      </div>
+                      <div v-else class="nc-empty-state">
+                        <img :src="EmptyStateImg" alt="No data" class="nc-empty-icon" />
+                        <p class="nc-empty-title">Nothing to see here</p>
+                        <p class="nc-empty-subtitle">No vendor contacts have been added yet.</p>
+                        <button class="button button-secondary" @click="apShowVendorContactDialog = true">+ Add Contact</button>
+                      </div>
+                    </v-card-text>
+                  </v-card>
+
+                  <!-- Add Vendor Contact Dialog -->
+                  <Dialog
+                    v-model="apShowVendorContactDialog"
+                    heading="Add Vendor Contact"
+                    :show-secondary-button="true"
+                    :actions="apVendorContactDialogActions"
+                  >
+                    <p class="text-body mb-4">Select contacts from vendors already associated with this account. To add a missing contact, go to Vendor Management in Solo2 and add them there first.</p>
+                    <Autocomplete
+                      v-model="apVendorContactSelections"
+                      :items="apVendorContactOptions"
+                      :multiple="true"
+                      label="Select vendor contacts"
+                    />
+                  </Dialog>
+
                 </template>
 
                 <!-- Step 2: Network Configuration -->
@@ -890,87 +1013,167 @@
 
                   <div class="lc-section-divider" />
 
-                  <!-- Payment Method -->
+                  <!-- B-21: Existing Billing Party -->
                   <div class="bl-section">
-                    <p class="lc-hcn-label">Payment Method</p>
+                    <p class="lc-hcn-label">Is billing managed by a TPA?</p>
                     <div class="toc-toggle-group">
-                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blPaymentMethod === 'ACH' }]" @click="blPaymentMethod = 'ACH'">ACH</button>
-                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blPaymentMethod === 'Check' }]" @click="blPaymentMethod = 'Check'">Check</button>
+                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blExistingParty === 'yes' }]" @click="blExistingParty = 'yes'">Yes</button>
+                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blExistingParty === 'no' }]" @click="blExistingParty = 'no'">No</button>
                     </div>
-
-                    <div v-if="blPaymentMethod === 'ACH'" class="bl-subsection">
-                      <p class="lc-hcn-label">ACH Method</p>
-                      <div class="toc-toggle-group">
-                        <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blAchMethod === 'send' }]" @click="blAchMethod = 'send'">Send to Liviniti</button>
-                        <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blAchMethod === 'debit' }]" @click="blAchMethod = 'debit'">Debited by Liviniti</button>
+                    <div v-if="blExistingParty === 'yes'" class="bl-subsection">
+                      <div class="bl-field-narrow">
+                        <Select
+                          v-model="blSelectedTpa"
+                          :items="blTpaOptions"
+                          label="Select billing party"
+                        />
                       </div>
-                    </div>
-
-                    <div v-if="blPaymentMethod === 'Check'" class="bl-subsection">
-                      <p class="text-body bl-note">Please send all checks to the following address:</p>
-                      <div class="bl-address">
-                        <p>Liviniti</p>
-                        <p>PO Box 896599</p>
-                        <p>Charlotte, NC 28289</p>
-                      </div>
-                    </div>
-
-                    <div class="bl-subsection">
-                      <FileUploader :show-document-type-selection="false">
-                        <template #label>
-                          <p class="bl-upload-label">
-                            Upload <a href="#" class="bl-upload-link" @click.prevent>W-9 form</a> or drag and drop
-                          </p>
-                        </template>
-                      </FileUploader>
+                      <p v-if="blSelectedTpa" class="text-body bl-note">Contacts from the selected billing party will populate the Responsible Party field below.</p>
                     </div>
                   </div>
 
+                  <!-- B-01/B-02/B-03/B-04: Payment Method (new billing setup only) -->
+                  <template v-if="blExistingParty === 'no'">
+                    <div class="lc-section-divider" />
+
+                    <div class="bl-section">
+                      <p class="lc-hcn-label">Payment Method</p>
+                      <div class="toc-toggle-group">
+                        <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blPaymentMethod === 'ACH' }]" @click="blPaymentMethod = 'ACH'">ACH</button>
+                        <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blPaymentMethod === 'Check' }]" @click="blPaymentMethod = 'Check'">Check</button>
+                      </div>
+
+                      <!-- ACH sub-options -->
+                      <div v-if="blPaymentMethod === 'ACH'" class="bl-subsection">
+                        <p class="lc-hcn-label">ACH Method <span class="bl-required">*</span></p>
+                        <div class="toc-toggle-group">
+                          <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blAchMethod === 'send' }]" @click="blAchMethod = 'send'">Send to Liviniti</button>
+                          <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blAchMethod === 'debit' }]" @click="blAchMethod = 'debit'">Debited by Liviniti</button>
+                        </div>
+
+                        <!-- B-02: Send to Liviniti — pre-filled downloadable forms -->
+                        <div v-if="blAchMethod === 'send'" class="bl-subsection">
+                          <p class="text-body bl-note">Download Liviniti's completed W-9 and ACH forms for your records.</p>
+                          <div class="bl-download-group">
+                            <button class="button bl-download-btn" @click.prevent>
+                              <CloudDownload :size="16" :stroke-width="2" />
+                              Download W-9 (Liviniti)
+                            </button>
+                            <button class="button bl-download-btn" @click.prevent>
+                              <CloudDownload :size="16" :stroke-width="2" />
+                              Download ACH Form (Liviniti)
+                            </button>
+                          </div>
+                        </div>
+
+                        <!-- B-02/B-03: Debited by Liviniti — blank forms + upload -->
+                        <div v-else-if="blAchMethod === 'debit'" class="bl-subsection">
+                          <p class="text-body bl-note">Download, complete, and upload the signed W-9 and ACH authorization forms.</p>
+                          <div class="bl-download-group">
+                            <button class="button bl-download-btn" @click.prevent>
+                              <CloudDownload :size="16" :stroke-width="2" />
+                              Download Blank W-9
+                            </button>
+                            <button class="button bl-download-btn" @click.prevent>
+                              <CloudDownload :size="16" :stroke-width="2" />
+                              Download ACH Authorization Form
+                            </button>
+                          </div>
+                          <div class="bl-upload-item">
+                            <p class="lc-hcn-label">Completed W-9</p>
+                            <FileUploader :show-document-type-selection="false" />
+                          </div>
+                          <div class="bl-upload-item">
+                            <p class="lc-hcn-label">Completed ACH Authorization</p>
+                            <FileUploader :show-document-type-selection="false" />
+                          </div>
+                        </div>
+
+                        <!-- B-04: Debit pull timing -->
+                        <div v-if="blAchMethod === 'debit'" class="bl-subsection">
+                          <p class="lc-hcn-label">Debit Pull Timing</p>
+                          <div class="bl-field-narrow">
+                            <Select
+                              v-model="blDebitTiming"
+                              :items="blDebitTimingOptions"
+                              label="Select timing"
+                            />
+                          </div>
+                          <div v-if="blDebitTiming === 'Prior approval required'" class="bl-subsection">
+                            <TextField
+                              v-model="blDebitApprovalEmail"
+                              label="Approval notification email"
+                            />
+                          </div>
+                          <div v-if="blDebitTiming === 'Custom'" class="bl-subsection">
+                            <v-textarea
+                              v-model="blDebitTimingNote"
+                              label="Describe the debit pull schedule"
+                              variant="outlined"
+                              density="compact"
+                              rows="2"
+                              auto-grow
+                              hide-details
+                              class="bl-notes-textarea"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Check mailing address -->
+                      <div v-if="blPaymentMethod === 'Check'" class="bl-subsection">
+                        <p class="text-body bl-note">Please send all checks to the following address:</p>
+                        <div class="bl-address">
+                          <p>Liviniti</p>
+                          <p>PO Box 896599</p>
+                          <p>Charlotte, NC 28289</p>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+
                   <div class="lc-section-divider" />
 
-                  <!-- Responsible Party -->
+                  <!-- B-05: Responsible Party (multi-select dropdown) -->
                   <div class="bl-section">
                     <p class="lc-hcn-label">Responsible Party</p>
-                    <div class="toc-toggle-group">
-                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blResponsibleParty === 'existing' }]" @click="blResponsibleParty = 'existing'">Existing Contact</button>
-                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blResponsibleParty === 'new' }]" @click="blResponsibleParty = 'new'">New Contact</button>
+                    <div class="bl-field-narrow">
+                      <Autocomplete
+                        v-model="blResponsibleContacts"
+                        :items="blResponsibleContactOptions"
+                        label="Select contacts"
+                        :multiple="true"
+                      />
                     </div>
-                    <div class="lc-fields bl-contact-list">
-                      <div
-                        v-for="contact in blContactOptions"
-                        :key="contact"
-                        :class="['lc-field-row', 'bl-contact-row', { 'bl-contact-row--selected': blResponsibleContact === contact }]"
-                        @click="blResponsibleContact = contact"
-                      >
-                        <span class="lc-field-label">{{ contact }}</span>
-                        <Check v-if="blResponsibleContact === contact" :size="16" :stroke-width="2" class="lc-check-icon" />
-                      </div>
+                  </div>
+
+                  <!-- B-14: Rebate Notifications (multi-select dropdown) -->
+                  <div class="bl-section">
+                    <p class="lc-hcn-label">Who should receive rebate notifications?</p>
+                    <p class="text-body bl-note">Selected contacts will be notified when rebates are issued.</p>
+                    <div class="bl-field-narrow">
+                      <Autocomplete
+                        v-model="blRebateContacts"
+                        :items="blRebateContactOptions"
+                        label="Select contacts"
+                        :multiple="true"
+                      />
                     </div>
                   </div>
 
                   <div class="lc-section-divider" />
-
-                  <!-- Billing Report Configuration -->
                   <h4 class="text-h4 bl-section-heading">Billing Report Configuration</h4>
 
-                  <!-- Include Claim Details -->
+                  <!-- B-07: PHI toggle (replaces Include Claim Details) -->
                   <div class="bl-section">
-                    <p class="lc-hcn-label">Include Claim Details in Billing Reports</p>
+                    <p class="lc-hcn-label">Show PHI in Billing Reports</p>
                     <div class="toc-toggle-group">
-                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blClaimDetails === 'no' }]" @click="blClaimDetails = 'no'">No</button>
-                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blClaimDetails === 'yes' }]" @click="blClaimDetails = 'yes'">Yes</button>
-                    </div>
-
-                    <div v-if="blClaimDetails === 'yes'" class="bl-subsection">
-                      <p class="lc-hcn-label">Include PHI in Claim Details</p>
-                      <div class="toc-toggle-group">
-                        <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blIncludePhi === 'no' }]" @click="blIncludePhi = 'no'">No</button>
-                        <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blIncludePhi === 'yes' }]" @click="blIncludePhi = 'yes'">Yes</button>
-                      </div>
+                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blIncludePhi === 'no' }]" @click="blIncludePhi = 'no'">No</button>
+                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blIncludePhi === 'yes' }]" @click="blIncludePhi = 'yes'">Yes</button>
                     </div>
                   </div>
 
-                  <!-- Billing Cycle -->
+                  <!-- B-11: Billing Cycle -->
                   <div class="bl-section">
                     <p class="lc-hcn-label">Billing Cycle</p>
                     <div class="bl-field-narrow">
@@ -980,54 +1183,93 @@
                         label="Billing Cycle"
                       />
                     </div>
-                  </div>
-
-                  <!-- Division/Location breakdown -->
-                  <div class="bl-section">
-                    <p class="lc-hcn-label">Does reporting need to be broken down by division or location?</p>
-                    <div class="toc-toggle-group">
-                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blDivisionBreakdown === 'no' }]" @click="blDivisionBreakdown = 'no'">No</button>
-                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blDivisionBreakdown === 'yes' }]" @click="blDivisionBreakdown = 'yes'">Yes</button>
-                    </div>
-                    <div v-if="blDivisionBreakdown === 'yes'" class="bl-subsection-select">
-                      <Select
-                        v-model="blDivisionOption"
-                        :items="blDivisionOptions"
-                        label="Select option"
+                    <div v-if="blBillingCycle === 'Custom'" class="bl-subsection">
+                      <v-textarea
+                        v-model="blCustomCycleNote"
+                        label="Describe the billing schedule"
+                        variant="outlined"
+                        density="compact"
+                        rows="2"
+                        auto-grow
+                        hide-details
+                        class="bl-notes-textarea"
                       />
                     </div>
                   </div>
 
-                  <!-- Member level breakdown -->
+                  <!-- B-08/B-09: Reporting Breakouts (multi-select) -->
                   <div class="bl-section">
-                    <p class="lc-hcn-label">Does reporting need to be broken down at the member level?</p>
+                    <p class="lc-hcn-label">Are reporting breakouts required?</p>
                     <div class="toc-toggle-group">
-                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blMemberBreakdown === 'no' }]" @click="blMemberBreakdown = 'no'">No</button>
-                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blMemberBreakdown === 'yes' }]" @click="blMemberBreakdown = 'yes'">Yes</button>
+                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blReportingBreakouts === 'no' }]" @click="blReportingBreakouts = 'no'">No</button>
+                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blReportingBreakouts === 'yes' }]" @click="blReportingBreakouts = 'yes'">Yes</button>
+                    </div>
+                    <div v-if="blReportingBreakouts === 'yes'" class="bl-subsection">
+                      <div class="bl-field-narrow">
+                        <Autocomplete v-model="blReportingBreakoutSelections" :items="blReportingBreakoutItems" :multiple="true" label="Select breakout types" />
+                      </div>
                     </div>
                   </div>
 
-                  <!-- Invoice breakout -->
+                  <!-- B-20: Separate Invoices -->
                   <div class="bl-section">
-                    <p class="lc-hcn-label">Do invoices need to be broken out?</p>
+                    <p class="lc-hcn-label">Are separate invoices required?</p>
+                    <div class="toc-toggle-group">
+                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blSeparateInvoices === 'no' }]" @click="blSeparateInvoices = 'no'">No</button>
+                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blSeparateInvoices === 'yes' }]" @click="blSeparateInvoices = 'yes'">Yes</button>
+                    </div>
+                    <div v-if="blSeparateInvoices === 'yes'" class="bl-subsection-select">
+                      <Select
+                        v-model="blSeparateInvoicesSplit"
+                        :items="blInvoiceSplitOptions"
+                        label="Split invoices by"
+                      />
+                    </div>
+                  </div>
+
+                  <!-- B-12: Invoice Breakout (multi-select, Custom warning) -->
+                  <div class="bl-section">
+                    <p class="lc-hcn-label">Are invoice breakouts required?</p>
                     <div class="toc-toggle-group">
                       <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blInvoiceBreakout === 'no' }]" @click="blInvoiceBreakout = 'no'">No</button>
                       <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blInvoiceBreakout === 'yes' }]" @click="blInvoiceBreakout = 'yes'">Yes</button>
+                    </div>
+                    <div v-if="blInvoiceBreakout === 'yes'" class="bl-subsection">
+                      <div class="bl-field-narrow">
+                        <Select v-model="blInvoiceBreakoutSelection" :items="blInvoiceBreakoutItems" label="Select breakout type" />
+                      </div>
+                      <div v-if="blInvoiceBreakoutSelection === 'Custom'" class="bl-custom-warning">
+                        <TriangleAlert :size="16" :stroke-width="2" class="bl-warning-icon" />
+                        <p class="text-body bl-warning-text">Custom invoice breakouts require coordination with Accounting. Open a ticket with Accounting to coordinate setup before proceeding.</p>
+                      </div>
+                      <div v-if="blInvoiceBreakoutSelection === 'Custom'" class="bl-subsection">
+                        <v-textarea
+                          v-model="blInvoiceBreakoutNote"
+                          label="Describe the custom breakout requirement"
+                          variant="outlined"
+                          density="compact"
+                          rows="2"
+                          auto-grow
+                          hide-details
+                          class="bl-notes-textarea"
+                        />
+                      </div>
                     </div>
                   </div>
 
                   <div class="lc-section-divider" />
 
-                  <!-- Billing Notes -->
+                  <!-- Billing Notes (B-10) -->
                   <div class="bl-section">
                     <v-textarea
                       v-model="blNotes"
                       label="Billing Notes"
+                      hint="For special billing instructions only."
+                      persistent-hint
                       variant="outlined"
                       density="compact"
                       rows="3"
                       auto-grow
-                      hide-details
                       class="bl-notes-textarea"
                     />
                   </div>
@@ -1949,6 +2191,7 @@ import Button from '@/components/ui/Button.vue';
 import ReportDataTable from '@/components/common/ReportDataTable.vue';
 import FilteringPill from '@/components/ui/FilteringPill.vue';
 import Select from '@/components/ui/Select.vue';
+import Dialog from '@/components/ui/Dialog.vue';
 import TextField from '@/components/ui/TextField.vue';
 import FileUploader from '@/components/ui/FileUploader.vue';
 import Autocomplete from '@/components/ui/Autocomplete.vue';
@@ -2080,21 +2323,74 @@ const lcDawPenalties = ref([
 
 // ─── Step 7: Billing ─────────────────────────────────────────────────────────
 
+const blEinNumber = ref('111111111');
+
+// B-21: Existing billing party
+const blExistingParty = ref('no');
+const blTpaOptions = ['Southern Scripts TPA', 'Acclaim Benefits', 'Benefit Advantage'];
+const blSelectedTpa = ref('');
+
+// B-01/B-02: Payment method
 const blPaymentMethod = ref('ACH');
 const blAchMethod = ref('send');
-const blResponsibleParty = ref('existing');
-const blResponsibleContact = ref('Nick Johnson');
-const blContactOptions = ['Nick Johnson', 'Sarah Lee', 'Mark Davis'];
-const blClaimDetails = ref('yes');
+
+// B-04: Debit pull timing
+const blDebitTiming = ref('');
+const blDebitTimingOptions = ['3–5 business days after billing complete', '10 business days', 'Prior approval required', 'Custom'];
+const blDebitApprovalEmail = ref('');
+const blDebitTimingNote = ref('');
+
+// B-05/B-14: Contacts
+const blResponsibleContactOptions = computed(() => {
+  if (blExistingParty.value === 'yes' && blSelectedTpa.value) {
+    return apVendorContacts.value
+      .filter(c => c.vendor === blSelectedTpa.value)
+      .map(c => c.name);
+  }
+  return apClientContacts.value.map(c => c.name);
+});
+const blRebateContactOptions = computed(() => apClientContacts.value.map(c => c.name));
+const blResponsibleContacts = ref<string[]>(['Nick Johnson']);
+const blRebateContacts = ref<string[]>([]);
+watch([() => blExistingParty.value, () => blSelectedTpa.value], () => {
+  blResponsibleContacts.value = [];
+});
+
+// B-07: PHI toggle
 const blIncludePhi = ref('no');
+
+// B-11: Billing cycle
 const blBillingCycle = ref('Weekly');
-const blCycleOptions = ['Weekly', 'Bi-Weekly', 'Monthly'];
-const blDivisionBreakdown = ref('no');
-const blDivisionOption = ref('');
-const blDivisionOptions = ['Division', 'Location', 'Both'];
-const blMemberBreakdown = ref('yes');
+const blCycleOptions = ['Weekly', 'Bi-Weekly', 'Monthly', 'Quad-Monthly', 'Custom'];
+const blCustomCycleNote = ref('');
+
+// B-20: Separate invoices
+const blSeparateInvoices = ref('no');
+const blSeparateInvoicesSplit = ref('');
+const blInvoiceSplitOptions = ['AR Type', 'Employee Location', 'Member', 'Employee Status'];
+
+// B-08/B-09: Reporting breakouts
+const blReportingBreakouts = ref('no');
+const blReportingBreakoutSelections = ref<string[]>([]);
+const blReportingBreakoutItems = [
+  'Detail by AR Type',
+  'Detail by Employee Location',
+  'Detail by Employee Location and AR Type',
+  'Detail by Employee Location and Member',
+  'Detail by Employee Status',
+  'Detail by Group ID',
+  'Detail by Member',
+  'Summary by AR Type',
+  'Summary by Employee Location',
+  'Summary by Employee Status',
+];
+
+// B-12: Invoice breakout
 const blInvoiceBreakout = ref('no');
-const blEinNumber = ref('111111111');
+const blInvoiceBreakoutSelection = ref('');
+const blInvoiceBreakoutItems = ['AR Type', 'Employee Location', 'Member', 'Employee Status', 'Custom'];
+const blInvoiceBreakoutNote = ref('');
+
 const blNotes = ref('');
 
 // ─── Step 8: ID Cards ─────────────────────────────────────────────────────────
@@ -2314,6 +2610,143 @@ const finishPlanSetup = () => {
 // ─── Step 1 data ──────────────────────────────────────────────────────────────
 
 const statusOptions = ['Implementation', 'Active', 'Inactive', 'Pending'];
+
+// ── Account Profile — Client Contacts ─────────────────────────────────────────
+const apClientContactHeaders = [
+  { title: 'Name', key: 'name' },
+  { title: 'Title', key: 'title' },
+  { title: 'Email', key: 'email' },
+  { title: 'Phone', key: 'phone' },
+  { title: '', key: 'actions', sortable: false },
+];
+const apClientContacts = ref([
+  { name: 'Nick Johnson', title: 'Benefits Manager', email: 'nick.johnson@starkind.com', phone: '(555) 234-5678' },
+]);
+const apShowAddContactDialog = ref(false);
+const apContactForm = ref({ firstName: '', lastName: '', title: '', email: '', phone: '', ext: '' });
+const apResetContactForm = () => { apContactForm.value = { firstName: '', lastName: '', title: '', email: '', phone: '', ext: '' }; };
+const formatPhone = (val: string): string => {
+  const d = val.replace(/\D/g, '').slice(0, 10);
+  if (d.length <= 3) return d;
+  if (d.length <= 6) return `(${d.slice(0, 3)}) ${d.slice(3)}`;
+  return `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}`;
+};
+watch(() => apContactForm.value.phone, val => {
+  const f = formatPhone(val);
+  if (f !== val) apContactForm.value.phone = f;
+});
+const apSaveContact = () => {
+  if (!apContactForm.value.firstName || !apContactForm.value.lastName || !apContactForm.value.email) return;
+  apClientContacts.value.push({
+    name: `${apContactForm.value.firstName} ${apContactForm.value.lastName}`,
+    title: apContactForm.value.title,
+    email: apContactForm.value.email,
+    phone: apContactForm.value.ext ? `${apContactForm.value.phone} x${apContactForm.value.ext}` : apContactForm.value.phone,
+  });
+  apShowAddContactDialog.value = false;
+  apResetContactForm();
+};
+const apClientContactRowActions = [
+  { label: 'Edit',   action: 'edit'   },
+  { label: 'Remove', action: 'remove' },
+];
+const apEditingContactIndex = ref(-1);
+const apShowEditContactDialog = ref(false);
+const apEditContactForm = ref({ firstName: '', lastName: '', title: '', email: '', phone: '', ext: '' });
+watch(() => apEditContactForm.value.phone, val => {
+  const f = formatPhone(val);
+  if (f !== val) apEditContactForm.value.phone = f;
+});
+const handleApClientContactRowAction = ({ action, item }: { action: string; item: any }) => {
+  const idx = apClientContacts.value.indexOf(item);
+  if (action === 'remove') {
+    if (idx > -1) apClientContacts.value.splice(idx, 1);
+  } else if (action === 'edit') {
+    const nameParts = (item.name as string).split(' ');
+    apEditContactForm.value = {
+      firstName: nameParts[0] ?? '',
+      lastName:  nameParts.slice(1).join(' '),
+      title:     item.title ?? '',
+      email:     item.email ?? '',
+      phone:     item.phone?.split(' x')[0] ?? '',
+      ext:       item.phone?.includes(' x') ? item.phone.split(' x')[1] : '',
+    };
+    apEditingContactIndex.value = idx;
+    apShowEditContactDialog.value = true;
+  }
+};
+const apSaveEditContact = () => {
+  const idx = apEditingContactIndex.value;
+  if (idx > -1) {
+    apClientContacts.value[idx] = {
+      name:  `${apEditContactForm.value.firstName} ${apEditContactForm.value.lastName}`,
+      title: apEditContactForm.value.title,
+      email: apEditContactForm.value.email,
+      phone: apEditContactForm.value.ext ? `${apEditContactForm.value.phone} x${apEditContactForm.value.ext}` : apEditContactForm.value.phone,
+    };
+  }
+  apShowEditContactDialog.value = false;
+};
+const apEditContactDialogActions = computed(() => [
+  { text: 'Cancel', styleType: 'secondary' as const, onClick: () => { apShowEditContactDialog.value = false; } },
+  { text: 'Save Changes', styleType: 'primary' as const, onClick: apSaveEditContact },
+]);
+const apContactDialogActions = computed(() => [
+  { text: 'Cancel', styleType: 'secondary' as const, onClick: () => { apShowAddContactDialog.value = false; apResetContactForm(); } },
+  { text: 'Add Contact', styleType: 'primary' as const, onClick: apSaveContact },
+]);
+
+// ── Account Profile — Vendor Contacts ─────────────────────────────────────────
+const apVendorContactHeaders = [
+  { title: 'Name', key: 'name' },
+  { title: 'Vendor', key: 'vendor' },
+  { title: 'Email', key: 'email' },
+  { title: 'Phone', key: 'phone' },
+  { title: '', key: 'actions', sortable: false },
+];
+const apVendorContacts = ref<{ name: string; vendor: string; email: string; phone: string }[]>([]);
+const apShowVendorContactDialog = ref(false);
+const apVendorContactSelections = ref<string[]>([]);
+const apVendorContactData = [
+  { name: 'Jordan Mills', vendor: '90 Degree Benefits', email: 'jordan.mills@90degreebenefits.com', phone: '(555) 234-5678' },
+  { name: 'Bob Carter',    vendor: '90 Degree Benefits', email: 'bob.carter@90degreebenefits.com',    phone: '(555) 345-6789' },
+  { name: 'Sarah Lee',     vendor: 'Acclaim Benefits',   email: 'sarah.lee@acclaimbenefits.com',      phone: '(555) 876-5432' },
+  { name: 'Mark Davis',    vendor: 'Acclaim Benefits',   email: 'mark.davis@acclaimbenefits.com',     phone: '(555) 456-7890' },
+];
+const apVendorContactOptions = (() => {
+  const byVendor = new Map<string, string[]>();
+  [...apVendorContactData]
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .forEach(c => {
+      if (!byVendor.has(c.vendor)) byVendor.set(c.vendor, []);
+      byVendor.get(c.vendor)!.push(`${c.name} — ${c.vendor}`);
+    });
+  const result: (string | { type: string; title: string })[] = [];
+  [...byVendor.keys()].sort().forEach(vendor => {
+    result.push({ type: 'subheader', title: vendor });
+    byVendor.get(vendor)!.forEach(opt => result.push(opt));
+  });
+  return result;
+})();
+const apRemoveVendorContact = (item: any) => {
+  const idx = apVendorContacts.value.indexOf(item);
+  if (idx > -1) apVendorContacts.value.splice(idx, 1);
+};
+const apSaveVendorContacts = () => {
+  apVendorContactSelections.value.forEach(selection => {
+    const already = apVendorContacts.value.some(c => `${c.name} — ${c.vendor}` === selection);
+    if (!already) {
+      const data = apVendorContactData.find(c => `${c.name} — ${c.vendor}` === selection);
+      if (data) apVendorContacts.value.push({ name: data.name, vendor: data.vendor, email: data.email, phone: data.phone });
+    }
+  });
+  apVendorContactSelections.value = [];
+  apShowVendorContactDialog.value = false;
+};
+const apVendorContactDialogActions = computed(() => [
+  { text: 'Cancel', styleType: 'secondary' as const, onClick: () => { apShowVendorContactDialog.value = false; apVendorContactSelections.value = []; } },
+  { text: 'Add Contact', styleType: 'primary' as const, onClick: apSaveVendorContacts },
+]);
 
 const accountProfile = ref({
   accountName: 'Stark Industries',
@@ -3521,6 +3954,19 @@ watch(selectedAccount, (newVal) => {
   }
 }
 
+.ap-contacts-card {
+  margin-top: $spacing-large;
+  border: 1px solid $color-border;
+
+  .v-card-title {
+    padding-bottom: $spacing-small;
+  }
+}
+
+.ap-contacts-table {
+  font-size: $font-size-small;
+}
+
 .ap-section-footer {
   display: flex;
   align-items: center;
@@ -4329,6 +4775,11 @@ watch(selectedAccount, (newVal) => {
   margin: $spacing-small 0;
 }
 
+.bl-required {
+  color: $color-error;
+  margin-left: 2px;
+}
+
 .bl-upload-label {
   font-size: $font-size-body;
   color: $color-text-primary;
@@ -4339,6 +4790,10 @@ watch(selectedAccount, (newVal) => {
     text-decoration: underline;
     cursor: pointer;
   }
+}
+
+.bl-upload-item {
+  margin-top: $spacing-medium;
 }
 
 .bl-address {
@@ -4353,21 +4808,55 @@ watch(selectedAccount, (newVal) => {
   }
 }
 
-.bl-contact-list {
+.bl-contact-group {
+  margin-top: $spacing-medium;
+}
+
+.bl-download-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-small;
   margin-top: $spacing-small;
 }
 
-.bl-contact-row {
+.bl-download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-xsmall;
+  padding: $spacing-xsmall $spacing-medium;
+  border: 1px solid $color-primary;
+  border-radius: 6px;
+  color: $color-primary;
+  font-size: $font-size-small;
+  font-weight: $font-weight-semibold;
+  background: transparent;
   cursor: pointer;
 
   &:hover {
-    background-color: #f9f9f9;
+    background-color: rgba($color-primary, 0.06);
   }
+}
 
-  &--selected .lc-field-label {
-    color: $color-primary;
-    font-weight: $font-weight-semibold;
-  }
+.bl-custom-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-small;
+  margin-top: $spacing-medium;
+  padding: $spacing-small $spacing-medium;
+  background-color: rgba($color-warning, 0.12);
+  border-left: 3px solid $color-warning;
+  border-radius: 6px;
+}
+
+.bl-warning-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: $color-warning;
+}
+
+.bl-warning-text {
+  color: $color-text-primary;
+  margin: 0;
 }
 
 .bl-section-heading {
