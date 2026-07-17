@@ -331,19 +331,39 @@
                     :actions="apContactDialogActions"
                   >
                     <v-row class="mt-1">
-                      <v-col cols="6"><TextField v-model="apContactForm.firstName" label="First Name" /></v-col>
-                      <v-col cols="6"><TextField v-model="apContactForm.lastName" label="Last Name" /></v-col>
+                      <v-col cols="6"><TextField v-model="apContactForm.firstName" label="First Name" :error-messages="apContactErrors.firstName" /></v-col>
+                      <v-col cols="6"><TextField v-model="apContactForm.lastName" label="Last Name" :error-messages="apContactErrors.lastName" /></v-col>
                     </v-row>
                     <v-row>
                       <v-col cols="12"><TextField v-model="apContactForm.title" label="Title" /></v-col>
                     </v-row>
                     <v-row>
-                      <v-col cols="12"><TextField v-model="apContactForm.email" label="Email" /></v-col>
+                      <v-col cols="12"><TextField v-model="apContactForm.email" label="Email" :error-messages="apContactErrors.email" /></v-col>
                     </v-row>
-                    <v-row>
-                      <v-col cols="8"><TextField v-model="apContactForm.phone" label="Phone" /></v-col>
-                      <v-col cols="4"><TextField v-model="apContactForm.ext" label="Ext" /></v-col>
-                    </v-row>
+                    <div v-for="(ph, idx) in apContactForm.phones" :key="idx" class="nl-repeatable-row">
+                      <div v-if="apContactForm.phones.length > 1" class="nl-repeatable-row-header">
+                        <span class="nl-repeatable-row-label">Phone {{ idx + 1 }}</span>
+                        <button class="nl-remove-row-btn" @click="apContactForm.phones.splice(idx, 1); if (apContactForm.primaryPhoneIdx >= apContactForm.phones.length) apContactForm.primaryPhoneIdx = 0" title="Remove">
+                          <Trash2 :size="16" :stroke-width="1.75" />
+                        </button>
+                      </div>
+                      <v-row>
+                        <v-col cols="5"><TextField v-model="ph.number" label="Number" /></v-col>
+                        <v-col cols="4">
+                          <Select v-model="ph.type" :items="apPhoneTypes" label="Type" />
+                        </v-col>
+                        <v-col cols="3"><TextField v-model="ph.ext" label="Ext" /></v-col>
+                      </v-row>
+                      <label class="ap-radio-option">
+                        <input type="radio" :value="idx" v-model="apContactForm.primaryPhoneIdx" class="ap-radio-input" />
+                        <span class="ap-radio-custom" :class="{ active: apContactForm.primaryPhoneIdx === idx }">
+                          <span v-if="apContactForm.primaryPhoneIdx === idx" class="ap-radio-dot" />
+                        </span>
+                        <span class="ap-radio-label">Primary</span>
+                      </label>
+                      <v-divider v-if="idx < apContactForm.phones.length - 1" class="nl-row-divider" />
+                    </div>
+                    <button v-if="apContactForm.phones.length < 3" class="nl-add-link" @click="apContactForm.phones.push(apNewPhone())">+ Add Phone Number</button>
                   </Dialog>
 
                   <!-- Edit Client Contact Dialog -->
@@ -354,19 +374,39 @@
                     :actions="apEditContactDialogActions"
                   >
                     <v-row class="mt-1">
-                      <v-col cols="6"><TextField v-model="apEditContactForm.firstName" label="First Name" /></v-col>
-                      <v-col cols="6"><TextField v-model="apEditContactForm.lastName" label="Last Name" /></v-col>
+                      <v-col cols="6"><TextField v-model="apEditContactForm.firstName" label="First Name" :error-messages="apEditContactErrors.firstName" /></v-col>
+                      <v-col cols="6"><TextField v-model="apEditContactForm.lastName" label="Last Name" :error-messages="apEditContactErrors.lastName" /></v-col>
                     </v-row>
                     <v-row>
                       <v-col cols="12"><TextField v-model="apEditContactForm.title" label="Title" /></v-col>
                     </v-row>
                     <v-row>
-                      <v-col cols="12"><TextField v-model="apEditContactForm.email" label="Email" /></v-col>
+                      <v-col cols="12"><TextField v-model="apEditContactForm.email" label="Email" :error-messages="apEditContactErrors.email" /></v-col>
                     </v-row>
-                    <v-row>
-                      <v-col cols="8"><TextField v-model="apEditContactForm.phone" label="Phone" /></v-col>
-                      <v-col cols="4"><TextField v-model="apEditContactForm.ext" label="Ext" /></v-col>
-                    </v-row>
+                    <div v-for="(ph, idx) in apEditContactForm.phones" :key="idx" class="nl-repeatable-row">
+                      <div v-if="apEditContactForm.phones.length > 1" class="nl-repeatable-row-header">
+                        <span class="nl-repeatable-row-label">Phone {{ idx + 1 }}</span>
+                        <button class="nl-remove-row-btn" @click="apEditContactForm.phones.splice(idx, 1); if (apEditContactForm.primaryPhoneIdx >= apEditContactForm.phones.length) apEditContactForm.primaryPhoneIdx = 0" title="Remove">
+                          <Trash2 :size="16" :stroke-width="1.75" />
+                        </button>
+                      </div>
+                      <v-row>
+                        <v-col cols="5"><TextField v-model="ph.number" label="Number" /></v-col>
+                        <v-col cols="4">
+                          <Select v-model="ph.type" :items="apPhoneTypes" label="Type" />
+                        </v-col>
+                        <v-col cols="3"><TextField v-model="ph.ext" label="Ext" /></v-col>
+                      </v-row>
+                      <label class="ap-radio-option">
+                        <input type="radio" :value="idx" v-model="apEditContactForm.primaryPhoneIdx" class="ap-radio-input" />
+                        <span class="ap-radio-custom" :class="{ active: apEditContactForm.primaryPhoneIdx === idx }">
+                          <span v-if="apEditContactForm.primaryPhoneIdx === idx" class="ap-radio-dot" />
+                        </span>
+                        <span class="ap-radio-label">Primary</span>
+                      </label>
+                      <v-divider v-if="idx < apEditContactForm.phones.length - 1" class="nl-row-divider" />
+                    </div>
+                    <button v-if="apEditContactForm.phones.length < 3" class="nl-add-link" @click="apEditContactForm.phones.push(apNewPhone())">+ Add Phone Number</button>
                   </Dialog>
 
                   <!-- Section: Vendor Contacts -->
@@ -2619,29 +2659,49 @@ const apClientContactHeaders = [
   { title: 'Phone', key: 'phone' },
   { title: '', key: 'actions', sortable: false },
 ];
+const apPhoneTypes = ['Office', 'Cell', 'Fax'];
+const apNewPhone = () => ({ number: '', type: 'Office', ext: '' });
 const apClientContacts = ref([
-  { name: 'Nick Johnson', title: 'Benefits Manager', email: 'nick.johnson@starkind.com', phone: '(555) 234-5678' },
+  { name: 'Nick Johnson', title: 'Benefits Manager', email: 'nick.johnson@starkind.com', phone: '(555) 234-5678', phones: [{ number: '(555) 234-5678', type: 'Office', ext: '' }] },
 ]);
 const apShowAddContactDialog = ref(false);
-const apContactForm = ref({ firstName: '', lastName: '', title: '', email: '', phone: '', ext: '' });
-const apResetContactForm = () => { apContactForm.value = { firstName: '', lastName: '', title: '', email: '', phone: '', ext: '' }; };
+const apContactForm = ref({ firstName: '', lastName: '', title: '', email: '', phones: [apNewPhone()], primaryPhoneIdx: 0 });
+const apContactErrors = ref({ firstName: '', lastName: '', email: '' });
+const apEditContactErrors = ref({ firstName: '', lastName: '', email: '' });
+const apValidateContact = (form: { firstName: string; lastName: string; email: string }) => {
+  const e = { firstName: '', lastName: '', email: '' };
+  if (!form.firstName.trim()) e.firstName = 'First name is required.';
+  if (!form.lastName.trim()) e.lastName = 'Last name is required.';
+  if (!form.email.trim()) e.email = 'Email is required.';
+  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) e.email = 'Please enter a valid email address.';
+  return e;
+};
+const apResetContactForm = () => {
+  apContactForm.value = { firstName: '', lastName: '', title: '', email: '', phones: [apNewPhone()], primaryPhoneIdx: 0 };
+  apContactErrors.value = { firstName: '', lastName: '', email: '' };
+};
 const formatPhone = (val: string): string => {
   const d = val.replace(/\D/g, '').slice(0, 10);
   if (d.length <= 3) return d;
   if (d.length <= 6) return `(${d.slice(0, 3)}) ${d.slice(3)}`;
   return `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}`;
 };
-watch(() => apContactForm.value.phone, val => {
-  const f = formatPhone(val);
-  if (f !== val) apContactForm.value.phone = f;
-});
+watch(() => apContactForm.value.phones, phones => {
+  phones.forEach(ph => { const f = formatPhone(ph.number); if (f !== ph.number) ph.number = f; });
+}, { deep: true });
 const apSaveContact = () => {
-  if (!apContactForm.value.firstName || !apContactForm.value.lastName || !apContactForm.value.email) return;
+  const errors = apValidateContact(apContactForm.value);
+  apContactErrors.value = errors;
+  if (Object.values(errors).some(e => e)) return;
+  const phones = apContactForm.value.phones.filter(p => p.number);
+  const primaryIdx = apContactForm.value.primaryPhoneIdx;
   apClientContacts.value.push({
     name: `${apContactForm.value.firstName} ${apContactForm.value.lastName}`,
     title: apContactForm.value.title,
     email: apContactForm.value.email,
-    phone: apContactForm.value.ext ? `${apContactForm.value.phone} x${apContactForm.value.ext}` : apContactForm.value.phone,
+    phones,
+    primaryPhoneIdx: primaryIdx,
+    phone: phones[primaryIdx]?.number ?? phones[0]?.number ?? '',
   });
   apShowAddContactDialog.value = false;
   apResetContactForm();
@@ -2652,11 +2712,10 @@ const apClientContactRowActions = [
 ];
 const apEditingContactIndex = ref(-1);
 const apShowEditContactDialog = ref(false);
-const apEditContactForm = ref({ firstName: '', lastName: '', title: '', email: '', phone: '', ext: '' });
-watch(() => apEditContactForm.value.phone, val => {
-  const f = formatPhone(val);
-  if (f !== val) apEditContactForm.value.phone = f;
-});
+const apEditContactForm = ref({ firstName: '', lastName: '', title: '', email: '', phones: [apNewPhone()], primaryPhoneIdx: 0 });
+watch(() => apEditContactForm.value.phones, phones => {
+  phones.forEach(ph => { const f = formatPhone(ph.number); if (f !== ph.number) ph.number = f; });
+}, { deep: true });
 const handleApClientContactRowAction = ({ action, item }: { action: string; item: any }) => {
   const idx = apClientContacts.value.indexOf(item);
   if (action === 'remove') {
@@ -2668,27 +2727,34 @@ const handleApClientContactRowAction = ({ action, item }: { action: string; item
       lastName:  nameParts.slice(1).join(' '),
       title:     item.title ?? '',
       email:     item.email ?? '',
-      phone:     item.phone?.split(' x')[0] ?? '',
-      ext:       item.phone?.includes(' x') ? item.phone.split(' x')[1] : '',
+      phones:    item.phones?.length ? item.phones.map((p: any) => ({ ...p })) : [apNewPhone()],
+      primaryPhoneIdx: item.primaryPhoneIdx ?? 0,
     };
     apEditingContactIndex.value = idx;
     apShowEditContactDialog.value = true;
   }
 };
 const apSaveEditContact = () => {
+  const errors = apValidateContact(apEditContactForm.value);
+  apEditContactErrors.value = errors;
+  if (Object.values(errors).some(e => e)) return;
   const idx = apEditingContactIndex.value;
   if (idx > -1) {
+    const phones = apEditContactForm.value.phones.filter(p => p.number);
+    const primaryIdx = apEditContactForm.value.primaryPhoneIdx;
     apClientContacts.value[idx] = {
       name:  `${apEditContactForm.value.firstName} ${apEditContactForm.value.lastName}`,
       title: apEditContactForm.value.title,
       email: apEditContactForm.value.email,
-      phone: apEditContactForm.value.ext ? `${apEditContactForm.value.phone} x${apEditContactForm.value.ext}` : apEditContactForm.value.phone,
+      phones,
+      primaryPhoneIdx: primaryIdx,
+      phone: phones[primaryIdx]?.number ?? phones[0]?.number ?? '',
     };
   }
   apShowEditContactDialog.value = false;
 };
 const apEditContactDialogActions = computed(() => [
-  { text: 'Cancel', styleType: 'secondary' as const, onClick: () => { apShowEditContactDialog.value = false; } },
+  { text: 'Cancel', styleType: 'secondary' as const, onClick: () => { apShowEditContactDialog.value = false; apEditContactErrors.value = { firstName: '', lastName: '', email: '' }; } },
   { text: 'Save Changes', styleType: 'primary' as const, onClick: apSaveEditContact },
 ]);
 const apContactDialogActions = computed(() => [
@@ -2713,9 +2779,11 @@ const apVendorContactData = [
   { name: 'Sarah Lee',    title: 'Account Executive',  vendor: 'Acclaim Benefits',   email: 'sarah.lee@acclaimbenefits.com',      phone: '(555) 876-5432' },
   { name: 'Mark Davis',   title: 'Benefits Consultant',vendor: 'Acclaim Benefits',   email: 'mark.davis@acclaimbenefits.com',     phone: '(555) 456-7890' },
 ];
-const apVendorContactOptions = (() => {
+const apVendorContactOptions = computed(() => {
+  const addedNames = new Set(apVendorContacts.value.map(c => c.name));
   const byVendor = new Map<string, string[]>();
   [...apVendorContactData]
+    .filter(c => !addedNames.has(c.name))
     .sort((a, b) => a.name.localeCompare(b.name))
     .forEach(c => {
       if (!byVendor.has(c.vendor)) byVendor.set(c.vendor, []);
@@ -2727,7 +2795,7 @@ const apVendorContactOptions = (() => {
     byVendor.get(vendor)!.forEach(opt => result.push(opt));
   });
   return result;
-})();
+});
 const apRemoveVendorContact = (item: any) => {
   const idx = apVendorContacts.value.indexOf(item);
   if (idx > -1) apVendorContacts.value.splice(idx, 1);
@@ -5812,6 +5880,46 @@ watch(selectedAccount, (newVal) => {
     color: $color-error;
     background-color: rgba($color-error, 0.08);
   }
+}
+
+.ap-radio-option {
+  display: flex;
+  align-items: center;
+  gap: $spacing-small;
+  padding: $spacing-xsmall 0;
+  cursor: pointer;
+}
+
+.ap-radio-input {
+  display: none;
+}
+
+.ap-radio-custom {
+  width: 18px;
+  height: 18px;
+  border: 2px solid $color-border;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s;
+
+  &.active {
+    border-color: $color-primary;
+  }
+}
+
+.ap-radio-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: $color-primary;
+}
+
+.ap-radio-label {
+  font-size: $font-size-body;
+  color: var(--color-text-primary);
 }
 </style>
 
