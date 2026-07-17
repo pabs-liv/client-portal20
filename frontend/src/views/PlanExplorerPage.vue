@@ -407,7 +407,7 @@
                     :show-secondary-button="true"
                     :actions="apVendorContactDialogActions"
                   >
-                    <p class="text-body mb-4">Select contacts from vendors already associated with this account. To add a missing contact, go to Vendor Management in Solo2 and add them there first.</p>
+                    <p class="text-body mb-4">The contacts below are from vendors already linked to this account.</p>
                     <Autocomplete
                       v-model="apVendorContactSelections"
                       :items="apVendorContactOptions"
@@ -2708,10 +2708,10 @@ const apVendorContacts = ref<{ name: string; vendor: string; email: string; phon
 const apShowVendorContactDialog = ref(false);
 const apVendorContactSelections = ref<string[]>([]);
 const apVendorContactData = [
-  { name: 'Jordan Mills', vendor: '90 Degree Benefits', email: 'jordan.mills@90degreebenefits.com', phone: '(555) 234-5678' },
-  { name: 'Bob Carter',    vendor: '90 Degree Benefits', email: 'bob.carter@90degreebenefits.com',    phone: '(555) 345-6789' },
-  { name: 'Sarah Lee',     vendor: 'Acclaim Benefits',   email: 'sarah.lee@acclaimbenefits.com',      phone: '(555) 876-5432' },
-  { name: 'Mark Davis',    vendor: 'Acclaim Benefits',   email: 'mark.davis@acclaimbenefits.com',     phone: '(555) 456-7890' },
+  { name: 'Jordan Mills', title: 'Account Manager',    vendor: '90 Degree Benefits', email: 'jordan.mills@90degreebenefits.com', phone: '(555) 234-5678' },
+  { name: 'Bob Carter',   title: 'Client Specialist',  vendor: '90 Degree Benefits', email: 'bob.carter@90degreebenefits.com',    phone: '(555) 345-6789' },
+  { name: 'Sarah Lee',    title: 'Account Executive',  vendor: 'Acclaim Benefits',   email: 'sarah.lee@acclaimbenefits.com',      phone: '(555) 876-5432' },
+  { name: 'Mark Davis',   title: 'Benefits Consultant',vendor: 'Acclaim Benefits',   email: 'mark.davis@acclaimbenefits.com',     phone: '(555) 456-7890' },
 ];
 const apVendorContactOptions = (() => {
   const byVendor = new Map<string, string[]>();
@@ -2719,7 +2719,7 @@ const apVendorContactOptions = (() => {
     .sort((a, b) => a.name.localeCompare(b.name))
     .forEach(c => {
       if (!byVendor.has(c.vendor)) byVendor.set(c.vendor, []);
-      byVendor.get(c.vendor)!.push(`${c.name} — ${c.vendor}`);
+      byVendor.get(c.vendor)!.push(c.name);
     });
   const result: (string | { type: string; title: string })[] = [];
   [...byVendor.keys()].sort().forEach(vendor => {
@@ -2734,9 +2734,9 @@ const apRemoveVendorContact = (item: any) => {
 };
 const apSaveVendorContacts = () => {
   apVendorContactSelections.value.forEach(selection => {
-    const already = apVendorContacts.value.some(c => `${c.name} — ${c.vendor}` === selection);
+    const already = apVendorContacts.value.some(c => c.name === selection);
     if (!already) {
-      const data = apVendorContactData.find(c => `${c.name} — ${c.vendor}` === selection);
+      const data = apVendorContactData.find(c => c.name === selection);
       if (data) apVendorContacts.value.push({ name: data.name, vendor: data.vendor, email: data.email, phone: data.phone });
     }
   });
