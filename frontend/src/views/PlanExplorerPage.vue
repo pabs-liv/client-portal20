@@ -1035,284 +1035,434 @@
 
                 <!-- Step 7: Billing -->
                 <template v-else-if="currentWizardStep === 6">
+
+                  <!-- Card 1: Billing Setup -->
                   <div class="ap-section">
                     <div class="ap-section-header">
-                      <h4 class="text-h4">Billing</h4>
+                      <h4 class="text-h4">Billing Setup</h4>
+                      <button v-if="!blEditingSetup" class="button button-thirtiary" @click="blEditingSetup = true">
+                        <Pencil :size="14" :stroke-width="1.5" />Edit
+                      </button>
                     </div>
-
-                  <!-- EIN Number -->
-                  <div class="bl-section bl-section--no-gap">
-                    <p class="wizard-step-description">Review and confirm this account's EIN Number to ensure proper billing.</p>
-                    <div class="bl-field-narrow">
-                      <TextField
-                        v-model="blEinNumber"
-                        label="EIN Number"
-                      />
-                    </div>
-                  </div>
-
-                  <div class="lc-section-divider" />
-
-                  <!-- B-21: Existing Billing Party -->
-                  <div class="bl-section">
-                    <p class="lc-hcn-label">Is billing managed by a TPA?</p>
-                    <div class="toc-toggle-group">
-                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blExistingParty === 'yes' }]" @click="blExistingParty = 'yes'">Yes</button>
-                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blExistingParty === 'no' }]" @click="blExistingParty = 'no'">No</button>
-                    </div>
-                    <div v-if="blExistingParty === 'yes'" class="bl-subsection">
-                      <div class="bl-field-narrow">
-                        <Select
-                          v-model="blSelectedTpa"
-                          :items="blTpaOptions"
-                          label="Select billing party"
-                        />
-                      </div>
-                      <p v-if="blSelectedTpa" class="text-body bl-note">Contacts from the selected billing party will populate the Responsible Party field below.</p>
-                    </div>
-                  </div>
-
-                  <!-- B-01/B-02/B-03/B-04: Payment Method (new billing setup only) -->
-                  <template v-if="blExistingParty === 'no'">
-                    <div class="lc-section-divider" />
-
-                    <div class="bl-section">
-                      <p class="lc-hcn-label">Payment Method</p>
-                      <div class="toc-toggle-group">
-                        <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blPaymentMethod === 'ACH' }]" @click="blPaymentMethod = 'ACH'">ACH</button>
-                        <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blPaymentMethod === 'Check' }]" @click="blPaymentMethod = 'Check'">Check</button>
-                      </div>
-
-                      <!-- ACH sub-options -->
-                      <div v-if="blPaymentMethod === 'ACH'" class="bl-subsection">
-                        <p class="lc-hcn-label">ACH Method <span class="bl-required">*</span></p>
-                        <div class="toc-toggle-group">
-                          <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blAchMethod === 'send' }]" @click="blAchMethod = 'send'">Send to Liviniti</button>
-                          <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blAchMethod === 'debit' }]" @click="blAchMethod = 'debit'">Debited by Liviniti</button>
-                        </div>
-
-                        <!-- B-02: Send to Liviniti — pre-filled downloadable forms -->
-                        <div v-if="blAchMethod === 'send'" class="bl-subsection">
-                          <p class="text-body bl-note">Download Liviniti's completed W-9 and ACH forms for your records.</p>
-                          <div class="bl-download-group">
-                            <button class="button bl-download-btn" @click.prevent>
-                              <CloudDownload :size="16" :stroke-width="2" />
-                              Download W-9 (Liviniti)
-                            </button>
-                            <button class="button bl-download-btn" @click.prevent>
-                              <CloudDownload :size="16" :stroke-width="2" />
-                              Download ACH Form (Liviniti)
-                            </button>
+                    <div class="ap-fields">
+                      <template v-if="!blEditingSetup">
+                        <div class="ap-field-row ap-field-row--multi">
+                          <div class="ap-field">
+                            <span class="ap-field-label">EIN Number</span>
+                            <span class="ap-field-value">{{ blEinNumber || '—' }}</span>
+                          </div>
+                          <div class="ap-field">
+                            <span class="ap-field-label">Billing managed by a third party</span>
+                            <span class="ap-field-value">{{ blExistingParty === 'yes' ? 'Yes' : 'No' }}</span>
+                          </div>
+                          <div v-if="blExistingParty === 'yes'" class="ap-field">
+                            <span class="ap-field-label">Billing Party</span>
+                            <span class="ap-field-value">{{ blSelectedTpa || '—' }}</span>
                           </div>
                         </div>
+                        <div class="ap-field-row">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Responsible Party</span>
+                            <span class="ap-field-value">{{ blResponsibleContacts.length ? blResponsibleContacts.join(', ') : '—' }}</span>
+                          </div>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <div class="form-row">
+                          <TextField :model-value="blEinNumber" label="EIN Number" placeholder="00-0000000" @update:model-value="blEinNumber = formatEin($event)" />
+                        </div>
+                        <div class="bl-section">
+                          <p class="lc-hcn-label">Is billing managed by a third party?</p>
+                          <div class="toc-toggle-group">
+                            <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blExistingParty === 'yes' }]" @click="blExistingParty = 'yes'">Yes</button>
+                            <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blExistingParty === 'no' }]" @click="blExistingParty = 'no'">No</button>
+                          </div>
+                          <div v-if="blExistingParty === 'yes'" class="bl-subsection">
+                            <div class="bl-field-narrow">
+                              <Select v-model="blSelectedTpa" :items="blTpaOptions" label="Select billing party" />
+                            </div>
+                            <p class="text-body bl-note">Don't see the billing party? Third party vendors must be added in SoloRx before they appear here.</p>
+                            <p v-if="blSelectedTpa" class="text-body bl-note">Contacts from the selected billing party will populate the Responsible Party field below.</p>
+                          </div>
+                        </div>
+                        <div class="bl-section">
+                          <p class="lc-hcn-label">Responsible Party</p>
+                          <div class="bl-field-narrow">
+                            <Autocomplete v-model="blResponsibleContacts" :items="blResponsibleContactOptions" label="Select contacts" :multiple="true" />
+                          </div>
+                        </div>
+                        <div class="ap-section-footer">
+                          <button class="button button-primary" @click="blEditingSetup = false">Save Changes</button>
+                          <button class="button button-secondary" @click="blEditingSetup = false">Cancel</button>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
 
-                        <!-- B-02/B-03: Debited by Liviniti — blank forms + upload -->
-                        <div v-else-if="blAchMethod === 'debit'" class="bl-subsection">
-                          <p class="text-body bl-note">Download, complete, and upload the signed W-9 and ACH authorization forms.</p>
+                  <!-- Card 2: Payment Method (hidden when third party = Yes) -->
+                  <div v-if="blExistingParty === 'no'" class="ap-section">
+                    <div class="ap-section-header">
+                      <h4 class="text-h4">Payment Method</h4>
+                      <button v-if="!blEditingPayment" class="button button-thirtiary" @click="blEditingPayment = true">
+                        <Pencil :size="14" :stroke-width="1.5" />Edit
+                      </button>
+                    </div>
+                    <div class="ap-fields">
+                      <template v-if="!blEditingPayment">
+                        <div class="ap-field-row ap-field-row--multi">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Payment Method</span>
+                            <span class="ap-field-value">{{ blPaymentMethod || '—' }}</span>
+                          </div>
+                          <div v-if="blPaymentMethod === 'ACH'" class="ap-field">
+                            <span class="ap-field-label">ACH Method</span>
+                            <span class="ap-field-value">{{ blAchMethod === 'send' ? 'Send to Liviniti' : blAchMethod === 'debit' ? 'Debited by Liviniti' : '—' }}</span>
+                          </div>
+                          <div v-if="blAchMethod === 'debit'" class="ap-field">
+                            <span class="ap-field-label">Debit Pull Timing</span>
+                            <span class="ap-field-value">{{ blDebitTiming || '—' }}</span>
+                          </div>
+                        </div>
+                        <div v-if="blAchMethod === 'debit'" class="ap-field-row ap-field-row--multi">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Completed W-9</span>
+                            <span class="ap-field-value">{{ blW9File || 'Not uploaded' }}</span>
+                          </div>
+                          <div class="ap-field">
+                            <span class="ap-field-label">Completed ACH Authorization</span>
+                            <span class="ap-field-value">{{ blAchAuthFile || 'Not uploaded' }}</span>
+                          </div>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <div class="bl-section">
+                          <p class="lc-hcn-label">Payment Method</p>
+                          <div class="toc-toggle-group">
+                            <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blPaymentMethod === 'ACH' }]" @click="blPaymentMethod = 'ACH'">ACH</button>
+                            <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blPaymentMethod === 'Check' }]" @click="blPaymentMethod = 'Check'">Check</button>
+                          </div>
+                          <div v-if="blPaymentMethod === 'ACH'" class="bl-subsection">
+                            <p class="lc-hcn-label">ACH Method <span class="bl-required">*</span></p>
+                            <div class="toc-toggle-group">
+                              <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blAchMethod === 'send' }]" @click="blAchMethod = 'send'">Send to Liviniti</button>
+                              <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blAchMethod === 'debit' }]" @click="blAchMethod = 'debit'">Debited by Liviniti</button>
+                            </div>
+                            <div v-if="blAchMethod === 'send'" class="bl-subsection">
+                              <p class="text-body bl-note">Download Liviniti's completed W-9 and ACH forms for your records.</p>
+                              <div class="bl-download-group">
+                                <button class="button bl-download-btn" @click.prevent>
+                                  <CloudDownload :size="16" :stroke-width="2" />Download W-9 (Liviniti)
+                                </button>
+                                <button class="button bl-download-btn" @click.prevent>
+                                  <CloudDownload :size="16" :stroke-width="2" />Download ACH Form (Liviniti)
+                                </button>
+                              </div>
+                            </div>
+                            <div v-else-if="blAchMethod === 'debit'" class="bl-subsection">
+                              <p class="text-body bl-note">Download, complete, and upload the signed W-9 and ACH authorization forms.</p>
+                              <div class="bl-download-group">
+                                <button class="button bl-download-btn" @click.prevent>
+                                  <CloudDownload :size="16" :stroke-width="2" />Download Blank W-9
+                                </button>
+                                <button class="button bl-download-btn" @click.prevent>
+                                  <CloudDownload :size="16" :stroke-width="2" />Download ACH Authorization Form
+                                </button>
+                              </div>
+                              <div class="bl-upload-item">
+                                <p class="lc-hcn-label">Completed W-9</p>
+                                <template v-if="blW9File && !blPendingW9Removal">
+                                  <v-chip color="primary" variant="flat" class="bl-file-chip">
+                                    <Paperclip :size="12" :stroke-width="2" class="bl-file-chip-icon" />
+                                    <span class="bl-file-chip-label">{{ blW9File }}</span>
+                                    <span class="bl-file-chip-close" @click.stop="blPendingW9Removal = true"><X :size="10" :stroke-width="2.5" /></span>
+                                  </v-chip>
+                                </template>
+                                <FileUploader v-else :show-document-type-selection="false" @file-selected="(name) => { blW9File = name; blPendingW9Removal = false }" />
+                              </div>
+                              <div class="bl-upload-item">
+                                <p class="lc-hcn-label">Completed ACH Authorization</p>
+                                <template v-if="blAchAuthFile && !blPendingAchAuthRemoval">
+                                  <v-chip color="primary" variant="flat" class="bl-file-chip">
+                                    <Paperclip :size="12" :stroke-width="2" class="bl-file-chip-icon" />
+                                    <span class="bl-file-chip-label">{{ blAchAuthFile }}</span>
+                                    <span class="bl-file-chip-close" @click.stop="blPendingAchAuthRemoval = true"><X :size="10" :stroke-width="2.5" /></span>
+                                  </v-chip>
+                                </template>
+                                <FileUploader v-else :show-document-type-selection="false" @file-selected="(name) => { blAchAuthFile = name; blPendingAchAuthRemoval = false }" />
+                              </div>
+                            </div>
+                            <div v-if="blAchMethod === 'debit'" class="bl-subsection">
+                              <p class="lc-hcn-label">Debit Pull Timing</p>
+                              <div class="bl-field-narrow">
+                                <Select v-model="blDebitTiming" :items="blDebitTimingOptions" label="Select timing" />
+                              </div>
+                              <div v-if="blDebitTiming === 'Prior approval required'" class="bl-subsection">
+                                <TextField v-model="blDebitApprovalEmail" label="Approval notification email" />
+                              </div>
+                              <div v-if="blDebitTiming === 'Custom'" class="bl-subsection">
+                                <v-textarea v-model="blDebitTimingNote" label="Describe the debit pull schedule" variant="outlined" density="compact" rows="2" auto-grow hide-details class="bl-notes-textarea" />
+                              </div>
+                            </div>
+                          </div>
+                          <div v-if="blPaymentMethod === 'Check'" class="bl-subsection">
+                            <p class="text-body bl-note">Please send all checks to the following address:</p>
+                            <div class="bl-address">
+                              <p>Liviniti</p>
+                              <p>PO Box 896599</p>
+                              <p>Charlotte, NC 28289</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="ap-section-footer">
+                          <button class="button button-primary" @click="savePaymentCard">Save Changes</button>
+                          <button class="button button-secondary" @click="cancelPaymentCard">Cancel</button>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+
+                  <!-- Card 3: Invoice Configuration -->
+                  <div class="ap-section">
+                    <div class="ap-section-header">
+                      <h4 class="text-h4">Invoice Configuration</h4>
+                      <button v-if="!blEditingInvoice" class="button button-thirtiary" @click="blEditingInvoice = true">
+                        <Pencil :size="14" :stroke-width="1.5" />Edit
+                      </button>
+                    </div>
+                    <div class="ap-fields">
+                      <template v-if="!blEditingInvoice">
+                        <div class="ap-field-row ap-field-row--multi">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Billing Cycle</span>
+                            <span class="ap-field-value">{{ blBillingCycle || '—' }}</span>
+                          </div>
+                          <div class="ap-field">
+                            <span class="ap-field-label">Separate Invoices</span>
+                            <span class="ap-field-value">{{ blSeparateInvoices === 'yes' ? `Yes — ${blSeparateInvoicesSplit || 'split not set'}` : 'No' }}</span>
+                          </div>
+                          <div class="ap-field">
+                            <span class="ap-field-label">Invoice Breakout</span>
+                            <span class="ap-field-value">{{ blInvoiceBreakout === 'yes' ? `Yes — ${blInvoiceBreakoutSelection || 'type not set'}` : 'No' }}</span>
+                          </div>
+                        </div>
+                        <div v-if="blBillingCycle === 'Custom'" class="ap-field-row">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Billing Schedule Note</span>
+                            <span class="ap-field-value">{{ blCustomCycleNote || '—' }}</span>
+                          </div>
+                        </div>
+                        <div v-if="blInvoiceBreakoutSelection === 'Custom'" class="ap-field-row">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Custom Breakout Note</span>
+                            <span class="ap-field-value">{{ blInvoiceBreakoutNote || '—' }}</span>
+                          </div>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <div class="bl-section">
+                          <p class="lc-hcn-label">Billing Cycle</p>
+                          <div class="bl-field-narrow">
+                            <Select v-model="blBillingCycle" :items="blCycleOptions" label="Billing Cycle" />
+                          </div>
+                          <div v-if="blBillingCycle === 'Custom'" class="bl-subsection">
+                            <v-textarea v-model="blCustomCycleNote" label="Describe the billing schedule" variant="outlined" density="compact" rows="2" auto-grow hide-details class="bl-notes-textarea" />
+                          </div>
+                        </div>
+                        <div class="bl-section">
+                          <p class="lc-hcn-label">Are separate invoices required?</p>
+                          <div class="toc-toggle-group">
+                            <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blSeparateInvoices === 'no' }]" @click="blSeparateInvoices = 'no'">No</button>
+                            <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blSeparateInvoices === 'yes' }]" @click="blSeparateInvoices = 'yes'">Yes</button>
+                          </div>
+                          <div v-if="blSeparateInvoices === 'yes'" class="bl-subsection-select">
+                            <Select v-model="blSeparateInvoicesSplit" :items="blInvoiceSplitOptions" label="Split invoices by" />
+                          </div>
+                        </div>
+                        <div class="bl-section">
+                          <p class="lc-hcn-label">Are invoice breakouts required?</p>
+                          <div class="toc-toggle-group">
+                            <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blInvoiceBreakout === 'no' }]" @click="blInvoiceBreakout = 'no'">No</button>
+                            <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blInvoiceBreakout === 'yes' }]" @click="blInvoiceBreakout = 'yes'">Yes</button>
+                          </div>
+                          <div v-if="blInvoiceBreakout === 'yes'" class="bl-subsection">
+                            <div class="bl-field-narrow">
+                              <Select v-model="blInvoiceBreakoutSelection" :items="blInvoiceBreakoutItems" label="Select breakout type" />
+                            </div>
+                            <div v-if="blInvoiceBreakoutSelection === 'Custom'" class="bl-custom-warning">
+                              <TriangleAlert :size="16" :stroke-width="2" class="bl-warning-icon" />
+                              <p class="text-body bl-warning-text">Custom invoice breakouts require coordination with Accounting. Open a ticket with Accounting to coordinate setup before proceeding.</p>
+                            </div>
+                            <div v-if="blInvoiceBreakoutSelection === 'Custom'" class="bl-subsection">
+                              <v-textarea v-model="blInvoiceBreakoutNote" label="Describe the custom breakout requirement" variant="outlined" density="compact" rows="2" auto-grow hide-details class="bl-notes-textarea" />
+                            </div>
+                          </div>
+                        </div>
+                        <div class="ap-section-footer">
+                          <button class="button button-primary" @click="blEditingInvoice = false">Save Changes</button>
+                          <button class="button button-secondary" @click="blEditingInvoice = false">Cancel</button>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+
+                  <!-- Card 4: Report Configuration -->
+                  <div class="ap-section">
+                    <div class="ap-section-header">
+                      <h4 class="text-h4">Report Configuration</h4>
+                      <button v-if="!blEditingReport" class="button button-thirtiary" @click="blEditingReport = true">
+                        <Pencil :size="14" :stroke-width="1.5" />Edit
+                      </button>
+                    </div>
+                    <div class="ap-fields">
+                      <template v-if="!blEditingReport">
+                        <div class="ap-field-row ap-field-row--multi">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Show PHI in Billing Reports</span>
+                            <span class="ap-field-value">{{ blIncludePhi === 'yes' ? 'Yes' : 'No' }}</span>
+                          </div>
+                          <div class="ap-field">
+                            <span class="ap-field-label">Reporting Breakouts Required</span>
+                            <span class="ap-field-value">{{ blReportingBreakouts === 'yes' ? 'Yes' : 'No' }}</span>
+                          </div>
+                        </div>
+                        <div v-if="blReportingBreakouts === 'yes'" class="ap-field-row">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Breakout Types</span>
+                            <span class="ap-field-value">{{ blReportingBreakoutSelections.length ? blReportingBreakoutSelections.join(', ') : '—' }}</span>
+                          </div>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <div class="bl-section">
+                          <p class="lc-hcn-label">Show PHI in Billing Reports</p>
+                          <div class="toc-toggle-group">
+                            <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blIncludePhi === 'no' }]" @click="blIncludePhi = 'no'">No</button>
+                            <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blIncludePhi === 'yes' }]" @click="blIncludePhi = 'yes'">Yes</button>
+                          </div>
+                        </div>
+                        <div class="bl-section">
+                          <p class="lc-hcn-label">Are reporting breakouts required?</p>
+                          <div class="toc-toggle-group">
+                            <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blReportingBreakouts === 'no' }]" @click="blReportingBreakouts = 'no'">No</button>
+                            <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blReportingBreakouts === 'yes' }]" @click="blReportingBreakouts = 'yes'">Yes</button>
+                          </div>
+                          <div v-if="blReportingBreakouts === 'yes'" class="bl-subsection">
+                            <div class="bl-field-narrow">
+                              <Autocomplete v-model="blReportingBreakoutSelections" :items="blReportingBreakoutItems" :multiple="true" label="Select breakout types" />
+                            </div>
+                          </div>
+                        </div>
+                        <div class="ap-section-footer">
+                          <button class="button button-primary" @click="blEditingReport = false">Save Changes</button>
+                          <button class="button button-secondary" @click="blEditingReport = false">Cancel</button>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+
+                  <!-- Card 5: Rebate Setup -->
+                  <div class="ap-section">
+                    <div class="ap-section-header">
+                      <h4 class="text-h4">Rebate Setup</h4>
+                      <button v-if="!blEditingRebate" class="button button-thirtiary" @click="blEditingRebate = true">
+                        <Pencil :size="14" :stroke-width="1.5" />Edit
+                      </button>
+                    </div>
+                    <div class="ap-fields">
+                      <template v-if="!blEditingRebate">
+                        <div class="ap-field-row">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Rebate Notification Contacts</span>
+                            <span class="ap-field-value">{{ blRebateContacts.length ? blRebateContacts.join(', ') : '—' }}</span>
+                          </div>
+                        </div>
+                        <div class="ap-field-row ap-field-row--multi">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Completed W-9</span>
+                            <span class="ap-field-value">{{ blRebateW9File || 'Not uploaded' }}</span>
+                          </div>
+                          <div class="ap-field">
+                            <span class="ap-field-label">Completed ACH Authorization</span>
+                            <span class="ap-field-value">{{ blRebateAchAuthFile || 'Not uploaded' }}</span>
+                          </div>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <div class="bl-section">
+                          <p class="lc-hcn-label">Who should receive rebate notifications?</p>
+                          <p class="text-body bl-note">Selected contacts will be notified when rebates are issued.</p>
+                          <div class="bl-field-narrow">
+                            <Autocomplete v-model="blRebateContacts" :items="blRebateContactOptions" label="Select contacts" :multiple="true" />
+                          </div>
+                        </div>
+                        <div class="bl-section">
+                          <p class="lc-hcn-label">Rebate ACH Setup</p>
+                          <p class="text-body bl-note">Download, complete, and upload the signed W-9 and ACH authorization forms for rebate payments.</p>
                           <div class="bl-download-group">
                             <button class="button bl-download-btn" @click.prevent>
-                              <CloudDownload :size="16" :stroke-width="2" />
-                              Download Blank W-9
+                              <CloudDownload :size="16" :stroke-width="2" />Download Blank W-9
                             </button>
                             <button class="button bl-download-btn" @click.prevent>
-                              <CloudDownload :size="16" :stroke-width="2" />
-                              Download ACH Authorization Form
+                              <CloudDownload :size="16" :stroke-width="2" />Download ACH Authorization Form
                             </button>
                           </div>
                           <div class="bl-upload-item">
                             <p class="lc-hcn-label">Completed W-9</p>
-                            <FileUploader :show-document-type-selection="false" />
+                            <template v-if="blRebateW9File && !blPendingRebateW9Removal">
+                              <v-chip color="primary" variant="flat" class="bl-file-chip">
+                                <Paperclip :size="12" :stroke-width="2" class="bl-file-chip-icon" />
+                                <span class="bl-file-chip-label">{{ blRebateW9File }}</span>
+                                <span class="bl-file-chip-close" @click.stop="blPendingRebateW9Removal = true"><X :size="10" :stroke-width="2.5" /></span>
+                              </v-chip>
+                            </template>
+                            <FileUploader v-else :show-document-type-selection="false" @file-selected="(name) => { blRebateW9File = name; blPendingRebateW9Removal = false }" />
                           </div>
                           <div class="bl-upload-item">
                             <p class="lc-hcn-label">Completed ACH Authorization</p>
-                            <FileUploader :show-document-type-selection="false" />
+                            <template v-if="blRebateAchAuthFile && !blPendingRebateAchAuthRemoval">
+                              <v-chip color="primary" variant="flat" class="bl-file-chip">
+                                <Paperclip :size="12" :stroke-width="2" class="bl-file-chip-icon" />
+                                <span class="bl-file-chip-label">{{ blRebateAchAuthFile }}</span>
+                                <span class="bl-file-chip-close" @click.stop="blPendingRebateAchAuthRemoval = true"><X :size="10" :stroke-width="2.5" /></span>
+                              </v-chip>
+                            </template>
+                            <FileUploader v-else :show-document-type-selection="false" @file-selected="(name) => { blRebateAchAuthFile = name; blPendingRebateAchAuthRemoval = false }" />
                           </div>
                         </div>
+                        <div class="ap-section-footer">
+                          <button class="button button-primary" @click="saveRebateCard">Save Changes</button>
+                          <button class="button button-secondary" @click="cancelRebateCard">Cancel</button>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
 
-                        <!-- B-04: Debit pull timing -->
-                        <div v-if="blAchMethod === 'debit'" class="bl-subsection">
-                          <p class="lc-hcn-label">Debit Pull Timing</p>
-                          <div class="bl-field-narrow">
-                            <Select
-                              v-model="blDebitTiming"
-                              :items="blDebitTimingOptions"
-                              label="Select timing"
-                            />
-                          </div>
-                          <div v-if="blDebitTiming === 'Prior approval required'" class="bl-subsection">
-                            <TextField
-                              v-model="blDebitApprovalEmail"
-                              label="Approval notification email"
-                            />
-                          </div>
-                          <div v-if="blDebitTiming === 'Custom'" class="bl-subsection">
-                            <v-textarea
-                              v-model="blDebitTimingNote"
-                              label="Describe the debit pull schedule"
-                              variant="outlined"
-                              density="compact"
-                              rows="2"
-                              auto-grow
-                              hide-details
-                              class="bl-notes-textarea"
-                            />
+                  <!-- Card 6: Billing Notes -->
+                  <div class="ap-section">
+                    <div class="ap-section-header">
+                      <h4 class="text-h4">Billing Notes</h4>
+                      <button v-if="!blEditingNotes" class="button button-thirtiary" @click="blEditingNotes = true">
+                        <Pencil :size="14" :stroke-width="1.5" />Edit
+                      </button>
+                    </div>
+                    <div class="ap-fields">
+                      <template v-if="!blEditingNotes">
+                        <div class="ap-field-row">
+                          <div class="ap-field">
+                            <span class="ap-field-value">{{ blNotes || '—' }}</span>
                           </div>
                         </div>
-                      </div>
-
-                      <!-- Check mailing address -->
-                      <div v-if="blPaymentMethod === 'Check'" class="bl-subsection">
-                        <p class="text-body bl-note">Please send all checks to the following address:</p>
-                        <div class="bl-address">
-                          <p>Liviniti</p>
-                          <p>PO Box 896599</p>
-                          <p>Charlotte, NC 28289</p>
+                      </template>
+                      <template v-else>
+                        <div class="bl-section">
+                          <v-textarea v-model="blNotes" label="Billing Notes" hint="For special billing instructions only." persistent-hint variant="outlined" density="compact" rows="3" auto-grow class="bl-notes-textarea" />
                         </div>
-                      </div>
+                        <div class="ap-section-footer">
+                          <button class="button button-primary" @click="blEditingNotes = false">Save Changes</button>
+                          <button class="button button-secondary" @click="blEditingNotes = false">Cancel</button>
+                        </div>
+                      </template>
                     </div>
-                  </template>
-
-                  <div class="lc-section-divider" />
-
-                  <!-- B-05: Responsible Party (multi-select dropdown) -->
-                  <div class="bl-section">
-                    <p class="lc-hcn-label">Responsible Party</p>
-                    <div class="bl-field-narrow">
-                      <Autocomplete
-                        v-model="blResponsibleContacts"
-                        :items="blResponsibleContactOptions"
-                        label="Select contacts"
-                        :multiple="true"
-                      />
-                    </div>
-                  </div>
-
-                  <!-- B-14: Rebate Notifications (multi-select dropdown) -->
-                  <div class="bl-section">
-                    <p class="lc-hcn-label">Who should receive rebate notifications?</p>
-                    <p class="text-body bl-note">Selected contacts will be notified when rebates are issued.</p>
-                    <div class="bl-field-narrow">
-                      <Autocomplete
-                        v-model="blRebateContacts"
-                        :items="blRebateContactOptions"
-                        label="Select contacts"
-                        :multiple="true"
-                      />
-                    </div>
-                  </div>
-
-                  <div class="lc-section-divider" />
-                  <h4 class="text-h4 bl-section-heading">Billing Report Configuration</h4>
-
-                  <!-- B-07: PHI toggle (replaces Include Claim Details) -->
-                  <div class="bl-section">
-                    <p class="lc-hcn-label">Show PHI in Billing Reports</p>
-                    <div class="toc-toggle-group">
-                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blIncludePhi === 'no' }]" @click="blIncludePhi = 'no'">No</button>
-                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blIncludePhi === 'yes' }]" @click="blIncludePhi = 'yes'">Yes</button>
-                    </div>
-                  </div>
-
-                  <!-- B-11: Billing Cycle -->
-                  <div class="bl-section">
-                    <p class="lc-hcn-label">Billing Cycle</p>
-                    <div class="bl-field-narrow">
-                      <Select
-                        v-model="blBillingCycle"
-                        :items="blCycleOptions"
-                        label="Billing Cycle"
-                      />
-                    </div>
-                    <div v-if="blBillingCycle === 'Custom'" class="bl-subsection">
-                      <v-textarea
-                        v-model="blCustomCycleNote"
-                        label="Describe the billing schedule"
-                        variant="outlined"
-                        density="compact"
-                        rows="2"
-                        auto-grow
-                        hide-details
-                        class="bl-notes-textarea"
-                      />
-                    </div>
-                  </div>
-
-                  <!-- B-08/B-09: Reporting Breakouts (multi-select) -->
-                  <div class="bl-section">
-                    <p class="lc-hcn-label">Are reporting breakouts required?</p>
-                    <div class="toc-toggle-group">
-                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blReportingBreakouts === 'no' }]" @click="blReportingBreakouts = 'no'">No</button>
-                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blReportingBreakouts === 'yes' }]" @click="blReportingBreakouts = 'yes'">Yes</button>
-                    </div>
-                    <div v-if="blReportingBreakouts === 'yes'" class="bl-subsection">
-                      <div class="bl-field-narrow">
-                        <Autocomplete v-model="blReportingBreakoutSelections" :items="blReportingBreakoutItems" :multiple="true" label="Select breakout types" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- B-20: Separate Invoices -->
-                  <div class="bl-section">
-                    <p class="lc-hcn-label">Are separate invoices required?</p>
-                    <div class="toc-toggle-group">
-                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blSeparateInvoices === 'no' }]" @click="blSeparateInvoices = 'no'">No</button>
-                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blSeparateInvoices === 'yes' }]" @click="blSeparateInvoices = 'yes'">Yes</button>
-                    </div>
-                    <div v-if="blSeparateInvoices === 'yes'" class="bl-subsection-select">
-                      <Select
-                        v-model="blSeparateInvoicesSplit"
-                        :items="blInvoiceSplitOptions"
-                        label="Split invoices by"
-                      />
-                    </div>
-                  </div>
-
-                  <!-- B-12: Invoice Breakout (multi-select, Custom warning) -->
-                  <div class="bl-section">
-                    <p class="lc-hcn-label">Are invoice breakouts required?</p>
-                    <div class="toc-toggle-group">
-                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blInvoiceBreakout === 'no' }]" @click="blInvoiceBreakout = 'no'">No</button>
-                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blInvoiceBreakout === 'yes' }]" @click="blInvoiceBreakout = 'yes'">Yes</button>
-                    </div>
-                    <div v-if="blInvoiceBreakout === 'yes'" class="bl-subsection">
-                      <div class="bl-field-narrow">
-                        <Select v-model="blInvoiceBreakoutSelection" :items="blInvoiceBreakoutItems" label="Select breakout type" />
-                      </div>
-                      <div v-if="blInvoiceBreakoutSelection === 'Custom'" class="bl-custom-warning">
-                        <TriangleAlert :size="16" :stroke-width="2" class="bl-warning-icon" />
-                        <p class="text-body bl-warning-text">Custom invoice breakouts require coordination with Accounting. Open a ticket with Accounting to coordinate setup before proceeding.</p>
-                      </div>
-                      <div v-if="blInvoiceBreakoutSelection === 'Custom'" class="bl-subsection">
-                        <v-textarea
-                          v-model="blInvoiceBreakoutNote"
-                          label="Describe the custom breakout requirement"
-                          variant="outlined"
-                          density="compact"
-                          rows="2"
-                          auto-grow
-                          hide-details
-                          class="bl-notes-textarea"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="lc-section-divider" />
-
-                  <!-- Billing Notes (B-10) -->
-                  <div class="bl-section">
-                    <v-textarea
-                      v-model="blNotes"
-                      label="Billing Notes"
-                      hint="For special billing instructions only."
-                      persistent-hint
-                      variant="outlined"
-                      density="compact"
-                      rows="3"
-                      auto-grow
-                      class="bl-notes-textarea"
-                    />
-                  </div>
                   </div>
 
                 </template>
@@ -2240,7 +2390,7 @@ import {
   Hourglass, CircleCheckBig, XCircle,
   Save as SaveIcon, LayoutList as LayoutListIcon, CircleCheck as CircleCheckIcon,
   ArrowRight as ArrowRightIcon, Pencil, CheckSquare, Square, ChevronDown, PlusCircle, X, Check, CloudDownload, TriangleAlert,
-  Building2, Shield, Link2, Users, FileText, Search, Globe, Trash2,
+  Building2, Shield, Link2, Users, FileText, Search, Globe, Trash2, Paperclip,
 } from 'lucide-vue-next';
 import EmptyStateImg from '@/assets/EmptyState.svg';
 import { VRow, VCol, VProgressCircular } from 'vuetify/components';
@@ -2363,7 +2513,11 @@ const lcDawPenalties = ref([
 
 // ─── Step 7: Billing ─────────────────────────────────────────────────────────
 
-const blEinNumber = ref('111111111');
+const blEinNumber = ref('');
+const formatEin = (val: string) => {
+  const digits = val.replace(/\D/g, '').slice(0, 9);
+  return digits.length > 2 ? `${digits.slice(0, 2)}-${digits.slice(2)}` : digits;
+};
 
 // B-21: Existing billing party
 const blExistingParty = ref('no');
@@ -2372,7 +2526,7 @@ const blSelectedTpa = ref('');
 
 // B-01/B-02: Payment method
 const blPaymentMethod = ref('ACH');
-const blAchMethod = ref('send');
+const blAchMethod = ref('debit');
 
 // B-04: Debit pull timing
 const blDebitTiming = ref('');
@@ -2390,7 +2544,7 @@ const blResponsibleContactOptions = computed(() => {
   return apClientContacts.value.map(c => c.name);
 });
 const blRebateContactOptions = computed(() => apClientContacts.value.map(c => c.name));
-const blResponsibleContacts = ref<string[]>(['Nick Johnson']);
+const blResponsibleContacts = ref<string[]>([]);
 const blRebateContacts = ref<string[]>([]);
 watch([() => blExistingParty.value, () => blSelectedTpa.value], () => {
   blResponsibleContacts.value = [];
@@ -2400,8 +2554,8 @@ watch([() => blExistingParty.value, () => blSelectedTpa.value], () => {
 const blIncludePhi = ref('no');
 
 // B-11: Billing cycle
-const blBillingCycle = ref('Weekly');
-const blCycleOptions = ['Weekly', 'Bi-Weekly', 'Monthly', 'Quad-Monthly', 'Custom'];
+const blBillingCycle = ref('');
+const blCycleOptions = ['Weekly', 'Bi-Weekly', 'Semi-Monthly', 'Monthly', 'Quad-Monthly', 'Custom'];
 const blCustomCycleNote = ref('');
 
 // B-20: Separate invoices
@@ -2432,6 +2586,51 @@ const blInvoiceBreakoutItems = ['AR Type', 'Employee Location', 'Member', 'Emplo
 const blInvoiceBreakoutNote = ref('');
 
 const blNotes = ref('');
+
+const blEditingSetup = ref(false);
+const blEditingPayment = ref(false);
+const blEditingInvoice = ref(false);
+const blEditingReport = ref(false);
+const blEditingRebate = ref(false);
+const blEditingNotes = ref(false);
+
+// ACH upload state — Payment Method card
+const blW9File = ref<string | null>(null);
+const blAchAuthFile = ref<string | null>(null);
+const blPendingW9Removal = ref(false);
+const blPendingAchAuthRemoval = ref(false);
+
+const savePaymentCard = () => {
+  if (blPendingW9Removal.value) blW9File.value = null;
+  blPendingW9Removal.value = false;
+  if (blPendingAchAuthRemoval.value) blAchAuthFile.value = null;
+  blPendingAchAuthRemoval.value = false;
+  blEditingPayment.value = false;
+};
+const cancelPaymentCard = () => {
+  blPendingW9Removal.value = false;
+  blPendingAchAuthRemoval.value = false;
+  blEditingPayment.value = false;
+};
+
+// ACH upload state — Rebate Setup card
+const blRebateW9File = ref<string | null>(null);
+const blRebateAchAuthFile = ref<string | null>(null);
+const blPendingRebateW9Removal = ref(false);
+const blPendingRebateAchAuthRemoval = ref(false);
+
+const saveRebateCard = () => {
+  if (blPendingRebateW9Removal.value) blRebateW9File.value = null;
+  blPendingRebateW9Removal.value = false;
+  if (blPendingRebateAchAuthRemoval.value) blRebateAchAuthFile.value = null;
+  blPendingRebateAchAuthRemoval.value = false;
+  blEditingRebate.value = false;
+};
+const cancelRebateCard = () => {
+  blPendingRebateW9Removal.value = false;
+  blPendingRebateAchAuthRemoval.value = false;
+  blEditingRebate.value = false;
+};
 
 // ─── Step 8: ID Cards ─────────────────────────────────────────────────────────
 const idVendorType = ref('Internal');
@@ -2770,7 +2969,13 @@ const apVendorContactHeaders = [
   { title: 'Phone', key: 'phone' },
   { title: '', key: 'actions', sortable: false },
 ];
-const apVendorContacts = ref<{ name: string; vendor: string; email: string; phone: string }[]>([]);
+const apVendorContacts = ref<{ name: string; vendor: string; email: string; phone: string }[]>([
+  { name: 'Mark Tillman', vendor: 'Southern Scripts TPA', email: 'mtillman@sstpa.com', phone: '(704) 555-0121' },
+  { name: 'Dana Osei', vendor: 'Southern Scripts TPA', email: 'dosei@sstpa.com', phone: '(704) 555-0122' },
+  { name: 'Rachel Vance', vendor: 'Acclaim Benefits', email: 'rvance@acclaim.com', phone: '(615) 555-0188' },
+  { name: 'James Pruitt', vendor: 'Acclaim Benefits', email: 'jpruitt@acclaim.com', phone: '(615) 555-0189' },
+  { name: 'Tara Mendez', vendor: 'Benefit Advantage', email: 'tmendez@benefitadv.com', phone: '(512) 555-0144' },
+]);
 const apShowVendorContactDialog = ref(false);
 const apVendorContactSelections = ref<string[]>([]);
 const apVendorContactData = [
@@ -4862,6 +5067,44 @@ watch(selectedAccount, (newVal) => {
 
 .bl-upload-item {
   margin-top: $spacing-medium;
+}
+
+.bl-file-chip {
+  padding: 0 8px;
+
+  :deep(.v-chip__content) {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .bl-file-chip-icon {
+    color: $color-neutral-white;
+    flex-shrink: 0;
+  }
+
+  .bl-file-chip-label {
+    color: $color-neutral-white;
+    font-size: $font-size-small;
+  }
+
+  .bl-file-chip-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background-color: $color-neutral-white;
+    color: $color-primary;
+    cursor: pointer;
+    flex-shrink: 0;
+    opacity: 0.9;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
 }
 
 .bl-address {

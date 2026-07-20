@@ -84,6 +84,10 @@ const props = withDefaults(defineProps<Props>(), {
   showDocumentTypeSelection: true,
 });
 
+const emit = defineEmits<{
+  (e: 'file-selected', filename: string): void;
+}>();
+
 const documentType = ref('phi');
 const isDragOver = ref(false);
 const fileInput = ref<HTMLInputElement | null>(null);
@@ -115,9 +119,9 @@ const handleFileChange = (event: Event) => {
 };
 
 const handleFiles = (files: FileList) => {
-  console.log('Selected files:', files);
-  // Implement actual file upload logic here
-  // e.g., upload to server, display progress, etc.
+  if (files.length > 0) {
+    emit('file-selected', files[0].name);
+  }
 };
 </script>
 
