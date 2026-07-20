@@ -44,7 +44,7 @@
       <SummaryWidget
         title="Prior Authorizations"
         count="8"
-        description="Requests needing review"
+        :description="`Requests needing review · Avg TAT ${activeData.priorAuthAvgTat}`"
         :showIcon="true"
         :icon="RotateCcwKey"
         iconBackgroundColor="#E0F2F7"
@@ -58,6 +58,10 @@
       :always-show="true"
       :message="executiveSummaryMessage"
     />
+
+    <p class="dashboard-context-line text-small">
+      {{ activeData.memberCount }} Members · {{ activeData.employeeCount }} Employees · {{ activeData.prescriptionCount }} Prescriptions
+    </p>
 
     <div class="kpi-container">
       <KpiStatCard
@@ -88,6 +92,24 @@
         label="PMPM"
         :value="activeData.pmpm.value"
         :deltaValue="activeData.pmpm.delta"
+        deltaDirection="up"
+      />
+      <KpiStatCard
+        label="Rx PMPM"
+        :value="activeData.rxPmpm.value"
+        :deltaValue="activeData.rxPmpm.delta"
+        deltaDirection="up"
+      />
+      <KpiStatCard
+        label="Rx PEPM"
+        :value="activeData.rxPepm.value"
+        :deltaValue="activeData.rxPepm.delta"
+        deltaDirection="up"
+      />
+      <KpiStatCard
+        label="Member Cost Share"
+        :value="activeData.memberCostShare.value"
+        :deltaValue="activeData.memberCostShare.delta"
         deltaDirection="up"
       />
     </div>
@@ -127,6 +149,13 @@
         />
       </PageCard>
     </div>
+
+    <PageCard headerText="Top Cost Drivers" :descriptionText="activeData.summaryLabel">
+      <TopDriversCard
+        :top-brand-medications="activeData.topBrandMedications"
+        :top-therapeutic-classes="activeData.topTherapeuticClasses"
+      />
+    </PageCard>
   </div>
 </template>
 
@@ -140,6 +169,7 @@ import SummaryWidget from '../components/common/SummaryWidget.vue';
 import SavingsBreakdownChart from '../components/common/SavingsBreakdownChart.vue';
 import UtilizationDriversChart from '../components/common/UtilizationDriversChart.vue';
 import CategoryTrendChart from '../components/common/CategoryTrendChart.vue';
+import TopDriversCard from '../components/common/TopDriversCard.vue';
 import Select from '../components/ui/Select.vue';
 import SegmentedToggle from '../components/ui/SegmentedToggle.vue';
 import { CircleCheckBig, ChartNoAxesCombined, RotateCcwKey } from 'lucide-vue-next';
@@ -187,6 +217,13 @@ interface PeriodDashboardData {
   utilization: { value: number; delta: string };
   paid: { value: string; delta: string };
   pmpm: { value: string; delta: string };
+  memberCount: string;
+  employeeCount: string;
+  prescriptionCount: string;
+  rxPmpm: { value: string; delta: string };
+  rxPepm: { value: string; delta: string };
+  memberCostShare: { value: string; delta: string };
+  priorAuthAvgTat: string;
   savingsBreakdownItems: { label: string; value: string; percent: number; color: string }[];
   claimsCounts: { month: string; count: number }[];
   monthlyUtilization?: { month: string; value: number }[];
@@ -194,6 +231,8 @@ interface PeriodDashboardData {
   paidPlan: { category: string; value: number }[];
   monthlyDispenseRate?: { month: string; Specialty: number; Generic: number; Brand: number }[];
   monthlyPaidPlan?: { month: string; Specialty: number; Generic: number; Brand: number }[];
+  topBrandMedications: { name: string; percentOfCost: number }[];
+  topTherapeuticClasses: { name: string; percentOfCost: number }[];
 }
 
 type AccountDashboardData = Record<PeriodKey, PeriodDashboardData>;
@@ -207,6 +246,13 @@ const dashboardDataByAccount: Record<string, AccountDashboardData> = {
       utilization: { value: 49, delta: '1 pts' },
       paid: { value: '$293M', delta: '6%' },
       pmpm: { value: '$293.03', delta: '7%' },
+      memberCount: '12,400',
+      employeeCount: '340',
+      prescriptionCount: '1.3M',
+      rxPmpm: { value: '$248.60', delta: '6%' },
+      rxPepm: { value: '$897.40', delta: '5%' },
+      memberCostShare: { value: '18.2%', delta: '1 pts' },
+      priorAuthAvgTat: '2.1 days',
       savingsBreakdownItems: [
         { label: 'VCP', value: '$6.91M', percent: 39, color: '#0F285B' },
         { label: 'Avoided Fees', value: '$3.62M', percent: 20, color: '#2C82CB' },
@@ -255,6 +301,20 @@ const dashboardDataByAccount: Record<string, AccountDashboardData> = {
         { month: 'May', Specialty: 24.30, Generic: 3.83, Brand: 22.50 },
         { month: 'Jun', Specialty: 24.67, Generic: 3.89, Brand: 22.82 },
       ],
+      topBrandMedications: [
+        { name: 'Humira', percentOfCost: 8.4 },
+        { name: 'Ozempic', percentOfCost: 7.1 },
+        { name: 'Trulicity', percentOfCost: 5.6 },
+        { name: 'Skyrizi', percentOfCost: 4.2 },
+        { name: 'Eliquis', percentOfCost: 3.8 },
+      ],
+      topTherapeuticClasses: [
+        { name: 'Diabetes', percentOfCost: 14.2 },
+        { name: 'Autoimmune', percentOfCost: 11.8 },
+        { name: 'Oncology', percentOfCost: 9.5 },
+        { name: 'Cardiovascular', percentOfCost: 7.3 },
+        { name: 'Respiratory', percentOfCost: 5.1 },
+      ],
     },
     month: {
       summaryLabel: 'June 2026',
@@ -263,6 +323,13 @@ const dashboardDataByAccount: Record<string, AccountDashboardData> = {
       utilization: { value: 51, delta: '2 pts' },
       paid: { value: '$51.2M', delta: '8%' },
       pmpm: { value: '$298.10', delta: '5%' },
+      memberCount: '12,400',
+      employeeCount: '340',
+      prescriptionCount: '223K',
+      rxPmpm: { value: '$252.90', delta: '5%' },
+      rxPepm: { value: '$914.20', delta: '6%' },
+      memberCostShare: { value: '18.6%', delta: '1 pts' },
+      priorAuthAvgTat: '1.9 days',
       savingsBreakdownItems: [
         { label: 'VCP', value: '$1.18M', percent: 40, color: '#0F285B' },
         { label: 'Avoided Fees', value: '$0.58M', percent: 20, color: '#2C82CB' },
@@ -285,6 +352,20 @@ const dashboardDataByAccount: Record<string, AccountDashboardData> = {
         { category: 'Generic', value: 0.68 },
         { category: 'Brand', value: 4.02 },
       ],
+      topBrandMedications: [
+        { name: 'Humira', percentOfCost: 8.1 },
+        { name: 'Ozempic', percentOfCost: 7.4 },
+        { name: 'Trulicity', percentOfCost: 5.8 },
+        { name: 'Skyrizi', percentOfCost: 4.3 },
+        { name: 'Eliquis', percentOfCost: 3.6 },
+      ],
+      topTherapeuticClasses: [
+        { name: 'Diabetes', percentOfCost: 14.6 },
+        { name: 'Autoimmune', percentOfCost: 11.5 },
+        { name: 'Oncology', percentOfCost: 9.7 },
+        { name: 'Cardiovascular', percentOfCost: 7.1 },
+        { name: 'Respiratory', percentOfCost: 4.9 },
+      ],
     },
   },
   '1': {
@@ -295,6 +376,13 @@ const dashboardDataByAccount: Record<string, AccountDashboardData> = {
       utilization: { value: 44, delta: '2 pts' },
       paid: { value: '$21.6M', delta: '5%' },
       pmpm: { value: '$268.11', delta: '4%' },
+      memberCount: '1,200',
+      employeeCount: '32',
+      prescriptionCount: '84K',
+      rxPmpm: { value: '$226.40', delta: '4%' },
+      rxPepm: { value: '$798.10', delta: '4%' },
+      memberCostShare: { value: '17.4%', delta: '1 pts' },
+      priorAuthAvgTat: '2.4 days',
       savingsBreakdownItems: [
         { label: 'VCP', value: '$0.58M', percent: 41, color: '#0F285B' },
         { label: 'Avoided Fees', value: '$0.28M', percent: 20, color: '#2C82CB' },
@@ -343,6 +431,20 @@ const dashboardDataByAccount: Record<string, AccountDashboardData> = {
         { month: 'May', Specialty: 1.89, Generic: 0.31, Brand: 1.71 },
         { month: 'Jun', Specialty: 1.92, Generic: 0.31, Brand: 1.74 },
       ],
+      topBrandMedications: [
+        { name: 'Humira', percentOfCost: 7.8 },
+        { name: 'Ozempic', percentOfCost: 6.9 },
+        { name: 'Trulicity', percentOfCost: 5.2 },
+        { name: 'Skyrizi', percentOfCost: 3.9 },
+        { name: 'Eliquis', percentOfCost: 3.4 },
+      ],
+      topTherapeuticClasses: [
+        { name: 'Diabetes', percentOfCost: 13.5 },
+        { name: 'Autoimmune', percentOfCost: 10.9 },
+        { name: 'Oncology', percentOfCost: 8.8 },
+        { name: 'Cardiovascular', percentOfCost: 6.7 },
+        { name: 'Respiratory', percentOfCost: 4.6 },
+      ],
     },
     month: {
       summaryLabel: 'June 2026',
@@ -351,6 +453,13 @@ const dashboardDataByAccount: Record<string, AccountDashboardData> = {
       utilization: { value: 46, delta: '1 pts' },
       paid: { value: '$3.68M', delta: '4%' },
       pmpm: { value: '$271.90', delta: '3%' },
+      memberCount: '1,200',
+      employeeCount: '32',
+      prescriptionCount: '14.1K',
+      rxPmpm: { value: '$229.80', delta: '3%' },
+      rxPepm: { value: '$806.50', delta: '4%' },
+      memberCostShare: { value: '17.6%', delta: '1 pts' },
+      priorAuthAvgTat: '2.2 days',
       savingsBreakdownItems: [
         { label: 'VCP', value: '$0.10M', percent: 41, color: '#0F285B' },
         { label: 'Avoided Fees', value: '$0.05M', percent: 20, color: '#2C82CB' },
@@ -373,6 +482,20 @@ const dashboardDataByAccount: Record<string, AccountDashboardData> = {
         { category: 'Generic', value: 0.05 },
         { category: 'Brand', value: 0.30 },
       ],
+      topBrandMedications: [
+        { name: 'Humira', percentOfCost: 8.0 },
+        { name: 'Ozempic', percentOfCost: 7.0 },
+        { name: 'Trulicity', percentOfCost: 5.3 },
+        { name: 'Skyrizi', percentOfCost: 4.0 },
+        { name: 'Eliquis', percentOfCost: 3.5 },
+      ],
+      topTherapeuticClasses: [
+        { name: 'Diabetes', percentOfCost: 13.8 },
+        { name: 'Autoimmune', percentOfCost: 11.1 },
+        { name: 'Oncology', percentOfCost: 9.0 },
+        { name: 'Cardiovascular', percentOfCost: 6.9 },
+        { name: 'Respiratory', percentOfCost: 4.7 },
+      ],
     },
   },
   '2': {
@@ -383,6 +506,13 @@ const dashboardDataByAccount: Record<string, AccountDashboardData> = {
       utilization: { value: 52, delta: '1 pts' },
       paid: { value: '$68.4M', delta: '7%' },
       pmpm: { value: '$301.55', delta: '8%' },
+      memberCount: '4,400',
+      employeeCount: '120',
+      prescriptionCount: '312K',
+      rxPmpm: { value: '$249.30', delta: '7%' },
+      rxPepm: { value: '$885.60', delta: '7%' },
+      memberCostShare: { value: '17.9%', delta: '1 pts' },
+      priorAuthAvgTat: '2.0 days',
       savingsBreakdownItems: [
         { label: 'VCP', value: '$1.58M', percent: 40, color: '#0F285B' },
         { label: 'Avoided Fees', value: '$0.79M', percent: 20, color: '#2C82CB' },
@@ -431,6 +561,20 @@ const dashboardDataByAccount: Record<string, AccountDashboardData> = {
         { month: 'May', Specialty: 6.03, Generic: 0.91, Brand: 5.52 },
         { month: 'Jun', Specialty: 6.12, Generic: 0.92, Brand: 5.61 },
       ],
+      topBrandMedications: [
+        { name: 'Humira', percentOfCost: 8.7 },
+        { name: 'Ozempic', percentOfCost: 7.6 },
+        { name: 'Trulicity', percentOfCost: 6.1 },
+        { name: 'Skyrizi', percentOfCost: 4.5 },
+        { name: 'Eliquis', percentOfCost: 3.9 },
+      ],
+      topTherapeuticClasses: [
+        { name: 'Diabetes', percentOfCost: 14.9 },
+        { name: 'Autoimmune', percentOfCost: 12.1 },
+        { name: 'Oncology', percentOfCost: 9.9 },
+        { name: 'Cardiovascular', percentOfCost: 7.5 },
+        { name: 'Respiratory', percentOfCost: 5.3 },
+      ],
     },
     month: {
       summaryLabel: 'June 2026',
@@ -439,6 +583,13 @@ const dashboardDataByAccount: Record<string, AccountDashboardData> = {
       utilization: { value: 54, delta: '2 pts' },
       paid: { value: '$11.9M', delta: '9%' },
       pmpm: { value: '$305.20', delta: '6%' },
+      memberCount: '4,400',
+      employeeCount: '120',
+      prescriptionCount: '52.3K',
+      rxPmpm: { value: '$253.70', delta: '6%' },
+      rxPepm: { value: '$898.90', delta: '7%' },
+      memberCostShare: { value: '18.1%', delta: '1 pts' },
+      priorAuthAvgTat: '1.8 days',
       savingsBreakdownItems: [
         { label: 'VCP', value: '$0.26M', percent: 40, color: '#0F285B' },
         { label: 'Avoided Fees', value: '$0.13M', percent: 20, color: '#2C82CB' },
@@ -461,6 +612,20 @@ const dashboardDataByAccount: Record<string, AccountDashboardData> = {
         { category: 'Generic', value: 0.16 },
         { category: 'Brand', value: 0.98 },
       ],
+      topBrandMedications: [
+        { name: 'Humira', percentOfCost: 8.9 },
+        { name: 'Ozempic', percentOfCost: 7.8 },
+        { name: 'Trulicity', percentOfCost: 6.3 },
+        { name: 'Skyrizi', percentOfCost: 4.7 },
+        { name: 'Eliquis', percentOfCost: 4.0 },
+      ],
+      topTherapeuticClasses: [
+        { name: 'Diabetes', percentOfCost: 15.2 },
+        { name: 'Autoimmune', percentOfCost: 12.4 },
+        { name: 'Oncology', percentOfCost: 10.1 },
+        { name: 'Cardiovascular', percentOfCost: 7.7 },
+        { name: 'Respiratory', percentOfCost: 5.4 },
+      ],
     },
   },
   '3': {
@@ -471,6 +636,13 @@ const dashboardDataByAccount: Record<string, AccountDashboardData> = {
       utilization: { value: 47, delta: '1 pts' },
       paid: { value: '$91.2M', delta: '6%' },
       pmpm: { value: '$289.40', delta: '6%' },
+      memberCount: '7,100',
+      employeeCount: '195',
+      prescriptionCount: '498K',
+      rxPmpm: { value: '$239.80', delta: '5%' },
+      rxPepm: { value: '$851.30', delta: '6%' },
+      memberCostShare: { value: '16.8%', delta: '1 pts' },
+      priorAuthAvgTat: '2.3 days',
       savingsBreakdownItems: [
         { label: 'VCP', value: '$2.24M', percent: 40, color: '#0F285B' },
         { label: 'Avoided Fees', value: '$1.12M', percent: 20, color: '#2C82CB' },
@@ -519,6 +691,20 @@ const dashboardDataByAccount: Record<string, AccountDashboardData> = {
         { month: 'May', Specialty: 8.74, Generic: 1.35, Brand: 7.51 },
         { month: 'Jun', Specialty: 8.87, Generic: 1.37, Brand: 7.62 },
       ],
+      topBrandMedications: [
+        { name: 'Humira', percentOfCost: 8.3 },
+        { name: 'Ozempic', percentOfCost: 7.2 },
+        { name: 'Trulicity', percentOfCost: 5.7 },
+        { name: 'Skyrizi', percentOfCost: 4.1 },
+        { name: 'Eliquis', percentOfCost: 3.7 },
+      ],
+      topTherapeuticClasses: [
+        { name: 'Diabetes', percentOfCost: 14.0 },
+        { name: 'Autoimmune', percentOfCost: 11.6 },
+        { name: 'Oncology', percentOfCost: 9.3 },
+        { name: 'Cardiovascular', percentOfCost: 7.0 },
+        { name: 'Respiratory', percentOfCost: 4.8 },
+      ],
     },
     month: {
       summaryLabel: 'June 2026',
@@ -527,6 +713,13 @@ const dashboardDataByAccount: Record<string, AccountDashboardData> = {
       utilization: { value: 49, delta: '1 pts' },
       paid: { value: '$15.8M', delta: '7%' },
       pmpm: { value: '$292.75', delta: '5%' },
+      memberCount: '7,100',
+      employeeCount: '195',
+      prescriptionCount: '83.6K',
+      rxPmpm: { value: '$243.10', delta: '4%' },
+      rxPepm: { value: '$862.70', delta: '5%' },
+      memberCostShare: { value: '17.0%', delta: '1 pts' },
+      priorAuthAvgTat: '2.1 days',
       savingsBreakdownItems: [
         { label: 'VCP', value: '$0.38M', percent: 40, color: '#0F285B' },
         { label: 'Avoided Fees', value: '$0.19M', percent: 20, color: '#2C82CB' },
@@ -549,6 +742,20 @@ const dashboardDataByAccount: Record<string, AccountDashboardData> = {
         { category: 'Generic', value: 0.24 },
         { category: 'Brand', value: 1.32 },
       ],
+      topBrandMedications: [
+        { name: 'Humira', percentOfCost: 8.5 },
+        { name: 'Ozempic', percentOfCost: 7.4 },
+        { name: 'Trulicity', percentOfCost: 5.9 },
+        { name: 'Skyrizi', percentOfCost: 4.2 },
+        { name: 'Eliquis', percentOfCost: 3.8 },
+      ],
+      topTherapeuticClasses: [
+        { name: 'Diabetes', percentOfCost: 14.3 },
+        { name: 'Autoimmune', percentOfCost: 11.9 },
+        { name: 'Oncology', percentOfCost: 9.5 },
+        { name: 'Cardiovascular', percentOfCost: 7.2 },
+        { name: 'Respiratory', percentOfCost: 5.0 },
+      ],
     },
   },
   '4': {
@@ -559,6 +766,13 @@ const dashboardDataByAccount: Record<string, AccountDashboardData> = {
       utilization: { value: 45, delta: '1 pts' },
       paid: { value: '$34.9M', delta: '5%' },
       pmpm: { value: '$275.02', delta: '5%' },
+      memberCount: '2,500',
+      employeeCount: '70',
+      prescriptionCount: '176K',
+      rxPmpm: { value: '$229.60', delta: '4%' },
+      rxPepm: { value: '$811.90', delta: '5%' },
+      memberCostShare: { value: '17.2%', delta: '1 pts' },
+      priorAuthAvgTat: '2.5 days',
       savingsBreakdownItems: [
         { label: 'VCP', value: '$0.87M', percent: 40, color: '#0F285B' },
         { label: 'Avoided Fees', value: '$0.44M', percent: 20, color: '#2C82CB' },
@@ -607,6 +821,20 @@ const dashboardDataByAccount: Record<string, AccountDashboardData> = {
         { month: 'May', Specialty: 3.26, Generic: 0.52, Brand: 2.98 },
         { month: 'Jun', Specialty: 3.31, Generic: 0.53, Brand: 3.03 },
       ],
+      topBrandMedications: [
+        { name: 'Humira', percentOfCost: 7.9 },
+        { name: 'Ozempic', percentOfCost: 6.8 },
+        { name: 'Trulicity', percentOfCost: 5.4 },
+        { name: 'Skyrizi', percentOfCost: 3.8 },
+        { name: 'Eliquis', percentOfCost: 3.3 },
+      ],
+      topTherapeuticClasses: [
+        { name: 'Diabetes', percentOfCost: 13.3 },
+        { name: 'Autoimmune', percentOfCost: 10.7 },
+        { name: 'Oncology', percentOfCost: 8.6 },
+        { name: 'Cardiovascular', percentOfCost: 6.5 },
+        { name: 'Respiratory', percentOfCost: 4.4 },
+      ],
     },
     month: {
       summaryLabel: 'June 2026',
@@ -615,6 +843,13 @@ const dashboardDataByAccount: Record<string, AccountDashboardData> = {
       utilization: { value: 46, delta: '1 pts' },
       paid: { value: '$5.96M', delta: '6%' },
       pmpm: { value: '$278.40', delta: '4%' },
+      memberCount: '2,500',
+      employeeCount: '70',
+      prescriptionCount: '29.5K',
+      rxPmpm: { value: '$232.90', delta: '3%' },
+      rxPepm: { value: '$823.40', delta: '4%' },
+      memberCostShare: { value: '17.5%', delta: '1 pts' },
+      priorAuthAvgTat: '2.3 days',
       savingsBreakdownItems: [
         { label: 'VCP', value: '$0.15M', percent: 40, color: '#0F285B' },
         { label: 'Avoided Fees', value: '$0.07M', percent: 20, color: '#2C82CB' },
@@ -637,6 +872,20 @@ const dashboardDataByAccount: Record<string, AccountDashboardData> = {
         { category: 'Generic', value: 0.09 },
         { category: 'Brand', value: 0.50 },
       ],
+      topBrandMedications: [
+        { name: 'Humira', percentOfCost: 8.0 },
+        { name: 'Ozempic', percentOfCost: 6.9 },
+        { name: 'Trulicity', percentOfCost: 5.5 },
+        { name: 'Skyrizi', percentOfCost: 3.9 },
+        { name: 'Eliquis', percentOfCost: 3.4 },
+      ],
+      topTherapeuticClasses: [
+        { name: 'Diabetes', percentOfCost: 13.6 },
+        { name: 'Autoimmune', percentOfCost: 10.9 },
+        { name: 'Oncology', percentOfCost: 8.8 },
+        { name: 'Cardiovascular', percentOfCost: 6.7 },
+        { name: 'Respiratory', percentOfCost: 4.5 },
+      ],
     },
   },
   '5': {
@@ -647,6 +896,13 @@ const dashboardDataByAccount: Record<string, AccountDashboardData> = {
       utilization: { value: 51, delta: '2 pts' },
       paid: { value: '$76.9M', delta: '7%' },
       pmpm: { value: '$296.95', delta: '7%' },
+      memberCount: '4,000',
+      employeeCount: '110',
+      prescriptionCount: '287K',
+      rxPmpm: { value: '$247.20', delta: '6%' },
+      rxPepm: { value: '$877.50', delta: '7%' },
+      memberCostShare: { value: '17.7%', delta: '2 pts' },
+      priorAuthAvgTat: '1.9 days',
       savingsBreakdownItems: [
         { label: 'VCP', value: '$1.81M', percent: 40, color: '#0F285B' },
         { label: 'Avoided Fees', value: '$0.91M', percent: 20, color: '#2C82CB' },
@@ -695,6 +951,20 @@ const dashboardDataByAccount: Record<string, AccountDashboardData> = {
         { month: 'May', Specialty: 7.38, Generic: 1.14, Brand: 6.75 },
         { month: 'Jun', Specialty: 7.49, Generic: 1.16, Brand: 6.85 },
       ],
+      topBrandMedications: [
+        { name: 'Humira', percentOfCost: 8.6 },
+        { name: 'Ozempic', percentOfCost: 7.5 },
+        { name: 'Trulicity', percentOfCost: 6.0 },
+        { name: 'Skyrizi', percentOfCost: 4.4 },
+        { name: 'Eliquis', percentOfCost: 3.9 },
+      ],
+      topTherapeuticClasses: [
+        { name: 'Diabetes', percentOfCost: 14.7 },
+        { name: 'Autoimmune', percentOfCost: 12.0 },
+        { name: 'Oncology', percentOfCost: 9.8 },
+        { name: 'Cardiovascular', percentOfCost: 7.4 },
+        { name: 'Respiratory', percentOfCost: 5.2 },
+      ],
     },
     month: {
       summaryLabel: 'June 2026',
@@ -703,6 +973,13 @@ const dashboardDataByAccount: Record<string, AccountDashboardData> = {
       utilization: { value: 53, delta: '2 pts' },
       paid: { value: '$13.4M', delta: '8%' },
       pmpm: { value: '$300.85', delta: '6%' },
+      memberCount: '4,000',
+      employeeCount: '110',
+      prescriptionCount: '48.3K',
+      rxPmpm: { value: '$251.50', delta: '5%' },
+      rxPepm: { value: '$891.10', delta: '6%' },
+      memberCostShare: { value: '17.9%', delta: '2 pts' },
+      priorAuthAvgTat: '1.8 days',
       savingsBreakdownItems: [
         { label: 'VCP', value: '$0.30M', percent: 40, color: '#0F285B' },
         { label: 'Avoided Fees', value: '$0.15M', percent: 20, color: '#2C82CB' },
@@ -724,6 +1001,20 @@ const dashboardDataByAccount: Record<string, AccountDashboardData> = {
         { category: 'Specialty', value: 1.31 },
         { category: 'Generic', value: 0.20 },
         { category: 'Brand', value: 1.19 },
+      ],
+      topBrandMedications: [
+        { name: 'Humira', percentOfCost: 8.8 },
+        { name: 'Ozempic', percentOfCost: 7.7 },
+        { name: 'Trulicity', percentOfCost: 6.2 },
+        { name: 'Skyrizi', percentOfCost: 4.6 },
+        { name: 'Eliquis', percentOfCost: 4.0 },
+      ],
+      topTherapeuticClasses: [
+        { name: 'Diabetes', percentOfCost: 15.0 },
+        { name: 'Autoimmune', percentOfCost: 12.3 },
+        { name: 'Oncology', percentOfCost: 10.0 },
+        { name: 'Cardiovascular', percentOfCost: 7.6 },
+        { name: 'Respiratory', percentOfCost: 5.3 },
       ],
     },
   },
@@ -792,9 +1083,15 @@ const executiveSummaryMessage = computed(() => {
   gap: $spacing-medium;
 }
 
+.dashboard-context-line {
+  color: $color-text-secondary;
+  font-size: 1.2rem !important;
+  margin: 0;
+}
+
 .kpi-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: $spacing-medium;
 }
 
@@ -831,7 +1128,7 @@ const executiveSummaryMessage = computed(() => {
   }
 
   .kpi-container {
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .drivers-row--columns {
@@ -866,6 +1163,12 @@ const executiveSummaryMessage = computed(() => {
   }
 
   .drivers-row--columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .kpi-container {
     grid-template-columns: 1fr;
   }
 }
