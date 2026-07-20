@@ -1,7 +1,7 @@
 <template>
   <div class="home-page-container">
-    <div class="home-header">
-      <h1 class="text-h1">Welcome back, Pablo! Here's what's new...</h1>
+    <div class="sticky-controls-bar" :class="{ 'sticky-controls-bar--scrolled': isScrolled }">
+      <h1 class="text-h1 home-header-title">Welcome back, Pablo! Here's what's new...</h1>
       <div class="home-header-controls">
         <SegmentedToggle
           :options="periodOptions"
@@ -160,7 +160,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import Banner from '../components/common/Banner.vue';
 import PageCard from '../components/common/PageCard.vue';
@@ -177,6 +177,21 @@ import { CircleCheckBig, ChartNoAxesCombined, RotateCcwKey } from 'lucide-vue-ne
 type PeriodKey = 'ytd' | 'month';
 
 const selectedPeriod = ref<PeriodKey>('ytd');
+
+const SCROLL_THRESHOLD = 24;
+const isScrolled = ref(false);
+
+const handleScroll = () => {
+  isScrolled.value = window.scrollY > SCROLL_THRESHOLD;
+};
+
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll, { passive: true });
+});
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll);
+});
 
 const periodOptions = [
   { label: 'Year to Date', value: 'ytd' },
@@ -1047,16 +1062,46 @@ const executiveSummaryMessage = computed(() => {
   gap: $spacing-large;
 }
 
-.home-header {
+.sticky-controls-bar {
+  position: sticky;
+  top: var(--v-layout-top, 48px);
+  z-index: 5;
   display: flex;
-  justify-content: space-between;
   align-items: center;
   gap: $spacing-medium;
+  background-color: $color-neutral-white;
+  padding: $spacing-small $root-padding;
+  margin: 0 calc(-1 * #{$root-padding});
+  box-shadow: none;
+  transition: background-color 0.25s ease, box-shadow 0.2s ease;
 
-  h1 {
-    margin-bottom: 0;
-    margin-top: 6px;
+  :global(html.dark) & {
+    background-color: var(--color-bg);
   }
+}
+
+.sticky-controls-bar--scrolled {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+
+  :global(html.dark) & {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.home-header-title {
+  margin-bottom: 0;
+  margin-top: 6px;
+  overflow: hidden;
+  max-width: 1000px;
+  opacity: 1;
+  transition: max-width 0.25s ease, opacity 0.15s ease, margin 0.25s ease;
+  white-space: nowrap;
+}
+
+.sticky-controls-bar--scrolled .home-header-title {
+  max-width: 0;
+  opacity: 0;
+  margin-right: 0;
 }
 
 .home-header-controls {
@@ -1137,9 +1182,24 @@ const executiveSummaryMessage = computed(() => {
 }
 
 @media (max-width: 768px) {
-  .home-header {
+  .sticky-controls-bar {
     flex-direction: column;
     align-items: flex-start;
+    margin: 0 (-$spacing-medium);
+    padding-left: $spacing-medium;
+    padding-right: $spacing-medium;
+  }
+
+  .home-header-title {
+    max-width: 100%;
+    white-space: normal;
+  }
+
+  .sticky-controls-bar--scrolled {
+    .home-header-title {
+      max-width: 0;
+      margin-bottom: 0;
+    }
   }
 
   .home-header-controls {
