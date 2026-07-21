@@ -884,66 +884,390 @@
 
                 <!-- Step 5: Programs -->
                 <template v-else-if="currentWizardStep === 4">
-                  <div class="ap-section">
-                    <div class="ap-section-header ap-section-header--space-between">
-                      <h4 class="text-h4">Configured Programs</h4>
-                    </div>
+                  <div class="prog-step">
 
-                  <!-- Filter pills -->
-                  <div class="prog-filters">
-                    <FilteringPill
-                      v-for="f in progFilters"
-                      :key="f"
-                      :is-active="progActiveFilter === f"
-                      @click="progActiveFilter = f"
-                    >{{ f }}</FilteringPill>
-                  </div>
+                    <!-- Widget 1: Programs to Configure -->
+                    <div class="prog-widget">
+                      <div class="prog-widget-header">
+                        <h4 class="text-h4">Programs to Configure</h4>
+                        <p class="prog-widget-desc">Select a program to configure it for this account. Once submitted, a setup ticket will be created for the RxCompass Team or VCP Team.</p>
+                      </div>
+                      <div class="prog-widget-body">
 
-                  <ReportDataTable
-                    :headers="progHeaders"
-                    :items="filteredPrograms"
-                    :show-search-bar="true"
-                    :show-filter-button="false"
-                    :show-filter-pills="false"
-                    :show-selection-checkboxes="false"
-                    :show-row-actions="false"
-                    :show-table-footer="true"
-                    :show-expand="true"
-                    search-placeholder="Search by program name"
-                  >
-                    <template #expanded-row="{ item, columns }">
-                      <tr>
-                        <td :colspan="columns.length" class="prog-detail-td">
-                          <div class="prog-detail">
-                            <h5 class="prog-detail-title">Program Details</h5>
-                            <div class="prog-detail-cols">
-                              <div>
-                                <p class="prog-detail-label">Program Option Name</p>
-                                <p class="prog-detail-value">{{ item.optionName }}</p>
-                              </div>
-                              <div>
-                                <p class="prog-detail-label">Invoice</p>
-                                <p class="prog-detail-value">{{ item.invoice }}</p>
-                              </div>
+                        <div v-if="rxCompassEnrolled && vcpEnrolled" class="prog-all-handled">
+                          <p class="text-body">All available programs have been configured for this account.</p>
+                        </div>
+                        <div v-else>
+                          <div class="prog-required-note mb-4">
+                            <Info :size="15" :stroke-width="2" class="prog-required-note-icon" />
+                            <p class="text-body">A VCP election must be submitted for all accounts before go-live. If this account is not participating, open the VCP tile and select <strong>Opt Out</strong>.</p>
+                          </div>
+                        <div class="prog-tiles">
+
+                          <!-- RxCompass Tile -->
+                          <div
+                            v-if="!rxCompassEnrolled"
+                            :class="['prog-tile', { 'prog-tile--selected': rxCompassInCart, 'prog-tile--pending': rxCompassPending }]"
+                            :role="rxCompassPending ? undefined : 'button'"
+                            :tabindex="rxCompassPending ? -1 : 0"
+                            :aria-disabled="rxCompassPending || undefined"
+                            @click="!rxCompassPending && openProgModal('rxcompass')"
+                            @keydown.enter.prevent="!rxCompassPending && openProgModal('rxcompass')"
+                            @keydown.space.prevent="!rxCompassPending && openProgModal('rxcompass')"
+                          >
+                            <div v-if="rxCompassInCart || rxCompassPending" :class="['prog-tile-badge', { 'prog-tile-badge--pending': rxCompassPending }]">
+                              <Check :size="12" :stroke-width="3" />
                             </div>
-                            <ReportDataTable
-                              :headers="progRatesHeaders"
-                              :items="item.rates"
-                              :show-search-bar="false"
-                              :show-filter-pills="false"
-                              :show-selection-checkboxes="false"
-                              :show-row-actions="false"
-                              :show-table-footer="true"
-                            />
-                            <div class="prog-detail-merp">
-                              <p class="prog-detail-label">MERP Administrator Name</p>
-                              <p class="prog-detail-value">{{ item.merpAdmin || '-' }}</p>
+                            <div class="prog-tile-header">
+                              <span class="prog-tile-name">RxCompass</span>
+                            </div>
+                            <p class="prog-tile-desc">Specialty drug management program providing clinical decision support and member engagement tools.</p>
+                            <div class="prog-tile-footer">
+                              <button v-if="rxCompassPending" class="prog-tile-details-link" @click.stop="openProgDetails('rxcompass')">View Details</button>
+                              <span v-if="rxCompassPending" class="prog-tile-status prog-tile-status--pending">
+                                <Hourglass :size="13" :stroke-width="2" /> Pending Setup
+                              </span>
+                              <span v-else-if="rxCompassInCart" class="prog-tile-status prog-tile-status--added">
+                                <Check :size="13" :stroke-width="2.5" /> Added
+                              </span>
+                              <span v-else class="prog-tile-status prog-tile-status--configure">Click to configure</span>
                             </div>
                           </div>
-                        </td>
-                      </tr>
-                    </template>
-                  </ReportDataTable>
+
+                          <!-- VCP Tile -->
+                          <div
+                            v-if="!vcpEnrolled"
+                            :class="['prog-tile', { 'prog-tile--selected': vcpInCart, 'prog-tile--pending': vcpPending }]"
+                            :role="vcpPending ? undefined : 'button'"
+                            :tabindex="vcpPending ? -1 : 0"
+                            :aria-disabled="vcpPending || undefined"
+                            @click="!vcpPending && openProgModal('vcp')"
+                            @keydown.enter.prevent="!vcpPending && openProgModal('vcp')"
+                            @keydown.space.prevent="!vcpPending && openProgModal('vcp')"
+                          >
+                            <div v-if="vcpInCart || vcpPending" :class="['prog-tile-badge', { 'prog-tile-badge--pending': vcpPending }]">
+                              <Check :size="12" :stroke-width="3" />
+                            </div>
+                            <div class="prog-tile-header">
+                              <span class="prog-tile-name">Variable Copay Program <span class="prog-tile-required" aria-label="required">*</span></span>
+                            </div>
+                            <p class="prog-tile-desc">Configures variable member cost-sharing based on drug type, formulary tier, or network designation.</p>
+                            <div class="prog-tile-footer">
+                              <button v-if="vcpPending" class="prog-tile-details-link" @click.stop="openProgDetails('vcp')">View Details</button>
+                              <span v-if="vcpPending" class="prog-tile-status prog-tile-status--pending">
+                                <Hourglass :size="13" :stroke-width="2" /> Pending Setup
+                              </span>
+                              <span v-else-if="vcpInCart" class="prog-tile-status prog-tile-status--added">
+                                <Check :size="13" :stroke-width="2.5" /> Added
+                              </span>
+                              <span v-else class="prog-tile-status prog-tile-status--configure">Click to configure</span>
+                            </div>
+                          </div>
+
+                        </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Widget 2: Configured Programs -->
+                    <div class="prog-widget">
+                      <div class="prog-widget-header">
+                        <h4 class="text-h4">Configured Programs</h4>
+                      </div>
+                      <div class="prog-widget-body prog-widget-body--table">
+                    <ReportDataTable
+                      :headers="progHeaders"
+                      :items="programs"
+                      :show-search-bar="false"
+                      :show-filter-button="false"
+                      :show-filter-pills="false"
+                      :show-selection-checkboxes="false"
+                      :show-row-actions="false"
+                      :show-table-footer="true"
+                      :show-expand="true"
+                    >
+                      <template #empty-state>
+                        <div class="prog-empty-state">
+                          <p class="text-body">No programs have been configured for this account yet.</p>
+                        </div>
+                      </template>
+                      <template #expanded-row="{ item, columns }">
+                        <tr>
+                          <td :colspan="columns.length" class="prog-detail-td">
+                            <div class="prog-detail">
+                              <h5 class="prog-detail-title">Program Details</h5>
+                              <div class="prog-detail-cols">
+                                <div>
+                                  <p class="prog-detail-label">Program Option Name</p>
+                                  <p class="prog-detail-value">{{ item.optionName }}</p>
+                                </div>
+                                <div>
+                                  <p class="prog-detail-label">Invoice</p>
+                                  <p class="prog-detail-value">{{ item.invoice }}</p>
+                                </div>
+                              </div>
+                              <div class="prog-detail-merp">
+                                <p class="prog-detail-label">MERP Administrator Name</p>
+                                <p class="prog-detail-value">{{ item.merpAdmin || '-' }}</p>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      </template>
+                    </ReportDataTable>
+                      </div>
+                    </div>
+
+                    <!-- Cart Bar -->
+                    <Transition name="prog-cart-slide">
+                      <div v-if="progCart.length > 0" class="prog-cart-bar">
+                        <div class="prog-cart-chips">
+                          <v-chip v-for="prog in progCart" :key="prog" size="small" variant="outlined" class="prog-cart-chip">
+                            {{ prog === 'rxcompass' ? 'RxCompass' : 'Variable Copay Program' }}
+                            <X :size="11" :stroke-width="2.5" class="prog-cart-remove" @click.stop="removeFromProgCart(prog)" />
+                          </v-chip>
+                        </div>
+                        <div class="prog-cart-right">
+                          <span class="prog-cart-count">{{ progCart.length }} {{ progCart.length === 1 ? 'program' : 'programs' }} configured</span>
+                          <button class="button prog-cart-cta" @click="showProgConfirmModal = true">Submit Program Setup</button>
+                        </div>
+                      </div>
+                    </Transition>
+
+                    <!-- Configuration Modal -->
+                    <v-dialog v-model="showProgModal" max-width="560">
+                      <!-- RxCompass -->
+                      <v-card v-if="activeProgModal === 'rxcompass'" class="prog-modal-card">
+                        <v-card-title class="prog-modal-title">Configure RxCompass</v-card-title>
+                        <v-card-text>
+                          <v-divider class="mb-4" />
+                          <div class="nl-alert mb-4">
+                            <div class="nl-alert-badge"><TriangleAlert :size="20" :stroke-width="2" /></div>
+                            <span>Not all plans are eligible to elect the RxCompass program. RxCompass is not recommended for clients with domestic/in-house pharmacy. <strong>Anti-Steerage States: FL, GA, OK, TN, and WV</strong> — cannot be set up with RxCompass per anti-steerage laws of those states.</span>
+                          </div>
+                          <v-row>
+                            <v-col cols="12">
+                              <Select v-model="rxCompassForm.type" :items="rxCompassTypeItems" label="RxCompass Type" />
+                            </v-col>
+                            <v-col v-if="rxCompassIsReconsider" cols="12" md="6">
+                              <p class="prog-modal-label">Follow-Up Date</p>
+                              <p class="prog-reconsider-date">{{ rxCompassForm.effectiveDate }}</p>
+                            </v-col>
+                            <v-col v-else-if="rxCompassForm.type" cols="12" md="6">
+                              <DatePicker v-model="rxCompassForm.effectiveDate" label="Effective Date" variant="underlined" />
+                            </v-col>
+                            <v-col v-if="rxCompassForm.type === 'Standard'" cols="12">
+                              <TextField v-model="rxCompassForm.merpVendor" label="MERP Administrator Name" />
+                            </v-col>
+                            <v-col cols="12">
+                              <v-textarea v-model="rxCompassForm.notes" label="Notes (optional)" variant="outlined" density="compact" rows="3" auto-grow hide-details class="bl-notes-textarea" />
+                            </v-col>
+                          </v-row>
+                        </v-card-text>
+                        <v-card-actions class="nl-dialog-footer">
+                          <button class="button button-secondary" @click="closeProgModal">Close</button>
+                          <button
+                            :class="['button', rxCompassInCart ? 'button-danger' : 'button-primary']"
+                            :disabled="!rxCompassInCart && !rxCompassFormValid"
+                            @click="toggleProgCart('rxcompass')"
+                          >{{ rxCompassInCart ? 'Remove from Queue' : 'Add to Queue' }}</button>
+                        </v-card-actions>
+                      </v-card>
+
+                      <!-- VCP -->
+                      <v-card v-if="activeProgModal === 'vcp'" class="prog-modal-card">
+                        <v-card-title class="prog-modal-title">Configure Variable Copay Program</v-card-title>
+                        <v-card-text>
+                          <v-divider class="mb-4" />
+                          <p class="prog-modal-label mb-2">VCP Election</p>
+                          <div class="toc-toggle-group nl-level-btn-group--wrap mb-5">
+                            <button
+                              v-for="opt in vcpElectionOptions"
+                              :key="opt.value"
+                              :class="['button', 'toc-toggle', 'nl-level-btn', { 'toc-toggle--selected': vcpForm.election === opt.value }]"
+                              @click="vcpForm.election = opt.value"
+                            >
+                              <span>{{ opt.label }}</span>
+                              <Check v-if="vcpForm.election === opt.value" :size="13" :stroke-width="2.5" class="nl-level-check" />
+                            </button>
+                          </div>
+
+                          <!-- Election description (non-Opt Out) -->
+                          <div v-if="vcpForm.election && vcpForm.election !== 'OptOut'" class="prog-election-desc mb-4">
+                            <p class="text-body">{{ vcpElectionDescriptions[vcpForm.election] }}</p>
+                          </div>
+
+                          <!-- Opt Out -->
+                          <v-row v-if="vcpForm.election === 'OptOut'">
+                            <v-col cols="12">
+                              <v-textarea v-model="vcpForm.optOutNotes" label="Notes" variant="outlined" density="compact" rows="3" auto-grow hide-details class="bl-notes-textarea" />
+                            </v-col>
+                          </v-row>
+
+                          <!-- All non-Opt Out elections -->
+                          <v-row v-else-if="vcpForm.election">
+                            <v-col cols="12" md="6">
+                              <DatePicker v-model="vcpForm.effectiveDate" label="Effective Date" variant="underlined" />
+                            </v-col>
+                            <v-col cols="12" md="6">
+                              <Select v-model="vcpForm.clientState" :items="usStateItems" label="Client State" />
+                            </v-col>
+                            <v-col v-if="vcpForm.election === 'OffsiteVCP'" cols="12" class="pt-1">
+                              <p class="prog-modal-label">Offsite Pharmacies</p>
+                              <p class="nl-dialog-field-label">NPI</p>
+                              <v-textarea
+                                v-model="vcpOffsitePharmacyText"
+                                variant="underlined"
+                                density="compact"
+                                messages="Enter one NPI per line"
+                                rows="3"
+                                class="nl-textarea"
+                                @keyup.enter="parseOffsitePharmacies"
+                                @blur="parseOffsitePharmacies"
+                              />
+                              <div v-if="vcpForm.offsitePharmacies.length" class="nl-npi-chips">
+                                <v-chip
+                                  v-for="(chip, idx) in vcpForm.offsitePharmacies"
+                                  :key="idx"
+                                  color="primary"
+                                  variant="flat"
+                                  class="bl-file-chip"
+                                >
+                                  <span class="bl-file-chip-label">{{ chip.name }}</span>
+                                  <span class="bl-file-chip-close" @click.stop="removeOffsitePharmacy(idx)"><X :size="10" :stroke-width="2.5" /></span>
+                                </v-chip>
+                              </div>
+                            </v-col>
+                            <v-col cols="12">
+                              <Autocomplete v-model="vcpForm.selectedPlans" :items="vcpPlanOptions" label="Does this apply to a specific plan?" :multiple="true" hide-details />
+                              <p class="nl-npi-hint">Leave blank to apply to all plans.</p>
+                            </v-col>
+                            <v-col cols="12">
+                              <p class="prog-modal-label mb-2">Program Features</p>
+                              <div class="prog-vcp-checkboxes">
+                                <div class="ap-checkbox-row" @click="vcpForm.isMaximizer = !vcpForm.isMaximizer" style="cursor:pointer">
+                                  <CheckSquare v-if="vcpForm.isMaximizer" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                                  <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                                  <span class="ap-field-value">Maximizer Program</span>
+                                </div>
+                                <div class="ap-checkbox-row" @click="vcpForm.isAccumulator = !vcpForm.isAccumulator" style="cursor:pointer">
+                                  <CheckSquare v-if="vcpForm.isAccumulator" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                                  <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                                  <span class="ap-field-value">Accumulator Program</span>
+                                </div>
+                              </div>
+                            </v-col>
+                          </v-row>
+
+                          <p v-if="!vcpForm.election" class="prog-modal-hint">Select an election type above to configure this program.</p>
+                        </v-card-text>
+                        <v-card-actions class="nl-dialog-footer">
+                          <button class="button button-secondary" @click="closeProgModal">Close</button>
+                          <button
+                            :class="['button', vcpInCart ? 'button-danger' : 'button-primary']"
+                            :disabled="!vcpInCart && !vcpFormValid"
+                            @click="toggleProgCart('vcp')"
+                          >{{ vcpInCart ? 'Remove from Queue' : 'Add to Queue' }}</button>
+                        </v-card-actions>
+                      </v-card>
+                    </v-dialog>
+
+                    <!-- Confirm Submit Modal -->
+                    <v-dialog v-model="showProgConfirmModal" max-width="520">
+                      <v-card class="prog-modal-card">
+                        <v-card-title class="prog-modal-title">Submit Program Setup</v-card-title>
+                        <v-card-text>
+                          <v-divider class="mb-4" />
+                          <p class="text-body mb-3">
+                            You are submitting setup requests for the following {{ progCart.length === 1 ? 'program' : 'programs' }}:
+                          </p>
+                          <div class="prog-confirm-list">
+                            <div v-if="progCart.includes('rxcompass')" class="prog-confirm-item">
+                              <p class="prog-confirm-name">RxCompass</p>
+                              <ul class="prog-confirm-details">
+                                <li>Type: {{ rxCompassTypeLabel }}</li>
+                                <li>{{ rxCompassIsReconsider ? 'Follow-Up Date' : 'Effective Date' }}: {{ rxCompassForm.effectiveDate || '—' }}</li>
+                                <li v-if="rxCompassForm.merpVendor">MERP Administrator Name: {{ rxCompassForm.merpVendor }}</li>
+                                <li v-if="rxCompassForm.notes">Notes: {{ rxCompassForm.notes }}</li>
+                              </ul>
+                            </div>
+                            <div v-if="progCart.includes('vcp')" class="prog-confirm-item">
+                              <p class="prog-confirm-name">Variable Copay Program</p>
+                              <ul class="prog-confirm-details">
+                                <li>Election: {{ vcpElectionLabel }}</li>
+                                <li v-if="vcpForm.election !== 'OptOut'">Effective Date: {{ vcpForm.effectiveDate || '—' }}</li>
+                                <li v-if="vcpForm.election === 'OffsiteVCP' && vcpForm.offsitePharmacies.length">Offsite Pharmacies: {{ vcpForm.offsitePharmacies.map(c => c.name).join(', ') }}</li>
+                                <li v-if="vcpForm.election !== 'OptOut' && vcpForm.isMaximizer">Maximizer Program: Yes</li>
+                                <li v-if="vcpForm.election !== 'OptOut' && vcpForm.isAccumulator">Accumulator Program: Yes</li>
+                                <li v-if="vcpForm.election !== 'OptOut' && vcpForm.clientState">Client State: {{ vcpForm.clientState }}</li>
+                                <li v-if="vcpForm.election !== 'OptOut' && vcpForm.selectedPlans.length">Applies to: {{ vcpForm.selectedPlans.join(', ') }}</li>
+                                <li v-else-if="vcpForm.election !== 'OptOut'">Applies to: All plans</li>
+                                <li v-if="vcpForm.election === 'OptOut' && vcpForm.optOutNotes">Notes: {{ vcpForm.optOutNotes }}</li>
+                              </ul>
+                            </div>
+                          </div>
+                          <p class="prog-confirm-note">
+                            <template v-if="progCart.includes('rxcompass') && progCart.includes('vcp')">A setup ticket will be created for each program and sent to the RxCompass Team and VCP Team.</template>
+                            <template v-else-if="progCart.includes('rxcompass')">A setup ticket will be created and sent to the RxCompass Team.</template>
+                            <template v-else>A setup ticket will be created and sent to the VCP Team.</template>
+                            Corrections must be made in Solo after submission.
+                          </p>
+                        </v-card-text>
+                        <v-card-actions class="nl-dialog-footer">
+                          <button class="button button-secondary" @click="showProgConfirmModal = false">Cancel</button>
+                          <button class="button button-primary" @click="submitPrograms">Confirm &amp; Submit</button>
+                        </v-card-actions>
+                      </v-card>
+                    </v-dialog>
+
+                    <!-- Pending Details Dialog -->
+                    <v-dialog v-model="showProgDetailsModal" max-width="480">
+                      <v-card class="prog-modal-card">
+                        <v-card-title class="prog-modal-title">
+                          {{ progDetailsTarget === 'rxcompass' ? 'RxCompass' : 'Variable Copay Program' }} — Submitted Request
+                        </v-card-title>
+                        <v-card-text>
+                          <v-divider class="mb-4" />
+                          <p class="prog-confirm-note mb-3">This request is pending setup by the {{ progDetailsTarget === 'rxcompass' ? 'RxCompass Team' : 'VCP Team' }}. To make corrections, contact them directly and reference the ticket number below.</p>
+                          <p class="prog-details-ticket mb-4">
+                            Ticket #: <strong>{{ progDetailsTarget === 'rxcompass' ? rxCompassTicketNumber : vcpTicketNumber }}</strong>
+                          </p>
+
+                          <!-- RxCompass details -->
+                          <ul v-if="progDetailsTarget === 'rxcompass'" class="prog-confirm-details prog-confirm-details--readonly">
+                            <li>Type: {{ rxCompassTypeLabel }}</li>
+                            <li>{{ rxCompassIsReconsider ? 'Follow-Up Date' : 'Effective Date' }}: {{ rxCompassForm.effectiveDate || '—' }}</li>
+                            <li v-if="rxCompassForm.merpVendor">MERP Administrator Name: {{ rxCompassForm.merpVendor }}</li>
+                            <li v-if="rxCompassForm.notes">Notes: {{ rxCompassForm.notes }}</li>
+                          </ul>
+
+                          <!-- VCP details -->
+                          <ul v-if="progDetailsTarget === 'vcp'" class="prog-confirm-details prog-confirm-details--readonly">
+                            <li>Election: {{ vcpElectionLabel }}</li>
+                            <li v-if="vcpForm.election !== 'OptOut'">Effective Date: {{ vcpForm.effectiveDate || '—' }}</li>
+                            <li v-if="vcpForm.election === 'OffsiteVCP' && vcpForm.offsitePharmacies.length">Offsite Pharmacies: {{ vcpForm.offsitePharmacies.map(c => c.name).join(', ') }}</li>
+                            <li v-if="vcpForm.election !== 'OptOut' && vcpForm.isMaximizer">Maximizer Program: Yes</li>
+                            <li v-if="vcpForm.election !== 'OptOut' && vcpForm.isAccumulator">Accumulator Program: Yes</li>
+                            <li v-if="vcpForm.election !== 'OptOut' && vcpForm.clientState">Client State: {{ vcpForm.clientState }}</li>
+                            <li v-if="vcpForm.election !== 'OptOut' && vcpForm.selectedPlans.length">Applies to: {{ vcpForm.selectedPlans.join(', ') }}</li>
+                            <li v-else-if="vcpForm.election !== 'OptOut'">Applies to: All plans</li>
+                            <li v-if="vcpForm.election === 'OptOut' && vcpForm.optOutNotes">Notes: {{ vcpForm.optOutNotes }}</li>
+                          </ul>
+                        </v-card-text>
+                        <v-card-actions class="nl-dialog-footer">
+                          <button class="button button-primary" @click="showProgDetailsModal = false">Close</button>
+                        </v-card-actions>
+                      </v-card>
+                    </v-dialog>
+
+                    <!-- Success Snackbar -->
+                    <v-snackbar v-model="showProgSuccessSnackbar" color="success" :timeout="4000" location="bottom right">
+                      <div class="d-flex align-center" style="gap: 8px;">
+                        <CircleCheckBig :size="18" :stroke-width="2" />
+                        <span>Setup requests submitted. The RxCompass Team and/or VCP Team have been notified.</span>
+                      </div>
+                    </v-snackbar>
+
                   </div>
                 </template>
 
@@ -2390,7 +2714,7 @@ import {
   Hourglass, CircleCheckBig, XCircle,
   Save as SaveIcon, LayoutList as LayoutListIcon, CircleCheck as CircleCheckIcon,
   ArrowRight as ArrowRightIcon, Pencil, CheckSquare, Square, ChevronDown, PlusCircle, X, Check, CloudDownload, TriangleAlert,
-  Building2, Shield, Link2, Users, FileText, Search, Globe, Trash2, Paperclip,
+  Building2, Shield, Link2, Users, FileText, Search, Globe, Trash2, Paperclip, Info,
 } from 'lucide-vue-next';
 import EmptyStateImg from '@/assets/EmptyState.svg';
 import { VRow, VCol, VProgressCircular } from 'vuetify/components';
@@ -2420,72 +2744,223 @@ const tocPriorAuth = ref<boolean | null>(false);
 
 // ─── Step 5: Programs ─────────────────────────────────────────────────────────
 
-const progFilters = ['All', 'Active', 'Terminated'];
-const progActiveFilter = ref('All');
+// Details modal for pending tiles
+const showProgDetailsModal = ref(false);
+const progDetailsTarget = ref<'rxcompass' | 'vcp' | null>(null);
+function openProgDetails(prog: 'rxcompass' | 'vcp') {
+  progDetailsTarget.value = prog;
+  showProgDetailsModal.value = true;
+}
 
-const programs = ref([
-  {
-    id: 1,
-    name: 'Liviniti',
-    status: 'Active',
-    effStartDate: '03/01/2026',
-    effEndDate: '',
-    optionName: 'Southern Scripts',
-    invoice: 'Yes',
-    merpAdmin: '',
-    rates: [
-      { rate: 'Admin Fee',                    type: 'CLAIM',      amount: '$8',     groupBy: 'Admin Fee', payTo: '-',            comment: '-', effStartDate: '03/01/2026', effEndDate: '02/28/2027' },
-      { rate: 'Admin Fee',                    type: 'CLAIM',      amount: '$8.25',  groupBy: 'Admin Fee', payTo: '-',            comment: '-', effStartDate: '03/01/2027', effEndDate: '02/29/2028' },
-      { rate: 'Admin Fee',                    type: 'CLAIM',      amount: '$8.5',   groupBy: 'Admin Fee', payTo: '-',            comment: '-', effStartDate: '03/01/2028', effEndDate: '-' },
-      { rate: 'Southern Scripts Monthly Minimum', type: 'MONTHLYMIN', amount: '$1200', groupBy: '-',        payTo: '-',            comment: '-', effStartDate: '03/01/2026', effEndDate: '-' },
-      { rate: 'Consultant Fees',              type: 'CLAIM',      amount: '$1',     groupBy: 'Admin Fee', payTo: 'EPIC Brokers', comment: '-', effStartDate: '03/01/2026', effEndDate: '-' },
-    ],
-  },
-  {
-    id: 2,
-    name: 'RxCompass Entity',
-    status: 'Active',
-    effStartDate: '03/01/2026',
-    effEndDate: '',
-    optionName: 'RxCompass Entity',
-    invoice: 'Yes',
-    merpAdmin: '',
-    rates: [],
-  },
-  {
-    id: 3,
-    name: 'RxCompass OLP',
-    status: 'Active',
-    effStartDate: '03/01/2026',
-    effEndDate: '',
-    optionName: 'RxCompass OLP',
-    invoice: 'No',
-    merpAdmin: '',
-    rates: [],
-  },
-]);
+// Enrollment state — true once program appears in Solo2 AccountPrograms
+const rxCompassEnrolled = ref(false);
+const vcpEnrolled = ref(false);
 
-const filteredPrograms = computed(() =>
-  progActiveFilter.value === 'All'
-    ? programs.value
-    : programs.value.filter(p => p.status === progActiveFilter.value)
+// Pending state — true after ticket submitted, until Solo1 finishes setup
+const rxCompassPending = ref(false);
+const vcpPending = ref(false);
+const rxCompassTicketNumber = ref('');
+const vcpTicketNumber = ref('');
+
+// Cart & modal state
+const progCart = ref<string[]>([]);
+const showProgModal = ref(false);
+const activeProgModal = ref<'rxcompass' | 'vcp' | null>(null);
+const showProgConfirmModal = ref(false);
+const showProgSuccessSnackbar = ref(false);
+
+// RxCompass form
+const rxCompassForm = ref({ type: '', effectiveDate: '', merpVendor: '', notes: '' });
+
+// VCP form
+const vcpForm = ref({
+  election: '',
+  effectiveDate: '',
+  offsitePharmacies: [] as { npi: string; name: string }[],
+  isMaximizer: false,
+  isAccumulator: false,
+  clientState: '',
+  optOutNotes: '',
+  selectedPlans: [] as string[],
+});
+
+const vcpElectionDescriptions: Record<string, string> = {
+  VCPHardstops: 'Qualifying medications will reject at non-VCP pharmacies after the selected effective date.',
+  VoluntaryVCP: 'VCP will be available to all members at any time, not promoted at pharmacy.',
+  OffsiteVCP: 'Specific VCP pharmacy to be utilized for VCP eligible medications.',
+};
+
+const vcpPlanOptions = [
+  'Plan A (Classic PPO)',
+  'Plan B (HDHP)',
+  'Plan C (HMO)',
+];
+
+const rxCompassTypeItems = [
+  { title: 'RxCompass (Standard)', value: 'Standard' },
+  { title: 'RxCompass Lite',       value: 'Lite' },
+  { title: 'Reconsider in 3 months', value: '3Months' },
+  { title: 'Reconsider in 6 months', value: '6Months' },
+];
+
+const vcpElectionOptions = [
+  { label: 'VCP Hardstops',  value: 'VCPHardstops' },
+  { label: 'Voluntary VCP',  value: 'VoluntaryVCP' },
+  { label: 'Offsite VCP',    value: 'OffsiteVCP' },
+  { label: 'Opt Out',        value: 'OptOut' },
+];
+
+const yesNoItems = [
+  { title: 'Yes', value: true },
+  { title: 'No',  value: false },
+];
+
+const usStateItems = [
+  'AK','AL','AR','AZ','CA','CO','CT','DC','DE','FL','GA','HI','IA','ID','IL','IN',
+  'KS','KY','LA','MA','MD','ME','MI','MN','MO','MS','MT','NC','ND','NE','NH','NJ',
+  'NM','NV','NY','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VA','VT','WA',
+  'WI','WV','WY',
+];
+
+const rxCompassInCart = computed(() => progCart.value.includes('rxcompass'));
+const vcpInCart       = computed(() => progCart.value.includes('vcp'));
+
+const rxCompassTypeLabel = computed(() =>
+  rxCompassTypeItems.find(i => i.value === rxCompassForm.value.type)?.title ?? '—'
+);
+const vcpElectionLabel = computed(() =>
+  vcpElectionOptions.find(o => o.value === vcpForm.value.election)?.label ?? '—'
+);
+
+const rxCompassIsReconsider = computed(() =>
+  rxCompassForm.value.type === '3Months' || rxCompassForm.value.type === '6Months'
+);
+
+watch(() => rxCompassForm.value.type, (type) => {
+  if (type === '3Months') {
+    const d = new Date();
+    d.setDate(d.getDate() + 90);
+    rxCompassForm.value.effectiveDate = d.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+  } else if (type === '6Months') {
+    const d = new Date();
+    d.setDate(d.getDate() + 180);
+    rxCompassForm.value.effectiveDate = d.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+  } else {
+    rxCompassForm.value.effectiveDate = '';
+  }
+});
+
+const rxCompassFormValid = computed(() =>
+  !!rxCompassForm.value.type &&
+  !!rxCompassForm.value.effectiveDate &&
+  (rxCompassForm.value.type !== 'Standard' || !!rxCompassForm.value.merpVendor)
+);
+
+const vcpOffsitePharmacyText = ref('');
+function parseOffsitePharmacies() {
+  vcpForm.value.offsitePharmacies = generateNpiChips(vcpOffsitePharmacyText.value);
+}
+function removeOffsitePharmacy(idx: number) {
+  vcpForm.value.offsitePharmacies.splice(idx, 1);
+  vcpOffsitePharmacyText.value = vcpForm.value.offsitePharmacies.map(c => c.npi).join('\n');
+}
+
+watch(() => vcpForm.value.election, () => {
+  vcpForm.value.effectiveDate = '';
+  vcpForm.value.offsitePharmacies = [];
+  vcpForm.value.isMaximizer = false;
+  vcpForm.value.isAccumulator = false;
+  vcpForm.value.clientState = '';
+  vcpForm.value.optOutNotes = '';
+  vcpForm.value.selectedPlans = [];
+  vcpOffsitePharmacyText.value = '';
+});
+
+const vcpFormValid = computed(() => {
+  const e = vcpForm.value.election;
+  if (!e) return false;
+  if (e === 'OptOut') return true;
+  return !!vcpForm.value.effectiveDate;
+});
+
+function openProgModal(prog: 'rxcompass' | 'vcp') {
+  activeProgModal.value = prog;
+  showProgModal.value = true;
+}
+
+function closeProgModal() {
+  showProgModal.value = false;
+}
+
+function toggleProgCart(prog: 'rxcompass' | 'vcp') {
+  if (progCart.value.includes(prog)) {
+    progCart.value = progCart.value.filter(p => p !== prog);
+  } else {
+    progCart.value.push(prog);
+  }
+  showProgModal.value = false;
+}
+
+function removeFromProgCart(prog: string) {
+  progCart.value = progCart.value.filter(p => p !== prog);
+}
+
+function mockTicketNumber() {
+  return `TKT-${Math.floor(100000 + Math.random() * 900000)}`;
+}
+
+function submitPrograms() {
+  if (progCart.value.includes('rxcompass')) {
+    rxCompassPending.value = true;
+    rxCompassTicketNumber.value = mockTicketNumber();
+  }
+  if (progCart.value.includes('vcp')) {
+    vcpPending.value = true;
+    vcpTicketNumber.value = mockTicketNumber();
+  }
+  progCart.value = [];
+  showProgConfirmModal.value = false;
+  showProgSuccessSnackbar.value = true;
+}
+
+const programsByAccount: Record<number, object[]> = {
+  [STARK_INDUSTRIES_ID]: [
+    {
+      id: 1,
+      name: 'Liviniti',
+      effStartDate: '03/01/2026',
+      optionName: 'Southern Scripts',
+      invoice: 'Yes',
+      merpAdmin: '',
+      rates: [
+        { rate: 'Admin Fee',                        type: 'CLAIM',      amount: '$8',    groupBy: 'Admin Fee', payTo: '-',            comment: '-', effStartDate: '03/01/2026', effEndDate: '02/28/2027' },
+        { rate: 'Admin Fee',                        type: 'CLAIM',      amount: '$8.25', groupBy: 'Admin Fee', payTo: '-',            comment: '-', effStartDate: '03/01/2027', effEndDate: '02/29/2028' },
+        { rate: 'Admin Fee',                        type: 'CLAIM',      amount: '$8.5',  groupBy: 'Admin Fee', payTo: '-',            comment: '-', effStartDate: '03/01/2028', effEndDate: '-' },
+        { rate: 'Southern Scripts Monthly Minimum', type: 'MONTHLYMIN', amount: '$1200', groupBy: '-',         payTo: '-',            comment: '-', effStartDate: '03/01/2026', effEndDate: '-' },
+        { rate: 'Consultant Fees',                  type: 'CLAIM',      amount: '$1',    groupBy: 'Admin Fee', payTo: 'EPIC Brokers', comment: '-', effStartDate: '03/01/2026', effEndDate: '-' },
+      ],
+    },
+  ],
+};
+
+const programs = computed(() =>
+  selectedAccount.value ? (programsByAccount[selectedAccount.value] ?? []) : []
 );
 
 const progHeaders = [
   { title: 'Program Name',    key: 'name' },
   { title: 'Eff. Start Date', key: 'effStartDate' },
-  { title: 'Eff. End Date',   key: 'effEndDate' },
 ];
 
 const progRatesHeaders = [
-  { title: 'Rate',             key: 'rate' },
-  { title: 'Type',             key: 'type' },
-  { title: 'Amount',           key: 'amount' },
-  { title: 'Group By',         key: 'groupBy' },
-  { title: 'Pay To',           key: 'payTo' },
-  { title: 'Comment',          key: 'comment' },
-  { title: 'Eff. Start Date',  key: 'effStartDate' },
-  { title: 'Eff. End Date',    key: 'effEndDate' },
+  { title: 'Rate',            key: 'rate' },
+  { title: 'Type',            key: 'type' },
+  { title: 'Amount',          key: 'amount' },
+  { title: 'Group By',        key: 'groupBy' },
+  { title: 'Pay To',          key: 'payTo' },
+  { title: 'Comment',         key: 'comment' },
+  { title: 'Eff. Start Date', key: 'effStartDate' },
+  { title: 'Eff. End Date',   key: 'effEndDate' },
 ];
 
 // ─── Step 6: Limits & Controls ────────────────────────────────────────────────
@@ -3732,6 +4207,26 @@ const markAsPending = (item: any) => { item.status = 'pending'; item.startDate =
 watch(selectedAccount, (newVal) => {
   wizardActive.value = false;
   currentWizardStep.value = 0;
+
+  // Reset programs state on account switch
+  rxCompassPending.value = false;
+  vcpPending.value = false;
+  rxCompassEnrolled.value = false;
+  vcpEnrolled.value = false;
+  rxCompassTicketNumber.value = '';
+  vcpTicketNumber.value = '';
+  progCart.value = [];
+  rxCompassForm.value = { type: '', effectiveDate: '', merpVendor: '', notes: '' };
+  vcpForm.value = { election: '', effectiveDate: '', offsitePharmacies: [] as { npi: string; name: string }[], isMaximizer: false, isAccumulator: false, clientState: '', optOutNotes: '', selectedPlans: [] };
+  vcpOffsitePharmacyText.value = '';
+
+  // Oscorp: pre-seed RxCompass in pending state so the pending tile is visible by default
+  if (newVal === OSCORP_ID) {
+    rxCompassPending.value = true;
+    rxCompassTicketNumber.value = 'TKT-482931';
+    rxCompassForm.value = { type: 'Standard', effectiveDate: '08/01/2026', merpVendor: 'Acme Health Solutions', notes: '' };
+  }
+
   if (newVal) {
     implementationSteps.value.forEach((step, index) => { step.active = (index === 0); });
     activeTimelineItem.value = implementationSteps.value[0];
@@ -4863,6 +5358,366 @@ watch(selectedAccount, (newVal) => {
 
 .prog-detail-merp {
   margin-top: $spacing-medium;
+}
+
+// Programs to Configure tiles
+.prog-step {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-medium;
+}
+
+.prog-widget {
+  border: 1px solid $color-border;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.prog-widget-header {
+  padding: $spacing-medium $spacing-large;
+  border-bottom: 1px solid $color-border;
+  background-color: $color-neutral-white;
+}
+
+.prog-widget-desc {
+  color: $color-text-secondary;
+  font-size: $font-size-body;
+  margin-top: $spacing-xsmall;
+}
+
+.prog-widget-body {
+  padding: $spacing-large;
+  background-color: $color-neutral-white;
+
+  &--table {
+    padding: 0;
+  }
+}
+
+.prog-required-note {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-small;
+  background-color: $color-information-background;
+  border-left: 3px solid $color-link;
+  border-radius: 4px;
+  padding: $spacing-small $spacing-medium;
+}
+
+.prog-required-note-icon {
+  color: $color-link;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.prog-tile-required {
+  color: $color-error;
+  font-weight: $font-weight-bold;
+}
+
+.prog-tile-details-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: $font-size-small;
+  color: $color-primary;
+  cursor: pointer;
+  white-space: nowrap;
+  pointer-events: all;
+
+  &:hover { text-decoration: underline; }
+}
+
+.prog-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: $spacing-medium;
+}
+
+.prog-tile {
+  position: relative;
+  background-color: $color-neutral-white;
+  border: 1.5px solid $color-border;
+  border-radius: 10px;
+  padding: $spacing-medium;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-small;
+  outline: none;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+
+  &:hover:not(.prog-tile--pending) {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-color: $color-primary;
+  }
+
+  &:focus-visible:not(.prog-tile--pending) {
+    box-shadow: 0 0 0 3px rgba($color-primary, 0.25);
+    border-color: $color-primary;
+  }
+
+  &--selected {
+    border-color: $color-primary;
+    background-color: rgba($color-primary, 0.03);
+    box-shadow: 0 2px 8px rgba($color-primary, 0.12);
+  }
+
+  &--pending {
+    border-color: rgba($color-warning, 0.5);
+    background-color: rgba($color-warning, 0.03);
+    cursor: default;
+    pointer-events: none;
+  }
+}
+
+.prog-tile-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background-color: $color-primary;
+  color: $color-neutral-white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &--pending {
+    background-color: $color-warning;
+  }
+}
+
+.prog-tile-header {
+  padding-right: 28px;
+}
+
+.prog-tile-name {
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+  font-size: $font-size-body;
+}
+
+.prog-tile-desc {
+  font-size: $font-size-small;
+  color: $color-text-secondary;
+  line-height: 1.5;
+  flex: 1;
+}
+
+.prog-tile-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid $color-border;
+  padding-top: $spacing-small;
+  margin-top: auto;
+}
+
+.prog-tile-status {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: $font-size-small;
+
+  &--added {
+    color: $color-primary;
+    font-weight: $font-weight-bold;
+  }
+
+  &--pending {
+    color: $color-warning;
+    font-weight: $font-weight-bold;
+  }
+
+  &--configure {
+    color: $color-text-secondary;
+  }
+}
+
+.prog-all-handled {
+  text-align: center;
+  padding: $spacing-large;
+  color: $color-text-secondary;
+}
+
+.prog-empty-state {
+  padding: $spacing-large;
+  text-align: center;
+  color: $color-text-secondary;
+}
+
+// Cart bar
+.prog-cart-bar {
+  position: fixed;
+  bottom: 0;
+  left: 120px;
+  right: 0;
+  z-index: 200;
+  background-color: $color-primary-dark;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding: $spacing-small $spacing-large;
+  min-height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.prog-cart-chips {
+  display: flex;
+  gap: $spacing-xsmall;
+  flex-wrap: wrap;
+}
+
+.prog-cart-chip {
+  border-color: rgba(255, 255, 255, 0.6) !important;
+  color: $color-neutral-white !important;
+}
+
+.prog-cart-remove {
+  cursor: pointer;
+  margin-left: 4px;
+  opacity: 0.75;
+
+  &:hover { opacity: 1; }
+}
+
+.prog-cart-right {
+  display: flex;
+  align-items: center;
+  gap: $spacing-medium;
+  flex-shrink: 0;
+}
+
+.prog-cart-count {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: $font-size-small;
+}
+
+.prog-cart-cta {
+  background-color: $color-neutral-white;
+  color: $color-primary-dark;
+  border-radius: 100px;
+  font-size: $font-size-body;
+  padding: 8px 20px;
+
+  &:hover { background-color: rgba(255, 255, 255, 0.9); }
+}
+
+.prog-cart-slide-enter-active,
+.prog-cart-slide-leave-active {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+.prog-cart-slide-enter-from,
+.prog-cart-slide-leave-to {
+  transform: translateY(100%);
+  opacity: 0;
+}
+
+// Modals
+.prog-modal-card {
+  padding: $spacing-small;
+}
+
+.prog-modal-title {
+  font-size: $font-size-h4 !important;
+  font-weight: $font-weight-bold !important;
+  color: $color-primary !important;
+}
+
+
+.prog-modal-label {
+  font-size: $font-size-body;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-small;
+}
+
+.prog-reconsider-date {
+  font-size: $font-size-body;
+  color: $color-text-primary;
+  margin-top: 4px;
+}
+
+.prog-modal-hint {
+  font-size: $font-size-small;
+  color: $color-text-secondary;
+  font-style: italic;
+  margin-top: $spacing-small;
+}
+
+.prog-election-desc {
+  padding: $spacing-small $spacing-medium;
+  background-color: $color-information-background;
+  border-left: 3px solid $color-link;
+  border-radius: 0 4px 4px 0;
+
+  p {
+    font-size: $font-size-small;
+    color: $color-text-primary;
+    margin: 0;
+  }
+}
+
+.prog-vcp-toggle {
+  flex-wrap: wrap;
+}
+
+.prog-vcp-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-small;
+}
+
+// Confirm modal
+.prog-confirm-list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-medium;
+  margin-bottom: $spacing-medium;
+}
+
+.prog-confirm-item {
+  padding: $spacing-small $spacing-medium;
+  border-left: 3px solid $color-primary;
+  background-color: rgba($color-primary, 0.04);
+  border-radius: 0 4px 4px 0;
+}
+
+.prog-confirm-name {
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+  font-size: $font-size-body;
+  margin-bottom: $spacing-xsmall;
+}
+
+.prog-confirm-details {
+  font-size: $font-size-small;
+  color: $color-text-secondary;
+  padding-left: $spacing-medium;
+
+  li { margin-bottom: 2px; }
+
+  &--readonly {
+    background-color: $color-information-background;
+    border-radius: 6px;
+    padding: $spacing-small $spacing-medium $spacing-small ($spacing-medium + 4px);
+  }
+}
+
+.prog-confirm-note {
+  font-size: $font-size-small;
+  color: $color-text-secondary;
+  background-color: $color-information-background;
+  border-left: 3px solid $color-link;
+  border-radius: 4px;
+  padding: $spacing-small $spacing-medium;
+}
+
+.prog-details-ticket {
+  font-size: $font-size-small;
+  color: $color-text-secondary;
 }
 
 // ─── Step 6: Limits & Controls ────────────────────────────────────────────────
