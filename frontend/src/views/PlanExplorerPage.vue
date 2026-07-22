@@ -1430,7 +1430,7 @@
                       </template>
                       <template v-else>
                         <div class="form-row">
-                          <TextField :model-value="blEinNumber" label="EIN Number" placeholder="00-0000000" @update:model-value="blEinNumber = formatEin($event)" />
+                          <TextField :model-value="blEinNumber" label="EIN Number" placeholder="00-0000000" maxlength="10" @update:model-value="blEinNumber = formatEin($event)" />
                         </div>
                         <div class="bl-section">
                           <p class="lc-hcn-label">Is billing managed by a third party?</p>
@@ -1460,8 +1460,8 @@
                     </div>
                   </div>
 
-                  <!-- Card 2: Payment Method (hidden when third party = Yes) -->
-                  <div v-if="blExistingParty === 'no'" class="ap-section">
+                  <!-- Card 2: Payment Method (always visible; content varies when third party = Yes) -->
+                  <div class="ap-section">
                     <div class="ap-section-header">
                       <h4 class="text-h4">Payment Method</h4>
                       <button v-if="!blEditingPayment" class="button button-thirtiary" @click="blEditingPayment = true">
@@ -1479,7 +1479,7 @@
                             <span class="ap-field-label">ACH Method</span>
                             <span class="ap-field-value">{{ blAchMethod === 'send' ? 'Send to Liviniti' : blAchMethod === 'debit' ? 'Debited by Liviniti' : '—' }}</span>
                           </div>
-                          <div v-if="blAchMethod === 'debit'" class="ap-field">
+                          <div v-if="blAchMethod === 'debit' && blExistingParty !== 'yes'" class="ap-field">
                             <span class="ap-field-label">Debit Pull Timing</span>
                             <span class="ap-field-value">{{ blDebitTiming || '—' }}</span>
                           </div>
@@ -1520,7 +1520,8 @@
                               </div>
                             </div>
                             <div v-else-if="blAchMethod === 'debit'" class="bl-subsection">
-                              <p class="text-body bl-note">Download, complete, and upload the signed W-9 and ACH authorization forms.</p>
+                              <p v-if="blExistingParty !== 'yes'" class="text-body bl-note">W-9 and ACH authorization forms are required for Billing to complete account setup. Download, complete, and upload the signed forms.</p>
+                              <p v-else class="text-body bl-note">Up-to-date W-9 and ACH authorization forms are required for Billing to complete account setup. If this billing party is already established with Liviniti, forms may already be on file — please confirm they are current. Upload updated forms below if needed.</p>
                               <div class="bl-download-group">
                                 <button class="button bl-download-btn" @click.prevent>
                                   <CloudDownload :size="16" :stroke-width="2" />Download Blank W-9
@@ -1552,8 +1553,9 @@
                                 <FileUploader v-else :show-document-type-selection="false" @file-selected="(name) => { blAchAuthFile = name; blPendingAchAuthRemoval = false }" />
                               </div>
                             </div>
-                            <div v-if="blAchMethod === 'debit'" class="bl-subsection">
+                            <div v-if="blAchMethod === 'debit' && blExistingParty !== 'yes'" class="bl-subsection">
                               <p class="lc-hcn-label">Debit Pull Timing</p>
+                              <p class="text-body bl-note">For informational purposes only. Records the client's preferred debit schedule for Accounting's reference — does not automate or trigger debit pulls.</p>
                               <div class="bl-field-narrow">
                                 <Select v-model="blDebitTiming" :items="blDebitTimingOptions" label="Select timing" />
                               </div>
