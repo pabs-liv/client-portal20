@@ -996,20 +996,57 @@
                           <td :colspan="columns.length" class="prog-detail-td">
                             <div class="prog-detail">
                               <h5 class="prog-detail-title">Program Details</h5>
-                              <div class="prog-detail-cols">
-                                <div>
-                                  <p class="prog-detail-label">Program Option Name</p>
-                                  <p class="prog-detail-value">{{ item.optionName }}</p>
+
+                              <!-- RxCompass details -->
+                              <template v-if="item.programType === 'rxcompass'">
+                                <div class="prog-detail-cols">
+                                  <div>
+                                    <p class="prog-detail-label">Program Option Name</p>
+                                    <p class="prog-detail-value">{{ item.optionName }}</p>
+                                  </div>
+                                  <div>
+                                    <p class="prog-detail-label">Invoice</p>
+                                    <p class="prog-detail-value">{{ item.invoice }}</p>
+                                  </div>
                                 </div>
-                                <div>
-                                  <p class="prog-detail-label">Invoice</p>
-                                  <p class="prog-detail-value">{{ item.invoice }}</p>
+                                <div class="prog-detail-cols">
+                                  <div>
+                                    <p class="prog-detail-label">MERP Administrator Name</p>
+                                    <p class="prog-detail-value">{{ item.merpAdmin || '-' }}</p>
+                                  </div>
                                 </div>
-                              </div>
-                              <div class="prog-detail-merp">
-                                <p class="prog-detail-label">MERP Administrator Name</p>
-                                <p class="prog-detail-value">{{ item.merpAdmin || '-' }}</p>
-                              </div>
+                              </template>
+
+                              <!-- VCP details -->
+                              <template v-else-if="item.programType === 'vcp'">
+                                <div class="prog-detail-cols">
+                                  <div>
+                                    <p class="prog-detail-label">Election Type</p>
+                                    <p class="prog-detail-value">{{ item.election }}</p>
+                                  </div>
+                                  <div>
+                                    <p class="prog-detail-label">Invoice</p>
+                                    <p class="prog-detail-value">{{ item.invoice }}</p>
+                                  </div>
+                                </div>
+                                <div class="prog-detail-cols">
+                                  <div>
+                                    <p class="prog-detail-label">Maximizer Program</p>
+                                    <p class="prog-detail-value">{{ item.isMaximizer ? 'Yes' : 'No' }}</p>
+                                  </div>
+                                  <div>
+                                    <p class="prog-detail-label">Accumulator Program</p>
+                                    <p class="prog-detail-value">{{ item.isAccumulator ? 'Yes' : 'No' }}</p>
+                                  </div>
+                                </div>
+                                <div v-if="item.clientState" class="prog-detail-cols">
+                                  <div>
+                                    <p class="prog-detail-label">Client State</p>
+                                    <p class="prog-detail-value">{{ item.clientState }}</p>
+                                  </div>
+                                </div>
+                              </template>
+
                             </div>
                           </td>
                         </tr>
@@ -2927,18 +2964,25 @@ const programsByAccount: Record<number, object[]> = {
   [STARK_INDUSTRIES_ID]: [
     {
       id: 1,
-      name: 'Liviniti',
+      programType: 'rxcompass',
+      name: 'RxCompass',
       effStartDate: '03/01/2026',
-      optionName: 'Southern Scripts',
+      optionName: 'RxCompass Standard',
       invoice: 'Yes',
-      merpAdmin: '',
-      rates: [
-        { rate: 'Admin Fee',                        type: 'CLAIM',      amount: '$8',    groupBy: 'Admin Fee', payTo: '-',            comment: '-', effStartDate: '03/01/2026', effEndDate: '02/28/2027' },
-        { rate: 'Admin Fee',                        type: 'CLAIM',      amount: '$8.25', groupBy: 'Admin Fee', payTo: '-',            comment: '-', effStartDate: '03/01/2027', effEndDate: '02/29/2028' },
-        { rate: 'Admin Fee',                        type: 'CLAIM',      amount: '$8.5',  groupBy: 'Admin Fee', payTo: '-',            comment: '-', effStartDate: '03/01/2028', effEndDate: '-' },
-        { rate: 'Southern Scripts Monthly Minimum', type: 'MONTHLYMIN', amount: '$1200', groupBy: '-',         payTo: '-',            comment: '-', effStartDate: '03/01/2026', effEndDate: '-' },
-        { rate: 'Consultant Fees',                  type: 'CLAIM',      amount: '$1',    groupBy: 'Admin Fee', payTo: 'EPIC Brokers', comment: '-', effStartDate: '03/01/2026', effEndDate: '-' },
-      ],
+      merpAdmin: 'Acme Health Solutions',
+    },
+  ],
+  [OSCORP_ID]: [
+    {
+      id: 1,
+      programType: 'vcp',
+      name: 'Variable Copay Program',
+      effStartDate: '05/01/2026',
+      election: 'Voluntary VCP',
+      clientState: '',
+      isMaximizer: false,
+      isAccumulator: false,
+      invoice: 'Yes',
     },
   ],
 };
@@ -4220,8 +4264,9 @@ watch(selectedAccount, (newVal) => {
   vcpForm.value = { election: '', effectiveDate: '', offsitePharmacies: [] as { npi: string; name: string }[], isMaximizer: false, isAccumulator: false, clientState: '', optOutNotes: '', selectedPlans: [] };
   vcpOffsitePharmacyText.value = '';
 
-  // Oscorp: pre-seed RxCompass in pending state so the pending tile is visible by default
+  // Oscorp: VCP already enrolled (shows in Configured Programs table); RxCompass pending
   if (newVal === OSCORP_ID) {
+    vcpEnrolled.value = true;
     rxCompassPending.value = true;
     rxCompassTicketNumber.value = 'TKT-482931';
     rxCompassForm.value = { type: 'Standard', effectiveDate: '08/01/2026', merpVendor: 'Acme Health Solutions', notes: '' };
