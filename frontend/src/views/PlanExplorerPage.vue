@@ -2961,17 +2961,6 @@ function submitPrograms() {
 }
 
 const programsByAccount: Record<number, object[]> = {
-  [STARK_INDUSTRIES_ID]: [
-    {
-      id: 1,
-      programType: 'rxcompass',
-      name: 'RxCompass',
-      effStartDate: '03/01/2026',
-      optionName: 'RxCompass Standard',
-      invoice: 'Yes',
-      merpAdmin: 'Acme Health Solutions',
-    },
-  ],
   [OSCORP_ID]: [
     {
       id: 1,
