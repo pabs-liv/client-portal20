@@ -87,7 +87,7 @@
                 <div v-if="caaOptionSelected" class="ap-fields">
                   <div class="ap-field-row ap-field-row--multi">
                     <div class="ap-field">
-                      <span class="ap-field-label">Liviniti will support our Plan Sponsors with the following offerings</span>
+                      <span class="ap-field-label">Reporting option selection</span>
                       <span class="ap-field-value">{{ editableCaaData.planSponsorOptions || '—' }}</span>
                     </div>
                     <div class="ap-field">
