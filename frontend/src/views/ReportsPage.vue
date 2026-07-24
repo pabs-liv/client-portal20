@@ -204,6 +204,8 @@ const reportTabs = [
   { label: 'Rebate Payments',  key: 'Rebate Payments' },
   { label: 'MAC Pricing',      key: 'MAC Pricing' },
   { label: 'RxCompass',        key: 'RxCompass' },
+  { label: 'RxCompass Lite',   key: 'RxCompass Lite' },
+  { label: 'Variable Copay',   key: 'Variable Copay' },
 ];
 
 const selectedTab = ref('all');

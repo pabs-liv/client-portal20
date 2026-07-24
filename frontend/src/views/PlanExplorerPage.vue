@@ -1084,7 +1084,7 @@
                           </div>
                           <v-row>
                             <v-col cols="12">
-                              <Select v-model="rxCompassForm.type" :items="rxCompassTypeItems" label="RxCompass Type" />
+                              <Select v-model="rxCompassForm.type" :items="rxCompassTypeItems" label="RxCompass Type" :disabled="rxCompassInCart" />
                             </v-col>
                             <v-col v-if="rxCompassIsReconsider" cols="12" md="6">
                               <p class="prog-modal-label">Follow-Up Date</p>
@@ -1102,12 +1102,18 @@
                           </v-row>
                         </v-card-text>
                         <v-card-actions class="nl-dialog-footer">
-                          <button class="button button-secondary" @click="closeProgModal">Close</button>
-                          <button
-                            :class="['button', rxCompassInCart ? 'button-danger' : 'button-primary']"
-                            :disabled="!rxCompassInCart && !rxCompassFormValid"
-                            @click="toggleProgCart('rxcompass')"
-                          >{{ rxCompassInCart ? 'Remove from Queue' : 'Add to Queue' }}</button>
+                          <template v-if="!rxCompassInCart">
+                            <button class="button button-secondary" @click="closeProgModal">Close</button>
+                            <button class="button button-primary" :disabled="!rxCompassFormValid" @click="toggleProgCart('rxcompass')">Add to Queue</button>
+                          </template>
+                          <template v-else-if="!rxCompassFormDirty">
+                            <button class="button button-danger" @click="toggleProgCart('rxcompass')">Remove from Queue</button>
+                            <button class="button button-secondary" @click="closeProgModal">Close</button>
+                          </template>
+                          <template v-else>
+                            <button class="button button-secondary" @click="cancelProgEdit">Cancel</button>
+                            <button class="button button-primary" @click="closeProgModal">Update Queue</button>
+                          </template>
                         </v-card-actions>
                       </v-card>
 
@@ -1122,6 +1128,7 @@
                               v-for="opt in vcpElectionOptions"
                               :key="opt.value"
                               :class="['button', 'toc-toggle', 'nl-level-btn', { 'toc-toggle--selected': vcpForm.election === opt.value }]"
+                              :disabled="vcpInCart"
                               @click="vcpForm.election = opt.value"
                             >
                               <span>{{ opt.label }}</span>
@@ -1199,12 +1206,18 @@
                           <p v-if="!vcpForm.election" class="prog-modal-hint">Select an election type above to configure this program.</p>
                         </v-card-text>
                         <v-card-actions class="nl-dialog-footer">
-                          <button class="button button-secondary" @click="closeProgModal">Close</button>
-                          <button
-                            :class="['button', vcpInCart ? 'button-danger' : 'button-primary']"
-                            :disabled="!vcpInCart && !vcpFormValid"
-                            @click="toggleProgCart('vcp')"
-                          >{{ vcpInCart ? 'Remove from Queue' : 'Add to Queue' }}</button>
+                          <template v-if="!vcpInCart">
+                            <button class="button button-secondary" @click="closeProgModal">Close</button>
+                            <button class="button button-primary" :disabled="!vcpFormValid" @click="toggleProgCart('vcp')">Add to Queue</button>
+                          </template>
+                          <template v-else-if="!vcpFormDirty">
+                            <button class="button button-danger" @click="toggleProgCart('vcp')">Remove from Queue</button>
+                            <button class="button button-secondary" @click="closeProgModal">Close</button>
+                          </template>
+                          <template v-else>
+                            <button class="button button-secondary" @click="cancelProgEdit">Cancel</button>
+                            <button class="button button-primary" @click="closeProgModal">Update Queue</button>
+                          </template>
                         </v-card-actions>
                       </v-card>
                     </v-dialog>
@@ -2760,6 +2773,7 @@ import { VRow, VCol, VProgressCircular } from 'vuetify/components';
 
 const STARK_INDUSTRIES_ID = 1;
 const WAYNE_ENTERPRISES_ID = 2;
+const CYBERDYNE_SYSTEMS_ID = 3;
 const OSCORP_ID = 4;
 
 const accountOptions = ref([
@@ -2919,15 +2933,49 @@ const vcpFormValid = computed(() => {
   const e = vcpForm.value.election;
   if (!e) return false;
   if (e === 'OptOut') return true;
-  return !!vcpForm.value.effectiveDate;
+  return !!vcpForm.value.effectiveDate && !!vcpForm.value.clientState;
+});
+
+const rxCompassFormSnapshot = ref<typeof rxCompassForm.value | null>(null);
+const vcpFormSnapshot = ref<typeof vcpForm.value | null>(null);
+
+const rxCompassFormDirty = computed(() => {
+  if (!rxCompassFormSnapshot.value) return false;
+  return JSON.stringify(rxCompassForm.value) !== JSON.stringify(rxCompassFormSnapshot.value);
+});
+
+const vcpFormDirty = computed(() => {
+  if (!vcpFormSnapshot.value) return false;
+  return JSON.stringify(vcpForm.value) !== JSON.stringify(vcpFormSnapshot.value);
 });
 
 function openProgModal(prog: 'rxcompass' | 'vcp') {
   activeProgModal.value = prog;
+  if (prog === 'rxcompass' && progCart.value.includes('rxcompass')) {
+    rxCompassFormSnapshot.value = JSON.parse(JSON.stringify(rxCompassForm.value));
+  } else {
+    rxCompassFormSnapshot.value = null;
+  }
+  if (prog === 'vcp' && progCart.value.includes('vcp')) {
+    vcpFormSnapshot.value = JSON.parse(JSON.stringify(vcpForm.value));
+  } else {
+    vcpFormSnapshot.value = null;
+  }
   showProgModal.value = true;
 }
 
 function closeProgModal() {
+  showProgModal.value = false;
+}
+
+function cancelProgEdit() {
+  if (activeProgModal.value === 'rxcompass' && rxCompassFormSnapshot.value) {
+    rxCompassForm.value = JSON.parse(JSON.stringify(rxCompassFormSnapshot.value));
+  }
+  if (activeProgModal.value === 'vcp' && vcpFormSnapshot.value) {
+    vcpForm.value = JSON.parse(JSON.stringify(vcpFormSnapshot.value));
+    vcpOffsitePharmacyText.value = vcpFormSnapshot.value.offsitePharmacies.map((c: { npi: string }) => c.npi).join('\n');
+  }
   showProgModal.value = false;
 }
 
@@ -2945,7 +2993,7 @@ function removeFromProgCart(prog: string) {
 }
 
 function mockTicketNumber() {
-  return `TKT-${Math.floor(100000 + Math.random() * 900000)}`;
+  return `${Math.floor(1000000 + Math.random() * 9000000)}`;
 }
 
 function submitPrograms() {
@@ -2972,6 +3020,28 @@ const programsByAccount: Record<number, object[]> = {
       election: 'Voluntary VCP',
       clientState: '',
       isMaximizer: false,
+      isAccumulator: false,
+      invoice: 'Yes',
+    },
+  ],
+  [CYBERDYNE_SYSTEMS_ID]: [
+    {
+      id: 1,
+      programType: 'rxcompass',
+      name: 'RxCompass',
+      effStartDate: '01/01/2026',
+      optionName: 'RxCompass (Standard)',
+      invoice: 'Yes',
+      merpAdmin: 'Apex Health Partners',
+    },
+    {
+      id: 2,
+      programType: 'vcp',
+      name: 'Variable Copay Program',
+      effStartDate: '01/01/2026',
+      election: 'VCP Hardstops',
+      clientState: '',
+      isMaximizer: true,
       isAccumulator: false,
       invoice: 'Yes',
     },
@@ -3196,8 +3266,9 @@ const lcFields = ref([
 
 const isStarkIndustries = computed(() => selectedAccount.value === STARK_INDUSTRIES_ID);
 const isWayneEnterprises = computed(() => selectedAccount.value === WAYNE_ENTERPRISES_ID);
+const isCyberdyne = computed(() => selectedAccount.value === CYBERDYNE_SYSTEMS_ID);
 const isOscorp = computed(() => selectedAccount.value === OSCORP_ID);
-const isWizardAccount = computed(() => isStarkIndustries.value || isOscorp.value);
+const isWizardAccount = computed(() => isStarkIndustries.value || isCyberdyne.value || isOscorp.value);
 
 const gapSections = [
   { label: 'Account Information',  icon: Building2  },
@@ -4255,11 +4326,17 @@ watch(selectedAccount, (newVal) => {
   vcpForm.value = { election: '', effectiveDate: '', offsitePharmacies: [] as { npi: string; name: string }[], isMaximizer: false, isAccumulator: false, clientState: '', optOutNotes: '', selectedPlans: [] };
   vcpOffsitePharmacyText.value = '';
 
+  // Cyberdyne Systems: both programs fully enrolled (tile grid shows "all configured" message)
+  if (newVal === CYBERDYNE_SYSTEMS_ID) {
+    rxCompassEnrolled.value = true;
+    vcpEnrolled.value = true;
+  }
+
   // Oscorp: VCP already enrolled (shows in Configured Programs table); RxCompass pending
   if (newVal === OSCORP_ID) {
     vcpEnrolled.value = true;
     rxCompassPending.value = true;
-    rxCompassTicketNumber.value = 'TKT-482931';
+    rxCompassTicketNumber.value = '4829310';
     rxCompassForm.value = { type: 'Standard', effectiveDate: '08/01/2026', merpVendor: 'Acme Health Solutions', notes: '' };
   }
 
@@ -4807,6 +4884,13 @@ watch(selectedAccount, (newVal) => {
   background-color: transparent;
   border-color: $color-primary;
   color: $color-primary;
+}
+
+.button-danger {
+  background-color: transparent;
+  border-color: $color-error;
+  color: $color-error;
+  &:hover { background-color: rgba($color-error, 0.06); }
 }
 
 .button-thirtiary {
