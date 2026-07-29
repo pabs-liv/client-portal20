@@ -117,7 +117,7 @@
     <PageCard headerText="Savings Story" :descriptionText="activeData.summaryLabel">
       <SavingsBreakdownChart
         :breakdown-items="activeData.savingsBreakdownItems"
-        :claims-counts="activeData.claimsCounts"
+        :claims-counts="quarterlyClaimsCounts"
       />
     </PageCard>
 
@@ -1039,6 +1039,22 @@ const activeData = computed<PeriodDashboardData>(() => {
   const key = selectedAccountId.value === BOOK_OF_BUSINESS_ID ? 'book-of-business' : String(selectedAccountId.value);
   const accountData = dashboardDataByAccount[key] ?? dashboardDataByAccount['book-of-business'];
   return accountData[selectedPeriod.value];
+});
+
+const quarterlyClaimsCounts = computed(() => {
+  const monthly = activeData.value.claimsCounts;
+  if (selectedPeriod.value !== 'ytd') {
+    return monthly;
+  }
+  const quarters: { month: string; count: number }[] = [];
+  for (let i = 0; i < monthly.length; i += 3) {
+    const group = monthly.slice(i, i + 3);
+    quarters.push({
+      month: `Q${quarters.length + 1}`,
+      count: group.reduce((sum, item) => sum + item.count, 0),
+    });
+  }
+  return quarters;
 });
 
 const selectedAccountName = computed(() =>
