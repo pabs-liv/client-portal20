@@ -659,6 +659,22 @@
                               <span class="ap-field-value">Allow Secondary Payer</span>
                             </div>
                           </div>
+                          <template v-if="plan.allowSecondaryPayer">
+                            <div class="ap-field-row">
+                              <div class="ap-checkbox-row">
+                                <CheckSquare v-if="plan.secondaryPlanOnly" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" @click="plan.secondaryPlanOnly = !plan.secondaryPlanOnly" style="cursor:pointer" />
+                                <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" @click="plan.secondaryPlanOnly = !plan.secondaryPlanOnly" style="cursor:pointer" />
+                                <span class="ap-field-value">Secondary Plan Only</span>
+                              </div>
+                            </div>
+                            <div class="ap-field-row">
+                              <div class="ap-checkbox-row">
+                                <CheckSquare v-if="plan.paySecondaryAsPrimary" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" @click="plan.paySecondaryAsPrimary = !plan.paySecondaryAsPrimary" style="cursor:pointer" />
+                                <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" @click="plan.paySecondaryAsPrimary = !plan.paySecondaryAsPrimary" style="cursor:pointer" />
+                                <span class="ap-field-value">Pay Secondary Claim as Primary if Rejected by Primary Payer</span>
+                              </div>
+                            </div>
+                          </template>
                           <div class="ap-field-row">
                             <div class="ap-field">
                               <span class="ap-field-label">COB configuration</span>
@@ -1129,7 +1145,7 @@
                               :key="opt.value"
                               :class="['button', 'toc-toggle', 'nl-level-btn', { 'toc-toggle--selected': vcpForm.election === opt.value }]"
                               :disabled="vcpInCart"
-                              @click="vcpForm.election = opt.value"
+                              @click="selectVcpElection(opt.value)"
                             >
                               <span>{{ opt.label }}</span>
                               <Check v-if="vcpForm.election === opt.value" :size="13" :stroke-width="2.5" class="nl-level-check" />
@@ -1144,20 +1160,64 @@
                           <!-- Opt Out -->
                           <v-row v-if="vcpForm.election === 'OptOut'">
                             <v-col cols="12">
+                              <div class="ap-checkbox-row mb-3" @click="vcpForm.optOutViaRxCompass = !vcpForm.optOutViaRxCompass" style="cursor:pointer">
+                                <CheckSquare v-if="vcpForm.optOutViaRxCompass" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                                <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                                <span class="ap-field-value">VCP is through RxCompass</span>
+                              </div>
                               <v-textarea v-model="vcpForm.optOutNotes" label="Notes" variant="outlined" density="compact" rows="3" auto-grow hide-details class="bl-notes-textarea" />
                             </v-col>
                           </v-row>
 
-                          <!-- All non-Opt Out elections -->
-                          <v-row v-else-if="vcpForm.election">
-                            <v-col cols="12" md="6">
-                              <DatePicker v-model="vcpForm.effectiveDate" label="Effective Date" variant="underlined" />
-                            </v-col>
-                            <v-col cols="12" md="6">
-                              <Select v-model="vcpForm.clientState" :items="usStateItems" label="Client State" />
-                            </v-col>
-                            <v-col v-if="vcpForm.election === 'OffsiteVCP'" cols="12" class="pt-1">
-                              <p class="prog-modal-label">Offsite Pharmacies</p>
+                          <!-- Configuring VCP -->
+                          <template v-else-if="vcpForm.election">
+                            <v-row>
+                              <v-col cols="12" md="6">
+                                <DatePicker v-model="vcpForm.effectiveDate" label="Effective Date" variant="underlined" />
+                              </v-col>
+                              <v-col cols="12" md="6">
+                                <div class="ap-field">
+                                  <span class="ap-field-label">Client State</span>
+                                  <span class="ap-field-value">{{ editableCompanyInfo.physicalState || '—' }}</span>
+                                </div>
+                                <p class="nl-npi-hint mb-0">Pulled from Account Profile.</p>
+                              </v-col>
+                            </v-row>
+
+                            <v-row>
+                              <v-col cols="12">
+                                <Autocomplete
+                                  :model-value="vcpForm.planIds"
+                                  @update:model-value="onVcpPlansChange"
+                                  :items="vcpPlanItems()"
+                                  label="Applicable Plans"
+                                  :multiple="true"
+                                  hide-details
+                                />
+                              </v-col>
+                            </v-row>
+
+                            <div v-if="vcpForm.planIds.length" class="prog-vcp-plan-rows mt-3">
+                              <div v-for="pid in vcpForm.planIds" :key="pid" class="prog-vcp-plan-row">
+                                <span class="prog-vcp-plan-row-name">{{ planNameById(pid) }}</span>
+                                <div class="toc-toggle-group">
+                                  <button
+                                    type="button"
+                                    :class="['button', 'toc-toggle', { 'toc-toggle--selected': vcpForm.designations[pid] === 'Maximizer' }]"
+                                    @click="setVcpDesignation(pid, 'Maximizer')"
+                                  >Maximizer</button>
+                                  <button
+                                    type="button"
+                                    :class="['button', 'toc-toggle', { 'toc-toggle--selected': vcpForm.designations[pid] === 'Accumulator' }]"
+                                    @click="setVcpDesignation(pid, 'Accumulator')"
+                                  >Accumulator</button>
+                                </div>
+                              </div>
+                            </div>
+                            <p v-else class="prog-modal-hint">Select at least one plan to configure this election.</p>
+
+                            <template v-if="vcpForm.election === 'OffsiteVCP'">
+                              <p class="prog-modal-label mt-4">Offsite Pharmacies</p>
                               <p class="nl-dialog-field-label">NPI</p>
                               <v-textarea
                                 v-model="vcpOffsitePharmacyText"
@@ -1181,27 +1241,8 @@
                                   <span class="bl-file-chip-close" @click.stop="removeOffsitePharmacy(idx)"><X :size="10" :stroke-width="2.5" /></span>
                                 </v-chip>
                               </div>
-                            </v-col>
-                            <v-col cols="12">
-                              <Autocomplete v-model="vcpForm.selectedPlans" :items="vcpPlanOptions" label="Does this apply to a specific plan?" :multiple="true" hide-details />
-                              <p class="nl-npi-hint">Leave blank to apply to all plans.</p>
-                            </v-col>
-                            <v-col cols="12">
-                              <p class="prog-modal-label mb-2">Program Features</p>
-                              <div class="prog-vcp-checkboxes">
-                                <div class="ap-checkbox-row" @click="vcpForm.isMaximizer = !vcpForm.isMaximizer" style="cursor:pointer">
-                                  <CheckSquare v-if="vcpForm.isMaximizer" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
-                                  <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
-                                  <span class="ap-field-value">Maximizer Program</span>
-                                </div>
-                                <div class="ap-checkbox-row" @click="vcpForm.isAccumulator = !vcpForm.isAccumulator" style="cursor:pointer">
-                                  <CheckSquare v-if="vcpForm.isAccumulator" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
-                                  <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
-                                  <span class="ap-field-value">Accumulator Program</span>
-                                </div>
-                              </div>
-                            </v-col>
-                          </v-row>
+                            </template>
+                          </template>
 
                           <p v-if="!vcpForm.election" class="prog-modal-hint">Select an election type above to configure this program.</p>
                         </v-card-text>
@@ -1245,14 +1286,16 @@
                               <p class="prog-confirm-name">Variable Copay Program</p>
                               <ul class="prog-confirm-details">
                                 <li>Election: {{ vcpElectionLabel }}</li>
-                                <li v-if="vcpForm.election !== 'OptOut'">Effective Date: {{ vcpForm.effectiveDate || '—' }}</li>
-                                <li v-if="vcpForm.election === 'OffsiteVCP' && vcpForm.offsitePharmacies.length">Offsite Pharmacies: {{ vcpForm.offsitePharmacies.map(c => c.name).join(', ') }}</li>
-                                <li v-if="vcpForm.election !== 'OptOut' && vcpForm.isMaximizer">Maximizer Program: Yes</li>
-                                <li v-if="vcpForm.election !== 'OptOut' && vcpForm.isAccumulator">Accumulator Program: Yes</li>
-                                <li v-if="vcpForm.election !== 'OptOut' && vcpForm.clientState">Client State: {{ vcpForm.clientState }}</li>
-                                <li v-if="vcpForm.election !== 'OptOut' && vcpForm.selectedPlans.length">Applies to: {{ vcpForm.selectedPlans.join(', ') }}</li>
-                                <li v-else-if="vcpForm.election !== 'OptOut'">Applies to: All plans</li>
-                                <li v-if="vcpForm.election === 'OptOut' && vcpForm.optOutNotes">Notes: {{ vcpForm.optOutNotes }}</li>
+                                <template v-if="vcpForm.election !== 'OptOut'">
+                                  <li>Effective Date: {{ vcpForm.effectiveDate || '—' }}</li>
+                                  <li>Client State: {{ editableCompanyInfo.physicalState || '—' }}</li>
+                                  <li v-if="vcpForm.planIds.length">Plans: {{ vcpForm.planIds.map(pid => `${planNameById(pid)} (${vcpForm.designations[pid] || '—'})`).join(', ') }}</li>
+                                  <li v-if="vcpForm.offsitePharmacies.length">Offsite Pharmacies: {{ vcpForm.offsitePharmacies.map(c => c.name).join(', ') }}</li>
+                                </template>
+                                <template v-else>
+                                  <li v-if="vcpForm.optOutViaRxCompass">VCP is through RxCompass</li>
+                                  <li v-if="vcpForm.optOutNotes">Notes: {{ vcpForm.optOutNotes }}</li>
+                                </template>
                               </ul>
                             </div>
                           </div>
@@ -1294,14 +1337,16 @@
                           <!-- VCP details -->
                           <ul v-if="progDetailsTarget === 'vcp'" class="prog-confirm-details prog-confirm-details--readonly">
                             <li>Election: {{ vcpElectionLabel }}</li>
-                            <li v-if="vcpForm.election !== 'OptOut'">Effective Date: {{ vcpForm.effectiveDate || '—' }}</li>
-                            <li v-if="vcpForm.election === 'OffsiteVCP' && vcpForm.offsitePharmacies.length">Offsite Pharmacies: {{ vcpForm.offsitePharmacies.map(c => c.name).join(', ') }}</li>
-                            <li v-if="vcpForm.election !== 'OptOut' && vcpForm.isMaximizer">Maximizer Program: Yes</li>
-                            <li v-if="vcpForm.election !== 'OptOut' && vcpForm.isAccumulator">Accumulator Program: Yes</li>
-                            <li v-if="vcpForm.election !== 'OptOut' && vcpForm.clientState">Client State: {{ vcpForm.clientState }}</li>
-                            <li v-if="vcpForm.election !== 'OptOut' && vcpForm.selectedPlans.length">Applies to: {{ vcpForm.selectedPlans.join(', ') }}</li>
-                            <li v-else-if="vcpForm.election !== 'OptOut'">Applies to: All plans</li>
-                            <li v-if="vcpForm.election === 'OptOut' && vcpForm.optOutNotes">Notes: {{ vcpForm.optOutNotes }}</li>
+                            <template v-if="vcpForm.election !== 'OptOut'">
+                              <li>Effective Date: {{ vcpForm.effectiveDate || '—' }}</li>
+                              <li>Client State: {{ editableCompanyInfo.physicalState || '—' }}</li>
+                              <li v-if="vcpForm.planIds.length">Plans: {{ vcpForm.planIds.map(pid => `${planNameById(pid)} (${vcpForm.designations[pid] || '—'})`).join(', ') }}</li>
+                              <li v-if="vcpForm.offsitePharmacies.length">Offsite Pharmacies: {{ vcpForm.offsitePharmacies.map(c => c.name).join(', ') }}</li>
+                            </template>
+                            <template v-else>
+                              <li v-if="vcpForm.optOutViaRxCompass">VCP is through RxCompass</li>
+                              <li v-if="vcpForm.optOutNotes">Notes: {{ vcpForm.optOutNotes }}</li>
+                            </template>
                           </ul>
                         </v-card-text>
                         <v-card-actions class="nl-dialog-footer">
@@ -1323,88 +1368,177 @@
 
                 <!-- Step 6: Limits & Controls -->
                 <template v-else-if="currentWizardStep === 5">
+
+                  <!-- Card 1: Standard Dispensing Limitations -->
                   <div class="ap-section">
                     <div class="ap-section-header">
-                      <h4 class="text-h4">Limits &amp; Controls</h4>
+                      <h4 class="text-h4">Standard Dispensing Limitations</h4>
+                      <button v-if="!lcEditingLimits" class="button button-thirtiary" @click="lcStartEdit">
+                        <Pencil :size="14" :stroke-width="1.5" />Edit
+                      </button>
                     </div>
-                  <p class="text-body lc-intro">Standard dispensing limitations are shown below.</p>
-
-                  <div class="toc-toggle-group lc-toggle-group">
-                    <button
-                      :class="['button', 'toc-toggle', { 'toc-toggle--selected': !lcRequestChange }]"
-                      @click="lcRequestChange = false"
-                    >Keep Standard</button>
-                    <button
-                      :class="['button', 'toc-toggle', { 'toc-toggle--selected': lcRequestChange }]"
-                      @click="lcRequestChange = true"
-                    >Request Change</button>
-                  </div>
-
-                  <div class="lc-fields">
-                    <div v-for="field in lcFields" :key="field.key" class="lc-field-row">
-                      <span class="lc-field-label">{{ field.label }}</span>
-                      <span v-if="!lcRequestChange" class="lc-field-value">{{ field.value }}</span>
-                      <input v-else v-model="field.value" class="lc-field-input" />
-                    </div>
-                  </div>
-
-                  <div class="lc-section-divider" />
-
-                  <!-- High Cost Notifications -->
-                  <p class="text-body lc-hcn-intro">Before a high cost claim exceeding the specified notify amount is processed, a notification will be sent to the indicated users below. Users will have 24 hours to acknowledge the claim before it will automatically be processed.</p>
-
-                  <div class="lc-hcn-field">
-                    <p class="lc-hcn-label">Notify threshold amount:</p>
-                    <input v-model="lcNotifyThreshold" class="lc-field-input lc-hcn-input" />
-                  </div>
-
-                  <div class="lc-hcn-field">
-                    <p class="lc-hcn-label">Who should receive high cost notifications?</p>
-                    <div
-                      v-for="(recipient, idx) in lcRecipients"
-                      :key="idx"
-                      class="lc-recipient-row"
-                    >
-                      <input v-model="lcRecipients[idx]" class="lc-field-input lc-recipient-input" />
-                      <X :size="16" :stroke-width="1.5" class="lc-recipient-remove" @click="lcRecipients.splice(idx, 1)" />
-                    </div>
-                    <button class="button lc-add-btn" @click="lcRecipients.push('')">ADD</button>
-                  </div>
-
-                  <div class="lc-section-divider" />
-
-                  <!-- Overrides & Edits -->
-                  <p class="text-body lc-hcn-intro">We recommend the standard management setup for overrides and edits, as shown below. Changes to clinical edits may impact cost savings and plan performance.</p>
-
-                  <div class="lc-fields">
-                    <div v-for="item in lcOverrides" :key="item" class="lc-field-row">
-                      <span class="lc-field-label">{{ item }}</span>
-                      <Check :size="16" :stroke-width="2" class="lc-check-icon" />
+                    <div class="ap-fields">
+                      <p v-if="lcEditingLimits" class="text-body bl-note">These are Liviniti's standard defaults. Make changes as needed for this account.</p>
+                      <div v-if="!lcEditingLimits" class="ap-field-row ap-field-row--multi ap-field-row--wrap">
+                        <div v-for="field in lcFields" :key="field.key" class="ap-field">
+                          <span class="ap-field-label">{{ field.label }}</span>
+                          <span class="ap-field-value">{{ field.value }}</span>
+                        </div>
+                      </div>
+                      <div v-else class="ap-field-row ap-field-row--multi ap-field-row--wrap">
+                        <div v-for="field in lcFields" :key="field.key" class="ap-field">
+                          <TextField v-model="field.value" :label="field.label" />
+                        </div>
+                      </div>
+                      <div v-if="lcEditingLimits" class="ap-section-footer">
+                        <button class="button button-primary" @click="lcSaveEdit">Save Changes</button>
+                        <button class="button button-secondary" @click="lcCancelEdit">Cancel</button>
+                      </div>
                     </div>
                   </div>
 
-                  <div class="lc-section-divider" />
-
-                  <!-- DAW Penalties -->
-                  <p class="text-body lc-hcn-intro">Dispense as Written standards are below, please indicate if you'd like to apply these penalties.</p>
-
-                  <div v-for="daw in lcDawPenalties" :key="daw.key" class="lc-daw-block">
-                    <h5 class="lc-daw-title">{{ daw.label }}</h5>
-                    <p class="text-body lc-daw-desc">{{ daw.description }}</p>
-                    <div class="toc-toggle-group">
-                      <button
-                        :class="['button', 'toc-toggle', { 'toc-toggle--selected': daw.value === false }]"
-                        @click="daw.value = false"
-                      >Not Applied</button>
-                      <button
-                        :class="['button', 'toc-toggle', { 'toc-toggle--selected': daw.value === true }]"
-                        @click="daw.value = true"
-                      >Applied</button>
+                  <!-- Card 2: High Cost Notifications -->
+                  <div class="ap-section">
+                    <div class="ap-section-header">
+                      <h4 class="text-h4">High Cost Notifications</h4>
+                      <button v-if="!lcEditingHcn" class="button button-thirtiary" @click="lcEditingHcn = true">
+                        <Pencil :size="14" :stroke-width="1.5" />Edit
+                      </button>
+                    </div>
+                    <div class="ap-fields">
+                      <template v-if="!lcEditingHcn">
+                        <div class="ap-field-row ap-field-row--multi">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Notify Threshold Amount</span>
+                            <span class="ap-field-value">${{ lcNotifyThreshold }}</span>
+                          </div>
+                          <div class="ap-field">
+                            <span class="ap-field-label">Notification Recipients</span>
+                            <span class="ap-field-value">{{ lcRecipients.length ? lcRecipients.join(', ') : '—' }}</span>
+                          </div>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <p class="text-body bl-note">Before a high cost claim exceeding the notify amount is processed, the contacts below are notified. They have 24 hours to acknowledge before the claim is automatically processed.</p>
+                        <div class="bl-section">
+                          <p class="lc-hcn-label">Notify threshold amount</p>
+                          <div class="bl-field-narrow">
+                            <TextField v-model="lcNotifyThreshold" label="Notify threshold amount" />
+                          </div>
+                        </div>
+                        <div class="bl-section">
+                          <p class="lc-hcn-label">Who should receive high cost notifications?</p>
+                          <p class="text-body bl-note">Selected contacts will be notified when a high cost claim is pending approval.</p>
+                          <div class="bl-field-narrow">
+                            <Autocomplete v-model="lcRecipients" :items="lcHcnContactOptions" label="Select contacts" :multiple="true" />
+                          </div>
+                        </div>
+                        <div class="ap-section-footer">
+                          <button class="button button-primary" @click="lcEditingHcn = false">Save Changes</button>
+                          <button class="button button-secondary" @click="lcEditingHcn = false">Cancel</button>
+                        </div>
+                      </template>
                     </div>
                   </div>
 
-                  <textarea v-model="lcDawNotes" class="lc-daw-notes" placeholder="DAW Notes" />
+                  <!-- Card 3: Overrides & Edits (read-only) -->
+                  <div class="ap-section">
+                    <div class="ap-section-header">
+                      <h4 class="text-h4">Overrides &amp; Edits</h4>
+                    </div>
+                    <div class="ap-fields">
+                      <p class="text-body bl-note">Liviniti recommends the standard management setup for overrides and edits. Changes to clinical edits may impact cost savings and plan performance. The following are included by default:</p>
+                      <ul class="lc-overrides-list">
+                        <li v-for="item in lcOverrides" :key="item">{{ item }}</li>
+                      </ul>
+                    </div>
                   </div>
+
+                  <!-- Card 4: Dispense as Written (DAW) -->
+                  <div class="ap-section">
+                    <div class="ap-section-header">
+                      <h4 class="text-h4">Dispense as Written (DAW)</h4>
+                      <button v-if="!lcEditingDaw" class="button button-thirtiary" @click="lcEditingDaw = true">
+                        <Pencil :size="14" :stroke-width="1.5" />Edit
+                      </button>
+                    </div>
+                    <div class="ap-fields">
+                      <template v-if="!lcEditingDaw">
+                        <div v-for="daw in lcDawPenalties" :key="daw.key" class="ap-field-row">
+                          <div class="ap-field">
+                            <span class="ap-field-label">{{ daw.label }}</span>
+                            <span class="ap-field-value">{{ daw.value || '—' }}</span>
+                          </div>
+                        </div>
+                        <div v-if="lcDawNotes" class="ap-field-row">
+                          <div class="ap-field">
+                            <span class="ap-field-label">DAW Notes</span>
+                            <span class="ap-field-value">{{ lcDawNotes }}</span>
+                          </div>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <p class="text-body bl-note">Indicate whether you would like to apply these DAW penalties.</p>
+                        <div v-for="daw in lcDawPenalties" :key="daw.key" class="bl-section">
+                          <p class="lc-hcn-label">{{ daw.label }}</p>
+                          <p class="text-body bl-note">{{ daw.description }}</p>
+                          <div class="bl-field-narrow">
+                            <Select v-model="daw.value" :items="daw.options" label="Apply penalty?" />
+                          </div>
+                        </div>
+                        <div class="bl-section">
+                          <v-textarea v-model="lcDawNotes" label="DAW Notes" variant="outlined" density="compact" rows="2" auto-grow hide-details class="bl-notes-textarea" />
+                        </div>
+                        <div class="ap-section-footer">
+                          <button class="button button-primary" @click="lcEditingDaw = false">Save Changes</button>
+                          <button class="button button-secondary" @click="lcEditingDaw = false">Cancel</button>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+
+                  <!-- Card 5: Manual Claims -->
+                  <div class="ap-section">
+                    <div class="ap-section-header">
+                      <h4 class="text-h4">Manual Claims</h4>
+                      <button v-if="!lcEditingManual" class="button button-thirtiary" @click="lcEditingManual = true">
+                        <Pencil :size="14" :stroke-width="1.5" />Edit
+                      </button>
+                    </div>
+                    <div class="ap-fields">
+                      <template v-if="!lcEditingManual">
+                        <div class="ap-field-row">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Reimbursement Type</span>
+                            <span class="ap-field-value">{{ lcManualReimbursement || '—' }}</span>
+                          </div>
+                        </div>
+                        <div v-if="lcManualNotes" class="ap-field-row">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Manual Claim Notes</span>
+                            <span class="ap-field-value">{{ lcManualNotes }}</span>
+                          </div>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <p class="text-body bl-note">Manual claims are processed for up to 30 days after the date of service.</p>
+                        <div class="bl-section">
+                          <p class="lc-hcn-label">Reimbursement type</p>
+                          <div class="bl-field-narrow">
+                            <Select v-model="lcManualReimbursement" :items="lcManualReimbursementOptions" label="Select reimbursement type" />
+                          </div>
+                        </div>
+                        <div class="bl-section">
+                          <v-textarea v-model="lcManualNotes" label="Manual Claim Notes" variant="outlined" density="compact" rows="2" auto-grow hide-details class="bl-notes-textarea" />
+                        </div>
+                        <div class="ap-section-footer">
+                          <button class="button button-primary" @click="lcEditingManual = false">Save Changes</button>
+                          <button class="button button-secondary" @click="lcEditingManual = false">Cancel</button>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+
                 </template>
 
                 <!-- Step 7: Billing -->
@@ -1483,33 +1617,49 @@
                     </div>
                     <div class="ap-fields">
                       <template v-if="!blEditingPayment">
-                        <div class="ap-field-row ap-field-row--multi">
-                          <div class="ap-field">
-                            <span class="ap-field-label">Payment Method</span>
-                            <span class="ap-field-value">{{ blPaymentMethod || '—' }}</span>
+                        <template v-if="blExistingParty === 'yes' && blSkipAchSetup">
+                          <div class="ap-field-row">
+                            <div class="ap-field">
+                              <span class="ap-field-value">Payment handled under existing TPA billing agreement.</span>
+                            </div>
                           </div>
-                          <div v-if="blPaymentMethod === 'ACH'" class="ap-field">
-                            <span class="ap-field-label">ACH Method</span>
-                            <span class="ap-field-value">{{ blAchMethod === 'send' ? 'Send to Liviniti' : blAchMethod === 'debit' ? 'Debited by Liviniti' : '—' }}</span>
+                        </template>
+                        <template v-else>
+                          <div class="ap-field-row ap-field-row--multi">
+                            <div class="ap-field">
+                              <span class="ap-field-label">Payment Method</span>
+                              <span class="ap-field-value">{{ blPaymentMethod || '—' }}</span>
+                            </div>
+                            <div v-if="blPaymentMethod === 'ACH'" class="ap-field">
+                              <span class="ap-field-label">ACH Method</span>
+                              <span class="ap-field-value">{{ blAchMethod === 'send' ? 'Send to Liviniti' : blAchMethod === 'debit' ? 'Debited by Liviniti' : '—' }}</span>
+                            </div>
+                            <div v-if="blAchMethod === 'debit' && blExistingParty !== 'yes'" class="ap-field">
+                              <span class="ap-field-label">Debit Pull Timing</span>
+                              <span class="ap-field-value">{{ blDebitTiming || '—' }}</span>
+                            </div>
                           </div>
-                          <div v-if="blAchMethod === 'debit' && blExistingParty !== 'yes'" class="ap-field">
-                            <span class="ap-field-label">Debit Pull Timing</span>
-                            <span class="ap-field-value">{{ blDebitTiming || '—' }}</span>
+                          <div v-if="blAchMethod === 'debit'" class="ap-field-row ap-field-row--multi">
+                            <div class="ap-field">
+                              <span class="ap-field-label">Completed W-9</span>
+                              <span class="ap-field-value">{{ blW9File || 'Not uploaded' }}</span>
+                            </div>
+                            <div class="ap-field">
+                              <span class="ap-field-label">Completed ACH Authorization</span>
+                              <span class="ap-field-value">{{ blAchAuthFile || 'Not uploaded' }}</span>
+                            </div>
                           </div>
-                        </div>
-                        <div v-if="blAchMethod === 'debit'" class="ap-field-row ap-field-row--multi">
-                          <div class="ap-field">
-                            <span class="ap-field-label">Completed W-9</span>
-                            <span class="ap-field-value">{{ blW9File || 'Not uploaded' }}</span>
-                          </div>
-                          <div class="ap-field">
-                            <span class="ap-field-label">Completed ACH Authorization</span>
-                            <span class="ap-field-value">{{ blAchAuthFile || 'Not uploaded' }}</span>
-                          </div>
-                        </div>
+                        </template>
                       </template>
                       <template v-else>
-                        <div class="bl-section">
+                        <div v-if="blExistingParty === 'yes'" class="bl-section">
+                          <div class="ap-checkbox-row mb-3" @click="blSkipAchSetup = !blSkipAchSetup" style="cursor:pointer">
+                            <CheckSquare v-if="blSkipAchSetup" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                            <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                            <span class="ap-field-value">Skip ACH setup — TPA has an existing billing agreement with Liviniti.</span>
+                          </div>
+                        </div>
+                        <div v-if="!blSkipAchSetup" class="bl-section">
                           <p class="lc-hcn-label">Payment Method</p>
                           <div class="toc-toggle-group">
                             <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blPaymentMethod === 'ACH' }]" @click="blPaymentMethod = 'ACH'">ACH</button>
@@ -2825,17 +2975,37 @@ const showProgSuccessSnackbar = ref(false);
 // RxCompass form
 const rxCompassForm = ref({ type: '', effectiveDate: '', merpVendor: '', notes: '' });
 
-// VCP form
-const vcpForm = ref({
-  election: '',
-  effectiveDate: '',
-  offsitePharmacies: [] as { npi: string; name: string }[],
-  isMaximizer: false,
-  isAccumulator: false,
-  clientState: '',
-  optOutNotes: '',
-  selectedPlans: [] as string[],
-});
+// VCP form — election type applies account-wide (single-select, like Opt Out); only the
+// Maximizer/Accumulator designation varies per plan. Confirmed with Implementation 2026-08-03.
+interface VcpFormShape {
+  election: string;
+  effectiveDate: string;
+  optOutNotes: string;
+  optOutViaRxCompass: boolean;
+  planIds: number[];
+  designations: Record<number, string>;
+  offsitePharmacies: { npi: string; name: string }[];
+}
+function emptyVcpForm(): VcpFormShape {
+  return {
+    election: '',
+    effectiveDate: '',
+    optOutNotes: '',
+    optOutViaRxCompass: false,
+    planIds: [],
+    designations: {},
+    offsitePharmacies: [],
+  };
+}
+
+const vcpForm = ref(emptyVcpForm());
+
+const vcpElectionOptions = [
+  { label: 'VCP Hardstops', value: 'VCPHardstops' },
+  { label: 'Voluntary VCP', value: 'VoluntaryVCP' },
+  { label: 'Offsite VCP',   value: 'OffsiteVCP' },
+  { label: 'Opt Out',       value: 'OptOut' },
+];
 
 const vcpElectionDescriptions: Record<string, string> = {
   VCPHardstops: 'Qualifying medications will reject at non-VCP pharmacies after the selected effective date.',
@@ -2843,11 +3013,35 @@ const vcpElectionDescriptions: Record<string, string> = {
   OffsiteVCP: 'Specific VCP pharmacy to be utilized for VCP eligible medications.',
 };
 
-const vcpPlanOptions = [
-  'Plan A (Classic PPO)',
-  'Plan B (HDHP)',
-  'Plan C (HMO)',
-];
+function planNameById(id: number) {
+  return planDesignPlans.value.find(p => p.id === id)?.name ?? '—';
+}
+
+function vcpPlanItems() {
+  return planDesignPlans.value.map(p => ({ title: `${p.name} (ID ${p.id})`, value: p.id }));
+}
+
+function onVcpPlansChange(planIds: number[]) {
+  vcpForm.value.planIds = planIds;
+  Object.keys(vcpForm.value.designations).forEach(key => {
+    if (!planIds.includes(Number(key))) delete vcpForm.value.designations[Number(key)];
+  });
+}
+
+function setVcpDesignation(planId: number, designation: string) {
+  vcpForm.value.designations[planId] = vcpForm.value.designations[planId] === designation ? '' : designation;
+}
+
+// Explicit handler (not a watcher) so switching elections resets the form without also firing
+// during a snapshot restore (Cancel) or account switch, which would clobber the restored data.
+function selectVcpElection(value: string) {
+  vcpForm.value = { ...emptyVcpForm(), election: value };
+  vcpOffsitePharmacyText.value = '';
+}
+
+const vcpElectionLabel = computed(() =>
+  vcpElectionOptions.find(o => o.value === vcpForm.value.election)?.label ?? '—'
+);
 
 const rxCompassTypeItems = [
   { title: 'RxCompass (Standard)', value: 'Standard' },
@@ -2856,23 +3050,9 @@ const rxCompassTypeItems = [
   { title: 'Reconsider in 6 months', value: '6Months' },
 ];
 
-const vcpElectionOptions = [
-  { label: 'VCP Hardstops',  value: 'VCPHardstops' },
-  { label: 'Voluntary VCP',  value: 'VoluntaryVCP' },
-  { label: 'Offsite VCP',    value: 'OffsiteVCP' },
-  { label: 'Opt Out',        value: 'OptOut' },
-];
-
 const yesNoItems = [
   { title: 'Yes', value: true },
   { title: 'No',  value: false },
-];
-
-const usStateItems = [
-  'AK','AL','AR','AZ','CA','CO','CT','DC','DE','FL','GA','HI','IA','ID','IL','IN',
-  'KS','KY','LA','MA','MD','ME','MI','MN','MO','MS','MT','NC','ND','NE','NH','NJ',
-  'NM','NV','NY','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VA','VT','WA',
-  'WI','WV','WY',
 ];
 
 const rxCompassInCart = computed(() => progCart.value.includes('rxcompass'));
@@ -2880,9 +3060,6 @@ const vcpInCart       = computed(() => progCart.value.includes('vcp'));
 
 const rxCompassTypeLabel = computed(() =>
   rxCompassTypeItems.find(i => i.value === rxCompassForm.value.type)?.title ?? '—'
-);
-const vcpElectionLabel = computed(() =>
-  vcpElectionOptions.find(o => o.value === vcpForm.value.election)?.label ?? '—'
 );
 
 const rxCompassIsReconsider = computed(() =>
@@ -2918,22 +3095,13 @@ function removeOffsitePharmacy(idx: number) {
   vcpOffsitePharmacyText.value = vcpForm.value.offsitePharmacies.map(c => c.npi).join('\n');
 }
 
-watch(() => vcpForm.value.election, () => {
-  vcpForm.value.effectiveDate = '';
-  vcpForm.value.offsitePharmacies = [];
-  vcpForm.value.isMaximizer = false;
-  vcpForm.value.isAccumulator = false;
-  vcpForm.value.clientState = '';
-  vcpForm.value.optOutNotes = '';
-  vcpForm.value.selectedPlans = [];
-  vcpOffsitePharmacyText.value = '';
-});
-
 const vcpFormValid = computed(() => {
-  const e = vcpForm.value.election;
-  if (!e) return false;
-  if (e === 'OptOut') return true;
-  return !!vcpForm.value.effectiveDate && !!vcpForm.value.clientState;
+  const f = vcpForm.value;
+  if (!f.election) return false;
+  if (f.election === 'OptOut') return true;
+  if (!f.effectiveDate) return false;
+  if (!f.planIds.length) return false;
+  return f.planIds.every(pid => !!f.designations[pid]);
 });
 
 const rxCompassFormSnapshot = ref<typeof rxCompassForm.value | null>(null);
@@ -2955,11 +3123,14 @@ function openProgModal(prog: 'rxcompass' | 'vcp') {
     rxCompassFormSnapshot.value = JSON.parse(JSON.stringify(rxCompassForm.value));
   } else {
     rxCompassFormSnapshot.value = null;
+    rxCompassForm.value = { type: '', effectiveDate: '', merpVendor: '', notes: '' };
   }
   if (prog === 'vcp' && progCart.value.includes('vcp')) {
     vcpFormSnapshot.value = JSON.parse(JSON.stringify(vcpForm.value));
   } else {
     vcpFormSnapshot.value = null;
+    vcpForm.value = emptyVcpForm();
+    vcpOffsitePharmacyText.value = '';
   }
   showProgModal.value = true;
 }
@@ -3070,26 +3241,72 @@ const progRatesHeaders = [
 
 // ─── Step 6: Limits & Controls ────────────────────────────────────────────────
 
-const lcRequestChange = ref(false);
+const lcEditingLimits = ref(false);
+let lcFieldsSnapshot: { key: string; label: string; value: string }[] = [];
 
+function lcStartEdit() {
+  lcFieldsSnapshot = JSON.parse(JSON.stringify(lcFields.value));
+  lcEditingLimits.value = true;
+}
+
+function lcSaveEdit() {
+  lcEditingLimits.value = false;
+}
+
+function lcCancelEdit() {
+  lcFields.value = JSON.parse(JSON.stringify(lcFieldsSnapshot));
+  lcEditingLimits.value = false;
+}
+
+const lcEditingHcn = ref(false);
 const lcNotifyThreshold = ref('10000');
 const lcRecipients = ref<string[]>([]);
+const lcHcnContactOptions = computed(() => {
+  const items: any[] = [
+    { type: 'subheader', title: 'Client Contacts' },
+    ...apClientContacts.value.map(c => ({ title: c.name, value: c.name })),
+  ];
+  const vendorGroups = new Map<string, string[]>();
+  apVendorContacts.value.forEach(c => {
+    if (!vendorGroups.has(c.vendor)) vendorGroups.set(c.vendor, []);
+    vendorGroups.get(c.vendor)!.push(c.name);
+  });
+  vendorGroups.forEach((names, vendor) => {
+    items.push({ type: 'divider' });
+    items.push({ type: 'subheader', title: vendor });
+    names.forEach(name => items.push({ title: name, value: name }));
+  });
+  return items;
+});
 
+const lcEditingDaw = ref(false);
+const lcDaw1Options = ['No (Recommended)', 'Yes – Brand Copay', 'Yes – Generic Copay'];
+const lcDaw2Options = ['Yes – Brand Copay (Recommended)', 'No', 'Yes – Generic Copay'];
 const lcDawNotes = ref('');
 const lcDawPenalties = ref([
   {
     key: 'daw1',
     label: 'DAW Penalty 1',
-    description: 'The member requests a brand name drug when a generic equivalent is available and the prescriber has not indicated "dispense as written." The member pays the brand copay plus the difference between the brand and generic price.',
-    value: true,
+    description: 'When a Prescription is presented to the Pharmacy signed "Brand Medically Necessary" by the prescriber, if marked Yes, the member will be charged the below selected copay plus the difference between the generic and brand name medication will be charged. DAW 1 prescriptions are also subject to Prior Authorization before they can be dispensed. If marked No, members will not be charged a penalty, and the applicable brand name co-pay will apply.',
+    value: 'No (Recommended)',
+    options: lcDaw1Options,
   },
   {
     key: 'daw2',
     label: 'DAW Penalty 2',
-    description: 'The prescriber indicates "dispense as written" for a brand name drug when a generic equivalent is available. The member pays the brand copay plus the difference between the brand and generic price.',
-    value: true,
+    description: 'When a member refuses a generic equivalent when both the physician allows it and one exists, if marked Yes, the below selected copay plus the difference between the generic and brand name medication will be charged. This penalty will not be applied to either deductible or OOP (out-of-pocket) expense. If marked No, members will not be charged a penalty, and the applicable brand name co-pay will apply.',
+    value: 'Yes – Brand Copay (Recommended)',
+    options: lcDaw2Options,
   },
 ]);
+
+const lcEditingManual = ref(false);
+const lcManualReimbursementOptions = [
+  "Liviniti's pharmacy network rate less copayment",
+  'What the member paid less applicable copayment',
+];
+const lcManualReimbursement = ref(lcManualReimbursementOptions[0]);
+const lcManualNotes = ref('');
 
 // ─── Step 7: Billing ─────────────────────────────────────────────────────────
 
@@ -3108,6 +3325,23 @@ const blSelectedTpa = ref('');
 const blPaymentMethod = ref('ACH');
 const blAchMethod = ref('debit');
 
+// Skip ACH setup — TPA already has an existing billing agreement with Liviniti
+const blSkipAchSetup = ref(false);
+const resetPaymentFields = () => {
+  blPaymentMethod.value = 'ACH';
+  blAchMethod.value = 'debit';
+  blDebitTiming.value = '';
+  blDebitApprovalEmail.value = '';
+  blDebitTimingNote.value = '';
+  blW9File.value = null;
+  blAchAuthFile.value = null;
+  blPendingW9Removal.value = false;
+  blPendingAchAuthRemoval.value = false;
+};
+watch(blSkipAchSetup, (val) => {
+  if (val) resetPaymentFields();
+});
+
 // B-04: Debit pull timing
 const blDebitTiming = ref('');
 const blDebitTimingOptions = ['3–5 business days after billing complete', '10 business days', 'Prior approval required', 'Custom'];
@@ -3123,18 +3357,37 @@ const blResponsibleContactOptions = computed(() => {
   }
   return apClientContacts.value.map(c => c.name);
 });
-const blRebateContactOptions = computed(() => apClientContacts.value.map(c => c.name));
+const blRebateContactOptions = computed(() => {
+  const items: any[] = [
+    { type: 'subheader', title: 'Client Contacts' },
+    ...apClientContacts.value.map(c => ({ title: c.name, value: c.name })),
+  ];
+  const vendorGroups = new Map<string, string[]>();
+  apVendorContacts.value.forEach(c => {
+    if (!vendorGroups.has(c.vendor)) vendorGroups.set(c.vendor, []);
+    vendorGroups.get(c.vendor)!.push(c.name);
+  });
+  vendorGroups.forEach((names, vendor) => {
+    items.push({ type: 'divider' });
+    items.push({ type: 'subheader', title: vendor });
+    names.forEach(name => items.push({ title: name, value: name }));
+  });
+  return items;
+});
 const blResponsibleContacts = ref<string[]>([]);
 const blRebateContacts = ref<string[]>([]);
 watch([() => blExistingParty.value, () => blSelectedTpa.value], () => {
   blResponsibleContacts.value = [];
+});
+watch(() => blExistingParty.value, () => {
+  blSkipAchSetup.value = false;
 });
 
 // B-07: PHI toggle
 const blIncludePhi = ref('no');
 
 // B-11: Billing cycle
-const blBillingCycle = ref('');
+const blBillingCycle = ref('Bi-Weekly');
 const blCycleOptions = ['Weekly', 'Bi-Weekly', 'Semi-Monthly', 'Monthly', 'Quad-Monthly', 'Custom'];
 const blCustomCycleNote = ref('');
 
@@ -3296,7 +3549,7 @@ const wizardSteps = ref([
   { name: 'Plan Design',            required: true,  status: 'not-started',  description: 'Configure the benefit structure, cost-sharing rules, and coverage tiers.' },
   { name: 'Transition of Care',     required: false, status: 'not-started',  description: 'Set up transition of care rules for members moving from another plan.' },
   { name: 'Programs',               required: false, status: 'not-started',  description: 'Select and configure clinical and specialty programs for this account.' },
-  { name: 'Limits & Controls',      required: false, status: 'not-started',  description: 'Define quantity limits, step therapy rules, and utilization management controls.' },
+  { name: 'Limits & Controls',      required: false, status: 'not-started',  description: 'Configure dispensing limits, high cost claim notifications, and manual claims handling for the account.' },
   { name: 'Billing',                required: false, status: 'not-started',  description: 'Configure billing preferences, payment terms, and invoice settings.' },
   { name: 'ID Cards',               required: false, status: 'not-started',  description: 'Set up member ID card design and distribution preferences.' },
   { name: 'Verification & Summary', required: false, status: 'not-started',  description: 'Review the completion status of all configuration steps before finishing plan setup.' },
@@ -4188,6 +4441,8 @@ const planDesignPlans = ref([
     maxSpendEnabled: false,
     allowSecondaryPayer: false,
     cobConfiguration: '',
+    secondaryPlanOnly: false,
+    paySecondaryAsPrimary: false,
     benefitByFlag: false,
     bpgRows: [
       { bin: '025945', pcn: 'SSN', groupId: '1275', groupName: 'Allied Finishing, Inc', effStartDate: '03/01/2026', effEndDate: '' },
@@ -4208,6 +4463,8 @@ const planDesignPlans = ref([
     maxSpendEnabled: false,
     allowSecondaryPayer: false,
     cobConfiguration: '',
+    secondaryPlanOnly: false,
+    paySecondaryAsPrimary: false,
     benefitByFlag: false,
     bpgRows: [
       { bin: '025945', pcn: 'SSN', groupId: '1275', groupName: 'Allied Finishing, Inc', effStartDate: '03/01/2026', effEndDate: '' },
@@ -4323,7 +4580,7 @@ watch(selectedAccount, (newVal) => {
   vcpTicketNumber.value = '';
   progCart.value = [];
   rxCompassForm.value = { type: '', effectiveDate: '', merpVendor: '', notes: '' };
-  vcpForm.value = { election: '', effectiveDate: '', offsitePharmacies: [] as { npi: string; name: string }[], isMaximizer: false, isAccumulator: false, clientState: '', optOutNotes: '', selectedPlans: [] };
+  vcpForm.value = emptyVcpForm();
   vcpOffsitePharmacyText.value = '';
 
   // Cyberdyne Systems: both programs fully enrolled (tile grid shows "all configured" message)
@@ -4766,6 +5023,12 @@ watch(selectedAccount, (newVal) => {
   }
 
   &--thirds .ap-field { flex: 1; }
+
+  &--wrap {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: $spacing-large $spacing-xlarge;
+  }
 }
 
 .ap-field {
@@ -5780,14 +6043,26 @@ watch(selectedAccount, (newVal) => {
   }
 }
 
-.prog-vcp-toggle {
-  flex-wrap: wrap;
-}
-
-.prog-vcp-checkboxes {
+.prog-vcp-plan-rows {
   display: flex;
   flex-direction: column;
   gap: $spacing-small;
+}
+
+.prog-vcp-plan-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-medium;
+  padding: $spacing-small $spacing-medium;
+  border: 1px solid $color-border;
+  border-radius: 6px;
+}
+
+.prog-vcp-plan-row-name {
+  font-size: $font-size-body;
+  color: $color-text-primary;
+  font-weight: $font-weight-semibold;
 }
 
 // Confirm modal
@@ -5842,53 +6117,18 @@ watch(selectedAccount, (newVal) => {
 
 // ─── Step 6: Limits & Controls ────────────────────────────────────────────────
 
-.lc-intro {
-  color: $color-text-secondary;
-  font-style: italic;
-  margin-bottom: $spacing-medium;
-}
-
-.lc-toggle-group {
-  margin-bottom: $spacing-large;
-}
-
-.lc-fields {
-  border-top: 1px solid $color-border;
-}
-
-.lc-field-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: $spacing-small 0;
-  border-bottom: 1px solid $color-border;
-}
-
-.lc-field-label {
+.lc-overrides-list {
+  margin: 0;
+  padding-left: $spacing-medium;
   font-size: $font-size-body;
   color: $color-text-primary;
-}
 
-.lc-field-value {
-  font-size: $font-size-body;
-  color: $color-text-primary;
-  min-width: 80px;
-  text-align: right;
-}
+  li {
+    margin-bottom: $spacing-xsmall;
 
-.lc-field-input {
-  border: 1px solid $color-border;
-  border-radius: 4px;
-  padding: 6px $spacing-small;
-  font-size: $font-size-body;
-  font-family: $font-family-base;
-  color: $color-text-primary;
-  min-width: 120px;
-  text-align: left;
-
-  &:focus {
-    outline: none;
-    border-color: $color-primary;
+    &:last-child {
+      margin-bottom: 0;
+    }
   }
 }
 
@@ -5898,67 +6138,10 @@ watch(selectedAccount, (newVal) => {
   margin: $spacing-large 0;
 }
 
-.lc-hcn-intro {
-  color: $color-text-secondary;
-  font-style: italic;
-  margin-bottom: $spacing-large;
-}
-
-.lc-hcn-field {
-  margin-bottom: $spacing-large;
-}
-
 .lc-hcn-label {
   font-size: $font-size-body;
   font-weight: $font-weight-bold;
   color: $color-text-primary;
-  margin-bottom: $spacing-small;
-}
-
-.lc-hcn-input {
-  min-width: 200px;
-}
-
-.lc-recipient-row {
-  display: flex;
-  align-items: center;
-  gap: $spacing-small;
-  margin-bottom: $spacing-small;
-}
-
-.lc-recipient-input {
-  flex: 1;
-  min-width: unset;
-}
-
-.lc-recipient-remove {
-  cursor: pointer;
-  color: $color-text-secondary;
-  flex-shrink: 0;
-
-  &:hover {
-    color: $color-error;
-  }
-}
-
-.lc-check-icon {
-  color: $color-text-primary;
-  flex-shrink: 0;
-}
-
-.lc-daw-block {
-  margin-bottom: $spacing-large;
-}
-
-.lc-daw-title {
-  font-size: $font-size-body;
-  font-weight: $font-weight-bold;
-  color: $color-primary;
-  margin-bottom: $spacing-small;
-}
-
-.lc-daw-desc {
-  color: $color-text-secondary;
   margin-bottom: $spacing-small;
 }
 
