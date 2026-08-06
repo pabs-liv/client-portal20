@@ -1401,7 +1401,7 @@
                   <div class="ap-section">
                     <div class="ap-section-header">
                       <h4 class="text-h4">High Cost Notifications</h4>
-                      <button v-if="!lcEditingHcn" class="button button-thirtiary" @click="lcEditingHcn = true">
+                      <button v-if="!lcEditingHcn" class="button button-thirtiary" @click="lcHcnStartEdit">
                         <Pencil :size="14" :stroke-width="1.5" />Edit
                       </button>
                     </div>
@@ -1434,8 +1434,8 @@
                           </div>
                         </div>
                         <div class="ap-section-footer">
-                          <button class="button button-primary" @click="lcEditingHcn = false">Save Changes</button>
-                          <button class="button button-secondary" @click="lcEditingHcn = false">Cancel</button>
+                          <button class="button button-primary" @click="lcHcnSaveEdit">Save Changes</button>
+                          <button class="button button-secondary" @click="lcHcnCancelEdit">Cancel</button>
                         </div>
                       </template>
                     </div>
@@ -1458,7 +1458,7 @@
                   <div class="ap-section">
                     <div class="ap-section-header">
                       <h4 class="text-h4">Dispense as Written (DAW)</h4>
-                      <button v-if="!lcEditingDaw" class="button button-thirtiary" @click="lcEditingDaw = true">
+                      <button v-if="!lcEditingDaw" class="button button-thirtiary" @click="lcDawStartEdit">
                         <Pencil :size="14" :stroke-width="1.5" />Edit
                       </button>
                     </div>
@@ -1490,8 +1490,8 @@
                           <v-textarea v-model="lcDawNotes" label="DAW Notes" variant="outlined" density="compact" rows="2" auto-grow hide-details class="bl-notes-textarea" />
                         </div>
                         <div class="ap-section-footer">
-                          <button class="button button-primary" @click="lcEditingDaw = false">Save Changes</button>
-                          <button class="button button-secondary" @click="lcEditingDaw = false">Cancel</button>
+                          <button class="button button-primary" @click="lcDawSaveEdit">Save Changes</button>
+                          <button class="button button-secondary" @click="lcDawCancelEdit">Cancel</button>
                         </div>
                       </template>
                     </div>
@@ -1501,7 +1501,7 @@
                   <div class="ap-section">
                     <div class="ap-section-header">
                       <h4 class="text-h4">Manual Claims</h4>
-                      <button v-if="!lcEditingManual" class="button button-thirtiary" @click="lcEditingManual = true">
+                      <button v-if="!lcEditingManual" class="button button-thirtiary" @click="lcManualStartEdit">
                         <Pencil :size="14" :stroke-width="1.5" />Edit
                       </button>
                     </div>
@@ -1532,8 +1532,8 @@
                           <v-textarea v-model="lcManualNotes" label="Manual Claim Notes" variant="outlined" density="compact" rows="2" auto-grow hide-details class="bl-notes-textarea" />
                         </div>
                         <div class="ap-section-footer">
-                          <button class="button button-primary" @click="lcEditingManual = false">Save Changes</button>
-                          <button class="button button-secondary" @click="lcEditingManual = false">Cancel</button>
+                          <button class="button button-primary" @click="lcManualSaveEdit">Save Changes</button>
+                          <button class="button button-secondary" @click="lcManualCancelEdit">Cancel</button>
                         </div>
                       </template>
                     </div>
@@ -3261,6 +3261,23 @@ function lcCancelEdit() {
 const lcEditingHcn = ref(false);
 const lcNotifyThreshold = ref('10000');
 const lcRecipients = ref<string[]>([]);
+let lcHcnSnapshot = { threshold: '', recipients: [] as string[] };
+
+function lcHcnStartEdit() {
+  lcHcnSnapshot = { threshold: lcNotifyThreshold.value, recipients: [...lcRecipients.value] };
+  lcEditingHcn.value = true;
+}
+
+function lcHcnSaveEdit() {
+  lcEditingHcn.value = false;
+}
+
+function lcHcnCancelEdit() {
+  lcNotifyThreshold.value = lcHcnSnapshot.threshold;
+  lcRecipients.value = [...lcHcnSnapshot.recipients];
+  lcEditingHcn.value = false;
+}
+
 const lcHcnContactOptions = computed(() => {
   const items: any[] = [
     { type: 'subheader', title: 'Client Contacts' },
@@ -3299,6 +3316,22 @@ const lcDawPenalties = ref([
     options: lcDaw2Options,
   },
 ]);
+let lcDawSnapshot = { values: ['', ''], notes: '' };
+
+function lcDawStartEdit() {
+  lcDawSnapshot = { values: lcDawPenalties.value.map(d => d.value), notes: lcDawNotes.value };
+  lcEditingDaw.value = true;
+}
+
+function lcDawSaveEdit() {
+  lcEditingDaw.value = false;
+}
+
+function lcDawCancelEdit() {
+  lcDawPenalties.value.forEach((d, i) => { d.value = lcDawSnapshot.values[i]; });
+  lcDawNotes.value = lcDawSnapshot.notes;
+  lcEditingDaw.value = false;
+}
 
 const lcEditingManual = ref(false);
 const lcManualReimbursementOptions = [
@@ -3307,6 +3340,22 @@ const lcManualReimbursementOptions = [
 ];
 const lcManualReimbursement = ref(lcManualReimbursementOptions[0]);
 const lcManualNotes = ref('');
+let lcManualSnapshot = { reimbursement: '', notes: '' };
+
+function lcManualStartEdit() {
+  lcManualSnapshot = { reimbursement: lcManualReimbursement.value, notes: lcManualNotes.value };
+  lcEditingManual.value = true;
+}
+
+function lcManualSaveEdit() {
+  lcEditingManual.value = false;
+}
+
+function lcManualCancelEdit() {
+  lcManualReimbursement.value = lcManualSnapshot.reimbursement;
+  lcManualNotes.value = lcManualSnapshot.notes;
+  lcEditingManual.value = false;
+}
 
 // ─── Step 7: Billing ─────────────────────────────────────────────────────────
 
