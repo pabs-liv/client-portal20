@@ -364,6 +364,45 @@
                       <v-divider v-if="idx < apContactForm.phones.length - 1" class="nl-row-divider" />
                     </div>
                     <button v-if="apContactForm.phones.length < 3" class="nl-add-link" @click="apContactForm.phones.push(apNewPhone())">+ Add Phone Number</button>
+
+                    <v-divider class="my-4" />
+                    <h5 class="ap-subsection-heading">Client Portal Access</h5>
+                    <div class="ap-checkbox-toggle" @click="apContactForm.portalAccess = !apContactForm.portalAccess">
+                      <CheckSquare v-if="apContactForm.portalAccess" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                      <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                      <span class="text-small">Grant Client Portal access</span>
+                    </div>
+                    <template v-if="apContactForm.portalAccess">
+                      <v-row class="mt-2">
+                        <v-col cols="12" sm="6"><Select v-model="apContactForm.role" :items="apClientRoleOptions" label="Role" /></v-col>
+                      </v-row>
+                      <p v-if="apContactForm.role === 'Administrator'" class="text-small ap-role-note">Administrators have full access to all Client Portal features, including PHI — permissions below don't apply.</p>
+                      <template v-else>
+                        <h6 class="ap-subsection-heading">Permissions</h6>
+                        <div class="ap-permission-grid">
+                          <div v-for="perm in apPermissionOptions" :key="perm.key" class="ap-checkbox-toggle" @click="apContactForm.permissions[perm.key] = !apContactForm.permissions[perm.key]">
+                            <CheckSquare v-if="apContactForm.permissions[perm.key]" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                            <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                            <span class="text-small">{{ perm.label }}</span>
+                          </div>
+                        </div>
+                        <div class="ap-checkbox-toggle" @click="apContactForm.allowPhi = !apContactForm.allowPhi">
+                          <CheckSquare v-if="apContactForm.allowPhi" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                          <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                          <span class="text-small">Allow PHI access</span>
+                        </div>
+                      </template>
+                      <div class="ap-checkbox-toggle mt-3" @click="apContactForm.mainPointOfContact = !apContactForm.mainPointOfContact">
+                        <CheckSquare v-if="apContactForm.mainPointOfContact" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                        <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                        <span class="text-small">Main Point of Contact</span>
+                      </div>
+                      <div class="ap-checkbox-toggle" @click="apContactForm.surveyContact = !apContactForm.surveyContact">
+                        <CheckSquare v-if="apContactForm.surveyContact" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                        <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                        <span class="text-small">Survey Contact</span>
+                      </div>
+                    </template>
                   </Dialog>
 
                   <!-- Edit Client Contact Dialog -->
@@ -407,6 +446,45 @@
                       <v-divider v-if="idx < apEditContactForm.phones.length - 1" class="nl-row-divider" />
                     </div>
                     <button v-if="apEditContactForm.phones.length < 3" class="nl-add-link" @click="apEditContactForm.phones.push(apNewPhone())">+ Add Phone Number</button>
+
+                    <v-divider class="my-4" />
+                    <h5 class="ap-subsection-heading">Client Portal Access</h5>
+                    <div class="ap-checkbox-toggle" @click="apEditContactForm.portalAccess = !apEditContactForm.portalAccess">
+                      <CheckSquare v-if="apEditContactForm.portalAccess" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                      <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                      <span class="text-small">Grant Client Portal access</span>
+                    </div>
+                    <template v-if="apEditContactForm.portalAccess">
+                      <v-row class="mt-2">
+                        <v-col cols="12" sm="6"><Select v-model="apEditContactForm.role" :items="apClientRoleOptions" label="Role" /></v-col>
+                      </v-row>
+                      <p v-if="apEditContactForm.role === 'Administrator'" class="text-small ap-role-note">Administrators have full access to all Client Portal features, including PHI — permissions below don't apply.</p>
+                      <template v-else>
+                        <h6 class="ap-subsection-heading">Permissions</h6>
+                        <div class="ap-permission-grid">
+                          <div v-for="perm in apPermissionOptions" :key="perm.key" class="ap-checkbox-toggle" @click="apEditContactForm.permissions[perm.key] = !apEditContactForm.permissions[perm.key]">
+                            <CheckSquare v-if="apEditContactForm.permissions[perm.key]" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                            <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                            <span class="text-small">{{ perm.label }}</span>
+                          </div>
+                        </div>
+                        <div class="ap-checkbox-toggle" @click="apEditContactForm.allowPhi = !apEditContactForm.allowPhi">
+                          <CheckSquare v-if="apEditContactForm.allowPhi" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                          <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                          <span class="text-small">Allow PHI access</span>
+                        </div>
+                      </template>
+                      <div class="ap-checkbox-toggle mt-3" @click="apEditContactForm.mainPointOfContact = !apEditContactForm.mainPointOfContact">
+                        <CheckSquare v-if="apEditContactForm.mainPointOfContact" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                        <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                        <span class="text-small">Main Point of Contact</span>
+                      </div>
+                      <div class="ap-checkbox-toggle" @click="apEditContactForm.surveyContact = !apEditContactForm.surveyContact">
+                        <CheckSquare v-if="apEditContactForm.surveyContact" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                        <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                        <span class="text-small">Survey Contact</span>
+                      </div>
+                    </template>
                   </Dialog>
 
                   <!-- Section: Vendor Contacts -->
@@ -425,7 +503,10 @@
                           class="ap-contacts-table"
                         >
                           <template #item.actions="{ item }">
-                            <v-btn icon variant="plain" size="small" color="error" @click="apRemoveVendorContact(item)">
+                            <v-btn icon variant="plain" size="small" @click="handleEditVendorContact(item)" title="Edit role &amp; permissions">
+                              <Pencil :size="16" :stroke-width="1.75" />
+                            </v-btn>
+                            <v-btn icon variant="plain" size="small" color="error" @click="apRemoveVendorContact(item)" title="Remove">
                               <Trash2 :size="16" :stroke-width="1.75" />
                             </v-btn>
                           </template>
@@ -454,6 +535,45 @@
                       :multiple="true"
                       label="Select vendor contacts"
                     />
+
+                    <v-divider class="my-4" />
+                    <h5 class="ap-subsection-heading">Client Portal Access</h5>
+                    <p class="text-small ap-role-note">Applies to all contacts selected above. External vendors must be defined on the applicable agreement and have signed the required data transfer agreement before Client Portal access is granted.</p>
+                    <v-row class="mt-1">
+                      <v-col cols="12" sm="6"><Select v-model="apVendorRoleSelection" :items="apVendorRoleOptions" label="Business Role" /></v-col>
+                    </v-row>
+                    <div class="ap-checkbox-toggle" @click="apVendorAllowPhi = !apVendorAllowPhi">
+                      <CheckSquare v-if="apVendorAllowPhi" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                      <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                      <span class="text-small">Allow PHI access</span>
+                    </div>
+                    <div class="ap-checkbox-toggle" @click="apVendorAckConfirmed = !apVendorAckConfirmed">
+                      <CheckSquare v-if="apVendorAckConfirmed" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                      <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                      <span class="text-small">I confirm this external vendor has signed the required data transfer agreement.</span>
+                    </div>
+                  </Dialog>
+
+                  <!-- Edit Vendor Contact Dialog -->
+                  <Dialog
+                    v-model="apShowEditVendorContactDialog"
+                    heading="Edit Vendor Contact Access"
+                    :show-secondary-button="true"
+                    :actions="apEditVendorContactDialogActions"
+                  >
+                    <v-row class="mt-1">
+                      <v-col cols="12" sm="6"><Select v-model="apEditVendorContactForm.role" :items="apVendorRoleOptions" label="Business Role" /></v-col>
+                    </v-row>
+                    <div class="ap-checkbox-toggle" @click="apEditVendorContactForm.allowPhi = !apEditVendorContactForm.allowPhi">
+                      <CheckSquare v-if="apEditVendorContactForm.allowPhi" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                      <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                      <span class="text-small">Allow PHI access</span>
+                    </div>
+                    <div class="ap-checkbox-toggle" @click="apEditVendorContactForm.ackConfirmed = !apEditVendorContactForm.ackConfirmed">
+                      <CheckSquare v-if="apEditVendorContactForm.ackConfirmed" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                      <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                      <span class="text-small">I confirm this external vendor has signed the required data transfer agreement.</span>
+                    </div>
                   </Dialog>
 
                 </template>
@@ -846,56 +966,255 @@
 
                 <!-- Step 4: Transition of Care -->
                 <template v-else-if="currentWizardStep === 3">
+
+                  <!-- Card 1: Transition of Care Setup (Historical Claims + Prior Authorization File) -->
                   <div class="ap-section">
                     <div class="ap-section-header">
-                      <h4 class="text-h4">Transition of Care</h4>
+                      <h4 class="text-h4">Transition of Care Setup</h4>
+                      <button v-if="!tocEditingFiles && !(hcfPending && paPending)" class="button button-thirtiary" @click="startEditFilesCard">
+                        <Pencil :size="14" :stroke-width="1.5" />Edit
+                      </button>
                     </div>
-                    <p class="text-body toc-intro">We understand the importance of providing the best onboarding experience to your members. As you transition, there are options available to help minimize disruption.</p>
+                    <div class="ap-fields">
+                      <template v-if="!tocEditingFiles">
+                        <div class="ap-field-row ap-field-row--multi">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Will Historical Claims data be provided? (HCF)</span>
+                            <span class="ap-field-value">{{ tocHistoricalClaims ? 'Yes' : 'No' }}</span>
+                          </div>
+                          <div v-if="tocHistoricalClaims === true" class="ap-field">
+                            <span class="ap-field-label">Transition of Care Override</span>
+                            <span class="ap-field-value">{{ tocOverrideDays }}</span>
+                          </div>
+                        </div>
+                        <div v-if="tocHistoricalClaims === true" class="ap-field-row ap-field-row--multi">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Historical Claims File</span>
+                            <span class="ap-field-value">{{ tocHistoricalClaimsFile || 'Not uploaded' }}</span>
+                          </div>
+                          <div class="ap-field">
+                            <span class="ap-field-label">Historical Claims File Submitted?</span>
+                            <span class="ap-field-value">{{ hcfPending ? `Yes — Ticket #${hcfTicketNumber}` : 'No' }}</span>
+                          </div>
+                        </div>
 
-                    <!-- Historical Claims -->
-                    <div class="toc-question">
-                      <p class="toc-question-label">Will Historical Claims be provided?</p>
-                      <div class="toc-toggle-group">
-                        <button
-                          :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocHistoricalClaims === false }]"
-                          @click="tocHistoricalClaims = false"
-                        >No</button>
-                        <button
-                          :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocHistoricalClaims === true }]"
-                          @click="tocHistoricalClaims = true"
-                        >Yes</button>
-                      </div>
-                    </div>
+                        <div class="ap-field-row ap-field-row--multi mt-3">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Will a Prior Authorization file be provided? (PA)</span>
+                            <span class="ap-field-value">{{ tocPriorAuth ? 'Yes' : 'No' }}</span>
+                          </div>
+                          <div v-if="tocPriorAuth === true" class="ap-field">
+                            <span class="ap-field-label">Prior Authorization File</span>
+                            <span class="ap-field-value">{{ tocPriorAuthFile || 'Not uploaded' }}</span>
+                          </div>
+                        </div>
+                        <div v-if="tocPriorAuth === true" class="ap-field-row">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Prior Authorization File Submitted?</span>
+                            <span class="ap-field-value">{{ paPending ? `Yes — Ticket #${paTicketNumber}` : 'No' }}</span>
+                          </div>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <div class="prog-required-note">
+                          <Info :size="15" :stroke-width="2" class="prog-required-note-icon" />
+                          <p class="text-body"><strong>Rx Claims Data &amp; Prior Authorization (PA) File:</strong> Requested data must be provided at a minimum of 15 days prior to the effective date. The loading of files and pre-go-live outreach is contingent upon the receipt and successful loading of the eligibility file.</p>
+                        </div>
 
-                    <div v-if="tocHistoricalClaims === false" class="toc-info-box">
-                      <p class="toc-info-text">If historical claims data is not received and a member is currently on a medication regimen that requires a Prior Authorization, the system actively observes rejected claims for 60 days post go-live, provides transition of care overrides for members with ongoing therapies, delivers written communication to disrupted members, and initiates prior authorizations. This allows an override for the member for a period of 30, 60, or 90 days.</p>
-                      <div class="toc-toggle-group">
-                        <button
-                          :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocRxWatchtower === false }]"
-                          @click="tocRxWatchtower = false"
-                        >Allow</button>
-                        <button
-                          :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocRxWatchtower === true }]"
-                          @click="tocRxWatchtower = true"
-                        >Do Not Allow</button>
-                      </div>
-                    </div>
+                        <!-- Historical Claims sub-section -->
+                        <template v-if="hcfPending">
+                          <p class="lc-hcn-label">Historical Claims File</p>
+                          <p class="text-body bl-note">Submitted — Ticket #: <strong>{{ hcfTicketNumber }}</strong></p>
+                        </template>
+                        <template v-else>
+                          <div class="toc-question">
+                            <p class="toc-question-label">Will Historical Claims data be provided? (HCF) <span class="bl-required" aria-label="required">*</span></p>
+                            <div class="toc-toggle-group">
+                              <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocHistoricalClaims === false }]" @click="tocHistoricalClaims = false">No</button>
+                              <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocHistoricalClaims === true }]" @click="tocHistoricalClaims = true">Yes</button>
+                            </div>
+                          </div>
 
-                    <!-- Prior Authorization -->
-                    <div class="toc-question">
-                      <p class="toc-question-label">Will Prior Authorization file be provided?</p>
-                      <div class="toc-toggle-group">
-                        <button
-                          :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocPriorAuth === false }]"
-                          @click="tocPriorAuth = false"
-                        >No</button>
-                        <button
-                          :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocPriorAuth === true }]"
-                          @click="tocPriorAuth = true"
-                        >Yes</button>
-                      </div>
+                          <template v-if="tocHistoricalClaims === true">
+                            <p class="text-body bl-note">Received historical claims data will be checked against the Liviniti Formulary. Members impacted by the transition to Liviniti will receive an override for the duration selected below, allowing time to align their medication(s) with Liviniti.</p>
+                            <div class="bl-field-narrow">
+                              <Select v-model="tocOverrideDays" :items="tocDayOptions" label="Transition of Care Override Period" />
+                            </div>
+
+                            <div class="bl-upload-item">
+                              <p class="lc-hcn-label">Historical Claims File <span class="bl-required" aria-label="required">*</span></p>
+                              <template v-if="tocHistoricalClaimsFile && !tocPendingHcfRemoval">
+                                <v-chip color="primary" variant="flat" class="bl-file-chip">
+                                  <Paperclip :size="12" :stroke-width="2" class="bl-file-chip-icon" />
+                                  <span class="bl-file-chip-label">{{ tocHistoricalClaimsFile }}</span>
+                                  <span class="bl-file-chip-close" @click.stop="tocPendingHcfRemoval = true"><X :size="10" :stroke-width="2.5" /></span>
+                                </v-chip>
+                              </template>
+                              <FileUploader v-else :show-document-type-selection="false" @file-selected="(name) => { tocHistoricalClaimsFile = name; tocPendingHcfRemoval = false }" />
+                            </div>
+
+                            <div v-if="tocHistoricalClaimsFile" class="toc-queue-action">
+                              <button class="button button-primary" @click="openTocSubmitModal('hcf')">Submit to Ticket Queue</button>
+                              <p class="text-body bl-note">Sends this file to the Claims Analysis Queue and stores it under Documents &gt; PHI Documents.</p>
+                            </div>
+                          </template>
+                        </template>
+
+                        <v-divider class="my-4" />
+
+                        <!-- Prior Authorization File sub-section -->
+                        <template v-if="paPending">
+                          <p class="lc-hcn-label">Prior Authorization File</p>
+                          <p class="text-body bl-note">Submitted — Ticket #: <strong>{{ paTicketNumber }}</strong></p>
+                        </template>
+                        <template v-else>
+                          <div class="toc-question">
+                            <p class="toc-question-label">Will a Prior Authorization file be provided? (PA) <span class="toc-recommended">Recommended</span></p>
+                            <div class="toc-toggle-group">
+                              <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocPriorAuth === false }]" @click="tocPriorAuth = false">No</button>
+                              <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocPriorAuth === true }]" @click="tocPriorAuth = true">Yes</button>
+                            </div>
+                          </div>
+
+                          <template v-if="tocPriorAuth === true">
+                            <div class="bl-upload-item">
+                              <p class="lc-hcn-label">Prior Authorization File</p>
+                              <template v-if="tocPriorAuthFile && !tocPendingPaRemoval">
+                                <v-chip color="primary" variant="flat" class="bl-file-chip">
+                                  <Paperclip :size="12" :stroke-width="2" class="bl-file-chip-icon" />
+                                  <span class="bl-file-chip-label">{{ tocPriorAuthFile }}</span>
+                                  <span class="bl-file-chip-close" @click.stop="tocPendingPaRemoval = true"><X :size="10" :stroke-width="2.5" /></span>
+                                </v-chip>
+                              </template>
+                              <FileUploader v-else :show-document-type-selection="false" @file-selected="(name) => { tocPriorAuthFile = name; tocPendingPaRemoval = false }" />
+                            </div>
+
+                            <div v-if="tocPriorAuthFile" class="toc-queue-action">
+                              <button class="button button-primary" @click="openTocSubmitModal('pa')">Submit to Ticket Queue</button>
+                              <p class="text-body bl-note">Sends this file to the PA Import Queue and stores it under Documents &gt; PHI Documents.</p>
+                            </div>
+                          </template>
+                        </template>
+
+                        <div class="ap-section-footer">
+                          <button class="button button-primary" @click="saveFilesCard">Save Changes</button>
+                          <button class="button button-secondary" @click="cancelFilesCard">Cancel</button>
+                        </div>
+                      </template>
                     </div>
                   </div>
+
+                  <!-- Card 2: RxWatchtower -->
+                  <div class="ap-section">
+                    <div class="ap-section-header">
+                      <h4 class="text-h4">RxWatchtower</h4>
+                      <button v-if="!tocEditingWatchtower" class="button button-thirtiary" @click="startEditWatchtowerCard">
+                        <Pencil :size="14" :stroke-width="1.5" />Edit
+                      </button>
+                    </div>
+                    <div class="ap-fields">
+                      <template v-if="!tocEditingWatchtower">
+                        <div class="ap-field-row">
+                          <div class="ap-field">
+                            <span class="ap-field-label">RxWatchtower Override Period</span>
+                            <span class="ap-field-value">{{ tocWatchtowerDays }}</span>
+                          </div>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <p class="text-body toc-intro">All clients are automatically enrolled in the RxWatchtower program. For any member currently on a medication regimen that requires a Prior Authorization, RxWatchtower actively reviews rejected claims post go-live, provides transition of care overrides for members with ongoing therapies, delivers written communication to disrupted members, and initiates prior authorizations.</p>
+                        <div class="bl-field-narrow">
+                          <Select v-model="tocWatchtowerDays" :items="tocDayOptions" label="RxWatchtower Override Period" />
+                        </div>
+                        <div class="ap-section-footer">
+                          <button class="button button-primary" @click="tocEditingWatchtower = false">Save Changes</button>
+                          <button class="button button-secondary" @click="cancelWatchtowerCard">Cancel</button>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+
+                  <!-- Card 3: Open Refill Transfer File (ORTF) -->
+                  <div class="ap-section">
+                    <div class="ap-section-header">
+                      <h4 class="text-h4">Open Refill Transfer File (ORTF) <span class="toc-recommended">Uncommon</span></h4>
+                      <button v-if="!tocEditingOrtf" class="button button-thirtiary" @click="startEditOrtfCard">
+                        <Pencil :size="14" :stroke-width="1.5" />Edit
+                      </button>
+                    </div>
+                    <div class="ap-fields">
+                      <template v-if="!tocEditingOrtf">
+                        <div class="ap-field-row">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Will an Open Refill Transfer File be provided?</span>
+                            <span class="ap-field-value">{{ tocOpenRefillTransfer ? 'Yes' : 'No' }}</span>
+                          </div>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <p class="text-body bl-note mb-3">This option only applies to mail order pharmacies. It involves the client's existing mail order pharmacy sending a one-time snapshot, taken at go-live, of prescriptions with open refills to the mail order pharmacy or pharmacies selected under Liviniti's plans — sometimes affecting as few as one or two members. Implementation must coordinate directly with both the outgoing and incoming mail order pharmacies to arrange this, and it adds limited value for most clients, so it is not generally recommended.</p>
+                        <div class="toc-toggle-group">
+                          <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocOpenRefillTransfer === false }]" @click="tocOpenRefillTransfer = false">No</button>
+                          <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocOpenRefillTransfer === true }]" @click="tocOpenRefillTransfer = true">Yes</button>
+                        </div>
+                        <div class="ap-section-footer">
+                          <button class="button button-primary" @click="tocEditingOrtf = false">Save Changes</button>
+                          <button class="button button-secondary" @click="cancelOrtfCard">Cancel</button>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+
+                  <!-- Card 4: Notes -->
+                  <div class="ap-section">
+                    <div class="ap-section-header">
+                      <h4 class="text-h4">Transition of Care / File Notes</h4>
+                      <button v-if="!tocEditingNotes" class="button button-thirtiary" @click="startEditNotesCard">
+                        <Pencil :size="14" :stroke-width="1.5" />Edit
+                      </button>
+                    </div>
+                    <div class="ap-fields">
+                      <template v-if="!tocEditingNotes">
+                        <div class="ap-field-row">
+                          <div class="ap-field">
+                            <span class="ap-field-value">{{ tocNotes || 'No notes added.' }}</span>
+                          </div>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <v-textarea
+                          v-model="tocNotes"
+                          label="Transition of Care / File Notes"
+                          variant="outlined"
+                          density="compact"
+                          rows="3"
+                          auto-grow
+                          hide-details
+                          class="bl-notes-textarea"
+                        />
+                        <div class="ap-section-footer">
+                          <button class="button button-primary" @click="tocEditingNotes = false">Save Changes</button>
+                          <button class="button button-secondary" @click="cancelNotesCard">Cancel</button>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+
+                  <!-- File Submit Confirm Modal (one item at a time, triggered from inside edit mode) -->
+                  <v-dialog v-model="showTocSubmitModal" max-width="480">
+                    <v-card class="prog-modal-card">
+                      <v-card-title class="prog-modal-title">Submit {{ tocSubmitTarget === 'hcf' ? 'Historical Claims File' : 'Prior Authorization File' }}</v-card-title>
+                      <v-card-text>
+                        <v-divider class="mb-4" />
+                        <p class="text-body mb-3">File: <strong>{{ tocSubmitTarget === 'hcf' ? tocHistoricalClaimsFile : tocPriorAuthFile }}</strong></p>
+                        <p class="prog-confirm-note">A setup ticket will be created and sent to the {{ tocSubmitTarget === 'hcf' ? 'Claims Analysis Queue' : 'PA Import Queue' }}. This file will also be stored under Documents &gt; PHI Documents.</p>
+                      </v-card-text>
+                      <v-card-actions class="nl-dialog-footer">
+                        <button class="button button-secondary" @click="showTocSubmitModal = false">Cancel</button>
+                        <button class="button button-primary" @click="confirmTocSubmit">Confirm &amp; Submit</button>
+                      </v-card-actions>
+                    </v-card>
+                  </v-dialog>
                 </template>
 
                 <!-- Step 5: Programs -->
@@ -1548,7 +1867,7 @@
                   <div class="ap-section">
                     <div class="ap-section-header">
                       <h4 class="text-h4">Billing Setup</h4>
-                      <button v-if="!blEditingSetup" class="button button-thirtiary" @click="blEditingSetup = true">
+                      <button v-if="!blEditingSetup" class="button button-thirtiary" @click="blSetupStartEdit">
                         <Pencil :size="14" :stroke-width="1.5" />Edit
                       </button>
                     </div>
@@ -1600,8 +1919,8 @@
                           </div>
                         </div>
                         <div class="ap-section-footer">
-                          <button class="button button-primary" @click="blEditingSetup = false">Save Changes</button>
-                          <button class="button button-secondary" @click="blEditingSetup = false">Cancel</button>
+                          <button class="button button-primary" @click="blSetupSaveEdit">Save Changes</button>
+                          <button class="button button-secondary" @click="blSetupCancelEdit">Cancel</button>
                         </div>
                       </template>
                     </div>
@@ -1611,7 +1930,7 @@
                   <div class="ap-section">
                     <div class="ap-section-header">
                       <h4 class="text-h4">Payment Method</h4>
-                      <button v-if="!blEditingPayment" class="button button-thirtiary" @click="blEditingPayment = true">
+                      <button v-if="!blEditingPayment" class="button button-thirtiary" @click="blPaymentStartEdit">
                         <Pencil :size="14" :stroke-width="1.5" />Edit
                       </button>
                     </div>
@@ -1751,7 +2070,7 @@
                   <div class="ap-section">
                     <div class="ap-section-header">
                       <h4 class="text-h4">Invoice Configuration</h4>
-                      <button v-if="!blEditingInvoice" class="button button-thirtiary" @click="blEditingInvoice = true">
+                      <button v-if="!blEditingInvoice" class="button button-thirtiary" @click="blInvoiceStartEdit">
                         <Pencil :size="14" :stroke-width="1.5" />Edit
                       </button>
                     </div>
@@ -1824,8 +2143,8 @@
                           </div>
                         </div>
                         <div class="ap-section-footer">
-                          <button class="button button-primary" @click="blEditingInvoice = false">Save Changes</button>
-                          <button class="button button-secondary" @click="blEditingInvoice = false">Cancel</button>
+                          <button class="button button-primary" @click="blInvoiceSaveEdit">Save Changes</button>
+                          <button class="button button-secondary" @click="blInvoiceCancelEdit">Cancel</button>
                         </div>
                       </template>
                     </div>
@@ -1835,7 +2154,7 @@
                   <div class="ap-section">
                     <div class="ap-section-header">
                       <h4 class="text-h4">Report Configuration</h4>
-                      <button v-if="!blEditingReport" class="button button-thirtiary" @click="blEditingReport = true">
+                      <button v-if="!blEditingReport" class="button button-thirtiary" @click="blReportStartEdit">
                         <Pencil :size="14" :stroke-width="1.5" />Edit
                       </button>
                     </div>
@@ -1879,8 +2198,8 @@
                           </div>
                         </div>
                         <div class="ap-section-footer">
-                          <button class="button button-primary" @click="blEditingReport = false">Save Changes</button>
-                          <button class="button button-secondary" @click="blEditingReport = false">Cancel</button>
+                          <button class="button button-primary" @click="blReportSaveEdit">Save Changes</button>
+                          <button class="button button-secondary" @click="blReportCancelEdit">Cancel</button>
                         </div>
                       </template>
                     </div>
@@ -1890,7 +2209,7 @@
                   <div class="ap-section">
                     <div class="ap-section-header">
                       <h4 class="text-h4">Rebate Setup</h4>
-                      <button v-if="!blEditingRebate" class="button button-thirtiary" @click="blEditingRebate = true">
+                      <button v-if="!blEditingRebate" class="button button-thirtiary" @click="blRebateStartEdit">
                         <Pencil :size="14" :stroke-width="1.5" />Edit
                       </button>
                     </div>
@@ -1967,7 +2286,7 @@
                   <div class="ap-section">
                     <div class="ap-section-header">
                       <h4 class="text-h4">Billing Notes</h4>
-                      <button v-if="!blEditingNotes" class="button button-thirtiary" @click="blEditingNotes = true">
+                      <button v-if="!blEditingNotes" class="button button-thirtiary" @click="blNotesStartEdit">
                         <Pencil :size="14" :stroke-width="1.5" />Edit
                       </button>
                     </div>
@@ -1984,8 +2303,8 @@
                           <v-textarea v-model="blNotes" label="Billing Notes" hint="For special billing instructions only." persistent-hint variant="outlined" density="compact" rows="3" auto-grow class="bl-notes-textarea" />
                         </div>
                         <div class="ap-section-footer">
-                          <button class="button button-primary" @click="blEditingNotes = false">Save Changes</button>
-                          <button class="button button-secondary" @click="blEditingNotes = false">Cancel</button>
+                          <button class="button button-primary" @click="blNotesSaveEdit">Save Changes</button>
+                          <button class="button button-secondary" @click="blNotesCancelEdit">Cancel</button>
                         </div>
                       </template>
                     </div>
@@ -2900,7 +3219,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, nextTick } from 'vue';
 import AccountSelector from '@/components/common/AccountSelector.vue';
 import PageCard from '@/components/common/PageCard.vue';
 import Button from '@/components/ui/Button.vue';
@@ -2919,6 +3238,7 @@ import {
   Building2, Shield, Link2, Users, FileText, Search, Globe, Trash2, Paperclip, Info,
 } from 'lucide-vue-next';
 import EmptyStateImg from '@/assets/EmptyState.svg';
+import { useDocumentsStore } from '@/stores/documents';
 import { VRow, VCol, VProgressCircular } from 'vuetify/components';
 
 const STARK_INDUSTRIES_ID = 1;
@@ -2941,9 +3261,151 @@ const wizardActive = ref(false);
 const currentWizardStep = ref(0);
 
 // Step 4: Transition of Care
-const tocHistoricalClaims = ref<boolean | null>(false);
-const tocRxWatchtower = ref<boolean | null>(true);
-const tocPriorAuth = ref<boolean | null>(false);
+const documentsStore = useDocumentsStore();
+const tocDayOptions = ['30 days', '60 days', '90 days'];
+
+// Card edit-mode flags (read-only by default, matching the Billing card pattern)
+const tocEditingFiles = ref(false); // Historical Claims + Prior Authorization File — shared widget
+const tocEditingWatchtower = ref(false);
+const tocEditingOrtf = ref(false);
+const tocEditingNotes = ref(false);
+
+// Historical Claims (HCF) — required; drives the TOC override
+const tocHistoricalClaims = ref(false);
+const tocOverrideDays = ref('60 days');
+const tocHistoricalClaimsFile = ref('');
+const tocPendingHcfRemoval = ref(false);
+const hcfPending = ref(false);
+const hcfTicketNumber = ref('');
+
+// Prior Authorization File (PA) — recommended, independent of HCF
+const tocPriorAuth = ref(false);
+const tocPriorAuthFile = ref('');
+const tocPendingPaRemoval = ref(false);
+const paPending = ref(false);
+const paTicketNumber = ref('');
+
+// RxWatchtower — always on, own override window, unrelated to HCF/TOC
+const tocWatchtowerDays = ref('60 days');
+
+// Open Refill Transfer File (ORTF) — uncommon, mail order only, no upload/ticket
+const tocOpenRefillTransfer = ref(false);
+
+const tocNotes = ref('');
+
+// Ticket submission — one item at a time, triggered only from inside edit mode.
+// Save never touches this; submitting is a separate, deliberate action you can
+// come back and do later, independent of when the answer/file was saved.
+const showTocSubmitModal = ref(false);
+const tocSubmitTarget = ref<'hcf' | 'pa' | null>(null);
+
+function openTocSubmitModal(target: 'hcf' | 'pa') {
+  tocSubmitTarget.value = target;
+  showTocSubmitModal.value = true;
+}
+
+function confirmTocSubmit() {
+  const today = new Date().toISOString().slice(0, 10);
+  if (tocSubmitTarget.value === 'hcf' && tocHistoricalClaimsFile.value) {
+    hcfPending.value = true;
+    hcfTicketNumber.value = mockTicketNumber();
+    documentsStore.addDocument({
+      documentName: tocHistoricalClaimsFile.value,
+      type: tocHistoricalClaimsFile.value.split('.').pop() || 'file',
+      uploadDate: today,
+      lastModifiedBy: 'Implementation',
+      status: 'Published',
+      category: 'PHI Documents',
+    });
+  } else if (tocSubmitTarget.value === 'pa' && tocPriorAuthFile.value) {
+    paPending.value = true;
+    paTicketNumber.value = mockTicketNumber();
+    documentsStore.addDocument({
+      documentName: tocPriorAuthFile.value,
+      type: tocPriorAuthFile.value.split('.').pop() || 'file',
+      uploadDate: today,
+      lastModifiedBy: 'Implementation',
+      status: 'Published',
+      category: 'PHI Documents',
+    });
+  }
+  showTocSubmitModal.value = false;
+  tocSubmitTarget.value = null;
+}
+
+// Snapshots capture each widget's values the moment Edit is clicked, so Cancel can restore
+// every field to exactly what it was before this edit session — not just pending file removals.
+let tocFilesSnapshot = { historicalClaims: false, overrideDays: '', historicalClaimsFile: '', priorAuth: false, priorAuthFile: '' };
+
+function startEditFilesCard() {
+  tocFilesSnapshot = {
+    historicalClaims: tocHistoricalClaims.value,
+    overrideDays: tocOverrideDays.value,
+    historicalClaimsFile: tocHistoricalClaimsFile.value,
+    priorAuth: tocPriorAuth.value,
+    priorAuthFile: tocPriorAuthFile.value,
+  };
+  tocEditingFiles.value = true;
+}
+
+function saveFilesCard() {
+  if (tocPendingHcfRemoval.value) {
+    tocHistoricalClaimsFile.value = '';
+    tocPendingHcfRemoval.value = false;
+  }
+  if (tocPendingPaRemoval.value) {
+    tocPriorAuthFile.value = '';
+    tocPendingPaRemoval.value = false;
+  }
+  tocEditingFiles.value = false;
+}
+
+function cancelFilesCard() {
+  tocHistoricalClaims.value = tocFilesSnapshot.historicalClaims;
+  tocOverrideDays.value = tocFilesSnapshot.overrideDays;
+  tocHistoricalClaimsFile.value = tocFilesSnapshot.historicalClaimsFile;
+  tocPriorAuth.value = tocFilesSnapshot.priorAuth;
+  tocPriorAuthFile.value = tocFilesSnapshot.priorAuthFile;
+  tocPendingHcfRemoval.value = false;
+  tocPendingPaRemoval.value = false;
+  tocEditingFiles.value = false;
+}
+
+let tocWatchtowerSnapshot = '60 days';
+
+function startEditWatchtowerCard() {
+  tocWatchtowerSnapshot = tocWatchtowerDays.value;
+  tocEditingWatchtower.value = true;
+}
+
+function cancelWatchtowerCard() {
+  tocWatchtowerDays.value = tocWatchtowerSnapshot;
+  tocEditingWatchtower.value = false;
+}
+
+let tocOrtfSnapshot = false;
+
+function startEditOrtfCard() {
+  tocOrtfSnapshot = tocOpenRefillTransfer.value;
+  tocEditingOrtf.value = true;
+}
+
+function cancelOrtfCard() {
+  tocOpenRefillTransfer.value = tocOrtfSnapshot;
+  tocEditingOrtf.value = false;
+}
+
+let tocNotesSnapshot = '';
+
+function startEditNotesCard() {
+  tocNotesSnapshot = tocNotes.value;
+  tocEditingNotes.value = true;
+}
+
+function cancelNotesCard() {
+  tocNotes.value = tocNotesSnapshot;
+  tocEditingNotes.value = false;
+}
 
 // ─── Step 5: Programs ─────────────────────────────────────────────────────────
 
@@ -3376,6 +3838,7 @@ const blAchMethod = ref('debit');
 
 // Skip ACH setup — TPA already has an existing billing agreement with Liviniti
 const blSkipAchSetup = ref(false);
+let suppressPaymentFieldsReset = false;
 const resetPaymentFields = () => {
   blPaymentMethod.value = 'ACH';
   blAchMethod.value = 'debit';
@@ -3388,6 +3851,7 @@ const resetPaymentFields = () => {
   blPendingAchAuthRemoval.value = false;
 };
 watch(blSkipAchSetup, (val) => {
+  if (suppressPaymentFieldsReset) return;
   if (val) resetPaymentFields();
 });
 
@@ -3425,7 +3889,9 @@ const blRebateContactOptions = computed(() => {
 });
 const blResponsibleContacts = ref<string[]>([]);
 const blRebateContacts = ref<string[]>([]);
+let suppressResponsibleContactsReset = false;
 watch([() => blExistingParty.value, () => blSelectedTpa.value], () => {
+  if (suppressResponsibleContactsReset) return;
   blResponsibleContacts.value = [];
 });
 watch(() => blExistingParty.value, () => {
@@ -3476,12 +3942,54 @@ const blEditingReport = ref(false);
 const blEditingRebate = ref(false);
 const blEditingNotes = ref(false);
 
+// Card 1: Billing Setup — snapshot/restore so Cancel undoes every field, not just uploads
+let blSetupSnapshot = { einNumber: '', existingParty: 'no', selectedTpa: '', responsibleContacts: [] as string[] };
+const blSetupStartEdit = () => {
+  blSetupSnapshot = {
+    einNumber: blEinNumber.value,
+    existingParty: blExistingParty.value,
+    selectedTpa: blSelectedTpa.value,
+    responsibleContacts: [...blResponsibleContacts.value],
+  };
+  blEditingSetup.value = true;
+};
+const blSetupSaveEdit = () => {
+  blEditingSetup.value = false;
+};
+const blSetupCancelEdit = () => {
+  suppressResponsibleContactsReset = true;
+  blEinNumber.value = blSetupSnapshot.einNumber;
+  blExistingParty.value = blSetupSnapshot.existingParty;
+  blSelectedTpa.value = blSetupSnapshot.selectedTpa;
+  blResponsibleContacts.value = blSetupSnapshot.responsibleContacts;
+  blEditingSetup.value = false;
+  nextTick(() => { suppressResponsibleContactsReset = false; });
+};
+
 // ACH upload state — Payment Method card
 const blW9File = ref<string | null>(null);
 const blAchAuthFile = ref<string | null>(null);
 const blPendingW9Removal = ref(false);
 const blPendingAchAuthRemoval = ref(false);
 
+let blPaymentSnapshot = {
+  skipAchSetup: false, paymentMethod: 'ACH', achMethod: 'debit',
+  w9File: null as string | null, achAuthFile: null as string | null,
+  debitTiming: '', debitApprovalEmail: '', debitTimingNote: '',
+};
+const blPaymentStartEdit = () => {
+  blPaymentSnapshot = {
+    skipAchSetup: blSkipAchSetup.value,
+    paymentMethod: blPaymentMethod.value,
+    achMethod: blAchMethod.value,
+    w9File: blW9File.value,
+    achAuthFile: blAchAuthFile.value,
+    debitTiming: blDebitTiming.value,
+    debitApprovalEmail: blDebitApprovalEmail.value,
+    debitTimingNote: blDebitTimingNote.value,
+  };
+  blEditingPayment.value = true;
+};
 const savePaymentCard = () => {
   if (blPendingW9Removal.value) blW9File.value = null;
   blPendingW9Removal.value = false;
@@ -3490,9 +3998,71 @@ const savePaymentCard = () => {
   blEditingPayment.value = false;
 };
 const cancelPaymentCard = () => {
+  suppressPaymentFieldsReset = true;
+  blSkipAchSetup.value = blPaymentSnapshot.skipAchSetup;
+  blPaymentMethod.value = blPaymentSnapshot.paymentMethod;
+  blAchMethod.value = blPaymentSnapshot.achMethod;
+  blW9File.value = blPaymentSnapshot.w9File;
+  blAchAuthFile.value = blPaymentSnapshot.achAuthFile;
+  blDebitTiming.value = blPaymentSnapshot.debitTiming;
+  blDebitApprovalEmail.value = blPaymentSnapshot.debitApprovalEmail;
+  blDebitTimingNote.value = blPaymentSnapshot.debitTimingNote;
   blPendingW9Removal.value = false;
   blPendingAchAuthRemoval.value = false;
   blEditingPayment.value = false;
+  nextTick(() => { suppressPaymentFieldsReset = false; });
+};
+
+// Card 3: Invoice Configuration
+let blInvoiceSnapshot = {
+  billingCycle: 'Bi-Weekly', customCycleNote: '',
+  separateInvoices: 'no', separateInvoicesSplit: '',
+  invoiceBreakout: 'no', invoiceBreakoutSelection: '', invoiceBreakoutNote: '',
+};
+const blInvoiceStartEdit = () => {
+  blInvoiceSnapshot = {
+    billingCycle: blBillingCycle.value,
+    customCycleNote: blCustomCycleNote.value,
+    separateInvoices: blSeparateInvoices.value,
+    separateInvoicesSplit: blSeparateInvoicesSplit.value,
+    invoiceBreakout: blInvoiceBreakout.value,
+    invoiceBreakoutSelection: blInvoiceBreakoutSelection.value,
+    invoiceBreakoutNote: blInvoiceBreakoutNote.value,
+  };
+  blEditingInvoice.value = true;
+};
+const blInvoiceSaveEdit = () => {
+  blEditingInvoice.value = false;
+};
+const blInvoiceCancelEdit = () => {
+  blBillingCycle.value = blInvoiceSnapshot.billingCycle;
+  blCustomCycleNote.value = blInvoiceSnapshot.customCycleNote;
+  blSeparateInvoices.value = blInvoiceSnapshot.separateInvoices;
+  blSeparateInvoicesSplit.value = blInvoiceSnapshot.separateInvoicesSplit;
+  blInvoiceBreakout.value = blInvoiceSnapshot.invoiceBreakout;
+  blInvoiceBreakoutSelection.value = blInvoiceSnapshot.invoiceBreakoutSelection;
+  blInvoiceBreakoutNote.value = blInvoiceSnapshot.invoiceBreakoutNote;
+  blEditingInvoice.value = false;
+};
+
+// Card 4: Report Configuration
+let blReportSnapshot = { includePhi: 'no', reportingBreakouts: 'no', reportingBreakoutSelections: [] as string[] };
+const blReportStartEdit = () => {
+  blReportSnapshot = {
+    includePhi: blIncludePhi.value,
+    reportingBreakouts: blReportingBreakouts.value,
+    reportingBreakoutSelections: [...blReportingBreakoutSelections.value],
+  };
+  blEditingReport.value = true;
+};
+const blReportSaveEdit = () => {
+  blEditingReport.value = false;
+};
+const blReportCancelEdit = () => {
+  blIncludePhi.value = blReportSnapshot.includePhi;
+  blReportingBreakouts.value = blReportSnapshot.reportingBreakouts;
+  blReportingBreakoutSelections.value = blReportSnapshot.reportingBreakoutSelections;
+  blEditingReport.value = false;
 };
 
 // ACH upload state — Rebate Setup card
@@ -3501,6 +4071,19 @@ const blRebateAchAuthFile = ref<string | null>(null);
 const blPendingRebateW9Removal = ref(false);
 const blPendingRebateAchAuthRemoval = ref(false);
 
+let blRebateSnapshot = {
+  contacts: [] as string[],
+  w9File: null as string | null,
+  achAuthFile: null as string | null,
+};
+const blRebateStartEdit = () => {
+  blRebateSnapshot = {
+    contacts: [...blRebateContacts.value],
+    w9File: blRebateW9File.value,
+    achAuthFile: blRebateAchAuthFile.value,
+  };
+  blEditingRebate.value = true;
+};
 const saveRebateCard = () => {
   if (blPendingRebateW9Removal.value) blRebateW9File.value = null;
   blPendingRebateW9Removal.value = false;
@@ -3509,9 +4092,26 @@ const saveRebateCard = () => {
   blEditingRebate.value = false;
 };
 const cancelRebateCard = () => {
+  blRebateContacts.value = blRebateSnapshot.contacts;
+  blRebateW9File.value = blRebateSnapshot.w9File;
+  blRebateAchAuthFile.value = blRebateSnapshot.achAuthFile;
   blPendingRebateW9Removal.value = false;
   blPendingRebateAchAuthRemoval.value = false;
   blEditingRebate.value = false;
+};
+
+// Card 6: Billing Notes
+let blNotesSnapshot = '';
+const blNotesStartEdit = () => {
+  blNotesSnapshot = blNotes.value;
+  blEditingNotes.value = true;
+};
+const blNotesSaveEdit = () => {
+  blEditingNotes.value = false;
+};
+const blNotesCancelEdit = () => {
+  blNotes.value = blNotesSnapshot;
+  blEditingNotes.value = false;
 };
 
 // ─── Step 8: ID Cards ─────────────────────────────────────────────────────────
@@ -3733,21 +4333,60 @@ const finishPlanSetup = () => {
 
 const statusOptions = ['Implementation', 'Active', 'Inactive', 'Pending'];
 
+// ── Account Profile — Client Portal role/permission taxonomy (shared) ────────
+// Taxonomy validated against both the old Client Portal (Ehn.Web.Pbm.Customers
+// AccountPermissions) and Solo2's GPS report "Client Portal Access" template.
+const apPermissionOptions = [
+  { key: 'reports', label: 'Reports' },
+  { key: 'invoices', label: 'Invoices' },
+  { key: 'rebates', label: 'Rebates' },
+  { key: 'highCostNotifications', label: 'High Cost Notifications' },
+  { key: 'planChanges', label: 'Plan Changes' },
+  { key: 'planApproval', label: 'Plan Approval' },
+  { key: 'overrides', label: 'Overrides' },
+  { key: 'vcpClaims', label: 'VCP Claims' },
+];
+const apClientRoleOptions = ['Administrator', 'Client'];
+const apVendorRoleOptions = ['Broker', 'Consultant', 'TPA', 'TPV'];
+const apNewPermissions = (): Record<string, boolean> => ({ reports: false, invoices: false, rebates: false, highCostNotifications: false, planChanges: false, planApproval: false, overrides: false, vcpClaims: false });
+const apPortalRoleLabel = (portalAccess: boolean, role: string) => (portalAccess ? role : 'No portal access');
+// Enforces the old portal's rule: only one contact per account can be Main Point of Contact.
+const apEnforceSingleMainPoc = (contacts: any[], keepIdx: number) => {
+  contacts.forEach((c, i) => { if (i !== keepIdx) c.mainPointOfContact = false; });
+};
+
 // ── Account Profile — Client Contacts ─────────────────────────────────────────
 const apClientContactHeaders = [
   { title: 'Name', key: 'name' },
   { title: 'Title', key: 'title' },
   { title: 'Email', key: 'email' },
   { title: 'Phone', key: 'phone' },
+  { title: 'Portal Role', key: 'roleLabel' },
   { title: '', key: 'actions', sortable: false },
 ];
 const apPhoneTypes = ['Office', 'Cell', 'Fax'];
 const apNewPhone = () => ({ number: '', type: 'Office', ext: '' });
-const apClientContacts = ref([
-  { name: 'Nick Johnson', title: 'Benefits Manager', email: 'nick.johnson@starkind.com', phone: '(555) 234-5678', phones: [{ number: '(555) 234-5678', type: 'Office', ext: '' }] },
+interface ApClientContact {
+  name: string;
+  title: string;
+  email: string;
+  phone: string;
+  phones: { number: string; type: string; ext: string }[];
+  primaryPhoneIdx: number;
+  portalAccess: boolean;
+  role: string;
+  permissions: Record<string, boolean>;
+  allowPhi: boolean;
+  mainPointOfContact: boolean;
+  surveyContact: boolean;
+  roleLabel: string;
+}
+const apClientContacts = ref<ApClientContact[]>([
+  { name: 'Nick Johnson', title: 'Benefits Manager', email: 'nick.johnson@starkind.com', phone: '(555) 234-5678', phones: [{ number: '(555) 234-5678', type: 'Office', ext: '' }], primaryPhoneIdx: 0, portalAccess: false, role: 'Client', permissions: apNewPermissions(), allowPhi: false, mainPointOfContact: false, surveyContact: false, roleLabel: 'No portal access' },
 ]);
 const apShowAddContactDialog = ref(false);
-const apContactForm = ref({ firstName: '', lastName: '', title: '', email: '', phones: [apNewPhone()], primaryPhoneIdx: 0 });
+const apNewContactForm = () => ({ firstName: '', lastName: '', title: '', email: '', phones: [apNewPhone()], primaryPhoneIdx: 0, portalAccess: false, role: 'Client', permissions: apNewPermissions(), allowPhi: false, mainPointOfContact: false, surveyContact: false });
+const apContactForm = ref(apNewContactForm());
 const apContactErrors = ref({ firstName: '', lastName: '', email: '' });
 const apEditContactErrors = ref({ firstName: '', lastName: '', email: '' });
 const apValidateContact = (form: { firstName: string; lastName: string; email: string }) => {
@@ -3759,7 +4398,7 @@ const apValidateContact = (form: { firstName: string; lastName: string; email: s
   return e;
 };
 const apResetContactForm = () => {
-  apContactForm.value = { firstName: '', lastName: '', title: '', email: '', phones: [apNewPhone()], primaryPhoneIdx: 0 };
+  apContactForm.value = apNewContactForm();
   apContactErrors.value = { firstName: '', lastName: '', email: '' };
 };
 const formatPhone = (val: string): string => {
@@ -3777,14 +4416,23 @@ const apSaveContact = () => {
   if (Object.values(errors).some(e => e)) return;
   const phones = apContactForm.value.phones.filter(p => p.number);
   const primaryIdx = apContactForm.value.primaryPhoneIdx;
+  const f = apContactForm.value;
   apClientContacts.value.push({
-    name: `${apContactForm.value.firstName} ${apContactForm.value.lastName}`,
-    title: apContactForm.value.title,
-    email: apContactForm.value.email,
+    name: `${f.firstName} ${f.lastName}`,
+    title: f.title,
+    email: f.email,
     phones,
     primaryPhoneIdx: primaryIdx,
     phone: phones[primaryIdx]?.number ?? phones[0]?.number ?? '',
+    portalAccess: f.portalAccess,
+    role: f.role,
+    permissions: { ...f.permissions },
+    allowPhi: f.role === 'Administrator' ? true : f.allowPhi,
+    mainPointOfContact: f.portalAccess ? f.mainPointOfContact : false,
+    surveyContact: f.portalAccess ? f.surveyContact : false,
+    roleLabel: apPortalRoleLabel(f.portalAccess, f.role),
   });
+  if (f.portalAccess && f.mainPointOfContact) apEnforceSingleMainPoc(apClientContacts.value, apClientContacts.value.length - 1);
   apShowAddContactDialog.value = false;
   apResetContactForm();
 };
@@ -3794,7 +4442,7 @@ const apClientContactRowActions = [
 ];
 const apEditingContactIndex = ref(-1);
 const apShowEditContactDialog = ref(false);
-const apEditContactForm = ref({ firstName: '', lastName: '', title: '', email: '', phones: [apNewPhone()], primaryPhoneIdx: 0 });
+const apEditContactForm = ref(apNewContactForm());
 watch(() => apEditContactForm.value.phones, phones => {
   phones.forEach(ph => { const f = formatPhone(ph.number); if (f !== ph.number) ph.number = f; });
 }, { deep: true });
@@ -3811,6 +4459,12 @@ const handleApClientContactRowAction = ({ action, item }: { action: string; item
       email:     item.email ?? '',
       phones:    item.phones?.length ? item.phones.map((p: any) => ({ ...p })) : [apNewPhone()],
       primaryPhoneIdx: item.primaryPhoneIdx ?? 0,
+      portalAccess: item.portalAccess ?? false,
+      role: item.role ?? 'Client',
+      permissions: item.permissions ? { ...item.permissions } : apNewPermissions(),
+      allowPhi: item.allowPhi ?? false,
+      mainPointOfContact: item.mainPointOfContact ?? false,
+      surveyContact: item.surveyContact ?? false,
     };
     apEditingContactIndex.value = idx;
     apShowEditContactDialog.value = true;
@@ -3824,14 +4478,23 @@ const apSaveEditContact = () => {
   if (idx > -1) {
     const phones = apEditContactForm.value.phones.filter(p => p.number);
     const primaryIdx = apEditContactForm.value.primaryPhoneIdx;
+    const f = apEditContactForm.value;
     apClientContacts.value[idx] = {
-      name:  `${apEditContactForm.value.firstName} ${apEditContactForm.value.lastName}`,
-      title: apEditContactForm.value.title,
-      email: apEditContactForm.value.email,
+      name:  `${f.firstName} ${f.lastName}`,
+      title: f.title,
+      email: f.email,
       phones,
       primaryPhoneIdx: primaryIdx,
       phone: phones[primaryIdx]?.number ?? phones[0]?.number ?? '',
+      portalAccess: f.portalAccess,
+      role: f.role,
+      permissions: { ...f.permissions },
+      allowPhi: f.role === 'Administrator' ? true : f.allowPhi,
+      mainPointOfContact: f.portalAccess ? f.mainPointOfContact : false,
+      surveyContact: f.portalAccess ? f.surveyContact : false,
+      roleLabel: apPortalRoleLabel(f.portalAccess, f.role),
     };
+    if (f.portalAccess && f.mainPointOfContact) apEnforceSingleMainPoc(apClientContacts.value, idx);
   }
   apShowEditContactDialog.value = false;
 };
@@ -3850,17 +4513,22 @@ const apVendorContactHeaders = [
   { title: 'Vendor', key: 'vendor' },
   { title: 'Email', key: 'email' },
   { title: 'Phone', key: 'phone' },
+  { title: 'Business Role', key: 'roleLabel' },
   { title: '', key: 'actions', sortable: false },
 ];
-const apVendorContacts = ref<{ name: string; vendor: string; email: string; phone: string }[]>([
-  { name: 'Mark Tillman', vendor: 'Southern Scripts TPA', email: 'mtillman@sstpa.com', phone: '(704) 555-0121' },
-  { name: 'Dana Osei', vendor: 'Southern Scripts TPA', email: 'dosei@sstpa.com', phone: '(704) 555-0122' },
-  { name: 'Rachel Vance', vendor: 'Acclaim Benefits', email: 'rvance@acclaim.com', phone: '(615) 555-0188' },
-  { name: 'James Pruitt', vendor: 'Acclaim Benefits', email: 'jpruitt@acclaim.com', phone: '(615) 555-0189' },
-  { name: 'Tara Mendez', vendor: 'Benefit Advantage', email: 'tmendez@benefitadv.com', phone: '(512) 555-0144' },
+type ApVendorContact = { name: string; vendor: string; email: string; phone: string; role?: string; allowPhi?: boolean; ackConfirmed?: boolean; roleLabel?: string };
+const apVendorContacts = ref<ApVendorContact[]>([
+  { name: 'Mark Tillman', vendor: 'Southern Scripts TPA', email: 'mtillman@sstpa.com', phone: '(704) 555-0121', role: 'TPA', allowPhi: false, ackConfirmed: true, roleLabel: 'TPA' },
+  { name: 'Dana Osei', vendor: 'Southern Scripts TPA', email: 'dosei@sstpa.com', phone: '(704) 555-0122', role: 'TPA', allowPhi: false, ackConfirmed: true, roleLabel: 'TPA' },
+  { name: 'Rachel Vance', vendor: 'Acclaim Benefits', email: 'rvance@acclaim.com', phone: '(615) 555-0188', role: 'Broker', allowPhi: false, ackConfirmed: true, roleLabel: 'Broker' },
+  { name: 'James Pruitt', vendor: 'Acclaim Benefits', email: 'jpruitt@acclaim.com', phone: '(615) 555-0189', role: 'Broker', allowPhi: false, ackConfirmed: true, roleLabel: 'Broker' },
+  { name: 'Tara Mendez', vendor: 'Benefit Advantage', email: 'tmendez@benefitadv.com', phone: '(512) 555-0144', role: 'Consultant', allowPhi: false, ackConfirmed: true, roleLabel: 'Consultant' },
 ]);
 const apShowVendorContactDialog = ref(false);
 const apVendorContactSelections = ref<string[]>([]);
+const apVendorRoleSelection = ref('Broker');
+const apVendorAllowPhi = ref(false);
+const apVendorAckConfirmed = ref(false);
 const apVendorContactData = [
   { name: 'Jordan Mills', title: 'Account Manager',    vendor: '90 Degree Benefits', email: 'jordan.mills@90degreebenefits.com', phone: '(555) 234-5678' },
   { name: 'Bob Carter',   title: 'Client Specialist',  vendor: '90 Degree Benefits', email: 'bob.carter@90degreebenefits.com',    phone: '(555) 345-6789' },
@@ -3888,20 +4556,64 @@ const apRemoveVendorContact = (item: any) => {
   const idx = apVendorContacts.value.indexOf(item);
   if (idx > -1) apVendorContacts.value.splice(idx, 1);
 };
+const apResetVendorAddState = () => {
+  apVendorContactSelections.value = [];
+  apVendorRoleSelection.value = 'Broker';
+  apVendorAllowPhi.value = false;
+  apVendorAckConfirmed.value = false;
+};
 const apSaveVendorContacts = () => {
+  if (!apVendorAckConfirmed.value) return;
   apVendorContactSelections.value.forEach(selection => {
     const already = apVendorContacts.value.some(c => c.name === selection);
     if (!already) {
       const data = apVendorContactData.find(c => c.name === selection);
-      if (data) apVendorContacts.value.push({ name: data.name, vendor: data.vendor, email: data.email, phone: data.phone });
+      if (data) {
+        apVendorContacts.value.push({
+          name: data.name,
+          vendor: data.vendor,
+          email: data.email,
+          phone: data.phone,
+          role: apVendorRoleSelection.value,
+          allowPhi: apVendorAllowPhi.value,
+          ackConfirmed: apVendorAckConfirmed.value,
+          roleLabel: apVendorRoleSelection.value,
+        });
+      }
     }
   });
-  apVendorContactSelections.value = [];
+  apResetVendorAddState();
   apShowVendorContactDialog.value = false;
 };
 const apVendorContactDialogActions = computed(() => [
-  { text: 'Cancel', styleType: 'secondary' as const, onClick: () => { apShowVendorContactDialog.value = false; apVendorContactSelections.value = []; } },
-  { text: 'Add Contact', styleType: 'primary' as const, onClick: apSaveVendorContacts },
+  { text: 'Cancel', styleType: 'secondary' as const, onClick: () => { apShowVendorContactDialog.value = false; apResetVendorAddState(); } },
+  { text: 'Add Contact', styleType: 'primary' as const, onClick: apSaveVendorContacts, disabled: !apVendorAckConfirmed.value },
+]);
+
+// Edit Vendor Contact (role/PHI only — identity fields come from the vendor's own contact record)
+const apShowEditVendorContactDialog = ref(false);
+const apEditingVendorContactIndex = ref(-1);
+const apEditVendorContactForm = ref({ role: 'Broker', allowPhi: false, ackConfirmed: false });
+const handleEditVendorContact = (item: ApVendorContact) => {
+  const idx = apVendorContacts.value.indexOf(item);
+  apEditVendorContactForm.value = { role: item.role ?? 'Broker', allowPhi: item.allowPhi ?? false, ackConfirmed: item.ackConfirmed ?? false };
+  apEditingVendorContactIndex.value = idx;
+  apShowEditVendorContactDialog.value = true;
+};
+const apSaveEditVendorContact = () => {
+  const idx = apEditingVendorContactIndex.value;
+  if (idx > -1 && apEditVendorContactForm.value.ackConfirmed) {
+    const c = apVendorContacts.value[idx];
+    c.role = apEditVendorContactForm.value.role;
+    c.allowPhi = apEditVendorContactForm.value.allowPhi;
+    c.ackConfirmed = apEditVendorContactForm.value.ackConfirmed;
+    c.roleLabel = apEditVendorContactForm.value.role;
+  }
+  apShowEditVendorContactDialog.value = false;
+};
+const apEditVendorContactDialogActions = computed(() => [
+  { text: 'Cancel', styleType: 'secondary' as const, onClick: () => { apShowEditVendorContactDialog.value = false; } },
+  { text: 'Save Changes', styleType: 'primary' as const, onClick: apSaveEditVendorContact, disabled: !apEditVendorContactForm.value.ackConfirmed },
 ]);
 
 const accountProfile = ref({
@@ -5160,6 +5872,18 @@ watch(selectedAccount, (newVal) => {
   font-size: $font-size-small;
 }
 
+.ap-permission-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: $spacing-xsmall $spacing-medium;
+  margin: $spacing-small 0;
+}
+
+.ap-role-note {
+  color: $color-text-secondary;
+  margin: $spacing-xsmall 0 $spacing-small;
+}
+
 .ap-section-footer {
   display: flex;
   align-items: center;
@@ -5725,20 +6449,30 @@ watch(selectedAccount, (newVal) => {
     color: $color-primary;
     font-weight: $font-weight-semibold;
   }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 }
 
-.toc-info-box {
-  background-color: #f5f5f5;
-  border-left: 3px solid $color-border;
-  border-radius: 4px;
-  padding: $spacing-medium;
-  margin-bottom: $spacing-large;
+.toc-recommended {
+  font-size: $font-size-small;
+  font-weight: $font-weight-semibold;
+  color: $color-text-secondary;
+  margin-left: $spacing-xsmall;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
 
-  .toc-info-text {
-    font-size: $font-size-small;
-    color: $color-text-secondary;
-    font-style: italic;
-    margin-bottom: $spacing-medium;
+.toc-queue-action {
+  display: flex;
+  align-items: center;
+  gap: $spacing-medium;
+  margin-top: $spacing-small;
+
+  .bl-note {
+    margin: 0;
   }
 }
 

@@ -14,52 +14,199 @@
       variant="outlined"
     >
       <div class="account-settings">
-        <Tabs :tabs="settingTabs" @tab-selected="handleTabSelected" />
+        <Tabs v-if="selectedAccount" :tabs="settingTabs" @tab-selected="handleTabSelected" />
         <div v-if="selectedAccount && activeTab === 'company-information'">
-          <div class="general-information-container">
-            <div class="tab-header">
-              <div class="heading-and-button-wrapper">
-                <h3 class="text-h3">General Information</h3>
-                <Button v-if="!isEditingCompany" @click="isEditingCompany = true" label="Edit" variant="thirtiary" />
-              </div>
-              <p class="text-body">Keep company information up to date.</p>
+          <!-- Mirrors Plan Explorer > Account Profile step (Account Profile + About This
+               Company cards) — see project_settings_master_divergences.md. High Cost
+               Notification Settings removed: it's Solo2-owned and already editable via
+               Plan Explorer > Limits & Controls, not a Client Portal setting. -->
+
+          <!-- Section: Account Profile -->
+          <div class="ap-section">
+            <div class="ap-section-header ap-section-header--space-between">
+              <h4 class="text-h4">Account Profile</h4>
+              <Button v-if="!isEditingAccountProfile" @click="isEditingAccountProfile = true" label="Edit" variant="thirtiary" />
             </div>
-            <div class="form-row">
-              <TextField
-                label="Company name"
-                :model-value="editableCompanyData.companyName"
-                :readonly="!isEditingCompany"
-                @update:model-value="updateCompanyField('companyName', $event)"
-              />
-              <TextField
-                label="Doing business as"
-                :model-value="editableCompanyData.dba"
-                :readonly="!isEditingCompany"
-                @update:model-value="updateCompanyField('dba', $event)"
-              />
+            <div class="ap-fields">
+              <template v-if="!isEditingAccountProfile">
+                <div class="ap-field-row ap-field-row--multi ap-field-row--thirds">
+                  <div class="ap-field">
+                    <span class="ap-field-label">Account name</span>
+                    <span class="ap-field-value">{{ editableCompanyData.companyName || '—' }}</span>
+                  </div>
+                  <div class="ap-field">
+                    <span class="ap-field-label">Legal Name</span>
+                    <span class="ap-field-value">{{ editableCompanyData.apLegalName || '—' }}</span>
+                  </div>
+                  <div class="ap-field">
+                    <span class="ap-field-label">DBA</span>
+                    <span class="ap-field-value">{{ editableCompanyData.dba || '—' }}</span>
+                  </div>
+                </div>
+                <div class="ap-field-row ap-field-row--multi">
+                  <div class="ap-field">
+                    <span class="ap-field-label">Effective start date</span>
+                    <span class="ap-field-value">{{ editableCompanyData.apEffectiveStartDate || '—' }}</span>
+                  </div>
+                  <div class="ap-field">
+                    <span class="ap-field-label">Effective end date</span>
+                    <span class="ap-field-value">{{ editableCompanyData.apEffectiveEndDate || '—' }}</span>
+                  </div>
+                </div>
+              </template>
+              <template v-else>
+                <div class="form-row">
+                  <TextField v-model="editableCompanyData.companyName" label="Account name" />
+                  <TextField v-model="editableCompanyData.apLegalName" label="Legal Name" />
+                  <TextField v-model="editableCompanyData.dba" label="DBA" />
+                </div>
+                <div class="form-row">
+                  <TextField v-model="editableCompanyData.apEffectiveStartDate" label="Effective start date" placeholder="MM/DD/YYYY" />
+                  <TextField v-model="editableCompanyData.apEffectiveEndDate" label="Effective end date" placeholder="MM/DD/YYYY" />
+                </div>
+                <div class="ap-section-footer">
+                  <Button variant="primary" label="Save Changes" @click="saveAccountProfileChanges" />
+                  <Button variant="secondary" label="Cancel" @click="cancelAccountProfileChanges" />
+                </div>
+              </template>
             </div>
           </div>
-          <div class="high-cost-container">
-            <div class="tab-header">
-              <h3 class="text-h3">High Cost Notification Settings</h3>
-              <p class="text-body">Set a high-cost claim limit to get notifications when adjudicated claims surpass the limit.</p>
+
+          <!-- Section: About This Company -->
+          <div class="ap-section">
+            <div class="ap-section-header ap-section-header--space-between">
+              <h4 class="text-h4">About This Company</h4>
+              <Button v-if="!isEditingAboutCompany" @click="isEditingAboutCompany = true" label="Edit" variant="thirtiary" />
             </div>
-            <div class="form-row">
-              <TextField
-                label="Notification threshold"
-                :model-value="editableCompanyData.notificationThreshold"
-                @update:model-value="updateCompanyField('notificationThreshold', $event)"
-                :readonly="!isEditingCompany"
-                prefix="$"
-              />
+            <div class="ap-fields">
+              <template v-if="!isEditingAboutCompany">
+                <div class="ap-field-row">
+                  <div class="ap-field">
+                    <span class="ap-field-label">SIC Code</span>
+                    <span class="ap-field-value">{{ editableCompanyData.apSicCode || '—' }}</span>
+                  </div>
+                </div>
+                <h5 class="ap-subsection-heading">Physical Address</h5>
+                <div class="ap-field-row">
+                  <div class="ap-field">
+                    <span class="ap-field-label">Address 1</span>
+                    <span class="ap-field-value">{{ editableCompanyData.apPhysicalAddress1 || '—' }}</span>
+                  </div>
+                </div>
+                <div class="ap-field-row">
+                  <div class="ap-field">
+                    <span class="ap-field-label">Address 2</span>
+                    <span class="ap-field-value">{{ editableCompanyData.apPhysicalAddress2 || '—' }}</span>
+                  </div>
+                </div>
+                <div class="ap-field-row ap-field-row--multi ap-field-row--thirds">
+                  <div class="ap-field">
+                    <span class="ap-field-label">City</span>
+                    <span class="ap-field-value">{{ editableCompanyData.apPhysicalCity || '—' }}</span>
+                  </div>
+                  <div class="ap-field">
+                    <span class="ap-field-label">State</span>
+                    <span class="ap-field-value">{{ editableCompanyData.apPhysicalState || '—' }}</span>
+                  </div>
+                  <div class="ap-field">
+                    <span class="ap-field-label">ZIP</span>
+                    <span class="ap-field-value">{{ editableCompanyData.apPhysicalZip || '—' }}</span>
+                  </div>
+                </div>
+                <div class="ap-field-row">
+                  <div class="ap-field">
+                    <span class="ap-field-label">Country</span>
+                    <span class="ap-field-value">{{ editableCompanyData.apPhysicalCountry || '—' }}</span>
+                  </div>
+                </div>
+                <h5 class="ap-subsection-heading">Mailing Address</h5>
+                <div class="ap-field-row">
+                  <div class="ap-field">
+                    <span class="ap-field-label">Address 1</span>
+                    <span class="ap-field-value">{{ editableCompanyData.apMailingAddress1 || '—' }}</span>
+                  </div>
+                </div>
+                <div class="ap-field-row">
+                  <div class="ap-field">
+                    <span class="ap-field-label">Address 2</span>
+                    <span class="ap-field-value">{{ editableCompanyData.apMailingAddress2 || '—' }}</span>
+                  </div>
+                </div>
+                <div class="ap-field-row ap-field-row--multi ap-field-row--thirds">
+                  <div class="ap-field">
+                    <span class="ap-field-label">City</span>
+                    <span class="ap-field-value">{{ editableCompanyData.apMailingCity || '—' }}</span>
+                  </div>
+                  <div class="ap-field">
+                    <span class="ap-field-label">State</span>
+                    <span class="ap-field-value">{{ editableCompanyData.apMailingState || '—' }}</span>
+                  </div>
+                  <div class="ap-field">
+                    <span class="ap-field-label">ZIP</span>
+                    <span class="ap-field-value">{{ editableCompanyData.apMailingZip || '—' }}</span>
+                  </div>
+                </div>
+                <div class="ap-field-row">
+                  <div class="ap-field">
+                    <span class="ap-field-label">Country</span>
+                    <span class="ap-field-value">{{ editableCompanyData.apMailingCountry || '—' }}</span>
+                  </div>
+                </div>
+              </template>
+              <template v-else>
+                <div class="form-row">
+                  <TextField v-model="editableCompanyData.apSicCode" label="SIC Code" />
+                </div>
+                <h5 class="ap-subsection-heading">Physical Address</h5>
+                <div class="form-row">
+                  <TextField v-model="editableCompanyData.apPhysicalAddress1" label="Address 1" />
+                </div>
+                <div class="form-row">
+                  <TextField v-model="editableCompanyData.apPhysicalAddress2" label="Address 2" />
+                </div>
+                <div class="form-row">
+                  <TextField v-model="editableCompanyData.apPhysicalCity" label="City" />
+                  <TextField v-model="editableCompanyData.apPhysicalState" label="State" />
+                  <TextField v-model="editableCompanyData.apPhysicalZip" label="ZIP" />
+                </div>
+                <div class="form-row">
+                  <TextField v-model="editableCompanyData.apPhysicalCountry" label="Country" />
+                </div>
+                <div class="ap-mailing-header">
+                  <h5 class="ap-subsection-heading">Mailing Address</h5>
+                  <div class="ap-checkbox-toggle" @click="toggleSameAsPhysical">
+                    <CheckSquare v-if="sameAsPhysical" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                    <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                    <span class="text-small">Same as physical address</span>
+                  </div>
+                </div>
+                <div class="form-row">
+                  <TextField v-model="editableCompanyData.apMailingAddress1" label="Address 1" :disabled="sameAsPhysical" />
+                </div>
+                <div class="form-row">
+                  <TextField v-model="editableCompanyData.apMailingAddress2" label="Address 2" :disabled="sameAsPhysical" />
+                </div>
+                <div class="form-row">
+                  <TextField v-model="editableCompanyData.apMailingCity" label="City" :disabled="sameAsPhysical" />
+                  <TextField v-model="editableCompanyData.apMailingState" label="State" :disabled="sameAsPhysical" />
+                  <TextField v-model="editableCompanyData.apMailingZip" label="ZIP" :disabled="sameAsPhysical" />
+                </div>
+                <div class="form-row">
+                  <TextField v-model="editableCompanyData.apMailingCountry" label="Country" :disabled="sameAsPhysical" />
+                </div>
+                <div class="ap-section-footer">
+                  <Button variant="primary" label="Save Changes" @click="saveAboutCompanyChanges" />
+                  <Button variant="secondary" label="Cancel" @click="cancelAboutCompanyChanges" />
+                </div>
+              </template>
             </div>
-          </div>
-          <div v-if="isEditingCompany" class="form-actions">
-            <v-btn :disabled="!isCompanyChanged" color="primary" @click="saveCompanyChanges">Save</v-btn>
-            <v-btn variant="text" @click="cancelCompanyChanges">Cancel</v-btn>
           </div>
         </div>
         <div v-if="selectedAccount && activeTab === 'user-administration'">
+          <div class="ua-header">
+            <p class="text-body ua-header-note">Manage who has Client Portal access to this account, and what they can see once it's live.</p>
+            <Button label="+ Add User" variant="primary" @click="openAddUser" />
+          </div>
           <ReportDataTable
             :headers="userAdminHeaders"
             :items="userAdminData"
@@ -67,21 +214,81 @@
             :show-filter-button="false"
             search-placeholder="Search users"
             :show-row-actions="true"
+            :row-action-items="userAdminRowActions"
+            @row-action="handleUserAdminRowAction"
             :show-table-footer="true"
             :show-selection-checkboxes="false"
             :boolean-columns="['activated', 'mainPoc', 'surveyContact']"
           >
           </ReportDataTable>
+
+          <!-- Add/Edit User Dialog -->
+          <Dialog
+            v-model="showUserAdminDialog"
+            :heading="userAdminDialogMode === 'add' ? 'Add User' : 'Edit User'"
+            :show-secondary-button="true"
+            :actions="userAdminDialogActions"
+          >
+            <v-row class="mt-1">
+              <v-col cols="6"><TextField v-model="userAdminForm.firstName" label="First Name" :error-messages="userAdminErrors.firstName" /></v-col>
+              <v-col cols="6"><TextField v-model="userAdminForm.lastName" label="Last Name" :error-messages="userAdminErrors.lastName" /></v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="12"><TextField v-model="userAdminForm.email" label="Email" :error-messages="userAdminErrors.email" /></v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="12" sm="6"><Select v-model="userAdminForm.role" :items="userAdminRoleOptions" label="Role" /></v-col>
+            </v-row>
+            <div v-if="userAdminExternalRoles.includes(userAdminForm.role)" class="ua-checkbox-toggle" @click="userAdminForm.ackConfirmed = !userAdminForm.ackConfirmed">
+              <CheckSquare v-if="userAdminForm.ackConfirmed" :size="18" :stroke-width="1.5" class="ua-checkbox-icon ua-checkbox-icon--checked" />
+              <Square v-else :size="18" :stroke-width="1.5" class="ua-checkbox-icon" />
+              <span class="text-small">I confirm this external vendor has signed the required data transfer agreement.</span>
+            </div>
+            <p v-if="userAdminForm.role === 'Administrator'" class="text-small ua-role-note">Administrators have full access to all Client Portal features, including PHI — permissions below don't apply.</p>
+            <template v-else>
+              <p v-if="userAdminInternalRoles.includes(userAdminForm.role)" class="text-small ua-role-note">Liviniti internal role — set the specific portal permissions this person needs below; internal role assignment itself doesn't imply any particular permission set.</p>
+              <h5 class="ua-subsection-heading">Permissions</h5>
+              <div class="ua-permission-grid">
+                <div v-for="perm in userAdminPermissionOptions" :key="perm.key" class="ua-checkbox-toggle" @click="userAdminForm.permissions[perm.key] = !userAdminForm.permissions[perm.key]">
+                  <CheckSquare v-if="userAdminForm.permissions[perm.key]" :size="18" :stroke-width="1.5" class="ua-checkbox-icon ua-checkbox-icon--checked" />
+                  <Square v-else :size="18" :stroke-width="1.5" class="ua-checkbox-icon" />
+                  <span class="text-small">{{ perm.label }}</span>
+                </div>
+              </div>
+              <div class="ua-checkbox-toggle" @click="userAdminForm.allowPhi = !userAdminForm.allowPhi">
+                <CheckSquare v-if="userAdminForm.allowPhi" :size="18" :stroke-width="1.5" class="ua-checkbox-icon ua-checkbox-icon--checked" />
+                <Square v-else :size="18" :stroke-width="1.5" class="ua-checkbox-icon" />
+                <span class="text-small">Allow PHI access</span>
+              </div>
+            </template>
+            <div class="ua-checkbox-toggle mt-2" @click="userAdminForm.mainPoc = !userAdminForm.mainPoc">
+              <CheckSquare v-if="userAdminForm.mainPoc" :size="18" :stroke-width="1.5" class="ua-checkbox-icon ua-checkbox-icon--checked" />
+              <Square v-else :size="18" :stroke-width="1.5" class="ua-checkbox-icon" />
+              <span class="text-small">Main Point of Contact</span>
+            </div>
+            <div class="ua-checkbox-toggle" @click="userAdminForm.surveyContact = !userAdminForm.surveyContact">
+              <CheckSquare v-if="userAdminForm.surveyContact" :size="18" :stroke-width="1.5" class="ua-checkbox-icon ua-checkbox-icon--checked" />
+              <Square v-else :size="18" :stroke-width="1.5" class="ua-checkbox-icon" />
+              <span class="text-small">Survey Contact</span>
+            </div>
+          </Dialog>
         </div>
         <div v-if="selectedAccount && activeTab === 'caa-drug-cost-reporting'">
           <div class="caa-settings">
             <h3 class="text-h3">Consolidated Appropriations Act Reporting</h3>
+            <Banner
+              v-if="!canEditCaaDrugCostReporting"
+              variant="warning"
+              message="The deadline to edit CAA Drug Cost Reporting has passed. This tab is now read-only."
+              :always-show="true"
+              class="mb-3"
+            />
 
             <!-- Widget 1: Reporting Option -->
             <div class="ap-section">
               <div class="ap-section-header ap-section-header--space-between">
                 <h4 class="text-h4">Reporting Option</h4>
-                <Button v-if="!isEditingCaaOption" @click="isEditingCaaOption = true" label="Edit" variant="thirtiary" />
+                <Button v-if="!isEditingCaaOption && canEditCaaDrugCostReporting" @click="isEditingCaaOption = true" label="Edit" variant="thirtiary" />
               </div>
               <template v-if="!isEditingCaaOption">
                 <div v-if="caaOptionSelected" class="ap-fields">
@@ -186,7 +393,7 @@
             <div class="ap-section">
               <div class="ap-section-header ap-section-header--space-between">
                 <h4 class="text-h4">Benefit Details</h4>
-                <Button v-if="!isEditingBenefitDetails" @click="isEditingBenefitDetails = true" label="Edit" variant="thirtiary" />
+                <Button v-if="!isEditingBenefitDetails && canEditCaaDrugCostReporting" @click="isEditingBenefitDetails = true" label="Edit" variant="thirtiary" />
               </div>
               <template v-if="!isEditingBenefitDetails">
                 <div class="ap-fields">
@@ -305,7 +512,7 @@
             <div class="ap-section">
               <div class="ap-section-header ap-section-header--space-between">
                 <h4 class="text-h4">Plan Sponsor Details</h4>
-                <Button v-if="!isEditingPlanSponsor" @click="isEditingPlanSponsor = true" label="Edit" variant="thirtiary" />
+                <Button v-if="!isEditingPlanSponsor && canEditCaaDrugCostReporting" @click="isEditingPlanSponsor = true" label="Edit" variant="thirtiary" />
               </div>
               <template v-if="!isEditingPlanSponsor">
                 <div class="ap-fields">
@@ -340,6 +547,9 @@
                     label="Plan Sponsor EIN"
                     :model-value="editableCaaData.planSponsorEin"
                     @update:model-value="updateCaaField('planSponsorEin', $event)"
+                    :error-messages="caaEinErrors.planSponsorEin"
+                    hint="9 digits per EIN; separate multiple with a semicolon"
+                    persistent-hint
                   />
                   <TextField
                     label="TPA name"
@@ -350,6 +560,9 @@
                     label="TPA EIN"
                     :model-value="editableCaaData.tpaEin"
                     @update:model-value="updateCaaField('tpaEin', $event)"
+                    :error-messages="caaEinErrors.tpaEin"
+                    hint="9 digits per EIN; separate multiple with a semicolon"
+                    persistent-hint
                   />
                 </div>
                 <div class="ap-section-footer">
@@ -457,275 +670,352 @@
           </div>
         </div>
         <div v-if="selectedAccount && activeTab === 'caa-gag-clause-attestation'">
-          <div class="tab-header">
-            <div class="heading-and-button-wrapper">
-              <h3 class="text-h3">CAA Gag Clause Prohibition Compliance Attestation</h3>
-              <Button v-if="!isEditingGagClause" @click="isEditingGagClause = true" label="Edit" variant="thirtiary" />
+          <div class="caa-settings">
+            <h3 class="text-h3">CAA Gag Clause Prohibition Compliance Attestation</h3>
+            <Banner
+              v-if="!canEditGagClauseAttestation"
+              variant="warning"
+              message="The deadline to edit the CAA Gag Clause Attestation has passed. This tab is now read-only."
+              :always-show="true"
+              class="mb-3"
+            />
+
+            <!-- Widget 1: Authorization -->
+            <div class="ap-section">
+              <div class="ap-section-header ap-section-header--space-between">
+                <h4 class="text-h4">Authorization</h4>
+                <Button v-if="!isEditingGagAuthorization && canEditGagClauseAttestation" @click="isEditingGagAuthorization = true" label="Edit" variant="thirtiary" />
+              </div>
+              <template v-if="!isEditingGagAuthorization">
+                <div class="ap-fields">
+                  <div class="ap-field-row ap-field-row--multi">
+                    <div class="ap-field">
+                      <span class="ap-field-label">Do you want Liviniti to submit a Gag Attestation on your behalf?</span>
+                      <span class="ap-field-value">{{ editableGagClauseData.authorize === 'yes' ? 'Yes' : 'No' }}</span>
+                    </div>
+                  </div>
+                  <div v-if="editableGagClauseData.authorize === 'yes'" class="ap-field-row ap-field-row--multi">
+                    <div class="ap-field">
+                      <span class="ap-field-label">Fee of $250 per reporting period</span>
+                      <span class="ap-field-value">Acknowledged: {{ editableGagClauseData.gagFeeAcknowledged ? 'Yes' : 'No' }}</span>
+                    </div>
+                  </div>
+                </div>
+              </template>
+              <template v-else>
+                <div class="ap-fields">
+                  <div class="caa-option-section">
+                    <p>Do you want Liviniti to submit a Gag Attestation on your behalf?</p>
+                  </div>
+                  <v-item-group v-model="editableGagClauseData.authorize" mandatory class="mt-small">
+                    <div class="form-row">
+                      <v-item v-slot="{ isSelected, toggle }" value="yes">
+                        <v-btn :color="isSelected ? 'primary' : ''" @click="toggle">Yes</v-btn>
+                      </v-item>
+                      <v-item v-slot="{ isSelected, toggle }" value="no">
+                        <v-btn :color="isSelected ? 'primary' : ''" @click="toggle">No</v-btn>
+                      </v-item>
+                    </div>
+                  </v-item-group>
+                  <div v-if="editableGagClauseData.authorize === 'yes'" class="caa-fee-ack">
+                    <p class="caa-fee-ack__notice">You acknowledge that a fee of $250 will be charged per reporting period.</p>
+                    <label class="caa-checkbox-label">
+                      <input
+                        type="checkbox"
+                        v-model="editableGagClauseData.gagFeeAcknowledged"
+                      />
+                      I Accept
+                    </label>
+                  </div>
+                  <div class="ap-section-footer">
+                    <Button variant="primary" label="Save Changes" @click="saveGagAuthorizationChanges" />
+                    <Button variant="secondary" label="Cancel" @click="cancelGagAuthorizationChanges" />
+                  </div>
+                </div>
+              </template>
             </div>
-          </div>
-          <div class="CAA-config">
-            <v-form>
-              <div class="form-row">
-                <div>
-                  <p>Do you authorize Liviniti to submit the CAA Gag Clause Prohibition Compliance Attestation on your behalf?</p>
-                  <p class="disclaimer">By selecting Yes, you authorize Liviniti to submit the CAA Gag Clause Prohibition Compliance Attestation on your behalf, for a charge of $250, for this calendar year.</p>
-                </div>
-              </div>
-              <v-item-group v-model="editableGagClauseData.authorize" mandatory class="mt-small">
-                <div class="form-row">
-                  <v-item v-slot="{ isSelected, toggle }" value="yes">
-                    <v-btn :color="isSelected ? 'primary' : ''" @click="toggle">Yes</v-btn>
-                  </v-item>
-                  <v-item v-slot="{ isSelected, toggle }" value="no">
-                    <v-btn :color="isSelected ? 'primary' : ''" @click="toggle">No</v-btn>
-                  </v-item>
-                </div>
-              </v-item-group>
-              <div class="reporting-period">
+
+            <!-- Widget 2: Reporting Period -->
+            <div v-if="editableGagClauseData.authorize === 'yes'" class="ap-section">
+              <div class="ap-section-header ap-section-header--space-between">
                 <h4 class="text-h4">Reporting Period</h4>
-                <div class="form-row reporting-period-row">
-                  <Select
-                    label="Select period"
-                    :items="periodOptions"
-                    v-model="editableGagClauseData.reportingPeriod"
-                    :readonly="!isEditingGagClause"
-                    @update:model-value="updateGagClauseField('reportingPeriod', $event)"
-                  />
-                  <DatePicker
-                    label="Eff. start date - Starting coverage"
-                    v-model="editableGagClauseData.effectiveStartDate"
-                    :readonly="!isEditingGagClause"
-                    @update:model-value="updateGagClauseField('effectiveStartDate', $event)"
-                  />
-                  <DatePicker
-                    label="Eff. end date - Starting coverage"
-                    v-model="editableGagClauseData.effectiveEndDate"
-                    :readonly="!isEditingGagClause"
-                    @update:model-value="updateGagClauseField('effectiveEndDate', $event)"
-                  />
-                </div>
+                <Button v-if="!isEditingGagReportingPeriod && canEditGagClauseAttestation" @click="isEditingGagReportingPeriod = true" label="Edit" variant="thirtiary" />
               </div>
-              <div class="report-entity-details">
+              <template v-if="!isEditingGagReportingPeriod">
+                <div class="ap-fields">
+                  <div class="ap-field-row ap-field-row--multi">
+                    <div class="ap-field">
+                      <span class="ap-field-label">Reporting period</span>
+                      <span class="ap-field-value">{{ periodOptions.find(p => p.value === editableGagClauseData.reportingPeriod)?.title || '—' }}</span>
+                    </div>
+                    <div class="ap-field">
+                      <span class="ap-field-label">Eff. start date</span>
+                      <span class="ap-field-value">{{ editableGagClauseData.effectiveStartDate || '—' }}</span>
+                    </div>
+                    <div class="ap-field">
+                      <span class="ap-field-label">Eff. end date</span>
+                      <span class="ap-field-value">{{ editableGagClauseData.effectiveEndDate || '—' }}</span>
+                    </div>
+                  </div>
+                </div>
+              </template>
+              <template v-else>
+                <div class="form-row">
+                  <Select label="Select period" :items="periodOptions" v-model="editableGagClauseData.reportingPeriod" />
+                  <DatePicker label="Eff. start date" v-model="editableGagClauseData.effectiveStartDate" />
+                  <DatePicker label="Eff. end date" v-model="editableGagClauseData.effectiveEndDate" />
+                </div>
+                <div class="ap-section-footer">
+                  <Button variant="primary" label="Save Changes" @click="saveGagReportingPeriodChanges" />
+                  <Button variant="secondary" label="Cancel" @click="cancelGagReportingPeriodChanges" />
+                </div>
+              </template>
+            </div>
+
+            <!-- Widget 3: Reporting Entity Details (Details + Mailing Address + Primary Contact) -->
+            <div v-if="editableGagClauseData.authorize === 'yes'" class="ap-section">
+              <div class="ap-section-header ap-section-header--space-between">
                 <h4 class="text-h4">Reporting Entity Details</h4>
+                <Button v-if="!isEditingGagEntityDetails && canEditGagClauseAttestation" @click="isEditingGagEntityDetails = true" label="Edit" variant="thirtiary" />
+              </div>
+              <template v-if="!isEditingGagEntityDetails">
+                <div class="ap-fields">
+                  <div class="ap-field-row ap-field-row--multi">
+                    <div class="ap-field">
+                      <span class="ap-field-label">Reporting entity type</span>
+                      <span class="ap-field-value">{{ editableGagClauseData.reportingEntityType || '—' }}</span>
+                    </div>
+                    <div class="ap-field">
+                      <span class="ap-field-label">Report entity name</span>
+                      <span class="ap-field-value">{{ editableGagClauseData.reportingEntityName || '—' }}</span>
+                    </div>
+                    <div class="ap-field">
+                      <span class="ap-field-label">Employer identification number (EIN)</span>
+                      <span class="ap-field-value">{{ editableGagClauseData.reportingEntityEin || '—' }}</span>
+                    </div>
+                  </div>
+                  <div class="ap-field-row ap-field-row--multi">
+                    <div class="ap-field">
+                      <span class="ap-field-label">Attestation agreement</span>
+                      <span class="ap-field-value">{{ editableGagClauseData.attestationAgreement || '—' }}</span>
+                    </div>
+                    <div class="ap-field">
+                      <span class="ap-field-label">Agreement types</span>
+                      <span class="ap-field-value">{{ editableGagClauseData.agreementTypes || '—' }}</span>
+                    </div>
+                  </div>
+                  <h5 class="ap-subsection-heading">Mailing Address</h5>
+                  <div class="ap-field-row">
+                    <div class="ap-field">
+                      <span class="ap-field-label">Address 1</span>
+                      <span class="ap-field-value">{{ editableGagClauseData.mailingAddress1 || '—' }}</span>
+                    </div>
+                  </div>
+                  <div class="ap-field-row">
+                    <div class="ap-field">
+                      <span class="ap-field-label">Address 2</span>
+                      <span class="ap-field-value">{{ editableGagClauseData.mailingAddress2 || '—' }}</span>
+                    </div>
+                  </div>
+                  <div class="ap-field-row ap-field-row--multi ap-field-row--thirds">
+                    <div class="ap-field">
+                      <span class="ap-field-label">City</span>
+                      <span class="ap-field-value">{{ editableGagClauseData.city || '—' }}</span>
+                    </div>
+                    <div class="ap-field">
+                      <span class="ap-field-label">State</span>
+                      <span class="ap-field-value">{{ editableGagClauseData.mailingState || '—' }}</span>
+                    </div>
+                    <div class="ap-field">
+                      <span class="ap-field-label">ZIP</span>
+                      <span class="ap-field-value">{{ editableGagClauseData.zipCode || '—' }}</span>
+                    </div>
+                  </div>
+                  <h5 class="ap-subsection-heading">Primary Contact</h5>
+                  <div class="ap-field-row ap-field-row--multi">
+                    <div class="ap-field">
+                      <span class="ap-field-label">First name</span>
+                      <span class="ap-field-value">{{ editableGagClauseData.contactFirstName || '—' }}</span>
+                    </div>
+                    <div class="ap-field">
+                      <span class="ap-field-label">Last name</span>
+                      <span class="ap-field-value">{{ editableGagClauseData.contactLastName || '—' }}</span>
+                    </div>
+                  </div>
+                  <div class="ap-field-row ap-field-row--multi">
+                    <div class="ap-field">
+                      <span class="ap-field-label">Email</span>
+                      <span class="ap-field-value">{{ editableGagClauseData.contactEmail || '—' }}</span>
+                    </div>
+                    <div class="ap-field">
+                      <span class="ap-field-label">Phone number</span>
+                      <span class="ap-field-value">{{ editableGagClauseData.contactPhoneNumber || '—' }}</span>
+                    </div>
+                  </div>
+                </div>
+              </template>
+              <template v-else>
                 <div class="form-row">
+                  <TextField v-model="editableGagClauseData.reportingEntityType" label="Reporting entity type" />
+                  <TextField v-model="editableGagClauseData.reportingEntityName" label="Report entity name" />
                   <TextField
-                    label="Reporting entitiy type"
-                    :model-value="editableGagClauseData.reportingEntityType"
-                    :readonly="!isEditingGagClause"
-                    @update:model-value="updateGagClauseField('reportingEntityType', $event)"
-                  />
-                  <TextField
-                    label="Report entity name"
-                    :model-value="editableGagClauseData.reportingEntityName"
-                    :readonly="!isEditingGagClause"
-                    @update:model-value="updateGagClauseField('reportingEntityName', $event)"
-                  />
-                  <TextField
+                    v-model="editableGagClauseData.reportingEntityEin"
                     label="Employer identification number (EIN)"
-                    :model-value="editableGagClauseData.reportingEntityEin"
-                    :readonly="!isEditingGagClause"
-                    @update:model-value="updateGagClauseField('reportingEntityEin', $event)"
+                    :error-messages="gagClauseEinError"
+                    hint="9 digits per EIN; separate multiple with a semicolon"
+                    persistent-hint
                   />
                 </div>
                 <div class="form-row">
-                  <Select
-                    label="Attestation agreement"
-                    :items="attestationAgreements"
-                    v-model="editableGagClauseData.attestationAgreement"
-                    :readonly="!isEditingGagClause"
-                    @update:model-value="updateGagClauseField('attestationAgreement', $event)"
-                  />
-                  <Select
-                    label="Agreement types"
-                    :items="agreementTypes"
-                    v-model="editableGagClauseData.agreementTypes"
-                    :readonly="!isEditingGagClause"
-                    @update:model-value="updateGagClauseField('agreementTypes', $event)"
-                  />
+                  <Select label="Attestation agreement" :items="attestationAgreements" v-model="editableGagClauseData.attestationAgreement" />
+                  <Select label="Agreement types" :items="agreementTypes" v-model="editableGagClauseData.agreementTypes" />
                 </div>
-              </div>
-              <div class="reporting-entity-mailing-address">
-                <h4 class="text-h4">Reporting Entity Mailing Address</h4>
+                <h5 class="ap-subsection-heading">Mailing Address</h5>
                 <div class="form-row">
-                  <TextField
-                    label="Reporting entity mailing address 1"
-                    :model-value="editableGagClauseData.mailingAddress1"
-                    :readonly="!isEditingGagClause"
-                    @update:model-value="updateGagClauseField('mailingAddress1', $event)"
-                  />
-                  <TextField
-                    label="Reporting entity mailing address 2"
-                    :model-value="editableGagClauseData.mailingAddress2"
-                    :readonly="!isEditingGagClause"
-                    @update:model-value="updateGagClauseField('mailingAddress2', $event)"
-                  />
+                  <TextField v-model="editableGagClauseData.mailingAddress1" label="Address 1" />
                 </div>
                 <div class="form-row">
-                  <TextField
-                    label="City"
-                    :model-value="editableGagClauseData.city"
-                    :readonly="!isEditingGagClause"
-                    @update:model-value="updateGagClauseField('city', $event)"
-                  />
-                  <Select
-                    label="State"
-                    :items="states"
-                    v-model="editableGagClauseData.mailingState"
-                    :readonly="!isEditingGagClause"
-                    @update:model-value="updateGagClauseField('mailingState', $event)"
-                  />
-                  <TextField
-                    label="Zip code"
-                    :model-value="editableGagClauseData.zipCode"
-                    :readonly="!isEditingGagClause"
-                    @update:model-value="updateGagClauseField('zipCode', $event)"
-                  />
-                </div>
-              </div>
-              <div class="reporting-primary-contacts">
-                <h4 class="text-h4">Reporting Primary Contact</h4>
-                <div class="form-row">
-                  <TextField
-                    label="First name"
-                    :model-value="editableGagClauseData.contactFirstName"
-                    :readonly="!isEditingGagClause"
-                    @update:model-value="updateGagClauseField('contactFirstName', $event)"
-                  />
-                  <TextField
-                    label="Last name"
-                    :model-value="editableGagClauseData.contactLastName"
-                    :readonly="!isEditingGagClause"
-                    @update:model-value="updateGagClauseField('contactLastName', $event)"
-                  />
+                  <TextField v-model="editableGagClauseData.mailingAddress2" label="Address 2" />
                 </div>
                 <div class="form-row">
-                  <TextField
-                    label="Email"
-                    :model-value="editableGagClauseData.contactEmail"
-                    :readonly="!isEditingGagClause"
-                    @update:model-value="updateGagClauseField('contactEmail', $event)"
-                  />
-                  <TextField
-                    label="Phone number"
-                    :model-value="editableGagClauseData.contactPhoneNumber"
-                    :readonly="!isEditingGagClause"
-                    @update:model-value="updateGagClauseField('contactPhoneNumber', $event)"
-                  />
+                  <TextField v-model="editableGagClauseData.city" label="City" />
+                  <Select label="State" :items="states" v-model="editableGagClauseData.mailingState" />
+                  <TextField v-model="editableGagClauseData.zipCode" label="ZIP" />
                 </div>
-              </div>
-              <div class="billing-contact">
+                <h5 class="ap-subsection-heading">Primary Contact</h5>
+                <div class="form-row">
+                  <TextField v-model="editableGagClauseData.contactFirstName" label="First name" />
+                  <TextField v-model="editableGagClauseData.contactLastName" label="Last name" />
+                </div>
+                <div class="form-row">
+                  <TextField v-model="editableGagClauseData.contactEmail" label="Email" />
+                  <TextField v-model="editableGagClauseData.contactPhoneNumber" label="Phone number" />
+                </div>
+                <div class="ap-section-footer">
+                  <Button variant="primary" label="Save Changes" @click="saveGagEntityDetailsChanges" />
+                  <Button variant="secondary" label="Cancel" @click="cancelGagEntityDetailsChanges" />
+                </div>
+              </template>
+            </div>
+
+            <!-- Widget 4: Billing Contact -->
+            <div v-if="editableGagClauseData.authorize === 'yes'" class="ap-section">
+              <div class="ap-section-header ap-section-header--space-between">
                 <h4 class="text-h4">Billing Contact</h4>
-                <div class="form-row">
-                  <TextField
-                    label="Organization"
-                    :model-value="editableGagClauseData.billingOrganization"
-                    :readonly="!isEditingGagClause"
-                    @update:model-value="updateGagClauseField('billingOrganization', $event)"
-                  />
-                  <TextField
-                    label="First name"
-                    :model-value="editableGagClauseData.billingFirstName"
-                    :readonly="!isEditingGagClause"
-                    @update:model-value="updateGagClauseField('billingFirstName', $event)"
-                  />
-                  <TextField
-                    label="Last name"
-                    :model-value="editableGagClauseData.billingLastName"
-                    :readonly="!isEditingGagClause"
-                    @update:model-value="updateGagClauseField('billingLastName', $event)"
-                  />
-                </div>
-                <div class="form-row">
-                  <TextField
-                    label="Email"
-                    :model-value="editableGagClauseData.billingEmail"
-                    :readonly="!isEditingGagClause"
-                    @update:model-value="updateGagClauseField('billingEmail', $event)"
-                  />
-                  <TextField
-                    label="Phone number"
-                    :model-value="editableGagClauseData.billingPhoneNumber"
-                    :readonly="!isEditingGagClause"
-                    @update:model-value="updateGagClauseField('billingPhoneNumber', $event)"
-                  />
-                </div>
+                <Button v-if="!isEditingGagBillingContact && canEditGagClauseAttestation" @click="isEditingGagBillingContact = true" label="Edit" variant="thirtiary" />
               </div>
-              <div class="disclaimer-box">
-                <p>In connection with this service provided by Liviniti to Client, Client hereby acknowledges and affirms its agreements/obligations, including the following:</p>
-                <ul>
-                  <li>Client shall timely pay Liviniti two-hundred and fifty dollars ($250) for submitting the Federal Gag Clause Prohibition Compliance Attestation on Client's behalf.</li>
-                  <li>Client shall indemnify and hold harmless Liviniti for any and all damages resulting directly or indirectly from the following:</li>
+              <template v-if="!isEditingGagBillingContact">
+                <div class="ap-fields">
+                  <div class="ap-field-row ap-field-row--multi">
+                    <div class="ap-field">
+                      <span class="ap-field-label">Organization</span>
+                      <span class="ap-field-value">{{ editableGagClauseData.billingOrganization || '—' }}</span>
+                    </div>
+                    <div class="ap-field">
+                      <span class="ap-field-label">First name</span>
+                      <span class="ap-field-value">{{ editableGagClauseData.billingFirstName || '—' }}</span>
+                    </div>
+                    <div class="ap-field">
+                      <span class="ap-field-label">Last name</span>
+                      <span class="ap-field-value">{{ editableGagClauseData.billingLastName || '—' }}</span>
+                    </div>
+                  </div>
+                  <div class="ap-field-row ap-field-row--multi">
+                    <div class="ap-field">
+                      <span class="ap-field-label">Email</span>
+                      <span class="ap-field-value">{{ editableGagClauseData.billingEmail || '—' }}</span>
+                    </div>
+                    <div class="ap-field">
+                      <span class="ap-field-label">Phone number</span>
+                      <span class="ap-field-value">{{ editableGagClauseData.billingPhoneNumber || '—' }}</span>
+                    </div>
+                  </div>
+                </div>
+              </template>
+              <template v-else>
+                <div class="form-row">
+                  <TextField v-model="editableGagClauseData.billingOrganization" label="Organization" />
+                  <TextField v-model="editableGagClauseData.billingFirstName" label="First name" />
+                  <TextField v-model="editableGagClauseData.billingLastName" label="Last name" />
+                </div>
+                <div class="form-row">
+                  <TextField v-model="editableGagClauseData.billingEmail" label="Email" />
+                  <TextField v-model="editableGagClauseData.billingPhoneNumber" label="Phone number" />
+                </div>
+                <div class="ap-section-footer">
+                  <Button variant="primary" label="Save Changes" @click="saveGagBillingContactChanges" />
+                  <Button variant="secondary" label="Cancel" @click="cancelGagBillingContactChanges" />
+                </div>
+              </template>
+            </div>
+
+            <!-- Widget 5: Acknowledgement and Signature -->
+            <div class="ap-section">
+              <div class="ap-section-header ap-section-header--space-between">
+                <h4 class="text-h4">Acknowledgement and Signature</h4>
+                <Button v-if="!isEditingGagAcknowledgement && canEditGagClauseAttestation" @click="isEditingGagAcknowledgement = true" label="Edit" variant="thirtiary" />
+              </div>
+              <template v-if="!isEditingGagAcknowledgement">
+                <div class="ap-fields">
+                  <div v-if="editableGagClauseData.authorize === 'yes'" class="ap-field-row ap-field-row--multi">
+                    <div class="ap-field">
+                      <span class="ap-field-label">Legal terms</span>
+                      <span class="ap-field-value">Acknowledged: {{ editableGagClauseData.gagAuthorityAcknowledged ? 'Yes' : 'No' }}</span>
+                    </div>
+                  </div>
+                  <div class="ap-field-row">
+                    <div class="ap-field">
+                      <span class="ap-field-label">e-Signature</span>
+                      <span class="ap-field-value">{{ editableGagClauseData.eSignature || '—' }}</span>
+                    </div>
+                  </div>
+                </div>
+              </template>
+              <template v-else>
+                <div v-if="editableGagClauseData.authorize === 'yes'" class="caa-legal-text">
+                  <p>In connection with this service provided by Liviniti to Client, Client hereby acknowledges and affirms its agreements/obligations, including the following:</p>
                   <ul>
-                    <li>Fees, penalties, costs, fines, assessed by CMS and/or the federal government related to the submission of the Federal Gag Clause Prohibition Compliance Attestation that are attributed to Client's actions.</li>
-                    <li>Damages related to inaccurate or incomplete information provided by Client to Liviniti.</li>
-                    <li>Damages related to a late or incomplete submission that is caused by Client.</li>
-                    <li>Damages related to any action taken by Liviniti at the direction of Client.</li>
-                    <li>Any other costs or expenses associated with these services.</li>
+                    <li>Client shall timely pay Liviniti two-hundred and fifty dollars ($250) for submitting the Federal Gag Clause Prohibition Compliance Attestation on Client's behalf.</li>
+                    <li>Client shall indemnify and hold harmless Liviniti for any and all damages resulting directly or indirectly from the following:
+                      <ul>
+                        <li>Fees, penalties, costs, fines, assessed by CMS and/or the federal government related to the submission of the Federal Gag Clause Prohibition Compliance Attestation that are attributed to Client's actions.</li>
+                        <li>Damages related to inaccurate or incomplete information provided by Client to Liviniti.</li>
+                        <li>Damages related to a late or incomplete submission that is caused by Client.</li>
+                        <li>Damages related to any action taken by Liviniti at the direction of Client.</li>
+                        <li>Any other costs or expenses associated with these services.</li>
+                      </ul>
+                    </li>
                   </ul>
-                </ul>
-              </div>
-              <div class="electronic-signature">
-                <h4 class="text-h4">Electronic Signature</h4>
+                  <p>Client hereby acknowledges its understanding and agreement of the above.</p>
+                  <label class="caa-checkbox-label">
+                    <input
+                      type="checkbox"
+                      v-model="editableGagClauseData.gagAuthorityAcknowledged"
+                    />
+                    I acknowledge my understanding and agreement of the above.
+                  </label>
+                </div>
                 <Banner
                   variant="info"
                   message="Each individual signing this form represents and warrants that he/she is signing with full and complete authority to bind the party on whose behalf he/she is signing with respect to the matters contained herein."
+                  class="mb-3"
                 />
-                <TextField
-                  label="e-Signature"
-                  :model-value="editableGagClauseData.eSignature"
-                  :readonly="!isEditingGagClause"
-                  @update:model-value="updateGagClauseField('eSignature', $event)"
-                />
-              </div>
-              <div v-if="isEditingGagClause" class="form-actions">
-                <v-btn :disabled="!isGagClauseChanged" color="primary" @click="saveGagClauseChanges">Save</v-btn>
-                <v-btn variant="text" @click="cancelGagClauseChanges">Cancel</v-btn>
-              </div>
-            </v-form>
+                <div class="form-row">
+                  <TextField v-model="editableGagClauseData.eSignature" label="e-Signature" />
+                </div>
+                <div class="ap-section-footer">
+                  <Button variant="primary" label="Save Changes" @click="saveGagAcknowledgementChanges" />
+                  <Button variant="secondary" label="Cancel" @click="cancelGagAcknowledgementChanges" />
+                </div>
+              </template>
+            </div>
           </div>
-        </div>
-        <div v-if="selectedAccount && activeTab === 'claim-edit-rules'">
-          <ReportDataTable
-            :headers="claimEditRulesHeaders"
-            :items="claimEditRulesData"
-            :show-search-bar="true"
-            :show-filter-button="false"
-            search-placeholder="Search rules"
-            :show-row-actions="true"
-            :show-table-footer="true"
-            :show-selection-checkboxes="false"
-          >
-            <template v-slot:item.ruleChangeLog="{ item }">
-              <span class="link" @click="openChangeLogDialog(item)">View Log</span>
-            </template>
-          </ReportDataTable>
         </div>
       </div>
     </AccountSelector>
     <v-snackbar v-model="showSnackbar" :timeout="3000" color="success">
       Settings saved successfully!
     </v-snackbar>
-
-    <Dialog
-      :model-value="showChangeLogDialog"
-      @update:model-value="showChangeLogDialog = $event"
-      heading="Change Log Details"
-      :actions="[
-        { text: 'Cancel', onClick: () => showChangeLogDialog = false, styleType: 'secondary' },
-        { text: 'Done', onClick: () => showChangeLogDialog = false, styleType: 'primary' }
-      ]"
-      :show-secondary-button="false"
-    >
-      <ReportDataTable
-        :headers="changeLogTableHeaders"
-        :items="currentChangeLogData"
-        :show-search-bar="false"
-        :show-filter-button="false"
-        :show-row-actions="false"
-        :show-table-footer="false"
-        :show-selection-checkboxes="false"
-      />
-    </Dialog>
   </div>
 </template>
 
@@ -739,7 +1029,7 @@ import DatePicker from '@/components/ui/DatePicker.vue';
 import Select from '@/components/ui/Select.vue';
 import Button from '@/components/ui/Button.vue';
 import Banner from '@/components/common/Banner.vue';
-import { ChevronDown } from 'lucide-vue-next';
+import { ChevronDown, CheckSquare, Square } from 'lucide-vue-next';
 import Dialog from '@/components/ui/Dialog.vue';
 import { ref, computed, watch } from 'vue';
 
@@ -756,7 +1046,28 @@ const selectedAccount = ref<number | null>(null);
 interface CompanyData {
   companyName: string;
   dba: string;
-  notificationThreshold: string;
+  // Removed 2026-08-07: notificationThreshold (High Cost Notification Settings) — this
+  // is Solo2-owned and already editable via Plan Explorer > Limits & Controls; the
+  // Settings tab should not have a second, separate editable copy of it.
+  // Account Profile / About This Company — mirrors Plan Explorer's Account Profile
+  // step (PlanExplorerPage.vue). "ap" prefix avoids colliding with the Gag Clause
+  // fields below, which have their own effectiveStartDate/mailingAddress1/etc.
+  apLegalName: string;
+  apEffectiveStartDate: string;
+  apEffectiveEndDate: string;
+  apSicCode: string;
+  apPhysicalAddress1: string;
+  apPhysicalAddress2: string;
+  apPhysicalCity: string;
+  apPhysicalState: string;
+  apPhysicalZip: string;
+  apPhysicalCountry: string;
+  apMailingAddress1: string;
+  apMailingAddress2: string;
+  apMailingCity: string;
+  apMailingState: string;
+  apMailingZip: string;
+  apMailingCountry: string;
   groupHealthPlan: string;
   carveOutBenefit: string;
   form5500Plan: string;
@@ -775,13 +1086,16 @@ interface CompanyData {
   option2Acknowledged: boolean;
   legalAcknowledged: boolean;
   authorize: string | null;
+  gagFeeAcknowledged: boolean;
+  gagAuthorityAcknowledged: boolean;
   reportingPeriod: string | null;
   effectiveStartDate: string | null;
   effectiveEndDate: string | null;
   reportingEntityType: string;
   reportingEntityName: string;
   reportingEntityEin: string;
-  attestationAgreement: string;
+  planNumber: string;
+  attestationAgreement: string[];
   agreementTypes: string;
   mailingAddress1: string;
   mailingAddress2: string;
@@ -801,11 +1115,11 @@ interface CompanyData {
 }
 
 const companyData: { [key: number]: CompanyData } = {
-  1: { companyName: 'Company A', dba: 'Company A', notificationThreshold: '15000', planSponsorOptions: 'Option 2 - D3-D8, PBM portion of narrative submitted to CMS on behalf of client, fee applicable', reportingPeriodOccurance: 'Annually', groupHealthPlanName: 'Company A Health Plan', groupHealthPlan: '12345678', carveOutBenefit: 'Pharmacy Only', form5500Plan: '501', states: ['CA', 'NY'], marketSegment: 'SF Large Employer Plans', planYearBeginDate: '01/01/2025', planYearEndDate: '12/31/2025', membersAsOf: '257', option2Acknowledged: true, legalAcknowledged: true, planSponsorLegalName: 'Company A Inc.', planSponsorEin: '12-3456789', tpaName: 'Allied Benefit Solutions', tpaEin: '36879958', authorize: null, reportingPeriod: 'plan-year', effectiveStartDate: '01/01/2025', effectiveEndDate: '12/31/2025', reportingEntityType: 'Plan Sponsor', reportingEntityName: 'Company A Inc.', reportingEntityEin: '12-3456789', attestationAgreement: 'Agreement A', agreementTypes: 'Type 1', mailingAddress1: '10880 Malibu Point', mailingAddress2: '', city: 'Malibu', mailingState: 'CA', zipCode: '90265', contactFirstName: 'Tony', contactLastName: 'Stark', contactEmail: 'tony.stark@companya.com', contactPhoneNumber: '555-123-4567', billingOrganization: 'Company A', billingFirstName: 'Pepper', billingLastName: 'Potts', billingEmail: 'pepper.potts@companya.com', billingPhoneNumber: '555-987-6543', eSignature: 'Tony Stark' },
-  2: { companyName: 'Company B', dba: 'Company B Foundation', notificationThreshold: '25000', planSponsorOptions: 'Option 1 - D3-D8 and PBM portion of narrative posted to Liviniti Client Portal for retrieval', reportingPeriodOccurance: 'Annually', groupHealthPlanName: 'Company B Health Plan', groupHealthPlan: '87654321', carveOutBenefit: 'Pharmacy Only', form5500Plan: '502', states: ['TX', 'FL'], marketSegment: 'SF Large Employer Plans', planYearBeginDate: '07/01/2024', planYearEndDate: '06/30/2025', membersAsOf: '500', option2Acknowledged: false, legalAcknowledged: false, planSponsorLegalName: 'Company B LLC', planSponsorEin: '98-7654321', tpaName: 'Allied Benefit Solutions', tpaEin: '36879958', authorize: null, reportingPeriod: 'benefit-period', effectiveStartDate: '07/01/2024', effectiveEndDate: '09/30/2024', reportingEntityType: 'Plan Sponsor', reportingEntityName: 'Company B LLC', reportingEntityEin: '98-7654321', attestationAgreement: 'Agreement B', agreementTypes: 'Type 2', mailingAddress1: '1007 Mountain Drive', mailingAddress2: '', city: 'Gotham', mailingState: 'NY', zipCode: '10001', contactFirstName: 'Bruce', contactLastName: 'Wayne', contactEmail: 'bruce.wayne@companyb.com', contactPhoneNumber: '555-234-5678', billingOrganization: 'Company B', billingFirstName: 'Alfred', billingLastName: 'Pennyworth', billingEmail: 'alfred.pennyworth@companyb.com', billingPhoneNumber: '555-876-5432', eSignature: 'Bruce Wayne' },
-  3: { companyName: 'Company C', dba: 'Company C', notificationThreshold: '10000', planSponsorOptions: 'Option 1 - D3-D8 and PBM portion of narrative posted to Liviniti Client Portal for retrieval', reportingPeriodOccurance: 'Current Reporting Period', groupHealthPlanName: 'Company C Health Plan', groupHealthPlan: '11223344', carveOutBenefit: 'Specialty Drugs Only', form5500Plan: '503', states: ['IL', 'GA'], marketSegment: 'SF Small Employer Plans', planYearBeginDate: '01/01/2025', planYearEndDate: '12/31/2025', membersAsOf: '100', option2Acknowledged: false, legalAcknowledged: false, planSponsorLegalName: 'Company C Corp.', planSponsorEin: '11-2233445', tpaName: 'Allied Benefit Solutions', tpaEin: '36879958', authorize: null, reportingPeriod: 'plan-year', effectiveStartDate: '01/01/2025', effectiveEndDate: '01/31/2025', reportingEntityType: 'Plan Sponsor', reportingEntityName: 'Company C Corp.', reportingEntityEin: '11-2233445', attestationAgreement: 'Agreement C', agreementTypes: 'Type 3', mailingAddress1: '21440 Chase Dr', mailingAddress2: '', city: 'Fremont', mailingState: 'CA', zipCode: '94539', contactFirstName: 'Miles', contactLastName: 'Dyson', contactEmail: 'miles.dyson@companyc.com', contactPhoneNumber: '555-345-6789', billingOrganization: 'Company C', billingFirstName: 'Sarah', billingLastName: 'Connor', billingEmail: 'sarah.connor@companyc.com', billingPhoneNumber: '555-765-4321', eSignature: 'Miles Dyson' },
-  4: { companyName: 'Company D', dba: 'Company D Industries', notificationThreshold: '20000', planSponsorOptions: 'Option 2 - D3-D8, PBM portion of narrative submitted to CMS on behalf of client, fee applicable', reportingPeriodOccurance: 'Annually', groupHealthPlanName: 'Company D Industries Health Plan', groupHealthPlan: '44332211', carveOutBenefit: 'Fertility Only', form5500Plan: '504', states: ['PA', 'OH'], marketSegment: 'SF Large Employer Plans', planYearBeginDate: '07/01/2024', planYearEndDate: '06/30/2025', membersAsOf: '750', option2Acknowledged: true, legalAcknowledged: true, planSponsorLegalName: 'Company D Industries', planSponsorEin: '44-3322110', tpaName: 'Allied Benefit Solutions', tpaEin: '36879958', authorize: null, reportingPeriod: 'benefit-period', effectiveStartDate: '07/01/2024', effectiveEndDate: '06/30/2025', reportingEntityType: 'Plan Sponsor', reportingEntityName: 'Company D Industries', reportingEntityEin: '44-3322110', attestationAgreement: 'Agreement D', agreementTypes: 'Type 4', mailingAddress1: '200 Park Ave', mailingAddress2: '', city: 'New York', mailingState: 'NY', zipCode: '10166', contactFirstName: 'Norman', contactLastName: 'Osborn', contactEmail: 'norman.osborn@companyd.com', contactPhoneNumber: '555-456-7890', billingOrganization: 'Company D', billingFirstName: 'Harry', billingLastName: 'Osborn', billingEmail: 'harry.osborn@companyd.com', billingPhoneNumber: '555-654-3210', eSignature: 'Norman Osborn' },
-  5: { companyName: 'Company E', dba: 'Company E', notificationThreshold: '30000', planSponsorOptions: '', reportingPeriodOccurance: '', groupHealthPlanName: '', groupHealthPlan: '99887766', carveOutBenefit: 'Pharmacy Only', form5500Plan: '505', states: ['WA', 'OR'], marketSegment: 'SF Large Employer Plans', planYearBeginDate: '01/01/2025', planYearEndDate: '12/31/2025', membersAsOf: '300', option2Acknowledged: false, legalAcknowledged: false, planSponsorLegalName: 'Company E Corporation', planSponsorEin: '99-8877665', tpaName: 'Allied Benefit Solutions', tpaEin: '36879958', authorize: null, reportingPeriod: 'plan-year', effectiveStartDate: '01/01/2025', effectiveEndDate: '03/31/2025', reportingEntityType: 'Plan Sponsor', reportingEntityName: 'Company E Corporation', reportingEntityEin: '99-8877665', attestationAgreement: 'Agreement E', agreementTypes: 'Type 5', mailingAddress1: '1238 W 6th St', mailingAddress2: '', city: 'Los Angeles', mailingState: 'CA', zipCode: '90017', contactFirstName: 'Eldon', contactLastName: 'Tyrell', contactEmail: 'eldon.tyrell@companye.com', contactPhoneNumber: '555-567-8901', billingOrganization: 'Company E', billingFirstName: 'Rachael', billingLastName: 'Tyrell', billingEmail: 'rachael.tyrell@companye.com', billingPhoneNumber: '555-543-2109', eSignature: 'Eldon Tyrell' },
+  1: { companyName: 'Company A', dba: 'Company A', apLegalName: 'Company A Inc.', apEffectiveStartDate: '01/01/2025', apEffectiveEndDate: '', apSicCode: '3812', apPhysicalAddress1: '10880 Malibu Point', apPhysicalAddress2: '', apPhysicalCity: 'Malibu', apPhysicalState: 'CA', apPhysicalZip: '90265', apPhysicalCountry: 'USA', apMailingAddress1: '10880 Malibu Point', apMailingAddress2: '', apMailingCity: 'Malibu', apMailingState: 'CA', apMailingZip: '90265', apMailingCountry: 'USA', planSponsorOptions: 'Option 2 - D3-D8, PBM portion of narrative submitted to CMS on behalf of client, fee applicable', reportingPeriodOccurance: 'Annually', groupHealthPlanName: 'Company A Health Plan', groupHealthPlan: '12345678', carveOutBenefit: 'Pharmacy Only', form5500Plan: '501', states: ['CA', 'NY'], marketSegment: 'SF Large Employer Plans', planYearBeginDate: '01/01/2025', planYearEndDate: '12/31/2025', membersAsOf: '257', option2Acknowledged: true, legalAcknowledged: true, planSponsorLegalName: 'Company A Inc.', planSponsorEin: '123456789', tpaName: 'Allied Benefit Solutions', tpaEin: '368799581', authorize: 'yes', gagFeeAcknowledged: true, gagAuthorityAcknowledged: true, reportingPeriod: 'plan-year', effectiveStartDate: '01/01/2025', effectiveEndDate: '12/31/2025', reportingEntityType: 'ERISA Group Health Plan (GHP)', planNumber: '501', reportingEntityName: 'Company A Inc.', reportingEntityEin: '123456789', attestationAgreement: ['Medical'], agreementTypes: 'Type 1', mailingAddress1: '10880 Malibu Point', mailingAddress2: '', city: 'Malibu', mailingState: 'CA', zipCode: '90265', contactFirstName: 'Tony', contactLastName: 'Stark', contactEmail: 'tony.stark@companya.com', contactPhoneNumber: '555-123-4567', billingOrganization: 'Company A', billingFirstName: 'Pepper', billingLastName: 'Potts', billingEmail: 'pepper.potts@companya.com', billingPhoneNumber: '555-987-6543', eSignature: 'Tony Stark' },
+  2: { companyName: 'Company B', dba: 'Company B Foundation', apLegalName: 'Company B LLC', apEffectiveStartDate: '07/01/2024', apEffectiveEndDate: '', apSicCode: '6311', apPhysicalAddress1: '1007 Mountain Drive', apPhysicalAddress2: '', apPhysicalCity: 'Gotham', apPhysicalState: 'NY', apPhysicalZip: '10001', apPhysicalCountry: 'USA', apMailingAddress1: '1007 Mountain Drive', apMailingAddress2: '', apMailingCity: 'Gotham', apMailingState: 'NY', apMailingZip: '10001', apMailingCountry: 'USA', planSponsorOptions: 'Option 1 - D3-D8 and PBM portion of narrative posted to Liviniti Client Portal for retrieval', reportingPeriodOccurance: 'Annually', groupHealthPlanName: 'Company B Health Plan', groupHealthPlan: '87654321', carveOutBenefit: 'Pharmacy Only', form5500Plan: '502', states: ['TX', 'FL'], marketSegment: 'SF Large Employer Plans', planYearBeginDate: '07/01/2024', planYearEndDate: '06/30/2025', membersAsOf: '500', option2Acknowledged: false, legalAcknowledged: false, planSponsorLegalName: 'Company B LLC', planSponsorEin: '987654321', tpaName: 'Allied Benefit Solutions', tpaEin: '368799581', authorize: 'no', gagFeeAcknowledged: false, gagAuthorityAcknowledged: false, reportingPeriod: 'benefit-period', effectiveStartDate: '07/01/2024', effectiveEndDate: '09/30/2024', reportingEntityType: 'Church plan', planNumber: '', reportingEntityName: 'Company B LLC', reportingEntityEin: '987654321', attestationAgreement: ['Pharmacy Benefits'], agreementTypes: 'Type 2', mailingAddress1: '1007 Mountain Drive', mailingAddress2: '', city: 'Gotham', mailingState: 'NY', zipCode: '10001', contactFirstName: 'Bruce', contactLastName: 'Wayne', contactEmail: 'bruce.wayne@companyb.com', contactPhoneNumber: '555-234-5678', billingOrganization: 'Company B', billingFirstName: 'Alfred', billingLastName: 'Pennyworth', billingEmail: 'alfred.pennyworth@companyb.com', billingPhoneNumber: '555-876-5432', eSignature: 'Bruce Wayne' },
+  3: { companyName: 'Company C', dba: 'Company C', apLegalName: 'Company C Corp.', apEffectiveStartDate: '01/01/2025', apEffectiveEndDate: '', apSicCode: '2836', apPhysicalAddress1: '21440 Chase Dr', apPhysicalAddress2: '', apPhysicalCity: 'Fremont', apPhysicalState: 'CA', apPhysicalZip: '94539', apPhysicalCountry: 'USA', apMailingAddress1: '21440 Chase Dr', apMailingAddress2: '', apMailingCity: 'Fremont', apMailingState: 'CA', apMailingZip: '94539', apMailingCountry: 'USA', planSponsorOptions: 'Option 1 - D3-D8 and PBM portion of narrative posted to Liviniti Client Portal for retrieval', reportingPeriodOccurance: 'Current Reporting Period', groupHealthPlanName: 'Company C Health Plan', groupHealthPlan: '11223344', carveOutBenefit: 'Specialty Drug Only', form5500Plan: '503', states: ['IL', 'GA'], marketSegment: 'Commercial Plans', planYearBeginDate: '01/01/2025', planYearEndDate: '12/31/2025', membersAsOf: '100', option2Acknowledged: false, legalAcknowledged: false, planSponsorLegalName: 'Company C Corp.', planSponsorEin: '112233445', tpaName: 'Allied Benefit Solutions', tpaEin: '368799581', authorize: 'no', gagFeeAcknowledged: false, gagAuthorityAcknowledged: false, reportingPeriod: 'plan-year', effectiveStartDate: '01/01/2025', effectiveEndDate: '01/31/2025', reportingEntityType: '(Non-Federal) Governmental Group Health Plan', planNumber: '', reportingEntityName: 'Company C Corp.', reportingEntityEin: '112233445', attestationAgreement: ['Behavioral Health'], agreementTypes: 'Type 3', mailingAddress1: '21440 Chase Dr', mailingAddress2: '', city: 'Fremont', mailingState: 'CA', zipCode: '94539', contactFirstName: 'Miles', contactLastName: 'Dyson', contactEmail: 'miles.dyson@companyc.com', contactPhoneNumber: '555-345-6789', billingOrganization: 'Company C', billingFirstName: 'Sarah', billingLastName: 'Connor', billingEmail: 'sarah.connor@companyc.com', billingPhoneNumber: '555-765-4321', eSignature: 'Miles Dyson' },
+  4: { companyName: 'Company D', dba: 'Company D Industries', apLegalName: 'Company D Industries', apEffectiveStartDate: '07/01/2024', apEffectiveEndDate: '', apSicCode: '3827', apPhysicalAddress1: '200 Park Ave', apPhysicalAddress2: '', apPhysicalCity: 'New York', apPhysicalState: 'NY', apPhysicalZip: '10166', apPhysicalCountry: 'USA', apMailingAddress1: '200 Park Ave', apMailingAddress2: '', apMailingCity: 'New York', apMailingState: 'NY', apMailingZip: '10166', apMailingCountry: 'USA', planSponsorOptions: 'Option 2 - D3-D8, PBM portion of narrative submitted to CMS on behalf of client, fee applicable', reportingPeriodOccurance: 'Annually', groupHealthPlanName: 'Company D Industries Health Plan', groupHealthPlan: '44332211', carveOutBenefit: 'Fertility Only', form5500Plan: '504', states: ['PA', 'OH'], marketSegment: 'SF Large Employer Plans', planYearBeginDate: '07/01/2024', planYearEndDate: '06/30/2025', membersAsOf: '750', option2Acknowledged: true, legalAcknowledged: true, planSponsorLegalName: 'Company D Industries', planSponsorEin: '443322110', tpaName: 'Allied Benefit Solutions', tpaEin: '368799581', authorize: 'no', gagFeeAcknowledged: false, gagAuthorityAcknowledged: false, reportingPeriod: 'benefit-period', effectiveStartDate: '07/01/2024', effectiveEndDate: '06/30/2025', reportingEntityType: 'ERISA Group Health Plan (GHP)', planNumber: '502', reportingEntityName: 'Company D Industries', reportingEntityEin: '443322110', attestationAgreement: ['Medical', 'Pharmacy Benefits'], agreementTypes: 'Type 4', mailingAddress1: '200 Park Ave', mailingAddress2: '', city: 'New York', mailingState: 'NY', zipCode: '10166', contactFirstName: 'Norman', contactLastName: 'Osborn', contactEmail: 'norman.osborn@companyd.com', contactPhoneNumber: '555-456-7890', billingOrganization: 'Company D', billingFirstName: 'Harry', billingLastName: 'Osborn', billingEmail: 'harry.osborn@companyd.com', billingPhoneNumber: '555-654-3210', eSignature: 'Norman Osborn' },
+  5: { companyName: 'Company E', dba: 'Company E', apLegalName: 'Company E Corporation', apEffectiveStartDate: '01/01/2025', apEffectiveEndDate: '', apSicCode: '8731', apPhysicalAddress1: '1238 W 6th St', apPhysicalAddress2: '', apPhysicalCity: 'Los Angeles', apPhysicalState: 'CA', apPhysicalZip: '90017', apPhysicalCountry: 'USA', apMailingAddress1: '1238 W 6th St', apMailingAddress2: '', apMailingCity: 'Los Angeles', apMailingState: 'CA', apMailingZip: '90017', apMailingCountry: 'USA', planSponsorOptions: '', reportingPeriodOccurance: '', groupHealthPlanName: '', groupHealthPlan: '99887766', carveOutBenefit: 'Pharmacy Only', form5500Plan: '505', states: ['WA', 'OR'], marketSegment: 'SF Large Employer Plans', planYearBeginDate: '01/01/2025', planYearEndDate: '12/31/2025', membersAsOf: '300', option2Acknowledged: false, legalAcknowledged: false, planSponsorLegalName: 'Company E Corporation', planSponsorEin: '998877665', tpaName: 'Allied Benefit Solutions', tpaEin: '368799581', authorize: 'no', gagFeeAcknowledged: false, gagAuthorityAcknowledged: false, reportingPeriod: 'plan-year', effectiveStartDate: '01/01/2025', effectiveEndDate: '03/31/2025', reportingEntityType: 'Church plan', planNumber: '', reportingEntityName: 'Company E Corporation', reportingEntityEin: '998877665', attestationAgreement: ['All'], agreementTypes: 'Type 5', mailingAddress1: '1238 W 6th St', mailingAddress2: '', city: 'Los Angeles', mailingState: 'CA', zipCode: '90017', contactFirstName: 'Eldon', contactLastName: 'Tyrell', contactEmail: 'eldon.tyrell@companye.com', contactPhoneNumber: '555-567-8901', billingOrganization: 'Company E', billingFirstName: 'Rachael', billingLastName: 'Tyrell', billingEmail: 'rachael.tyrell@companye.com', billingPhoneNumber: '555-543-2109', eSignature: 'Eldon Tyrell' },
 };
 
 const selectedAccountData = computed<CompanyData>(() => {
@@ -815,7 +1129,22 @@ const selectedAccountData = computed<CompanyData>(() => {
   return {
     companyName: '',
     dba: '',
-    notificationThreshold: '',
+    apLegalName: '',
+    apEffectiveStartDate: '',
+    apEffectiveEndDate: '',
+    apSicCode: '',
+    apPhysicalAddress1: '',
+    apPhysicalAddress2: '',
+    apPhysicalCity: '',
+    apPhysicalState: '',
+    apPhysicalZip: '',
+    apPhysicalCountry: '',
+    apMailingAddress1: '',
+    apMailingAddress2: '',
+    apMailingCity: '',
+    apMailingState: '',
+    apMailingZip: '',
+    apMailingCountry: '',
     groupHealthPlan: '',
     carveOutBenefit: '',
     form5500Plan: '',
@@ -828,14 +1157,17 @@ const selectedAccountData = computed<CompanyData>(() => {
     planSponsorEin: '',
     tpaName: '',
     tpaEin: '',
-    authorize: null,
+    authorize: 'no',
+    gagFeeAcknowledged: false,
+    gagAuthorityAcknowledged: false,
     reportingPeriod: null,
     effectiveStartDate: null,
     effectiveEndDate: null,
     reportingEntityType: '',
     reportingEntityName: '',
     reportingEntityEin: '',
-    attestationAgreement: '',
+    planNumber: '',
+    attestationAgreement: [],
     agreementTypes: '',
     mailingAddress1: '',
     mailingAddress2: '',
@@ -857,25 +1189,76 @@ const selectedAccountData = computed<CompanyData>(() => {
 
 const showSnackbar = ref(false);
 
-const isEditingCompany = ref(false);
-const isCompanyChanged = ref(false);
+const isEditingAccountProfile = ref(false);
+const isEditingAboutCompany = ref(false);
+const sameAsPhysical = ref(false);
 
 const editableCompanyData = ref<Partial<CompanyData>>({
   companyName: '',
   dba: '',
-  notificationThreshold: '',
+  apLegalName: '',
+  apEffectiveStartDate: '',
+  apEffectiveEndDate: '',
+  apSicCode: '',
+  apPhysicalAddress1: '',
+  apPhysicalAddress2: '',
+  apPhysicalCity: '',
+  apPhysicalState: '',
+  apPhysicalZip: '',
+  apPhysicalCountry: '',
+  apMailingAddress1: '',
+  apMailingAddress2: '',
+  apMailingCity: '',
+  apMailingState: '',
+  apMailingZip: '',
+  apMailingCountry: '',
 });
+
+const toggleSameAsPhysical = () => {
+  sameAsPhysical.value = !sameAsPhysical.value;
+  if (sameAsPhysical.value) {
+    editableCompanyData.value.apMailingAddress1 = editableCompanyData.value.apPhysicalAddress1;
+    editableCompanyData.value.apMailingAddress2 = editableCompanyData.value.apPhysicalAddress2;
+    editableCompanyData.value.apMailingCity = editableCompanyData.value.apPhysicalCity;
+    editableCompanyData.value.apMailingState = editableCompanyData.value.apPhysicalState;
+    editableCompanyData.value.apMailingZip = editableCompanyData.value.apPhysicalZip;
+    editableCompanyData.value.apMailingCountry = editableCompanyData.value.apPhysicalCountry;
+  }
+};
 
 const isEditingCaaOption = ref(false);
 const isEditingBenefitDetails = ref(false);
 const isEditingPlanSponsor = ref(false);
 const isCaaReportingFilesOpen = ref(false);
 
-const isEditingGagClause = ref(false);
-const isGagClauseChanged = ref(false);
+// Editing-deadline lockout, aligned to Master's CAA*LockoutDateInclusive config gate
+// (enforced server-side there; here it's just a UI flag since this prototype has no backend).
+// Defaults to editable — flip to false to preview the locked/read-only state.
+const canEditCaaDrugCostReporting = ref(true);
+const canEditGagClauseAttestation = ref(true);
+
+// Same EIN format rule as Master's settingsFormat.ts einListRule — 9 digits per EIN,
+// multiple EINs separated by a semicolon.
+const einListRule = (value: string | null | undefined, maxLength?: number): string => {
+  if (!value) return '';
+  if (maxLength && value.length > maxLength) return `Must be ${maxLength} characters or fewer`;
+  const segments = value.split(';');
+  const allValid = segments.every(segment => /^\d{9}$/.test(segment));
+  return allValid ? '' : 'Enter each EIN as exactly 9 digits; separate multiple EINs with a semicolon (e.g. 123456789;987654321)';
+};
+const caaEinErrors = ref({ planSponsorEin: '', tpaEin: '' });
+const gagClauseEinError = ref('');
+
+const isEditingGagAuthorization = ref(false);
+const isEditingGagReportingPeriod = ref(false);
+const isEditingGagEntityDetails = ref(false);
+const isEditingGagBillingContact = ref(false);
+const isEditingGagAcknowledgement = ref(false);
 
 const editableGagClauseData = ref<Partial<CompanyData>>({
-  authorize: null,
+  authorize: 'no',
+  gagFeeAcknowledged: false,
+  gagAuthorityAcknowledged: false,
   reportingPeriod: 'plan-year',
   effectiveStartDate: null,
   effectiveEndDate: null,
@@ -900,14 +1283,6 @@ const editableGagClauseData = ref<Partial<CompanyData>>({
   billingPhoneNumber: '',
   eSignature: '',
 });
-
-const showChangeLogDialog = ref(false);
-const currentChangeLogData = ref<any>(null);
-
-const openChangeLogDialog = (item: any) => {
-  currentChangeLogData.value = item.changeLogDetails;
-  showChangeLogDialog.value = true;
-};
 
 const editableCaaData = ref<Partial<CompanyData>>({
   planSponsorOptions: '',
@@ -935,10 +1310,26 @@ watch(selectedAccount, (newVal) => {
     editableCompanyData.value = {
       companyName: companyData[newVal].companyName,
       dba: companyData[newVal].dba,
-      notificationThreshold: companyData[newVal].notificationThreshold,
+      apLegalName: companyData[newVal].apLegalName,
+      apEffectiveStartDate: companyData[newVal].apEffectiveStartDate,
+      apEffectiveEndDate: companyData[newVal].apEffectiveEndDate,
+      apSicCode: companyData[newVal].apSicCode,
+      apPhysicalAddress1: companyData[newVal].apPhysicalAddress1,
+      apPhysicalAddress2: companyData[newVal].apPhysicalAddress2,
+      apPhysicalCity: companyData[newVal].apPhysicalCity,
+      apPhysicalState: companyData[newVal].apPhysicalState,
+      apPhysicalZip: companyData[newVal].apPhysicalZip,
+      apPhysicalCountry: companyData[newVal].apPhysicalCountry,
+      apMailingAddress1: companyData[newVal].apMailingAddress1,
+      apMailingAddress2: companyData[newVal].apMailingAddress2,
+      apMailingCity: companyData[newVal].apMailingCity,
+      apMailingState: companyData[newVal].apMailingState,
+      apMailingZip: companyData[newVal].apMailingZip,
+      apMailingCountry: companyData[newVal].apMailingCountry,
     };
-    isEditingCompany.value = false;
-    isCompanyChanged.value = false;
+    isEditingAccountProfile.value = false;
+    isEditingAboutCompany.value = false;
+    sameAsPhysical.value = false;
     // Initialize CAA data
     editableCaaData.value = {
       planSponsorOptions: companyData[newVal].planSponsorOptions,
@@ -965,6 +1356,8 @@ watch(selectedAccount, (newVal) => {
     // Initialize Gag Clause data
     editableGagClauseData.value = {
       authorize: companyData[newVal].authorize,
+      gagFeeAcknowledged: companyData[newVal].gagFeeAcknowledged,
+      gagAuthorityAcknowledged: companyData[newVal].gagAuthorityAcknowledged,
       reportingPeriod: companyData[newVal].reportingPeriod,
       effectiveStartDate: companyData[newVal].effectiveStartDate,
       effectiveEndDate: companyData[newVal].effectiveEndDate,
@@ -989,17 +1382,36 @@ watch(selectedAccount, (newVal) => {
       billingPhoneNumber: companyData[newVal].billingPhoneNumber,
       eSignature: companyData[newVal].eSignature,
     };
-    isEditingGagClause.value = false;
-    isGagClauseChanged.value = false;
+    isEditingGagAuthorization.value = false;
+    isEditingGagReportingPeriod.value = false;
+    isEditingGagEntityDetails.value = false;
+    isEditingGagBillingContact.value = false;
+    isEditingGagAcknowledgement.value = false;
   } else {
     // Reset Company data
     editableCompanyData.value = {
       companyName: '',
       dba: '',
-      notificationThreshold: '',
+      apLegalName: '',
+      apEffectiveStartDate: '',
+      apEffectiveEndDate: '',
+      apSicCode: '',
+      apPhysicalAddress1: '',
+      apPhysicalAddress2: '',
+      apPhysicalCity: '',
+      apPhysicalState: '',
+      apPhysicalZip: '',
+      apPhysicalCountry: '',
+      apMailingAddress1: '',
+      apMailingAddress2: '',
+      apMailingCity: '',
+      apMailingState: '',
+      apMailingZip: '',
+      apMailingCountry: '',
     };
-    isEditingCompany.value = false;
-    isCompanyChanged.value = false;
+    isEditingAccountProfile.value = false;
+    isEditingAboutCompany.value = false;
+    sameAsPhysical.value = false;
     // Reset CAA data
     editableCaaData.value = {
       groupHealthPlan: '',
@@ -1020,7 +1432,9 @@ watch(selectedAccount, (newVal) => {
     isEditingPlanSponsor.value = false;
     // Reset Gag Clause data
     editableGagClauseData.value = {
-      authorize: null,
+      authorize: 'no',
+      gagFeeAcknowledged: false,
+      gagAuthorityAcknowledged: false,
       reportingPeriod: null,
       effectiveStartDate: null,
       effectiveEndDate: null,
@@ -1045,15 +1459,13 @@ watch(selectedAccount, (newVal) => {
       billingPhoneNumber: '',
       eSignature: '',
     };
-    isEditingGagClause.value = false;
-    isGagClauseChanged.value = false;
+    isEditingGagAuthorization.value = false;
+    isEditingGagReportingPeriod.value = false;
+    isEditingGagEntityDetails.value = false;
+    isEditingGagBillingContact.value = false;
+    isEditingGagAcknowledgement.value = false;
   }
 }, { immediate: true });
-
-const updateCompanyField = (field: string, value: any) => {
-  (editableCompanyData.value as any)[field] = value;
-  isCompanyChanged.value = true;
-};
 
 const updateCaaField = (field: string, value: any) => {
   (editableCaaData.value as any)[field] = value;
@@ -1063,17 +1475,53 @@ const caaOptionSelected = computed(() => !!editableCaaData.value.planSponsorOpti
 const caaIsOption1 = computed(() => editableCaaData.value.planSponsorOptions?.includes('Option 1'));
 const caaIsOption2 = computed(() => editableCaaData.value.planSponsorOptions?.includes('Option 2'));
 
-const updateGagClauseField = (field: string, value: any) => {
-  (editableGagClauseData.value as any)[field] = value;
-  isGagClauseChanged.value = true;
-};
-
-const saveCompanyChanges = () => {
+const saveAccountProfileChanges = () => {
   if (selectedAccount.value) {
     Object.assign(companyData[selectedAccount.value], editableCompanyData.value);
-    isCompanyChanged.value = false;
-    isEditingCompany.value = false;
+    isEditingAccountProfile.value = false;
     showSnackbar.value = true;
+  }
+};
+
+const cancelAccountProfileChanges = () => {
+  if (selectedAccount.value) {
+    const saved = companyData[selectedAccount.value];
+    editableCompanyData.value.companyName = saved.companyName;
+    editableCompanyData.value.dba = saved.dba;
+    editableCompanyData.value.apLegalName = saved.apLegalName;
+    editableCompanyData.value.apEffectiveStartDate = saved.apEffectiveStartDate;
+    editableCompanyData.value.apEffectiveEndDate = saved.apEffectiveEndDate;
+    isEditingAccountProfile.value = false;
+  }
+};
+
+const saveAboutCompanyChanges = () => {
+  if (selectedAccount.value) {
+    Object.assign(companyData[selectedAccount.value], editableCompanyData.value);
+    isEditingAboutCompany.value = false;
+    sameAsPhysical.value = false;
+    showSnackbar.value = true;
+  }
+};
+
+const cancelAboutCompanyChanges = () => {
+  if (selectedAccount.value) {
+    const saved = companyData[selectedAccount.value];
+    editableCompanyData.value.apSicCode = saved.apSicCode;
+    editableCompanyData.value.apPhysicalAddress1 = saved.apPhysicalAddress1;
+    editableCompanyData.value.apPhysicalAddress2 = saved.apPhysicalAddress2;
+    editableCompanyData.value.apPhysicalCity = saved.apPhysicalCity;
+    editableCompanyData.value.apPhysicalState = saved.apPhysicalState;
+    editableCompanyData.value.apPhysicalZip = saved.apPhysicalZip;
+    editableCompanyData.value.apPhysicalCountry = saved.apPhysicalCountry;
+    editableCompanyData.value.apMailingAddress1 = saved.apMailingAddress1;
+    editableCompanyData.value.apMailingAddress2 = saved.apMailingAddress2;
+    editableCompanyData.value.apMailingCity = saved.apMailingCity;
+    editableCompanyData.value.apMailingState = saved.apMailingState;
+    editableCompanyData.value.apMailingZip = saved.apMailingZip;
+    editableCompanyData.value.apMailingCountry = saved.apMailingCountry;
+    isEditingAboutCompany.value = false;
+    sameAsPhysical.value = false;
   }
 };
 
@@ -1094,6 +1542,10 @@ const saveBenefitDetailsChanges = () => {
 };
 
 const savePlanSponsorChanges = () => {
+  const planSponsorEinError = einListRule(editableCaaData.value.planSponsorEin);
+  const tpaEinError = einListRule(editableCaaData.value.tpaEin);
+  caaEinErrors.value = { planSponsorEin: planSponsorEinError, tpaEin: tpaEinError };
+  if (planSponsorEinError || tpaEinError) return;
   if (selectedAccount.value) {
     Object.assign(companyData[selectedAccount.value], editableCaaData.value);
     isEditingPlanSponsor.value = false;
@@ -1101,24 +1553,69 @@ const savePlanSponsorChanges = () => {
   }
 };
 
-const saveGagClauseChanges = () => {
+const saveGagAuthorizationChanges = () => {
   if (selectedAccount.value) {
-    Object.assign(companyData[selectedAccount.value], editableGagClauseData.value);
-    isGagClauseChanged.value = false;
-    isEditingGagClause.value = false;
+    if (editableGagClauseData.value.authorize !== 'yes') editableGagClauseData.value.gagFeeAcknowledged = false;
+    companyData[selectedAccount.value].authorize = editableGagClauseData.value.authorize ?? 'no';
+    companyData[selectedAccount.value].gagFeeAcknowledged = editableGagClauseData.value.gagFeeAcknowledged ?? false;
+    isEditingGagAuthorization.value = false;
     showSnackbar.value = true;
   }
 };
 
-const cancelCompanyChanges = () => {
+const saveGagReportingPeriodChanges = () => {
   if (selectedAccount.value) {
-    editableCompanyData.value = {
-      companyName: companyData[selectedAccount.value].companyName,
-      dba: companyData[selectedAccount.value].dba,
-      notificationThreshold: companyData[selectedAccount.value].notificationThreshold,
-    };
-    isCompanyChanged.value = false;
-    isEditingCompany.value = false;
+    companyData[selectedAccount.value].reportingPeriod = editableGagClauseData.value.reportingPeriod ?? null;
+    companyData[selectedAccount.value].effectiveStartDate = editableGagClauseData.value.effectiveStartDate ?? null;
+    companyData[selectedAccount.value].effectiveEndDate = editableGagClauseData.value.effectiveEndDate ?? null;
+    isEditingGagReportingPeriod.value = false;
+    showSnackbar.value = true;
+  }
+};
+
+const saveGagEntityDetailsChanges = () => {
+  gagClauseEinError.value = einListRule(editableGagClauseData.value.reportingEntityEin, 50);
+  if (gagClauseEinError.value) return;
+  if (selectedAccount.value) {
+    const saved = companyData[selectedAccount.value];
+    saved.reportingEntityType = editableGagClauseData.value.reportingEntityType ?? '';
+    saved.reportingEntityName = editableGagClauseData.value.reportingEntityName ?? '';
+    saved.reportingEntityEin = editableGagClauseData.value.reportingEntityEin ?? '';
+    saved.attestationAgreement = editableGagClauseData.value.attestationAgreement ?? '';
+    saved.agreementTypes = editableGagClauseData.value.agreementTypes ?? '';
+    saved.mailingAddress1 = editableGagClauseData.value.mailingAddress1 ?? '';
+    saved.mailingAddress2 = editableGagClauseData.value.mailingAddress2 ?? '';
+    saved.city = editableGagClauseData.value.city ?? '';
+    saved.mailingState = editableGagClauseData.value.mailingState ?? '';
+    saved.zipCode = editableGagClauseData.value.zipCode ?? '';
+    saved.contactFirstName = editableGagClauseData.value.contactFirstName ?? '';
+    saved.contactLastName = editableGagClauseData.value.contactLastName ?? '';
+    saved.contactEmail = editableGagClauseData.value.contactEmail ?? '';
+    saved.contactPhoneNumber = editableGagClauseData.value.contactPhoneNumber ?? '';
+    isEditingGagEntityDetails.value = false;
+    showSnackbar.value = true;
+  }
+};
+
+const saveGagBillingContactChanges = () => {
+  if (selectedAccount.value) {
+    const saved = companyData[selectedAccount.value];
+    saved.billingOrganization = editableGagClauseData.value.billingOrganization ?? '';
+    saved.billingFirstName = editableGagClauseData.value.billingFirstName ?? '';
+    saved.billingLastName = editableGagClauseData.value.billingLastName ?? '';
+    saved.billingEmail = editableGagClauseData.value.billingEmail ?? '';
+    saved.billingPhoneNumber = editableGagClauseData.value.billingPhoneNumber ?? '';
+    isEditingGagBillingContact.value = false;
+    showSnackbar.value = true;
+  }
+};
+
+const saveGagAcknowledgementChanges = () => {
+  if (selectedAccount.value) {
+    companyData[selectedAccount.value].gagAuthorityAcknowledged = editableGagClauseData.value.gagAuthorityAcknowledged ?? false;
+    companyData[selectedAccount.value].eSignature = editableGagClauseData.value.eSignature ?? '';
+    isEditingGagAcknowledgement.value = false;
+    showSnackbar.value = true;
   }
 };
 
@@ -1140,39 +1637,69 @@ const cancelPlanSponsorChanges = () => {
   if (selectedAccount.value) {
     editableCaaData.value = JSON.parse(JSON.stringify(companyData[selectedAccount.value]));
     isEditingPlanSponsor.value = false;
+    caaEinErrors.value = { planSponsorEin: '', tpaEin: '' };
   }
 };
 
-const cancelGagClauseChanges = () => {
+const cancelGagAuthorizationChanges = () => {
   if (selectedAccount.value) {
-    editableGagClauseData.value = {
-      authorize: companyData[selectedAccount.value].authorize,
-      reportingPeriod: companyData[selectedAccount.value].reportingPeriod,
-      effectiveStartDate: companyData[selectedAccount.value].effectiveStartDate,
-      effectiveEndDate: companyData[selectedAccount.value].effectiveEndDate,
-      reportingEntityType: companyData[selectedAccount.value].reportingEntityType,
-      reportingEntityName: companyData[selectedAccount.value].reportingEntityName,
-      reportingEntityEin: companyData[selectedAccount.value].reportingEntityEin,
-      attestationAgreement: companyData[selectedAccount.value].attestationAgreement,
-      agreementTypes: companyData[selectedAccount.value].agreementTypes,
-      mailingAddress1: companyData[selectedAccount.value].mailingAddress1,
-      mailingAddress2: companyData[selectedAccount.value].mailingAddress2,
-      city: companyData[selectedAccount.value].city,
-      mailingState: companyData[selectedAccount.value].mailingState,
-      zipCode: companyData[selectedAccount.value].zipCode,
-      contactFirstName: companyData[selectedAccount.value].contactFirstName,
-      contactLastName: companyData[selectedAccount.value].contactLastName,
-      contactEmail: companyData[selectedAccount.value].contactEmail,
-      contactPhoneNumber: companyData[selectedAccount.value].contactPhoneNumber,
-      billingOrganization: companyData[selectedAccount.value].billingOrganization,
-      billingFirstName: companyData[selectedAccount.value].billingFirstName,
-      billingLastName: companyData[selectedAccount.value].billingLastName,
-      billingEmail: companyData[selectedAccount.value].billingEmail,
-      billingPhoneNumber: companyData[selectedAccount.value].billingPhoneNumber,
-      eSignature: companyData[selectedAccount.value].eSignature,
-    };
-    isGagClauseChanged.value = false;
-    isEditingGagClause.value = false;
+    const saved = companyData[selectedAccount.value];
+    editableGagClauseData.value.authorize = saved.authorize;
+    editableGagClauseData.value.gagFeeAcknowledged = saved.gagFeeAcknowledged;
+    isEditingGagAuthorization.value = false;
+  }
+};
+
+const cancelGagReportingPeriodChanges = () => {
+  if (selectedAccount.value) {
+    const saved = companyData[selectedAccount.value];
+    editableGagClauseData.value.reportingPeriod = saved.reportingPeriod;
+    editableGagClauseData.value.effectiveStartDate = saved.effectiveStartDate;
+    editableGagClauseData.value.effectiveEndDate = saved.effectiveEndDate;
+    isEditingGagReportingPeriod.value = false;
+  }
+};
+
+const cancelGagEntityDetailsChanges = () => {
+  if (selectedAccount.value) {
+    const saved = companyData[selectedAccount.value];
+    editableGagClauseData.value.reportingEntityType = saved.reportingEntityType;
+    editableGagClauseData.value.reportingEntityName = saved.reportingEntityName;
+    editableGagClauseData.value.reportingEntityEin = saved.reportingEntityEin;
+    editableGagClauseData.value.attestationAgreement = saved.attestationAgreement;
+    editableGagClauseData.value.agreementTypes = saved.agreementTypes;
+    editableGagClauseData.value.mailingAddress1 = saved.mailingAddress1;
+    editableGagClauseData.value.mailingAddress2 = saved.mailingAddress2;
+    editableGagClauseData.value.city = saved.city;
+    editableGagClauseData.value.mailingState = saved.mailingState;
+    editableGagClauseData.value.zipCode = saved.zipCode;
+    editableGagClauseData.value.contactFirstName = saved.contactFirstName;
+    editableGagClauseData.value.contactLastName = saved.contactLastName;
+    editableGagClauseData.value.contactEmail = saved.contactEmail;
+    editableGagClauseData.value.contactPhoneNumber = saved.contactPhoneNumber;
+    isEditingGagEntityDetails.value = false;
+    gagClauseEinError.value = '';
+  }
+};
+
+const cancelGagBillingContactChanges = () => {
+  if (selectedAccount.value) {
+    const saved = companyData[selectedAccount.value];
+    editableGagClauseData.value.billingOrganization = saved.billingOrganization;
+    editableGagClauseData.value.billingFirstName = saved.billingFirstName;
+    editableGagClauseData.value.billingLastName = saved.billingLastName;
+    editableGagClauseData.value.billingEmail = saved.billingEmail;
+    editableGagClauseData.value.billingPhoneNumber = saved.billingPhoneNumber;
+    isEditingGagBillingContact.value = false;
+  }
+};
+
+const cancelGagAcknowledgementChanges = () => {
+  if (selectedAccount.value) {
+    const saved = companyData[selectedAccount.value];
+    editableGagClauseData.value.gagAuthorityAcknowledged = saved.gagAuthorityAcknowledged;
+    editableGagClauseData.value.eSignature = saved.eSignature;
+    isEditingGagAcknowledgement.value = false;
   }
 };
 
@@ -1181,7 +1708,6 @@ const settingTabs = ref([
   { label: 'User Administration', key: 'user-administration' },
   { label: 'CAA Drug Cost Reporting', key: 'caa-drug-cost-reporting' },
   { label: 'CAA Gag Clause Attestation', key: 'caa-gag-clause-attestation' },
-  { label: 'Claim Edit Rules', key: 'claim-edit-rules' },
 ]);
 
 const states = ref([
@@ -1192,15 +1718,19 @@ const states = ref([
   'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY',
 ]);
 
+// Aligned to Master (Alex's build) 2026-08-07 — was ['SF Small Employer Plans', 'SF Large Employer Plans']
 const marketSegments = ref([
-  'SF Small Employer Plans',
   'SF Large Employer Plans',
+  'Commercial Plans',
+  'Government Plans',
+  'Individual Plans',
 ]);
 
+// "Specialty Drug Only" (no "s") aligned to Master's wording 2026-08-07
 const carveOutBenefits = ref([
   'Pharmacy Only',
   'Fertility Only',
-  'Specialty Drugs Only',
+  'Specialty Drug Only',
 ]);
 
 const planSponsorOptionsList = ref([
@@ -1239,86 +1769,178 @@ const handleTabSelected = (tabKey: string) => {
 };
 
 const userAdminHeaders = ref([
-  { title: 'Account Name', key: 'accountName' },
   { title: 'User', key: 'user' },
   { title: 'Role', key: 'role' },
   { title: 'Email', key: 'email' },
-  { title: 'Permissions', key: 'permissions' },
+  { title: 'Permissions', key: 'permissionsLabel' },
   { title: 'Activated', key: 'activated', align: 'center' },
   { title: 'Main POC', key: 'mainPoc', align: 'center' },
   { title: 'Survey Contact', key: 'surveyContact', align: 'center' },
   { title: '', key: 'actions', align: 'end', sortable: false },
 ]);
 
-const userAdminData = ref([
+// Same permission taxonomy as Account Profile > Client/Vendor Contacts — see
+// project_contacts_roles_design_decisions.md. Kept in sync manually since this
+// prototype has no shared store; a real build would source both from one place.
+const userAdminPermissionOptions = [
+  { key: 'reports', label: 'Reports' },
+  { key: 'invoices', label: 'Invoices' },
+  { key: 'rebates', label: 'Rebates' },
+  { key: 'highCostNotifications', label: 'High Cost Notifications' },
+  { key: 'planChanges', label: 'Plan Changes' },
+  { key: 'planApproval', label: 'Plan Approval' },
+  { key: 'overrides', label: 'Overrides' },
+  { key: 'vcpClaims', label: 'VCP Claims' },
+];
+// Full live role catalog confirmed against the old portal's Admin > Roles screen 2026-08-07
+// (screenshot review) — "Global" excluded (synthetic display-only pseudo-role, not
+// assignable; no Delete action in that screen). "Rebates" excluded (appeared once as a
+// role name but is a permission everywhere else researched — treated as a stray old-portal
+// entry, not replicated here; revisit if someone confirms it was intentional).
+const userAdminRoleOptions = [
+  { type: 'subheader', title: 'Client-Facing' },
+  'Administrator', 'Client', 'Broker', 'Consultant', 'TPA', 'TPV',
+  { type: 'subheader', title: 'Liviniti Internal' },
+  'Account Manager', 'Account Executive', 'Implementation Manager', 'Implementation Coordinator', 'Accounting', 'Clinical Account Executive',
+];
+const userAdminExternalRoles = ['Broker', 'Consultant', 'TPA', 'TPV'];
+const userAdminInternalRoles = ['Account Manager', 'Account Executive', 'Implementation Manager', 'Implementation Coordinator', 'Accounting', 'Clinical Account Executive'];
+const newUserAdminPermissions = (): Record<string, boolean> => ({ reports: false, invoices: false, rebates: false, highCostNotifications: false, planChanges: false, planApproval: false, overrides: false, vcpClaims: false });
+const permissionsLabel = (role: string, permissions: Record<string, boolean>) => {
+  if (role === 'Administrator') return 'All';
+  const selected = userAdminPermissionOptions.filter(p => permissions[p.key]).map(p => p.label);
+  return selected.length ? selected.join(', ') : 'None';
+};
+
+interface UserAdminEntry {
+  user: string;
+  email: string;
+  role: string;
+  permissions: Record<string, boolean>;
+  permissionsLabel: string;
+  allowPhi: boolean;
+  activated: boolean;
+  mainPoc: boolean;
+  surveyContact: boolean;
+  ackConfirmed: boolean;
+}
+
+const userAdminByAccount = ref<{ [key: number]: UserAdminEntry[] }>({
+  1: [
+    { user: 'Tony Stark', email: 'tony.stark@companya.com', role: 'Administrator', permissions: newUserAdminPermissions(), permissionsLabel: 'All', allowPhi: true, activated: true, mainPoc: true, surveyContact: false, ackConfirmed: false },
+    { user: 'Pepper Potts', email: 'pepper.potts@companya.com', role: 'Administrator', permissions: newUserAdminPermissions(), permissionsLabel: 'All', allowPhi: true, activated: true, mainPoc: false, surveyContact: true, ackConfirmed: false },
+  ],
+  2: [
+    { user: 'Bruce Wayne', email: 'bruce.wayne@companyb.com', role: 'Administrator', permissions: newUserAdminPermissions(), permissionsLabel: 'All', allowPhi: true, activated: true, mainPoc: true, surveyContact: false, ackConfirmed: false },
+  ],
+  3: [],
+  4: [],
+  5: [],
+});
+
+const userAdminData = computed<UserAdminEntry[]>(() => (selectedAccount.value ? userAdminByAccount.value[selectedAccount.value] ?? [] : []));
+
+const userAdminRowActions = [
+  { label: 'Edit', action: 'edit' },
+  { label: 'Remove', action: 'remove' },
+];
+
+const showUserAdminDialog = ref(false);
+const userAdminDialogMode = ref<'add' | 'edit'>('add');
+const userAdminEditingIndex = ref(-1);
+const newUserAdminForm = () => ({ firstName: '', lastName: '', email: '', role: 'Client', permissions: newUserAdminPermissions(), allowPhi: false, mainPoc: false, surveyContact: false, ackConfirmed: false });
+const userAdminForm = ref(newUserAdminForm());
+const userAdminErrors = ref({ firstName: '', lastName: '', email: '' });
+
+const validateUserAdminForm = (form: { firstName: string; lastName: string; email: string }) => {
+  const e = { firstName: '', lastName: '', email: '' };
+  if (!form.firstName.trim()) e.firstName = 'First name is required.';
+  if (!form.lastName.trim()) e.lastName = 'Last name is required.';
+  if (!form.email.trim()) e.email = 'Email is required.';
+  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) e.email = 'Please enter a valid email address.';
+  return e;
+};
+
+// Mirrors the old portal's rule: only one Main Point of Contact per account.
+const enforceSingleMainPoc = (entries: UserAdminEntry[], keepIdx: number) => {
+  entries.forEach((entry, i) => { if (i !== keepIdx) entry.mainPoc = false; });
+};
+
+const openAddUser = () => {
+  userAdminDialogMode.value = 'add';
+  userAdminForm.value = newUserAdminForm();
+  userAdminErrors.value = { firstName: '', lastName: '', email: '' };
+  showUserAdminDialog.value = true;
+};
+
+const handleUserAdminRowAction = ({ action, item }: { action: string; item: UserAdminEntry }) => {
+  const entries = selectedAccount.value ? userAdminByAccount.value[selectedAccount.value] : undefined;
+  if (!entries) return;
+  const idx = entries.indexOf(item);
+  if (action === 'remove') {
+    if (idx > -1) entries.splice(idx, 1);
+  } else if (action === 'edit') {
+    const nameParts = item.user.split(' ');
+    userAdminForm.value = {
+      firstName: nameParts[0] ?? '',
+      lastName: nameParts.slice(1).join(' '),
+      email: item.email,
+      role: item.role,
+      permissions: { ...item.permissions },
+      allowPhi: item.allowPhi,
+      mainPoc: item.mainPoc,
+      surveyContact: item.surveyContact,
+      ackConfirmed: item.ackConfirmed,
+    };
+    userAdminEditingIndex.value = idx;
+    userAdminDialogMode.value = 'edit';
+    userAdminErrors.value = { firstName: '', lastName: '', email: '' };
+    showUserAdminDialog.value = true;
+  }
+};
+
+const saveUserAdmin = () => {
+  const errors = validateUserAdminForm(userAdminForm.value);
+  userAdminErrors.value = errors;
+  if (Object.values(errors).some(e => e)) return;
+  if (userAdminExternalRoles.includes(userAdminForm.value.role) && !userAdminForm.value.ackConfirmed) return;
+  if (!selectedAccount.value) return;
+  if (!userAdminByAccount.value[selectedAccount.value]) userAdminByAccount.value[selectedAccount.value] = [];
+  const entries = userAdminByAccount.value[selectedAccount.value];
+  const f = userAdminForm.value;
+  const entry: UserAdminEntry = {
+    user: `${f.firstName} ${f.lastName}`,
+    email: f.email,
+    role: f.role,
+    permissions: { ...f.permissions },
+    permissionsLabel: permissionsLabel(f.role, f.permissions),
+    allowPhi: f.role === 'Administrator' ? true : f.allowPhi,
+    activated: false,
+    mainPoc: f.mainPoc,
+    surveyContact: f.surveyContact,
+    ackConfirmed: f.ackConfirmed,
+  };
+  if (userAdminDialogMode.value === 'edit' && userAdminEditingIndex.value > -1) {
+    entry.activated = entries[userAdminEditingIndex.value].activated;
+    entries[userAdminEditingIndex.value] = entry;
+    if (entry.mainPoc) enforceSingleMainPoc(entries, userAdminEditingIndex.value);
+  } else {
+    entries.push(entry);
+    if (entry.mainPoc) enforceSingleMainPoc(entries, entries.length - 1);
+  }
+  showUserAdminDialog.value = false;
+};
+
+const userAdminDialogActions = computed(() => [
+  { text: 'Cancel', styleType: 'secondary' as const, onClick: () => { showUserAdminDialog.value = false; } },
   {
-    accountName: 'Company A',
-    user: 'Tony Stark',
-    role: 'Admin',
-    email: 'tony.stark@companya.com',
-    permissions: 'All',
-    activated: true,
-    mainPoc: true,
-    surveyContact: false,
-  },
-  {
-    accountName: 'Company A',
-    user: 'Pepper Potts',
-    role: 'Admin',
-    email: 'pepper.potts@companya.com',
-    permissions: 'All',
-    activated: true,
-    mainPoc: false,
-    surveyContact: true,
-  },
-  {
-    accountName: 'Company B',
-    user: 'Bruce Wayne',
-    role: 'Admin',
-    email: 'bruce.wayne@companyb.com',
-    permissions: 'All',
-    activated: true,
-    mainPoc: true,
-    surveyContact: false,
+    text: userAdminDialogMode.value === 'add' ? 'Add User' : 'Save Changes',
+    styleType: 'primary' as const,
+    onClick: saveUserAdmin,
+    disabled: userAdminExternalRoles.includes(userAdminForm.value.role) && !userAdminForm.value.ackConfirmed,
   },
 ]);
 
-const claimEditRulesHeaders = ref([
-  { title: 'Rule Name', key: 'ruleName' },
-  { title: 'Rule Status', key: 'ruleStatus' },
-  { title: 'Rule Action', key: 'ruleAction' },
-  { title: 'Change Log', key: 'ruleChangeLog' },
-]);
-
-const claimEditRulesData = ref([
-  {
-    ruleName: 'Rule 1',
-    ruleStatus: 'Active',
-    ruleAction: 'Approve',
-    ruleChangeLog: 'View Log',
-    changeLogDetails: [
-      { change: 'Created', changeDescription: 'Initial rule creation', editedBy: 'John Doe', editDate: '2023-01-01' },
-      { change: 'Modified', changeDescription: 'Updated rule criteria', editedBy: 'Jane Smith', editDate: '2023-03-15' },
-    ],
-  },
-  {
-    ruleName: 'Rule 2',
-    ruleStatus: 'Inactive',
-    ruleAction: 'Deny',
-    ruleChangeLog: 'View Log',
-    changeLogDetails: [
-      { change: 'Created', changeDescription: 'Initial rule creation', editedBy: 'Jane Smith', editDate: '2022-11-01' },
-      { change: 'Modified', changeDescription: 'Deactivated rule', editedBy: 'John Doe', editDate: '2023-02-20' },
-    ],
-  },
-]);
-
-const changeLogTableHeaders = ref([
-  { title: 'Change', key: 'change' },
-  { title: 'Change Description', key: 'changeDescription' },
-  { title: 'Edited By', key: 'editedBy' },
-  { title: 'Edit Date', key: 'editDate' },
-]);
 </script>
 
 <style lang="scss" scoped>
@@ -1390,6 +2012,44 @@ const changeLogTableHeaders = ref([
     flex-wrap: wrap;
     gap: $spacing-xlarge;
   }
+
+  &--thirds .ap-field { flex: 1; }
+}
+
+.ap-subsection-heading {
+  font-family: $font-family-base;
+  font-size: $font-size-body;
+  font-weight: $font-weight-semibold;
+  color: $color-primary;
+  margin: $spacing-medium 0 $spacing-small;
+}
+
+.ap-mailing-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: $spacing-medium 0 $spacing-small;
+
+  .ap-subsection-heading {
+    margin: 0;
+  }
+}
+
+.ap-checkbox-toggle {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xsmall;
+  cursor: pointer;
+  user-select: none;
+
+  &:hover .ap-checkbox-icon {
+    color: $color-primary;
+  }
+}
+
+.ap-checkbox-icon {
+  color: $color-border;
+  &--checked { color: $color-primary; }
 }
 
 .ap-field {
@@ -1482,6 +2142,56 @@ const changeLogTableHeaders = ref([
   }
 }
 
+.ua-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-medium;
+  margin-bottom: $spacing-medium;
+}
+
+.ua-header-note {
+  color: $color-text-secondary;
+  margin: 0;
+}
+
+.ua-subsection-heading {
+  font-family: $font-family-base;
+  font-size: $font-size-body;
+  font-weight: $font-weight-semibold;
+  color: $color-primary;
+  margin: $spacing-medium 0 $spacing-small;
+}
+
+.ua-permission-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: $spacing-xsmall $spacing-medium;
+  margin: $spacing-small 0;
+}
+
+.ua-role-note {
+  color: $color-text-secondary;
+  margin: $spacing-xsmall 0 $spacing-small;
+}
+
+.ua-checkbox-toggle {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xsmall;
+  cursor: pointer;
+  user-select: none;
+  margin-bottom: $spacing-xsmall;
+
+  &:hover .ua-checkbox-icon {
+    color: $color-primary;
+  }
+}
+
+.ua-checkbox-icon {
+  color: $color-border;
+  &--checked { color: $color-primary; }
+}
 
 .caa-field-with-hint {
   display: flex;
@@ -1510,6 +2220,7 @@ const changeLogTableHeaders = ref([
   border: 1px solid $color-border;
   border-radius: 8px;
   padding: $spacing-medium;
+  margin-bottom: $spacing-medium;
 }
 
 .ap-section-header {

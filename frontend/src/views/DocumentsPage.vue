@@ -92,8 +92,10 @@ import ReportDataTable from '@/components/common/ReportDataTable.vue';
 import Tabs from '@/components/common/Tabs.vue';
 import FileUploader from '@/components/ui/FileUploader.vue';
 import { useUserType } from '@/composables/useUserType';
+import { useDocumentsStore } from '@/stores/documents';
 
 const { isInternal } = useUserType();
+const documentsStore = useDocumentsStore();
 
 const documentHeaders = ref([
   { title: 'Document Name', key: 'documentName' },
@@ -133,11 +135,13 @@ const handleTabSelected = (key: string) => {
   selectedTabKey.value = key;
 };
 
+const combinedDocumentItems = computed(() => [...documentsStore.documents, ...allDocumentItems.value]);
+
 const filteredDocumentItems = computed(() => {
   if (selectedTabKey.value === 'All Documents') {
-    return allDocumentItems.value;
+    return combinedDocumentItems.value;
   }
-  return allDocumentItems.value.filter(item => item.category === selectedTabKey.value);
+  return combinedDocumentItems.value.filter(item => item.category === selectedTabKey.value);
 });
 
 const macAppealsHeaders = ref([
