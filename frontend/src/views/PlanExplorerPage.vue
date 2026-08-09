@@ -3306,6 +3306,7 @@ function openTocSubmitModal(target: 'hcf' | 'pa') {
 
 function confirmTocSubmit() {
   const today = new Date().toISOString().slice(0, 10);
+  const accountName = accountOptions.value.find(acc => acc.id === selectedAccount.value)?.name ?? '';
   if (tocSubmitTarget.value === 'hcf' && tocHistoricalClaimsFile.value) {
     hcfPending.value = true;
     hcfTicketNumber.value = mockTicketNumber();
@@ -3313,9 +3314,10 @@ function confirmTocSubmit() {
       documentName: tocHistoricalClaimsFile.value,
       type: tocHistoricalClaimsFile.value.split('.').pop() || 'file',
       uploadDate: today,
-      lastModifiedBy: 'Implementation',
+      lastModifiedBy: 'Jane Smith',
       status: 'Published',
       category: 'PHI Documents',
+      accountName,
     });
   } else if (tocSubmitTarget.value === 'pa' && tocPriorAuthFile.value) {
     paPending.value = true;
@@ -3324,9 +3326,10 @@ function confirmTocSubmit() {
       documentName: tocPriorAuthFile.value,
       type: tocPriorAuthFile.value.split('.').pop() || 'file',
       uploadDate: today,
-      lastModifiedBy: 'Implementation',
+      lastModifiedBy: 'Jane Smith',
       status: 'Published',
       category: 'PHI Documents',
+      accountName,
     });
   }
   showTocSubmitModal.value = false;

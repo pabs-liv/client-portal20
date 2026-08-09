@@ -204,7 +204,7 @@
         </div>
         <div v-if="selectedAccount && activeTab === 'user-administration'">
           <div class="ua-header">
-            <p class="text-body ua-header-note">Manage who has Client Portal access to this account, and what they can see once it's live.</p>
+            <p class="text-body ua-header-note">Manage Client Portal access and permissions for this account.</p>
             <Button label="+ Add User" variant="primary" @click="openAddUser" />
           </div>
           <ReportDataTable
@@ -272,6 +272,16 @@
               <span class="text-small">Survey Contact</span>
             </div>
           </Dialog>
+
+          <!-- Remove User Confirmation Dialog -->
+          <Dialog
+            v-model="showRemoveUserDialog"
+            :icon="Trash2"
+            heading="Remove User"
+            :text="`Are you sure you want to remove ${userAdminPendingRemoval?.user} from this account? They will lose Client Portal access immediately.`"
+            :actions="removeUserDialogActions"
+            :show-secondary-button="true"
+          />
         </div>
         <div v-if="selectedAccount && activeTab === 'caa-drug-cost-reporting'">
           <div class="caa-settings">
@@ -797,7 +807,7 @@
                   <div class="ap-field-row ap-field-row--multi">
                     <div class="ap-field">
                       <span class="ap-field-label">Attestation agreement</span>
-                      <span class="ap-field-value">{{ editableGagClauseData.attestationAgreement || '—' }}</span>
+                      <span class="ap-field-value">{{ editableGagClauseData.attestationAgreement?.length ? editableGagClauseData.attestationAgreement.join(', ') : '—' }}</span>
                     </div>
                     <div class="ap-field">
                       <span class="ap-field-label">Agreement types</span>
@@ -856,7 +866,7 @@
               </template>
               <template v-else>
                 <div class="form-row">
-                  <TextField v-model="editableGagClauseData.reportingEntityType" label="Reporting entity type" />
+                  <Select label="Reporting entity type" :items="reportingEntityTypeOptions" v-model="editableGagClauseData.reportingEntityType" />
                   <TextField v-model="editableGagClauseData.reportingEntityName" label="Report entity name" />
                   <TextField
                     v-model="editableGagClauseData.reportingEntityEin"
@@ -867,7 +877,7 @@
                   />
                 </div>
                 <div class="form-row">
-                  <Select label="Attestation agreement" :items="attestationAgreements" v-model="editableGagClauseData.attestationAgreement" />
+                  <Autocomplete label="Attestation agreement" :items="attestationAgreements" v-model="editableGagClauseData.attestationAgreement" :multiple="true" />
                   <Select label="Agreement types" :items="agreementTypes" v-model="editableGagClauseData.agreementTypes" />
                 </div>
                 <h5 class="ap-subsection-heading">Mailing Address</h5>
@@ -1029,7 +1039,7 @@ import DatePicker from '@/components/ui/DatePicker.vue';
 import Select from '@/components/ui/Select.vue';
 import Button from '@/components/ui/Button.vue';
 import Banner from '@/components/common/Banner.vue';
-import { ChevronDown, CheckSquare, Square } from 'lucide-vue-next';
+import { ChevronDown, CheckSquare, Square, Trash2 } from 'lucide-vue-next';
 import Dialog from '@/components/ui/Dialog.vue';
 import { ref, computed, watch } from 'vue';
 
@@ -1115,10 +1125,10 @@ interface CompanyData {
 }
 
 const companyData: { [key: number]: CompanyData } = {
-  1: { companyName: 'Company A', dba: 'Company A', apLegalName: 'Company A Inc.', apEffectiveStartDate: '01/01/2025', apEffectiveEndDate: '', apSicCode: '3812', apPhysicalAddress1: '10880 Malibu Point', apPhysicalAddress2: '', apPhysicalCity: 'Malibu', apPhysicalState: 'CA', apPhysicalZip: '90265', apPhysicalCountry: 'USA', apMailingAddress1: '10880 Malibu Point', apMailingAddress2: '', apMailingCity: 'Malibu', apMailingState: 'CA', apMailingZip: '90265', apMailingCountry: 'USA', planSponsorOptions: 'Option 2 - D3-D8, PBM portion of narrative submitted to CMS on behalf of client, fee applicable', reportingPeriodOccurance: 'Annually', groupHealthPlanName: 'Company A Health Plan', groupHealthPlan: '12345678', carveOutBenefit: 'Pharmacy Only', form5500Plan: '501', states: ['CA', 'NY'], marketSegment: 'SF Large Employer Plans', planYearBeginDate: '01/01/2025', planYearEndDate: '12/31/2025', membersAsOf: '257', option2Acknowledged: true, legalAcknowledged: true, planSponsorLegalName: 'Company A Inc.', planSponsorEin: '123456789', tpaName: 'Allied Benefit Solutions', tpaEin: '368799581', authorize: 'yes', gagFeeAcknowledged: true, gagAuthorityAcknowledged: true, reportingPeriod: 'plan-year', effectiveStartDate: '01/01/2025', effectiveEndDate: '12/31/2025', reportingEntityType: 'ERISA Group Health Plan (GHP)', planNumber: '501', reportingEntityName: 'Company A Inc.', reportingEntityEin: '123456789', attestationAgreement: ['Medical'], agreementTypes: 'Type 1', mailingAddress1: '10880 Malibu Point', mailingAddress2: '', city: 'Malibu', mailingState: 'CA', zipCode: '90265', contactFirstName: 'Tony', contactLastName: 'Stark', contactEmail: 'tony.stark@companya.com', contactPhoneNumber: '555-123-4567', billingOrganization: 'Company A', billingFirstName: 'Pepper', billingLastName: 'Potts', billingEmail: 'pepper.potts@companya.com', billingPhoneNumber: '555-987-6543', eSignature: 'Tony Stark' },
+  1: { companyName: 'Company A', dba: 'Company A', apLegalName: 'Company A Inc.', apEffectiveStartDate: '01/01/2025', apEffectiveEndDate: '', apSicCode: '3812', apPhysicalAddress1: '10880 Malibu Point', apPhysicalAddress2: '', apPhysicalCity: 'Malibu', apPhysicalState: 'CA', apPhysicalZip: '90265', apPhysicalCountry: 'USA', apMailingAddress1: '10880 Malibu Point', apMailingAddress2: '', apMailingCity: 'Malibu', apMailingState: 'CA', apMailingZip: '90265', apMailingCountry: 'USA', planSponsorOptions: 'Option 2 - D3-D8, PBM portion of narrative submitted to CMS on behalf of client, fee applicable', reportingPeriodOccurance: 'Annually', groupHealthPlanName: 'Company A Health Plan', groupHealthPlan: '12345678', carveOutBenefit: 'Pharmacy Only', form5500Plan: '501', states: ['CA', 'NY'], marketSegment: 'SF Large Employer Plans', planYearBeginDate: '01/01/2025', planYearEndDate: '12/31/2025', membersAsOf: '257', option2Acknowledged: true, legalAcknowledged: true, planSponsorLegalName: 'Company A Inc.', planSponsorEin: '123456789', tpaName: 'Allied Benefit Solutions', tpaEin: '368799581', authorize: 'yes', gagFeeAcknowledged: true, gagAuthorityAcknowledged: true, reportingPeriod: 'plan-year', effectiveStartDate: '01/01/2025', effectiveEndDate: '12/31/2025', reportingEntityType: 'ERISA group health plan (GHP)', planNumber: '501', reportingEntityName: 'Company A Inc.', reportingEntityEin: '123456789', attestationAgreement: ['Medical'], agreementTypes: 'Type 1', mailingAddress1: '10880 Malibu Point', mailingAddress2: '', city: 'Malibu', mailingState: 'CA', zipCode: '90265', contactFirstName: 'Tony', contactLastName: 'Stark', contactEmail: 'tony.stark@companya.com', contactPhoneNumber: '555-123-4567', billingOrganization: 'Company A', billingFirstName: 'Pepper', billingLastName: 'Potts', billingEmail: 'pepper.potts@companya.com', billingPhoneNumber: '555-987-6543', eSignature: 'Tony Stark' },
   2: { companyName: 'Company B', dba: 'Company B Foundation', apLegalName: 'Company B LLC', apEffectiveStartDate: '07/01/2024', apEffectiveEndDate: '', apSicCode: '6311', apPhysicalAddress1: '1007 Mountain Drive', apPhysicalAddress2: '', apPhysicalCity: 'Gotham', apPhysicalState: 'NY', apPhysicalZip: '10001', apPhysicalCountry: 'USA', apMailingAddress1: '1007 Mountain Drive', apMailingAddress2: '', apMailingCity: 'Gotham', apMailingState: 'NY', apMailingZip: '10001', apMailingCountry: 'USA', planSponsorOptions: 'Option 1 - D3-D8 and PBM portion of narrative posted to Liviniti Client Portal for retrieval', reportingPeriodOccurance: 'Annually', groupHealthPlanName: 'Company B Health Plan', groupHealthPlan: '87654321', carveOutBenefit: 'Pharmacy Only', form5500Plan: '502', states: ['TX', 'FL'], marketSegment: 'SF Large Employer Plans', planYearBeginDate: '07/01/2024', planYearEndDate: '06/30/2025', membersAsOf: '500', option2Acknowledged: false, legalAcknowledged: false, planSponsorLegalName: 'Company B LLC', planSponsorEin: '987654321', tpaName: 'Allied Benefit Solutions', tpaEin: '368799581', authorize: 'no', gagFeeAcknowledged: false, gagAuthorityAcknowledged: false, reportingPeriod: 'benefit-period', effectiveStartDate: '07/01/2024', effectiveEndDate: '09/30/2024', reportingEntityType: 'Church plan', planNumber: '', reportingEntityName: 'Company B LLC', reportingEntityEin: '987654321', attestationAgreement: ['Pharmacy Benefits'], agreementTypes: 'Type 2', mailingAddress1: '1007 Mountain Drive', mailingAddress2: '', city: 'Gotham', mailingState: 'NY', zipCode: '10001', contactFirstName: 'Bruce', contactLastName: 'Wayne', contactEmail: 'bruce.wayne@companyb.com', contactPhoneNumber: '555-234-5678', billingOrganization: 'Company B', billingFirstName: 'Alfred', billingLastName: 'Pennyworth', billingEmail: 'alfred.pennyworth@companyb.com', billingPhoneNumber: '555-876-5432', eSignature: 'Bruce Wayne' },
-  3: { companyName: 'Company C', dba: 'Company C', apLegalName: 'Company C Corp.', apEffectiveStartDate: '01/01/2025', apEffectiveEndDate: '', apSicCode: '2836', apPhysicalAddress1: '21440 Chase Dr', apPhysicalAddress2: '', apPhysicalCity: 'Fremont', apPhysicalState: 'CA', apPhysicalZip: '94539', apPhysicalCountry: 'USA', apMailingAddress1: '21440 Chase Dr', apMailingAddress2: '', apMailingCity: 'Fremont', apMailingState: 'CA', apMailingZip: '94539', apMailingCountry: 'USA', planSponsorOptions: 'Option 1 - D3-D8 and PBM portion of narrative posted to Liviniti Client Portal for retrieval', reportingPeriodOccurance: 'Current Reporting Period', groupHealthPlanName: 'Company C Health Plan', groupHealthPlan: '11223344', carveOutBenefit: 'Specialty Drug Only', form5500Plan: '503', states: ['IL', 'GA'], marketSegment: 'Commercial Plans', planYearBeginDate: '01/01/2025', planYearEndDate: '12/31/2025', membersAsOf: '100', option2Acknowledged: false, legalAcknowledged: false, planSponsorLegalName: 'Company C Corp.', planSponsorEin: '112233445', tpaName: 'Allied Benefit Solutions', tpaEin: '368799581', authorize: 'no', gagFeeAcknowledged: false, gagAuthorityAcknowledged: false, reportingPeriod: 'plan-year', effectiveStartDate: '01/01/2025', effectiveEndDate: '01/31/2025', reportingEntityType: '(Non-Federal) Governmental Group Health Plan', planNumber: '', reportingEntityName: 'Company C Corp.', reportingEntityEin: '112233445', attestationAgreement: ['Behavioral Health'], agreementTypes: 'Type 3', mailingAddress1: '21440 Chase Dr', mailingAddress2: '', city: 'Fremont', mailingState: 'CA', zipCode: '94539', contactFirstName: 'Miles', contactLastName: 'Dyson', contactEmail: 'miles.dyson@companyc.com', contactPhoneNumber: '555-345-6789', billingOrganization: 'Company C', billingFirstName: 'Sarah', billingLastName: 'Connor', billingEmail: 'sarah.connor@companyc.com', billingPhoneNumber: '555-765-4321', eSignature: 'Miles Dyson' },
-  4: { companyName: 'Company D', dba: 'Company D Industries', apLegalName: 'Company D Industries', apEffectiveStartDate: '07/01/2024', apEffectiveEndDate: '', apSicCode: '3827', apPhysicalAddress1: '200 Park Ave', apPhysicalAddress2: '', apPhysicalCity: 'New York', apPhysicalState: 'NY', apPhysicalZip: '10166', apPhysicalCountry: 'USA', apMailingAddress1: '200 Park Ave', apMailingAddress2: '', apMailingCity: 'New York', apMailingState: 'NY', apMailingZip: '10166', apMailingCountry: 'USA', planSponsorOptions: 'Option 2 - D3-D8, PBM portion of narrative submitted to CMS on behalf of client, fee applicable', reportingPeriodOccurance: 'Annually', groupHealthPlanName: 'Company D Industries Health Plan', groupHealthPlan: '44332211', carveOutBenefit: 'Fertility Only', form5500Plan: '504', states: ['PA', 'OH'], marketSegment: 'SF Large Employer Plans', planYearBeginDate: '07/01/2024', planYearEndDate: '06/30/2025', membersAsOf: '750', option2Acknowledged: true, legalAcknowledged: true, planSponsorLegalName: 'Company D Industries', planSponsorEin: '443322110', tpaName: 'Allied Benefit Solutions', tpaEin: '368799581', authorize: 'no', gagFeeAcknowledged: false, gagAuthorityAcknowledged: false, reportingPeriod: 'benefit-period', effectiveStartDate: '07/01/2024', effectiveEndDate: '06/30/2025', reportingEntityType: 'ERISA Group Health Plan (GHP)', planNumber: '502', reportingEntityName: 'Company D Industries', reportingEntityEin: '443322110', attestationAgreement: ['Medical', 'Pharmacy Benefits'], agreementTypes: 'Type 4', mailingAddress1: '200 Park Ave', mailingAddress2: '', city: 'New York', mailingState: 'NY', zipCode: '10166', contactFirstName: 'Norman', contactLastName: 'Osborn', contactEmail: 'norman.osborn@companyd.com', contactPhoneNumber: '555-456-7890', billingOrganization: 'Company D', billingFirstName: 'Harry', billingLastName: 'Osborn', billingEmail: 'harry.osborn@companyd.com', billingPhoneNumber: '555-654-3210', eSignature: 'Norman Osborn' },
+  3: { companyName: 'Company C', dba: 'Company C', apLegalName: 'Company C Corp.', apEffectiveStartDate: '01/01/2025', apEffectiveEndDate: '', apSicCode: '2836', apPhysicalAddress1: '21440 Chase Dr', apPhysicalAddress2: '', apPhysicalCity: 'Fremont', apPhysicalState: 'CA', apPhysicalZip: '94539', apPhysicalCountry: 'USA', apMailingAddress1: '21440 Chase Dr', apMailingAddress2: '', apMailingCity: 'Fremont', apMailingState: 'CA', apMailingZip: '94539', apMailingCountry: 'USA', planSponsorOptions: 'Option 1 - D3-D8 and PBM portion of narrative posted to Liviniti Client Portal for retrieval', reportingPeriodOccurance: 'Current Reporting Period', groupHealthPlanName: 'Company C Health Plan', groupHealthPlan: '11223344', carveOutBenefit: 'Specialty Drug Only', form5500Plan: '503', states: ['IL', 'GA'], marketSegment: 'Commercial Plans', planYearBeginDate: '01/01/2025', planYearEndDate: '12/31/2025', membersAsOf: '100', option2Acknowledged: false, legalAcknowledged: false, planSponsorLegalName: 'Company C Corp.', planSponsorEin: '112233445', tpaName: 'Allied Benefit Solutions', tpaEin: '368799581', authorize: 'no', gagFeeAcknowledged: false, gagAuthorityAcknowledged: false, reportingPeriod: 'plan-year', effectiveStartDate: '01/01/2025', effectiveEndDate: '01/31/2025', reportingEntityType: '(Non-Federal) governmental group health plan', planNumber: '', reportingEntityName: 'Company C Corp.', reportingEntityEin: '112233445', attestationAgreement: ['Behavioral Health'], agreementTypes: 'Type 3', mailingAddress1: '21440 Chase Dr', mailingAddress2: '', city: 'Fremont', mailingState: 'CA', zipCode: '94539', contactFirstName: 'Miles', contactLastName: 'Dyson', contactEmail: 'miles.dyson@companyc.com', contactPhoneNumber: '555-345-6789', billingOrganization: 'Company C', billingFirstName: 'Sarah', billingLastName: 'Connor', billingEmail: 'sarah.connor@companyc.com', billingPhoneNumber: '555-765-4321', eSignature: 'Miles Dyson' },
+  4: { companyName: 'Company D', dba: 'Company D Industries', apLegalName: 'Company D Industries', apEffectiveStartDate: '07/01/2024', apEffectiveEndDate: '', apSicCode: '3827', apPhysicalAddress1: '200 Park Ave', apPhysicalAddress2: '', apPhysicalCity: 'New York', apPhysicalState: 'NY', apPhysicalZip: '10166', apPhysicalCountry: 'USA', apMailingAddress1: '200 Park Ave', apMailingAddress2: '', apMailingCity: 'New York', apMailingState: 'NY', apMailingZip: '10166', apMailingCountry: 'USA', planSponsorOptions: 'Option 2 - D3-D8, PBM portion of narrative submitted to CMS on behalf of client, fee applicable', reportingPeriodOccurance: 'Annually', groupHealthPlanName: 'Company D Industries Health Plan', groupHealthPlan: '44332211', carveOutBenefit: 'Fertility Only', form5500Plan: '504', states: ['PA', 'OH'], marketSegment: 'SF Large Employer Plans', planYearBeginDate: '07/01/2024', planYearEndDate: '06/30/2025', membersAsOf: '750', option2Acknowledged: true, legalAcknowledged: true, planSponsorLegalName: 'Company D Industries', planSponsorEin: '443322110', tpaName: 'Allied Benefit Solutions', tpaEin: '368799581', authorize: 'no', gagFeeAcknowledged: false, gagAuthorityAcknowledged: false, reportingPeriod: 'benefit-period', effectiveStartDate: '07/01/2024', effectiveEndDate: '06/30/2025', reportingEntityType: 'ERISA group health plan (GHP)', planNumber: '502', reportingEntityName: 'Company D Industries', reportingEntityEin: '443322110', attestationAgreement: ['Medical', 'Pharmacy Benefits'], agreementTypes: 'Type 4', mailingAddress1: '200 Park Ave', mailingAddress2: '', city: 'New York', mailingState: 'NY', zipCode: '10166', contactFirstName: 'Norman', contactLastName: 'Osborn', contactEmail: 'norman.osborn@companyd.com', contactPhoneNumber: '555-456-7890', billingOrganization: 'Company D', billingFirstName: 'Harry', billingLastName: 'Osborn', billingEmail: 'harry.osborn@companyd.com', billingPhoneNumber: '555-654-3210', eSignature: 'Norman Osborn' },
   5: { companyName: 'Company E', dba: 'Company E', apLegalName: 'Company E Corporation', apEffectiveStartDate: '01/01/2025', apEffectiveEndDate: '', apSicCode: '8731', apPhysicalAddress1: '1238 W 6th St', apPhysicalAddress2: '', apPhysicalCity: 'Los Angeles', apPhysicalState: 'CA', apPhysicalZip: '90017', apPhysicalCountry: 'USA', apMailingAddress1: '1238 W 6th St', apMailingAddress2: '', apMailingCity: 'Los Angeles', apMailingState: 'CA', apMailingZip: '90017', apMailingCountry: 'USA', planSponsorOptions: '', reportingPeriodOccurance: '', groupHealthPlanName: '', groupHealthPlan: '99887766', carveOutBenefit: 'Pharmacy Only', form5500Plan: '505', states: ['WA', 'OR'], marketSegment: 'SF Large Employer Plans', planYearBeginDate: '01/01/2025', planYearEndDate: '12/31/2025', membersAsOf: '300', option2Acknowledged: false, legalAcknowledged: false, planSponsorLegalName: 'Company E Corporation', planSponsorEin: '998877665', tpaName: 'Allied Benefit Solutions', tpaEin: '368799581', authorize: 'no', gagFeeAcknowledged: false, gagAuthorityAcknowledged: false, reportingPeriod: 'plan-year', effectiveStartDate: '01/01/2025', effectiveEndDate: '03/31/2025', reportingEntityType: 'Church plan', planNumber: '', reportingEntityName: 'Company E Corporation', reportingEntityEin: '998877665', attestationAgreement: ['All'], agreementTypes: 'Type 5', mailingAddress1: '1238 W 6th St', mailingAddress2: '', city: 'Los Angeles', mailingState: 'CA', zipCode: '90017', contactFirstName: 'Eldon', contactLastName: 'Tyrell', contactEmail: 'eldon.tyrell@companye.com', contactPhoneNumber: '555-567-8901', billingOrganization: 'Company E', billingFirstName: 'Rachael', billingLastName: 'Tyrell', billingEmail: 'rachael.tyrell@companye.com', billingPhoneNumber: '555-543-2109', eSignature: 'Eldon Tyrell' },
 };
 
@@ -1581,7 +1591,7 @@ const saveGagEntityDetailsChanges = () => {
     saved.reportingEntityType = editableGagClauseData.value.reportingEntityType ?? '';
     saved.reportingEntityName = editableGagClauseData.value.reportingEntityName ?? '';
     saved.reportingEntityEin = editableGagClauseData.value.reportingEntityEin ?? '';
-    saved.attestationAgreement = editableGagClauseData.value.attestationAgreement ?? '';
+    saved.attestationAgreement = editableGagClauseData.value.attestationAgreement ?? [];
     saved.agreementTypes = editableGagClauseData.value.agreementTypes ?? '';
     saved.mailingAddress1 = editableGagClauseData.value.mailingAddress1 ?? '';
     saved.mailingAddress2 = editableGagClauseData.value.mailingAddress2 ?? '';
@@ -1750,10 +1760,18 @@ const periodOptions = ref([
   { title: 'Monthly', value: 'monthly' },
 ]);
 
+const reportingEntityTypeOptions = ref([
+  'Church plan',
+  'ERISA group health plan (GHP)',
+  '(Non-Federal) governmental group health plan',
+]);
+
 const attestationAgreements = ref([
-  'Agreement A',
-  'Agreement B',
-  'Agreement C',
+  'All',
+  'Medical',
+  'Pharmacy Benefits',
+  'Behavioral Health',
+  'Other',
 ]);
 
 const agreementTypes = ref([
@@ -1878,7 +1896,8 @@ const handleUserAdminRowAction = ({ action, item }: { action: string; item: User
   if (!entries) return;
   const idx = entries.indexOf(item);
   if (action === 'remove') {
-    if (idx > -1) entries.splice(idx, 1);
+    userAdminPendingRemoval.value = item;
+    showRemoveUserDialog.value = true;
   } else if (action === 'edit') {
     const nameParts = item.user.split(' ');
     userAdminForm.value = {
@@ -1898,6 +1917,28 @@ const handleUserAdminRowAction = ({ action, item }: { action: string; item: User
     showUserAdminDialog.value = true;
   }
 };
+
+const showRemoveUserDialog = ref(false);
+const userAdminPendingRemoval = ref<UserAdminEntry | null>(null);
+
+const cancelRemoveUser = () => {
+  showRemoveUserDialog.value = false;
+  userAdminPendingRemoval.value = null;
+};
+
+const confirmRemoveUser = () => {
+  const entries = selectedAccount.value ? userAdminByAccount.value[selectedAccount.value] : undefined;
+  if (entries && userAdminPendingRemoval.value) {
+    const idx = entries.indexOf(userAdminPendingRemoval.value);
+    if (idx > -1) entries.splice(idx, 1);
+  }
+  cancelRemoveUser();
+};
+
+const removeUserDialogActions = [
+  { text: 'Cancel', onClick: cancelRemoveUser, styleType: 'secondary' as const },
+  { text: 'Remove', onClick: confirmRemoveUser, type: 'destructive' as const },
+];
 
 const saveUserAdmin = () => {
   const errors = validateUserAdminForm(userAdminForm.value);

@@ -9,6 +9,7 @@ export interface StoredDocument {
   lastModifiedBy: string;
   status: string;
   category: string;
+  accountName: string;
 }
 
 export const useDocumentsStore = defineStore('documents', () => {
@@ -18,5 +19,9 @@ export const useDocumentsStore = defineStore('documents', () => {
     documents.value.push({ id: Date.now() + Math.floor(Math.random() * 1000), ...doc });
   }
 
-  return { documents, addDocument };
+  function removeDocument(id: number) {
+    documents.value = documents.value.filter(doc => doc.id !== id);
+  }
+
+  return { documents, addDocument, removeDocument };
 });

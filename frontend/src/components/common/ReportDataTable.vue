@@ -198,6 +198,7 @@ const emit = defineEmits<{
   'row-action': [payload: { action: string; item: any }];
   'toggle-cell': [payload: { key: string; item: any }];
   'click:filter': [];
+  'bulk-download': [items: any[]];
 }>();
 
 const props = withDefaults(defineProps<Props>(), {
@@ -250,8 +251,13 @@ watch(sortByState, (newVal) => {
 });
 
 const handleBulkDownload = () => {
-  // Placeholder — bulk download logic to be connected later
+  // Placeholder — bulk download logic to be connected later. Clears the selection
+  // immediately (rather than waiting on a real download to complete) so the bulk
+  // action bar disappears the moment "Download" is clicked, matching the fact that
+  // there's no real file transfer to wait on in this prototype.
+  emit('bulk-download', [...selected.value]);
   console.log('Bulk download triggered for:', selected.value);
+  clearSelection();
 };
 
 const clearSelection = () => {
