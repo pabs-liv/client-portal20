@@ -20,7 +20,7 @@
           <div class="search-bar-wrapper">
             <SearchBar
               @update:searchTerm="documentSearchTerm = $event"
-              placeholder="Search documents"
+              placeholder="Search by document name"
               :showFilterButton="false"
             />
           </div>
@@ -49,7 +49,8 @@
           @bulk-download="handleBulkDownload"
         >
           <template #empty-state>
-            <div class="doc-empty-state">
+            <div v-if="isFilteredToZero" class="doc-no-results">No records found</div>
+            <div v-else class="doc-empty-state">
               <img :src="EmptyStateImg" alt="No data" class="doc-empty-icon" />
               <p class="doc-empty-title">Nothing to see here</p>
               <p class="doc-empty-subtitle">No documents have been uploaded yet.</p>
@@ -382,20 +383,27 @@ const handleFilterPillClose = (pill: FilterPill) => {
   }
 };
 
+// The category's full set before search/advanced-filters are applied — used to tell
+// "genuinely no documents in this category" apart from "filtered/searched down to zero",
+// since those two states need different empty-state treatments (illustration+CTA vs.
+// plain "No records found", matching Billing's pattern).
+const categoryDocumentItems = computed(() => {
+  if (!selectedAccount.value) return [];
+  return combinedDocumentItems.value.filter(item =>
+    item.accountName === selectedAccountName.value && item.category === selectedTabKey.value
+  );
+});
+
 const filteredDocumentItems = computed(() => {
   if (!selectedAccount.value) return [];
 
-  let items = combinedDocumentItems.value.filter(item =>
-    item.accountName === selectedAccountName.value && item.category === selectedTabKey.value
-  );
+  let items = categoryDocumentItems.value;
 
+  // Search is scoped to Document Name only — Uploaded By already has its own
+  // Advanced Filter, and Type isn't a meaningful free-text search target.
   if (documentSearchTerm.value) {
     const q = documentSearchTerm.value.toLowerCase();
-    items = items.filter(item =>
-      item.documentName.toLowerCase().includes(q) ||
-      item.type.toLowerCase().includes(q) ||
-      item.lastModifiedBy.toLowerCase().includes(q)
-    );
+    items = items.filter(item => item.documentName.toLowerCase().includes(q));
   }
   if (appliedModifiedBy.value.length > 0) {
     items = items.filter(item => appliedModifiedBy.value.includes(item.lastModifiedBy));
@@ -411,6 +419,12 @@ const filteredDocumentItems = computed(() => {
 
   return items;
 });
+
+// True only when search/filters are the reason the table is empty — the category
+// itself has documents, they're just all filtered out right now.
+const isFilteredToZero = computed(() =>
+  categoryDocumentItems.value.length > 0 && filteredDocumentItems.value.length === 0
+);
 
 // Row actions — Download and Remove (requires confirmation before anything is deleted).
 const documentRowActions = [
@@ -709,6 +723,13 @@ html.dark .account-option:hover {
   background-color: transparent;
   border-color: $color-primary;
   color: $color-primary;
+}
+
+.doc-no-results {
+  text-align: center;
+  padding: $spacing-medium;
+  color: $color-text-secondary;
+  font-size: $font-size-body;
 }
 
 .doc-empty-state {

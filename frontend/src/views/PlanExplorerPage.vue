@@ -3319,6 +3319,7 @@ function confirmTocSubmit() {
       category: 'PHI Documents',
       accountName,
     });
+    showToast('File submitted. The Claims Analysis Team has been notified.', 'success');
   } else if (tocSubmitTarget.value === 'pa' && tocPriorAuthFile.value) {
     paPending.value = true;
     paTicketNumber.value = mockTicketNumber();
@@ -3331,6 +3332,7 @@ function confirmTocSubmit() {
       category: 'PHI Documents',
       accountName,
     });
+    showToast('File submitted. The PA Import Team has been notified.', 'success');
   }
   showTocSubmitModal.value = false;
   tocSubmitTarget.value = null;
