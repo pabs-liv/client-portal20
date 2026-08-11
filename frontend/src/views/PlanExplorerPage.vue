@@ -4465,8 +4465,8 @@ const idMailingCancelEdit = () => {
 
 // Card 4: Effective Dates
 const idEditingDates = ref(false);
-const idEffectiveStart = ref('');
-const idEffectiveEnd = ref('');
+const idEffectiveStart = ref('03/22/2026');
+const idEffectiveEnd = ref('12/31/2199');
 
 let idDatesSnapshot = { start: '', end: '' };
 const idDatesStartEdit = () => {
