@@ -2419,277 +2419,405 @@
 
                 <!-- Step 8: ID Cards -->
                 <template v-else-if="currentWizardStep === 7">
+
+                  <!-- Card 1: Vendor -->
                   <div class="ap-section">
                     <div class="ap-section-header">
-                      <h4 class="text-h4">ID Cards</h4>
+                      <h4 class="text-h4">Vendor</h4>
+                      <button v-if="!idEditingVendor" class="button button-thirtiary" @click="idVendorStartEdit">
+                        <Pencil :size="14" :stroke-width="1.5" />Edit
+                      </button>
                     </div>
-
-                  <!-- Vendor -->
-                  <div class="bl-section bl-section--no-gap">
-                    <div class="id-two-col-row">
-                      <Select
-                        v-model="idVendorType"
-                        :items="idVendorTypeOptions"
-                        label="Vendor type"
-                      />
-                      <TextField
-                        v-if="idVendorType === 'Internal'"
-                        model-value="Liviniti"
-                        label="Vendor name"
-                        :readonly="true"
-                      />
-                      <Autocomplete
-                        v-else-if="idVendorType === 'Carrier'"
-                        v-model="idCarrierVendorName"
-                        :items="idCarrierVendorOptions"
-                        label="Vendor name"
-                      />
+                    <div class="ap-fields">
+                      <template v-if="!idEditingVendor">
+                        <div class="ap-field-row ap-field-row--multi">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Vendor type</span>
+                            <span class="ap-field-value">{{ idVendorType }}</span>
+                          </div>
+                          <div v-if="idVendorNameDisplay" class="ap-field">
+                            <span class="ap-field-label">Vendor name</span>
+                            <span class="ap-field-value">{{ idVendorNameDisplay }}</span>
+                          </div>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <div class="id-two-col-row">
+                          <Select
+                            v-model="idVendorTypeDraft"
+                            :items="idVendorTypeOptions"
+                            label="Vendor type"
+                          />
+                          <Autocomplete
+                            v-if="idVendorTypeDraft === 'Carrier'"
+                            v-model="idCarrierVendorNameDraft"
+                            :items="idCarrierVendorOptions"
+                            label="Vendor name"
+                          />
+                        </div>
+                        <div class="ap-section-footer">
+                          <button class="button button-primary" @click="idVendorSaveEdit">Save Changes</button>
+                          <button class="button button-secondary" @click="idVendorCancelEdit">Cancel</button>
+                        </div>
+                      </template>
                     </div>
                   </div>
 
-                  <!-- Internal-only fields -->
-                  <div v-if="idVendorType === 'Internal'" class="id-internal-fields">
+                  <p v-if="idVendorType === 'N/A'" class="text-body bl-note">
+                    This account does not produce ID cards.
+                  </p>
 
-                    <!-- Combine Rx + File upload -->
-                    <div class="bl-section">
-                      <v-checkbox
-                        v-model="idCombineRxMedical"
-                        label="Combine Rx and Medical information"
-                        color="primary"
-                        density="compact"
-                        hide-details
-                      />
-                    </div>
+                  <template v-else>
 
-                    <div class="bl-section">
-                      <p class="lc-hcn-label">ID Card file upload</p>
-                      <FileUploader :show-document-type-selection="false" />
-                    </div>
-
-                    <!-- Send cards + Days to send -->
-                    <div class="bl-section">
-                      <div class="id-two-col-row id-two-col-row--checkbox-pair">
-                        <v-checkbox
-                          v-model="idSendCards"
-                          label="Send cards"
-                          color="primary"
-                          density="compact"
-                          hide-details
-                        />
-                        <TextField
-                          v-if="idSendCards"
-                          v-model="idDaysToSend"
-                          label="Days to send cards before"
-                        />
+                    <!-- Card 2: Card Details -->
+                    <div class="ap-section">
+                      <div class="ap-section-header">
+                        <h4 class="text-h4">Card Details</h4>
+                        <button v-if="!idEditingDetails" class="button button-thirtiary" @click="idDetailsStartEdit">
+                          <Pencil :size="14" :stroke-width="1.5" />Edit
+                        </button>
                       </div>
-                    </div>
-
-                    <!-- Processing ID + Person code characters -->
-                    <div class="bl-section">
-                      <div class="id-two-col-row">
-                        <Select
-                          v-model="idProcessingId"
-                          :items="idProcessingIdOptions"
-                          label="Processing ID"
-                        />
-                        <TextField
-                          v-model="idPersonCodeChars"
-                          label="Person code characters"
-                        />
-                      </div>
-                    </div>
-
-                    <div class="lc-section-divider" />
-
-                    <!-- Mailing Preference -->
-                    <h4 class="text-h4 bl-section-heading">Mailing Preference</h4>
-
-                    <div class="bl-section">
-                      <div class="id-two-col-row">
-                        <Select
-                          v-model="idInitialMailing"
-                          :items="idMailingOptions"
-                          label="Initial mailing preference"
-                          hint="Optional"
-                          persistent-hint
-                        />
-                        <Select
-                          v-model="idAdditionalCard"
-                          :items="idMailingOptions"
-                          label="Additional/new card"
-                          hint="Optional"
-                          persistent-hint
-                        />
-                      </div>
-                    </div>
-
-                    <!-- Attention -->
-                    <div class="bl-section">
-                      <TextField
-                        v-model="idAttention"
-                        label="Attention"
-                        hint="Optional"
-                        persistent-hint
-                      />
-                    </div>
-
-                    <!-- Mailing address -->
-                    <div class="bl-section">
-                      <TextField
-                        v-model="idMailingAddress"
-                        label="Mailing address"
-                        hint="Optional"
-                        persistent-hint
-                      />
-                    </div>
-
-                    <!-- Notes/Special instructions -->
-                    <div class="bl-section">
-                      <TextField
-                        v-model="idNotes"
-                        label="Notes/Special instructions"
-                        hint="Optional"
-                        persistent-hint
-                      />
-                    </div>
-
-                    <!-- Auto-generate cards -->
-                    <div class="bl-section">
-                      <p class="id-autogen-heading">Automatically generate cards when any of the following occur:</p>
-                      <div class="id-autogen-grid">
-                        <div class="id-autogen-item">
-                          <v-checkbox v-model="idAutoGenCards.nameChange" label="Name Change" color="primary" density="compact" hide-details />
-                        </div>
-                        <div class="id-autogen-item">
-                          <v-checkbox v-model="idAutoGenCards.addressChange" color="primary" density="compact" hide-details>
-                            <template #label>
-                              <span>Address Change <span class="id-autogen-sublabel">(Primary Cardholder ONLY)</span></span>
-                            </template>
-                          </v-checkbox>
-                        </div>
-                        <div class="id-autogen-item">
-                          <v-checkbox v-model="idAutoGenCards.dependentChange" color="primary" density="compact" hide-details>
-                            <template #label>
-                              <span>Dependent Change <span class="id-autogen-sublabel">(Added/Removed)</span></span>
-                            </template>
-                          </v-checkbox>
-                        </div>
-                        <div class="id-autogen-item">
-                          <v-checkbox v-model="idAutoGenCards.locationChange" label="Location Change" color="primary" density="compact" hide-details />
-                        </div>
-                        <div class="id-autogen-item">
-                          <v-checkbox v-model="idAutoGenCards.effectiveDateChange" label="Effective Date Change" color="primary" density="compact" hide-details />
-                        </div>
-                      </div>
-                    </div>
-
-                    <!-- Effective dates -->
-                    <div class="bl-section">
-                      <div class="id-two-col-row">
-                        <DatePicker v-model="idEffectiveStart" label="Effective start date" />
-                        <DatePicker v-model="idEffectiveEnd" label="Effective end date" />
-                      </div>
-                    </div>
-
-                  </div>
-
-                  <!-- Carrier-only fields -->
-                  <div v-else-if="idVendorType === 'Carrier'" class="id-internal-fields">
-
-                    <!-- Carrier disclaimer -->
-                    <div class="bl-section">
-                      <div class="id-carrier-kit__disclaimer">
-                        <div class="id-carrier-kit__disclaimer-icon">
-                          <TriangleAlert :size="16" :stroke-width="1.5" />
-                        </div>
-                        <span><strong>Please Note:</strong> Walgreens is unable to process Cardholder IDs and Group Numbers that contain special characters, i.e. dashes.</span>
-                      </div>
-                    </div>
-
-                    <!-- Carrier branding kit info -->
-                    <div class="bl-section">
-                      <div class="id-carrier-kit">
-                        <div class="id-carrier-kit__info">
-                          <div class="id-carrier-kit__header">
-                            <p class="lc-hcn-label">
-                              Carrier Branding Information
-                              <span class="id-carrier-kit__optional">(Optional)</span>
-                            </p>
-                            <div class="id-carrier-kit__download">
-                              <button class="button button-secondary id-carrier-kit__btn" @click="downloadCarrierKit">
-                                <CloudDownload :size="16" :stroke-width="1.5" />
-                                Download Kit
-                              </button>
-                              <span class="id-carrier-kit__hint">Includes print-ready templates · PDF + logo file · 4.2 MB</span>
+                      <div class="ap-fields">
+                        <template v-if="!idEditingDetails">
+                          <div class="ap-field-row ap-field-row--multi">
+                            <div class="ap-field">
+                              <span class="ap-field-label">Processing ID</span>
+                              <span class="ap-field-value">{{ idProcessingId }}</span>
+                            </div>
+                            <div class="ap-field">
+                              <span class="ap-field-label">Person code characters</span>
+                              <span class="ap-field-value">{{ idPersonCodeChars || '—' }}</span>
+                            </div>
+                            <div v-if="idVendorType === 'Liviniti'" class="ap-field">
+                              <span class="ap-field-label">Combine Rx and Medical information</span>
+                              <span class="ap-field-value">{{ idCombineRxMedical ? 'Yes' : 'No' }}</span>
                             </div>
                           </div>
-                          <div class="id-carrier-kit__logo-wrap">
-                            <img src="/icons/Liviniti-logo.svg" alt="Liviniti Logo" class="id-carrier-kit__logo" />
+                          <div class="ap-field-row">
+                            <div class="ap-field">
+                              <span class="ap-field-label">ID Card file</span>
+                              <span class="ap-field-value">{{ idCardFile || 'Not uploaded' }}</span>
+                            </div>
                           </div>
-                          <p class="wizard-step-description">
-                            Please provide the following information when producing your own ID cards:
-                          </p>
-                          <table class="id-carrier-kit__table">
-                            <tbody>
-                              <tr>
-                                <td class="id-carrier-kit__table-label">Liviniti Customer Service Phone Number:</td>
-                                <td class="id-carrier-kit__table-value">1.800.710.9341</td>
-                              </tr>
-                              <tr>
-                                <td class="id-carrier-kit__table-label">Liviniti Help Desk Phone Number:</td>
-                                <td class="id-carrier-kit__table-value">1.800.710.9341</td>
-                              </tr>
-                              <tr>
-                                <td class="id-carrier-kit__table-label">Liviniti Website URL:</td>
-                                <td class="id-carrier-kit__table-value">www.liviniti.com</td>
-                              </tr>
-                              <tr>
-                                <td class="id-carrier-kit__table-label">Rx BIN:</td>
-                                <td class="id-carrier-kit__table-value">015433</td>
-                              </tr>
-                              <tr>
-                                <td class="id-carrier-kit__table-label">Rx PCN:</td>
-                                <td class="id-carrier-kit__table-value">SSN</td>
-                              </tr>
-                              <tr>
-                                <td class="id-carrier-kit__table-label">Rx Group Number:</td>
-                                <td class="id-carrier-kit__table-value id-carrier-kit__table-value--note">The Rx Group # will mirror the Group # assigned by your administrator.</td>
-                              </tr>
-                              <tr>
-                                <td class="id-carrier-kit__table-label">Effective Date:</td>
-                                <td class="id-carrier-kit__table-value id-carrier-kit__table-value--note">The member's effective date.</td>
-                              </tr>
-                            </tbody>
-                          </table>
+                        </template>
+                        <template v-else>
+                          <div class="bl-section">
+                            <div class="id-two-col-row">
+                              <Select
+                                v-model="idProcessingId"
+                                :items="idProcessingIdOptions"
+                                label="Processing ID"
+                              />
+                              <TextField
+                                v-model="idPersonCodeChars"
+                                label="Person code characters"
+                              />
+                            </div>
+                          </div>
+                          <div v-if="idVendorType === 'Liviniti'" class="bl-section">
+                            <div class="ap-checkbox-row" style="cursor:pointer" @click="idCombineRxMedical = !idCombineRxMedical">
+                              <CheckSquare v-if="idCombineRxMedical" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                              <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                              <span class="ap-field-value">Combine Rx and Medical information</span>
+                            </div>
+                          </div>
+                          <div class="bl-section">
+                            <p class="lc-hcn-label">ID Card file upload</p>
+                            <template v-if="idCardFile && !idPendingCardFileRemoval">
+                              <v-chip color="primary" variant="flat" class="bl-file-chip">
+                                <Paperclip :size="12" :stroke-width="2" class="bl-file-chip-icon" />
+                                <span class="bl-file-chip-label">{{ idCardFile }}</span>
+                                <span class="bl-file-chip-close" @click.stop="idPendingCardFileRemoval = true"><X :size="10" :stroke-width="2.5" /></span>
+                              </v-chip>
+                            </template>
+                            <FileUploader v-else :show-document-type-selection="false" @file-selected="(name) => { idCardFile = name; idPendingCardFileRemoval = false }" />
+                          </div>
+                          <div class="ap-section-footer">
+                            <button class="button button-primary" @click="idDetailsSaveEdit">Save Changes</button>
+                            <button class="button button-secondary" @click="idDetailsCancelEdit">Cancel</button>
+                          </div>
+                        </template>
+                      </div>
+                    </div>
+
+                    <!-- Card 3: Mailing Preferences (Liviniti only) -->
+                    <div v-if="idVendorType === 'Liviniti'" class="ap-section">
+                      <div class="ap-section-header">
+                        <h4 class="text-h4">Mailing Preferences</h4>
+                        <button v-if="!idEditingMailing" class="button button-thirtiary" @click="idMailingStartEdit">
+                          <Pencil :size="14" :stroke-width="1.5" />Edit
+                        </button>
+                      </div>
+                      <div class="ap-fields">
+                        <template v-if="!idEditingMailing">
+                          <div class="ap-field-row ap-field-row--multi">
+                            <div class="ap-field">
+                              <span class="ap-field-label">Send cards</span>
+                              <span class="ap-field-value">{{ idSendCards ? 'Yes' : 'No' }}</span>
+                            </div>
+                            <div v-if="idSendCards" class="ap-field">
+                              <span class="ap-field-label">Days to send cards before</span>
+                              <span class="ap-field-value">{{ idDaysToSend || '—' }}</span>
+                            </div>
+                          </div>
+                          <div class="ap-field-row ap-field-row--multi">
+                            <div class="ap-field">
+                              <span class="ap-field-label">Initial mailing preference</span>
+                              <span class="ap-field-value">{{ idInitialMailing || '—' }}</span>
+                            </div>
+                            <div class="ap-field">
+                              <span class="ap-field-label">Additional/new card</span>
+                              <span class="ap-field-value">{{ idAdditionalCard || '—' }}</span>
+                            </div>
+                          </div>
+                          <div class="ap-field-row ap-field-row--multi">
+                            <div class="ap-field">
+                              <span class="ap-field-label">Attention</span>
+                              <span class="ap-field-value">{{ idAttention || '—' }}</span>
+                            </div>
+                            <div class="ap-field">
+                              <span class="ap-field-label">Mailing address</span>
+                              <span class="ap-field-value">{{ idMailingAddress || '—' }}</span>
+                            </div>
+                          </div>
+                          <div class="ap-field-row">
+                            <div class="ap-field">
+                              <span class="ap-field-label">Notes/Special instructions</span>
+                              <span class="ap-field-value">{{ idNotes || '—' }}</span>
+                            </div>
+                          </div>
+                          <div class="ap-field-row">
+                            <div class="ap-field">
+                              <span class="ap-field-label">Automatically generate cards when</span>
+                              <span class="ap-field-value">{{ idAutoGenSummary }}</span>
+                            </div>
+                          </div>
+                        </template>
+                        <template v-else>
+                          <!-- Send cards + Days to send -->
+                          <div class="bl-section">
+                            <div class="id-two-col-row id-two-col-row--checkbox-pair">
+                              <div class="ap-checkbox-row" style="cursor:pointer" @click="idSendCards = !idSendCards">
+                                <CheckSquare v-if="idSendCards" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                                <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                                <span class="ap-field-value">Send cards</span>
+                              </div>
+                              <TextField
+                                v-if="idSendCards"
+                                v-model="idDaysToSend"
+                                label="Days to send cards before"
+                              />
+                            </div>
+                          </div>
+
+                          <div class="bl-section">
+                            <div class="id-two-col-row">
+                              <Select
+                                v-model="idInitialMailing"
+                                :items="idMailingOptions"
+                                label="Initial mailing preference"
+                                hint="Optional"
+                                persistent-hint
+                              />
+                              <Select
+                                v-model="idAdditionalCard"
+                                :items="idMailingOptions"
+                                label="Additional/new card"
+                                hint="Optional"
+                                persistent-hint
+                              />
+                            </div>
+                          </div>
+
+                          <!-- Attention -->
+                          <div class="bl-section">
+                            <TextField
+                              v-model="idAttention"
+                              label="Attention"
+                              hint="Optional"
+                              persistent-hint
+                            />
+                          </div>
+
+                          <!-- Mailing address -->
+                          <div class="bl-section">
+                            <TextField
+                              v-model="idMailingAddress"
+                              label="Mailing address"
+                              hint="Optional"
+                              persistent-hint
+                            />
+                          </div>
+
+                          <!-- Notes/Special instructions -->
+                          <div class="bl-section">
+                            <TextField
+                              v-model="idNotes"
+                              label="Notes/Special instructions"
+                              hint="Optional"
+                              persistent-hint
+                            />
+                          </div>
+
+                          <!-- Auto-generate cards -->
+                          <div class="bl-section">
+                            <p class="id-autogen-heading">Automatically generate cards when any of the following occur:</p>
+                            <div class="id-autogen-grid">
+                              <div class="id-autogen-item">
+                                <div class="ap-checkbox-row" style="cursor:pointer" @click="idAutoGenCards.nameChange = !idAutoGenCards.nameChange">
+                                  <CheckSquare v-if="idAutoGenCards.nameChange" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                                  <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                                  <span class="ap-field-value">Name Change</span>
+                                </div>
+                              </div>
+                              <div class="id-autogen-item">
+                                <div class="ap-checkbox-row" style="cursor:pointer" @click="idAutoGenCards.addressChange = !idAutoGenCards.addressChange">
+                                  <CheckSquare v-if="idAutoGenCards.addressChange" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                                  <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                                  <span class="ap-field-value">Address Change <span class="id-autogen-sublabel">(Primary Cardholder ONLY)</span></span>
+                                </div>
+                              </div>
+                              <div class="id-autogen-item">
+                                <div class="ap-checkbox-row" style="cursor:pointer" @click="idAutoGenCards.dependentChange = !idAutoGenCards.dependentChange">
+                                  <CheckSquare v-if="idAutoGenCards.dependentChange" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                                  <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                                  <span class="ap-field-value">Dependent Change <span class="id-autogen-sublabel">(Added/Removed)</span></span>
+                                </div>
+                              </div>
+                              <div class="id-autogen-item">
+                                <div class="ap-checkbox-row" style="cursor:pointer" @click="idAutoGenCards.locationChange = !idAutoGenCards.locationChange">
+                                  <CheckSquare v-if="idAutoGenCards.locationChange" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                                  <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                                  <span class="ap-field-value">Location Change</span>
+                                </div>
+                              </div>
+                              <div class="id-autogen-item">
+                                <div class="ap-checkbox-row" style="cursor:pointer" @click="idAutoGenCards.effectiveDateChange = !idAutoGenCards.effectiveDateChange">
+                                  <CheckSquare v-if="idAutoGenCards.effectiveDateChange" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                                  <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                                  <span class="ap-field-value">Effective Date Change</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div class="ap-section-footer">
+                            <button class="button button-primary" @click="idMailingSaveEdit">Save Changes</button>
+                            <button class="button button-secondary" @click="idMailingCancelEdit">Cancel</button>
+                          </div>
+                        </template>
+                      </div>
+                    </div>
+
+                    <!-- Card 4: Effective Dates -->
+                    <div class="ap-section">
+                      <div class="ap-section-header">
+                        <h4 class="text-h4">Effective Dates</h4>
+                        <button v-if="!idEditingDates" class="button button-thirtiary" @click="idDatesStartEdit">
+                          <Pencil :size="14" :stroke-width="1.5" />Edit
+                        </button>
+                      </div>
+                      <div class="ap-fields">
+                        <template v-if="!idEditingDates">
+                          <div class="ap-field-row ap-field-row--multi">
+                            <div class="ap-field">
+                              <span class="ap-field-label">Effective start date</span>
+                              <span class="ap-field-value">{{ idEffectiveStart || '—' }}</span>
+                            </div>
+                            <div class="ap-field">
+                              <span class="ap-field-label">Effective end date</span>
+                              <span class="ap-field-value">{{ idEffectiveEnd || '—' }}</span>
+                            </div>
+                          </div>
+                        </template>
+                        <template v-else>
+                          <div class="bl-section">
+                            <p class="text-body bl-note">Start date defaults to the group's account start date; end date defaults to 12/31/2199. The value shown here is what saves to the card record.</p>
+                            <div class="id-two-col-row">
+                              <DatePicker v-model="idEffectiveStart" label="Effective start date" />
+                              <DatePicker v-model="idEffectiveEnd" label="Effective end date" />
+                            </div>
+                          </div>
+                          <div class="ap-section-footer">
+                            <button class="button button-primary" @click="idDatesSaveEdit">Save Changes</button>
+                            <button class="button button-secondary" @click="idDatesCancelEdit">Cancel</button>
+                          </div>
+                        </template>
+                      </div>
+                    </div>
+
+                    <!-- Card 5: Card Assets & Information (Carrier only — read-only reference) -->
+                    <div v-if="idVendorType === 'Carrier'" class="ap-section">
+                      <div class="ap-section-header">
+                        <h4 class="text-h4">Card Assets & Information</h4>
+                      </div>
+                      <div class="ap-fields">
+                        <div class="bl-section">
+                          <div class="id-carrier-kit__disclaimer">
+                            <div class="id-carrier-kit__disclaimer-icon">
+                              <TriangleAlert :size="16" :stroke-width="1.5" />
+                            </div>
+                            <span><strong>Please Note:</strong> Walgreens is unable to process Cardholder IDs and Group Numbers that contain special characters, i.e. dashes.</span>
+                          </div>
+                        </div>
+
+                        <div class="bl-section">
+                          <div class="id-carrier-kit">
+                            <div class="id-carrier-kit__info">
+                              <div class="id-carrier-kit__header">
+                                <p class="lc-hcn-label">Producing Your Own ID Cards</p>
+                                <div class="id-carrier-kit__download">
+                                  <button class="button button-secondary id-carrier-kit__btn" @click="downloadLivinitiLogo">
+                                    <CloudDownload :size="16" :stroke-width="1.5" />
+                                    Download Liviniti Logo
+                                  </button>
+                                </div>
+                              </div>
+                              <div class="id-carrier-kit__logo-wrap">
+                                <img src="/icons/Liviniti-logo.svg" alt="Liviniti Logo" class="id-carrier-kit__logo" />
+                              </div>
+                              <p class="wizard-step-description">
+                                Please provide the following information when producing your own ID cards:
+                              </p>
+                              <table class="id-carrier-kit__table">
+                                <tbody>
+                                  <tr>
+                                    <td class="id-carrier-kit__table-label">Liviniti Customer Service Phone Number:</td>
+                                    <td class="id-carrier-kit__table-value">+1 (800) 710-9341</td>
+                                  </tr>
+                                  <tr>
+                                    <td class="id-carrier-kit__table-label">Liviniti Help Desk Phone Number:</td>
+                                    <td class="id-carrier-kit__table-value">+1 (800) 710-9341</td>
+                                  </tr>
+                                  <tr>
+                                    <td class="id-carrier-kit__table-label">Liviniti Website URL:</td>
+                                    <td class="id-carrier-kit__table-value">www.liviniti.com</td>
+                                  </tr>
+                                  <tr>
+                                    <td class="id-carrier-kit__table-label">Rx BIN:</td>
+                                    <td class="id-carrier-kit__table-value">015433</td>
+                                  </tr>
+                                  <tr>
+                                    <td class="id-carrier-kit__table-label">Rx PCN:</td>
+                                    <td class="id-carrier-kit__table-value">SSN</td>
+                                  </tr>
+                                  <tr>
+                                    <td class="id-carrier-kit__table-label">Rx Group Number:</td>
+                                    <td class="id-carrier-kit__table-value id-carrier-kit__table-value--note">The Rx Group # will mirror the Group # assigned by your administrator.</td>
+                                  </tr>
+                                  <tr>
+                                    <td class="id-carrier-kit__table-label">Effective Date:</td>
+                                    <td class="id-carrier-kit__table-value id-carrier-kit__table-value--note">The member's effective date.</td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
 
-                    <!-- Processing ID + Person code characters -->
-                    <div class="bl-section">
-                      <div class="id-two-col-row">
-                        <Select
-                          v-model="idProcessingId"
-                          :items="idProcessingIdOptions"
-                          label="Processing ID"
-                        />
-                        <TextField
-                          v-model="idPersonCodeChars"
-                          label="Person code characters"
-                        />
-                      </div>
-                    </div>
-
-                    <!-- Effective dates -->
-                    <div class="bl-section">
-                      <div class="id-two-col-row">
-                        <DatePicker v-model="idEffectiveStart" label="Effective start date" />
-                        <DatePicker v-model="idEffectiveEnd" label="Effective end date" />
-                      </div>
-                    </div>
-
-                  </div>
-                  </div>
+                  </template>
 
                 </template>
 
@@ -4208,23 +4336,74 @@ const blNotesCancelEdit = () => {
 };
 
 // ─── Step 8: ID Cards ─────────────────────────────────────────────────────────
-const idVendorType = ref('Internal');
-const idVendorTypeOptions = ['Internal', 'Carrier', 'N/A'];
+
+// Card 1: Vendor — committed refs drive Cards 2-5 visibility; Draft refs are what
+// the Select/Autocomplete/TextField bind to while editing, so changing Vendor Type
+// does not cascade to the other cards until Save is clicked.
+const idEditingVendor = ref(false);
+const idVendorType = ref('Liviniti');
+const idVendorTypeDraft = ref('Liviniti');
+const idVendorTypeOptions = ['Liviniti', 'Carrier', 'N/A'];
 const idCarrierVendorName = ref('');
-const idCarrierVendorOptions = [
-  'Aetna', 'Anthem', 'Blue Cross Blue Shield', 'Cigna', 'CVS Caremark',
-  'Express Scripts', 'Humana', 'Medco', 'OptumRx', 'United Healthcare',
-];
-const downloadCarrierKit = () => {
-  console.log('Download carrier kit');
-  // Production: trigger zip download from server
+const idCarrierVendorNameDraft = ref('');
+const idCarrierVendorOptions = ['Acclaim Benefits', 'Benefit Advantage'];
+
+const idVendorNameDisplay = computed(() => {
+  if (idVendorType.value === 'Carrier') return idCarrierVendorName.value || '—';
+  return null;
+});
+
+const idVendorStartEdit = () => {
+  idVendorTypeDraft.value = idVendorType.value;
+  idCarrierVendorNameDraft.value = idCarrierVendorName.value;
+  idEditingVendor.value = true;
 };
+const idVendorSaveEdit = () => {
+  idVendorType.value = idVendorTypeDraft.value;
+  idCarrierVendorName.value = idCarrierVendorNameDraft.value;
+  idEditingVendor.value = false;
+};
+const idVendorCancelEdit = () => {
+  idEditingVendor.value = false;
+};
+
+// Card 2: Card Details
+const idEditingDetails = ref(false);
 const idCombineRxMedical = ref(false);
-const idSendCards = ref(false);
-const idDaysToSend = ref('');
 const idProcessingId = ref('Cardholder ID');
 const idProcessingIdOptions = ['Cardholder ID', 'Alternate ID', 'Newtech Family ID'];
 const idPersonCodeChars = ref('3');
+const idCardFile = ref<string | null>(null);
+const idPendingCardFileRemoval = ref(false);
+
+let idDetailsSnapshot = { combineRxMedical: false, processingId: 'Cardholder ID', personCodeChars: '3', cardFile: null as string | null };
+const idDetailsStartEdit = () => {
+  idDetailsSnapshot = {
+    combineRxMedical: idCombineRxMedical.value,
+    processingId: idProcessingId.value,
+    personCodeChars: idPersonCodeChars.value,
+    cardFile: idCardFile.value,
+  };
+  idEditingDetails.value = true;
+};
+const idDetailsSaveEdit = () => {
+  if (idPendingCardFileRemoval.value) idCardFile.value = null;
+  idPendingCardFileRemoval.value = false;
+  idEditingDetails.value = false;
+};
+const idDetailsCancelEdit = () => {
+  idCombineRxMedical.value = idDetailsSnapshot.combineRxMedical;
+  idProcessingId.value = idDetailsSnapshot.processingId;
+  idPersonCodeChars.value = idDetailsSnapshot.personCodeChars;
+  idCardFile.value = idDetailsSnapshot.cardFile;
+  idPendingCardFileRemoval.value = false;
+  idEditingDetails.value = false;
+};
+
+// Card 3: Mailing Preferences (Liviniti only)
+const idEditingMailing = ref(false);
+const idSendCards = ref(false);
+const idDaysToSend = ref('');
 const idInitialMailing = ref('');
 const idAdditionalCard = ref('');
 const idMailingOptions = ['Mail to member', 'Mail to employer', 'Mail to HR', 'No mailing'];
@@ -4238,8 +4417,76 @@ const idAutoGenCards = ref({
   locationChange: true,
   effectiveDateChange: true,
 });
-const idEffectiveStart = ref('');
-const idEffectiveEnd = ref('');
+
+const idAutoGenLabels: Record<string, string> = {
+  nameChange: 'Name Change',
+  addressChange: 'Address Change',
+  dependentChange: 'Dependent Change',
+  locationChange: 'Location Change',
+  effectiveDateChange: 'Effective Date Change',
+};
+const idAutoGenSummary = computed(() => {
+  const active = Object.entries(idAutoGenCards.value).filter(([, v]) => v).map(([k]) => idAutoGenLabels[k]);
+  return active.length ? active.join(', ') : 'None';
+});
+
+let idMailingSnapshot = {
+  sendCards: false, daysToSend: '', initialMailing: '', additionalCard: '',
+  attention: '', mailingAddress: '', notes: '',
+  autoGenCards: { nameChange: true, addressChange: true, dependentChange: true, locationChange: true, effectiveDateChange: true },
+};
+const idMailingStartEdit = () => {
+  idMailingSnapshot = {
+    sendCards: idSendCards.value,
+    daysToSend: idDaysToSend.value,
+    initialMailing: idInitialMailing.value,
+    additionalCard: idAdditionalCard.value,
+    attention: idAttention.value,
+    mailingAddress: idMailingAddress.value,
+    notes: idNotes.value,
+    autoGenCards: { ...idAutoGenCards.value },
+  };
+  idEditingMailing.value = true;
+};
+const idMailingSaveEdit = () => {
+  idEditingMailing.value = false;
+};
+const idMailingCancelEdit = () => {
+  idSendCards.value = idMailingSnapshot.sendCards;
+  idDaysToSend.value = idMailingSnapshot.daysToSend;
+  idInitialMailing.value = idMailingSnapshot.initialMailing;
+  idAdditionalCard.value = idMailingSnapshot.additionalCard;
+  idAttention.value = idMailingSnapshot.attention;
+  idMailingAddress.value = idMailingSnapshot.mailingAddress;
+  idNotes.value = idMailingSnapshot.notes;
+  idAutoGenCards.value = { ...idMailingSnapshot.autoGenCards };
+  idEditingMailing.value = false;
+};
+
+// Card 4: Effective Dates
+const idEditingDates = ref(false);
+const idEffectiveStart = ref('03/22/2026');
+const idEffectiveEnd = ref('12/31/2199');
+
+let idDatesSnapshot = { start: '', end: '' };
+const idDatesStartEdit = () => {
+  idDatesSnapshot = { start: idEffectiveStart.value, end: idEffectiveEnd.value };
+  idEditingDates.value = true;
+};
+const idDatesSaveEdit = () => {
+  idEditingDates.value = false;
+};
+const idDatesCancelEdit = () => {
+  idEffectiveStart.value = idDatesSnapshot.start;
+  idEffectiveEnd.value = idDatesSnapshot.end;
+  idEditingDates.value = false;
+};
+
+// Card 5: Card Assets & Information (Carrier only — read-only reference, no edit state)
+const downloadLivinitiLogo = () => {
+  console.log('Download Liviniti logo');
+  // Production: trigger static asset download
+};
 
 const lcOverrides = [
   'Vacation Supply',
@@ -7369,18 +7616,6 @@ watch(selectedAccount, (newVal) => {
     flex-shrink: 0;
   }
 
-  &__hint {
-    font-size: $font-size-small;
-    color: $color-neutral-disabled;
-  }
-
-  &__optional {
-    font-weight: $font-weight-normal;
-    color: $color-neutral-disabled;
-    font-size: $font-size-small;
-    margin-left: $spacing-xsmall;
-  }
-
   &__table {
     width: 100%;
     border-collapse: collapse;
@@ -7450,32 +7685,6 @@ watch(selectedAccount, (newVal) => {
     svg {
       color: $color-neutral-white;
     }
-  }
-}
-
-.id-internal-fields {
-  :deep(.v-selection-control__input input) {
-    opacity: 1 !important;
-    width: 16px !important;
-  }
-
-  :deep(.v-selection-control__wrapper) {
-    color: $color-primary !important;
-    opacity: 1 !important;
-  }
-
-  :deep(.v-checkbox .v-icon) {
-    opacity: 1 !important;
-  }
-
-  :deep(.v-checkbox .v-selection-control__off-icon) {
-    color: $color-border !important;
-    opacity: 1 !important;
-  }
-
-  :deep(.v-checkbox .v-selection-control__on-icon) {
-    color: $color-primary !important;
-    opacity: 1 !important;
   }
 }
 
