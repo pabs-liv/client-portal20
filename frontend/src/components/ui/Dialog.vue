@@ -14,19 +14,15 @@
         <p v-if="text">{{ text }}</p>
         <slot></slot>
       </v-card-text>
-      <v-card-actions class="justify-end">
-        <v-btn
-          v-for="(action, index) in (showSecondaryButton ? actions : [actions[actions.length - 1]])"
+      <v-card-actions class="justify-end gap-small">
+        <Button
+          v-for="(action, index) in (showSecondaryButton ? actions : actions.slice(-1))"
           :key="index"
-          :color="action.styleType === 'primary' ? 'primary' : action.styleType === 'secondary' ? 'primary' : action.type === 'destructive' ? 'error' : action.color"
-          :variant="action.styleType === 'primary' ? 'elevated' : action.styleType === 'secondary' ? 'outlined' : action.variant || 'text'"
-          :rounded="true"
-          :class="{'dialog-button': true, 'text-white': action.styleType === 'primary' || action.type === 'destructive'}"
-          :disabled="action.disabled"
+          :variant="action.type === 'destructive' ? 'alert' : action.styleType === 'secondary' ? 'secondary' : 'primary'"
+          :label="action.text"
+          :disabled="action.disabled ?? false"
           @click="action.onClick"
-        >
-          {{ action.text }}
-        </v-btn>
+        />
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -35,20 +31,14 @@
 <script setup lang="ts">
 import { defineProps, defineEmits } from 'vue';
 import { Icon as LucideIcon } from 'lucide-vue-next';
-
-interface Header {
-  title: string;
-  key: string;
-  [key: string]: any;
-}
+import Button from '@/components/ui/Button.vue';
 
 interface Action {
   text: string;
   onClick: () => void;
-  color?: string;
-  variant?: 'text' | 'flat' | 'elevated' | 'tonal' | 'outlined' | 'plain';
   type?: 'default' | 'destructive';
   styleType?: 'primary' | 'secondary' | 'text' | 'destructive';
+  disabled?: boolean;
 }
 
 interface Props {
@@ -76,8 +66,7 @@ defineEmits(['update:modelValue']);
 .dialog-card {
   border: 1px solid $color-border;
 
-  .v-card-title,
-  .v-btn {
+  .v-card-title {
     letter-spacing: normal;
     white-space: normal;
   }
@@ -87,9 +76,7 @@ defineEmits(['update:modelValue']);
   }
 }
 
-.v-btn.dialog-button {
-  text-transform: none;
-  padding-left: $spacing-small;
-  padding-right: $spacing-small;
+.gap-small {
+  gap: $spacing-small;
 }
 </style>

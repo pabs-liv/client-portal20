@@ -21,14 +21,10 @@
     </template>
     <template #item="{ item, props }">
       <v-list-item v-bind="props" :title="item.title">
-        <template v-if="multiple" #prepend="{ isSelected }">
-          <v-list-item-action start>
-            <v-checkbox-btn
-              :model-value="isSelected"
-              density="compact"
-              tabindex="-1"
-            />
-          </v-list-item-action>
+        <template v-if="multiple" #prepend>
+          <div class="ac-check-box" :class="{ 'ac-check-box--checked': Array.isArray(modelValue) && modelValue.includes(item.value) }">
+            <Check v-if="Array.isArray(modelValue) && modelValue.includes(item.value)" :size="12" :stroke-width="2.5" />
+          </div>
         </template>
       </v-list-item>
     </template>
@@ -40,7 +36,7 @@
 
 <script setup lang="ts">
 import { VAutocomplete } from 'vuetify/components';
-import { ChevronDown, X } from 'lucide-vue-next';
+import { ChevronDown, X, Check } from 'lucide-vue-next';
 
 defineOptions({
   inheritAttrs: false,
@@ -78,11 +74,32 @@ defineEmits(['update:modelValue']);
   }
 }
 
-.ac-chip {
-  display: inline-flex;
+.ac-check-box {
+  width: 18px;
+  height: 18px;
+  border: 2px solid $color-neutral-disabled;
+  border-radius: 3px;
+  display: flex;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
+  margin-right: $spacing-xsmall;
+  flex-shrink: 0;
+
+  &--checked {
+    background-color: $color-primary;
+    border-color: $color-primary;
+    color: $color-neutral-white;
+  }
+}
+
+.ac-chip {
   padding: 0 8px;
+
+  :deep(.v-chip__content) {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
 
   .ac-chip-label {
     color: $color-neutral-white;

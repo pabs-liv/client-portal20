@@ -293,6 +293,394 @@
                     </div>
                   </div>
 
+                  <!-- Section: Client Contacts -->
+                  <v-card class="ap-contacts-card">
+                    <v-card-title class="d-flex align-center justify-space-between">
+                      <span class="text-h4">Client Contacts</span>
+                      <button v-if="apClientContacts.length > 0" class="button button-primary" @click="apShowAddContactDialog = true">+ Add Contact</button>
+                    </v-card-title>
+                    <v-card-text>
+                      <div v-if="apClientContacts.length > 0">
+                        <ReportDataTable
+                          :headers="apClientContactHeaders"
+                          :items="apClientContacts"
+                          :show-search-bar="false"
+                          :show-filter-button="false"
+                          :show-filter-pills="false"
+                          :show-selection-checkboxes="false"
+                          :show-row-actions="true"
+                          :row-action-items="apClientContactRowActions"
+                          :show-table-footer="false"
+                          :show-expand="true"
+                          item-value="email"
+                          @row-action="handleApClientContactRowAction"
+                        >
+                          <template #expanded-row="{ item, columns }">
+                            <tr>
+                              <td :colspan="columns.length" class="prog-detail-td">
+                                <div class="prog-detail">
+                                  <template v-if="!item.portalAccess">
+                                    <p class="prog-detail-value">No Client Portal access.</p>
+                                  </template>
+                                  <template v-else>
+                                    <div class="prog-detail-cols">
+                                      <div>
+                                        <p class="prog-detail-label">Main Point of Contact</p>
+                                        <p class="prog-detail-value">{{ item.mainPointOfContact ? 'Yes' : 'No' }}</p>
+                                      </div>
+                                      <div>
+                                        <p class="prog-detail-label">Survey Contact</p>
+                                        <p class="prog-detail-value">{{ item.surveyContact ? 'Yes' : 'No' }}</p>
+                                      </div>
+                                      <div>
+                                        <p class="prog-detail-label">Allow PHI Access</p>
+                                        <p class="prog-detail-value">{{ item.role === 'Administrator' ? 'Yes' : (item.allowPhi ? 'Yes' : 'No') }}</p>
+                                      </div>
+                                    </div>
+                                    <p class="prog-detail-label">Permissions</p>
+                                    <p class="prog-detail-value">{{ apPermissionsSummary(item.role, item.permissions) }}</p>
+                                  </template>
+                                </div>
+                              </td>
+                            </tr>
+                          </template>
+                        </ReportDataTable>
+                      </div>
+                      <div v-else class="nc-empty-state">
+                        <img :src="EmptyStateImg" alt="No data" class="nc-empty-icon" />
+                        <p class="nc-empty-title">Nothing to see here</p>
+                        <p class="nc-empty-subtitle">No client contacts have been added yet.</p>
+                        <button class="button button-secondary" @click="apShowAddContactDialog = true">+ Add Contact</button>
+                      </div>
+                    </v-card-text>
+                  </v-card>
+
+                  <!-- Add Client Contact Dialog -->
+                  <Dialog
+                    v-model="apShowAddContactDialog"
+                    heading="Add Client Contact"
+                    :show-secondary-button="true"
+                    :actions="apContactDialogActions"
+                  >
+                    <v-row class="mt-1">
+                      <v-col cols="6"><TextField v-model="apContactForm.firstName" label="First Name" :error-messages="apContactErrors.firstName" /></v-col>
+                      <v-col cols="6"><TextField v-model="apContactForm.lastName" label="Last Name" :error-messages="apContactErrors.lastName" /></v-col>
+                    </v-row>
+                    <v-row>
+                      <v-col cols="12"><TextField v-model="apContactForm.title" label="Title" /></v-col>
+                    </v-row>
+                    <v-row>
+                      <v-col cols="12"><TextField v-model="apContactForm.email" label="Email" :error-messages="apContactErrors.email" /></v-col>
+                    </v-row>
+                    <div v-for="(ph, idx) in apContactForm.phones" :key="idx" class="nl-repeatable-row">
+                      <div v-if="apContactForm.phones.length > 1" class="nl-repeatable-row-header">
+                        <span class="nl-repeatable-row-label">Phone {{ idx + 1 }}</span>
+                        <button class="nl-remove-row-btn" @click="apContactForm.phones.splice(idx, 1); if (apContactForm.primaryPhoneIdx >= apContactForm.phones.length) apContactForm.primaryPhoneIdx = 0" title="Remove">
+                          <Trash2 :size="16" :stroke-width="1.75" />
+                        </button>
+                      </div>
+                      <v-row>
+                        <v-col cols="5"><TextField v-model="ph.number" label="Number" /></v-col>
+                        <v-col cols="4">
+                          <Select v-model="ph.type" :items="apPhoneTypes" label="Type" />
+                        </v-col>
+                        <v-col cols="3"><TextField v-model="ph.ext" label="Ext" /></v-col>
+                      </v-row>
+                      <label class="ap-radio-option">
+                        <input type="radio" :value="idx" v-model="apContactForm.primaryPhoneIdx" class="ap-radio-input" />
+                        <span class="ap-radio-custom" :class="{ active: apContactForm.primaryPhoneIdx === idx }">
+                          <span v-if="apContactForm.primaryPhoneIdx === idx" class="ap-radio-dot" />
+                        </span>
+                        <span class="ap-radio-label">Primary</span>
+                      </label>
+                      <v-divider v-if="idx < apContactForm.phones.length - 1" class="nl-row-divider" />
+                    </div>
+                    <button v-if="apContactForm.phones.length < 3" class="nl-add-link" @click="apContactForm.phones.push(apNewPhone())">+ Add Phone Number</button>
+
+                    <v-divider class="my-4" />
+                    <h5 class="ap-subsection-heading">Client Portal Access</h5>
+                    <div class="ap-checkbox-toggle" @click="apContactForm.portalAccess = !apContactForm.portalAccess">
+                      <CheckSquare v-if="apContactForm.portalAccess" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                      <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                      <span class="text-small">Grant Client Portal access</span>
+                    </div>
+                    <template v-if="apContactForm.portalAccess">
+                      <v-row class="mt-2">
+                        <v-col cols="12" sm="6"><Select v-model="apContactForm.role" :items="apClientRoleOptions" label="Role" /></v-col>
+                      </v-row>
+                      <p v-if="apContactForm.role === 'Administrator'" class="text-small ap-role-note">Administrators have full access to all Client Portal features, including PHI — permissions below don't apply.</p>
+                      <template v-else>
+                        <h6 class="ap-subsection-heading">Permissions</h6>
+                        <div class="ap-permission-grid">
+                          <div v-for="perm in apPermissionOptions" :key="perm.key" class="ap-checkbox-toggle" @click="apContactForm.permissions[perm.key] = !apContactForm.permissions[perm.key]">
+                            <CheckSquare v-if="apContactForm.permissions[perm.key]" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                            <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                            <span class="text-small">{{ perm.label }}</span>
+                          </div>
+                        </div>
+                        <div class="ap-checkbox-toggle" @click="apContactForm.allowPhi = !apContactForm.allowPhi">
+                          <CheckSquare v-if="apContactForm.allowPhi" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                          <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                          <span class="text-small">Allow PHI access</span>
+                        </div>
+                      </template>
+                      <h6 class="ap-subsection-heading">Contact Designations</h6>
+                      <div
+                        class="ap-checkbox-toggle"
+                        :class="{ 'ap-checkbox-toggle--disabled': apOtherContactIsMainPoc(apClientContacts, -1) }"
+                        @click="!apOtherContactIsMainPoc(apClientContacts, -1) && (apContactForm.mainPointOfContact = !apContactForm.mainPointOfContact)"
+                      >
+                        <CheckSquare v-if="apContactForm.mainPointOfContact" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                        <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                        <span class="text-small">Main Point of Contact</span>
+                      </div>
+                      <p v-if="apOtherContactIsMainPoc(apClientContacts, -1)" class="text-small ap-role-note">{{ apOtherContactIsMainPoc(apClientContacts, -1) }} is already the Main Point of Contact for this account. Remove that designation from them before assigning a new one.</p>
+                      <div class="ap-checkbox-toggle" @click="apContactForm.surveyContact = !apContactForm.surveyContact">
+                        <CheckSquare v-if="apContactForm.surveyContact" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                        <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                        <span class="text-small">Survey Contact</span>
+                      </div>
+                    </template>
+                  </Dialog>
+
+                  <!-- Edit Client Contact Dialog -->
+                  <Dialog
+                    v-model="apShowEditContactDialog"
+                    heading="Edit Client Contact"
+                    :show-secondary-button="true"
+                    :actions="apEditContactDialogActions"
+                  >
+                    <v-row class="mt-1">
+                      <v-col cols="6"><TextField v-model="apEditContactForm.firstName" label="First Name" :error-messages="apEditContactErrors.firstName" /></v-col>
+                      <v-col cols="6"><TextField v-model="apEditContactForm.lastName" label="Last Name" :error-messages="apEditContactErrors.lastName" /></v-col>
+                    </v-row>
+                    <v-row>
+                      <v-col cols="12"><TextField v-model="apEditContactForm.title" label="Title" /></v-col>
+                    </v-row>
+                    <v-row>
+                      <v-col cols="12"><TextField v-model="apEditContactForm.email" label="Email" :error-messages="apEditContactErrors.email" /></v-col>
+                    </v-row>
+                    <div v-for="(ph, idx) in apEditContactForm.phones" :key="idx" class="nl-repeatable-row">
+                      <div v-if="apEditContactForm.phones.length > 1" class="nl-repeatable-row-header">
+                        <span class="nl-repeatable-row-label">Phone {{ idx + 1 }}</span>
+                        <button class="nl-remove-row-btn" @click="apEditContactForm.phones.splice(idx, 1); if (apEditContactForm.primaryPhoneIdx >= apEditContactForm.phones.length) apEditContactForm.primaryPhoneIdx = 0" title="Remove">
+                          <Trash2 :size="16" :stroke-width="1.75" />
+                        </button>
+                      </div>
+                      <v-row>
+                        <v-col cols="5"><TextField v-model="ph.number" label="Number" /></v-col>
+                        <v-col cols="4">
+                          <Select v-model="ph.type" :items="apPhoneTypes" label="Type" />
+                        </v-col>
+                        <v-col cols="3"><TextField v-model="ph.ext" label="Ext" /></v-col>
+                      </v-row>
+                      <label class="ap-radio-option">
+                        <input type="radio" :value="idx" v-model="apEditContactForm.primaryPhoneIdx" class="ap-radio-input" />
+                        <span class="ap-radio-custom" :class="{ active: apEditContactForm.primaryPhoneIdx === idx }">
+                          <span v-if="apEditContactForm.primaryPhoneIdx === idx" class="ap-radio-dot" />
+                        </span>
+                        <span class="ap-radio-label">Primary</span>
+                      </label>
+                      <v-divider v-if="idx < apEditContactForm.phones.length - 1" class="nl-row-divider" />
+                    </div>
+                    <button v-if="apEditContactForm.phones.length < 3" class="nl-add-link" @click="apEditContactForm.phones.push(apNewPhone())">+ Add Phone Number</button>
+
+                    <v-divider class="my-4" />
+                    <h5 class="ap-subsection-heading">Client Portal Access</h5>
+                    <div class="ap-checkbox-toggle" @click="apEditContactForm.portalAccess = !apEditContactForm.portalAccess">
+                      <CheckSquare v-if="apEditContactForm.portalAccess" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                      <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                      <span class="text-small">Grant Client Portal access</span>
+                    </div>
+                    <template v-if="apEditContactForm.portalAccess">
+                      <v-row class="mt-2">
+                        <v-col cols="12" sm="6"><Select v-model="apEditContactForm.role" :items="apClientRoleOptions" label="Role" /></v-col>
+                      </v-row>
+                      <p v-if="apEditContactForm.role === 'Administrator'" class="text-small ap-role-note">Administrators have full access to all Client Portal features, including PHI — permissions below don't apply.</p>
+                      <template v-else>
+                        <h6 class="ap-subsection-heading">Permissions</h6>
+                        <div class="ap-permission-grid">
+                          <div v-for="perm in apPermissionOptions" :key="perm.key" class="ap-checkbox-toggle" @click="apEditContactForm.permissions[perm.key] = !apEditContactForm.permissions[perm.key]">
+                            <CheckSquare v-if="apEditContactForm.permissions[perm.key]" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                            <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                            <span class="text-small">{{ perm.label }}</span>
+                          </div>
+                        </div>
+                        <div class="ap-checkbox-toggle" @click="apEditContactForm.allowPhi = !apEditContactForm.allowPhi">
+                          <CheckSquare v-if="apEditContactForm.allowPhi" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                          <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                          <span class="text-small">Allow PHI access</span>
+                        </div>
+                      </template>
+                      <h6 class="ap-subsection-heading">Contact Designations</h6>
+                      <div
+                        class="ap-checkbox-toggle"
+                        :class="{ 'ap-checkbox-toggle--disabled': apOtherContactIsMainPoc(apClientContacts, apEditingContactIndex) }"
+                        @click="!apOtherContactIsMainPoc(apClientContacts, apEditingContactIndex) && (apEditContactForm.mainPointOfContact = !apEditContactForm.mainPointOfContact)"
+                      >
+                        <CheckSquare v-if="apEditContactForm.mainPointOfContact" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                        <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                        <span class="text-small">Main Point of Contact</span>
+                      </div>
+                      <p v-if="apOtherContactIsMainPoc(apClientContacts, apEditingContactIndex)" class="text-small ap-role-note">{{ apOtherContactIsMainPoc(apClientContacts, apEditingContactIndex) }} is already the Main Point of Contact for this account. Remove that designation from them before assigning a new one.</p>
+                      <div class="ap-checkbox-toggle" @click="apEditContactForm.surveyContact = !apEditContactForm.surveyContact">
+                        <CheckSquare v-if="apEditContactForm.surveyContact" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                        <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                        <span class="text-small">Survey Contact</span>
+                      </div>
+                    </template>
+                  </Dialog>
+
+                  <!-- Remove Contact Confirmation Dialog (shared by Client + Vendor Contacts) -->
+                  <Dialog
+                    v-model="apShowRemoveContactDialog"
+                    :icon="Trash2"
+                    heading="Remove Contact"
+                    :text="`Are you sure you want to remove ${apPendingRemoveContact?.name} from this account?`"
+                    :actions="apRemoveContactDialogActions"
+                    :show-secondary-button="true"
+                  />
+
+                  <!-- Section: Vendor Contacts -->
+                  <v-card class="ap-contacts-card">
+                    <v-card-title class="d-flex align-center justify-space-between">
+                      <span class="text-h4">Vendor Contacts</span>
+                      <button v-if="apVendorContacts.length > 0" class="button button-primary" @click="apShowVendorContactDialog = true">+ Add Contact</button>
+                    </v-card-title>
+                    <v-card-text>
+                      <div v-if="apVendorContacts.length > 0">
+                        <ReportDataTable
+                          :headers="apVendorContactHeaders"
+                          :items="apVendorContacts"
+                          :show-search-bar="false"
+                          :show-filter-button="false"
+                          :show-filter-pills="false"
+                          :show-selection-checkboxes="false"
+                          :show-row-actions="true"
+                          :row-action-items="apVendorContactRowActions"
+                          :show-table-footer="false"
+                          :show-expand="true"
+                          item-value="email"
+                          @row-action="handleApVendorContactRowAction"
+                        >
+                          <template #expanded-row="{ item, columns }">
+                            <tr>
+                              <td :colspan="columns.length" class="prog-detail-td">
+                                <div class="prog-detail">
+                                  <div class="prog-detail-cols">
+                                    <div>
+                                      <p class="prog-detail-label">Survey Contact</p>
+                                      <p class="prog-detail-value">{{ item.surveyContact ? 'Yes' : 'No' }}</p>
+                                    </div>
+                                    <div>
+                                      <p class="prog-detail-label">Allow PHI Access</p>
+                                      <p class="prog-detail-value">{{ item.allowPhi ? 'Yes' : 'No' }}</p>
+                                    </div>
+                                  </div>
+                                  <p class="prog-detail-label">Permissions</p>
+                                  <p class="prog-detail-value">{{ apPermissionsSummary(item.role, item.permissions) }}</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </template>
+                        </ReportDataTable>
+                      </div>
+                      <div v-else class="nc-empty-state">
+                        <img :src="EmptyStateImg" alt="No data" class="nc-empty-icon" />
+                        <p class="nc-empty-title">Nothing to see here</p>
+                        <p class="nc-empty-subtitle">No vendor contacts have been added yet.</p>
+                        <button class="button button-secondary" @click="apShowVendorContactDialog = true">+ Add Contact</button>
+                      </div>
+                    </v-card-text>
+                  </v-card>
+
+                  <!-- Add Vendor Contact Dialog -->
+                  <Dialog
+                    v-model="apShowVendorContactDialog"
+                    heading="Add Vendor Contact"
+                    :show-secondary-button="true"
+                    :actions="apVendorContactDialogActions"
+                  >
+                    <p class="text-body mb-4">The contact below is from a vendor already linked to this account.</p>
+                    <Autocomplete
+                      v-model="apVendorContactSelection"
+                      :items="apVendorContactOptions"
+                      :multiple="false"
+                      label="Select vendor contact"
+                    />
+
+                    <v-divider class="my-4" />
+                    <h5 class="ap-subsection-heading">Client Portal Access</h5>
+                    <p class="text-small ap-role-note">External vendors must be defined on the applicable agreement and have signed the required data transfer agreement before Client Portal access is granted.</p>
+                    <v-row class="mt-1">
+                      <v-col cols="12" sm="6"><Select v-model="apVendorRoleSelection" :items="apVendorRoleOptions" label="Business Role" /></v-col>
+                    </v-row>
+                    <h6 class="ap-subsection-heading">Permissions</h6>
+                    <div class="ap-permission-grid">
+                      <div v-for="perm in apPermissionOptions" :key="perm.key" class="ap-checkbox-toggle" @click="apVendorPermissions[perm.key] = !apVendorPermissions[perm.key]">
+                        <CheckSquare v-if="apVendorPermissions[perm.key]" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                        <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                        <span class="text-small">{{ perm.label }}</span>
+                      </div>
+                    </div>
+                    <div class="ap-checkbox-toggle" @click="apVendorAllowPhi = !apVendorAllowPhi">
+                      <CheckSquare v-if="apVendorAllowPhi" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                      <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                      <span class="text-small">Allow PHI access</span>
+                    </div>
+                    <h6 class="ap-subsection-heading">Contact Designations</h6>
+                    <div class="ap-checkbox-toggle" @click="apVendorSurveyContact = !apVendorSurveyContact">
+                      <CheckSquare v-if="apVendorSurveyContact" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                      <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                      <span class="text-small">Survey Contact</span>
+                    </div>
+                    <div class="ap-checkbox-toggle mt-3" @click="apVendorAckConfirmed = !apVendorAckConfirmed">
+                      <CheckSquare v-if="apVendorAckConfirmed" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                      <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                      <span class="text-small">I confirm this external vendor has signed the required data transfer agreement.</span>
+                    </div>
+                  </Dialog>
+
+                  <!-- Edit Vendor Contact Dialog -->
+                  <Dialog
+                    v-model="apShowEditVendorContactDialog"
+                    :heading="`Edit Vendor Contact — ${apEditingVendorContactName}`"
+                    :show-secondary-button="true"
+                    :actions="apEditVendorContactDialogActions"
+                  >
+                    <div class="ap-field mb-3">
+                      <span class="ap-field-label">Name</span>
+                      <span class="ap-field-value">{{ apEditingVendorContactName }}</span>
+                    </div>
+                    <v-row class="mt-1">
+                      <v-col cols="12" sm="6"><Select v-model="apEditVendorContactForm.role" :items="apVendorRoleOptions" label="Business Role" /></v-col>
+                    </v-row>
+                    <h6 class="ap-subsection-heading">Permissions</h6>
+                    <div class="ap-permission-grid">
+                      <div v-for="perm in apPermissionOptions" :key="perm.key" class="ap-checkbox-toggle" @click="apEditVendorContactForm.permissions[perm.key] = !apEditVendorContactForm.permissions[perm.key]">
+                        <CheckSquare v-if="apEditVendorContactForm.permissions[perm.key]" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                        <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                        <span class="text-small">{{ perm.label }}</span>
+                      </div>
+                    </div>
+                    <div class="ap-checkbox-toggle" @click="apEditVendorContactForm.allowPhi = !apEditVendorContactForm.allowPhi">
+                      <CheckSquare v-if="apEditVendorContactForm.allowPhi" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                      <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                      <span class="text-small">Allow PHI access</span>
+                    </div>
+                    <h6 class="ap-subsection-heading">Contact Designations</h6>
+                    <div class="ap-checkbox-toggle" @click="apEditVendorContactForm.surveyContact = !apEditVendorContactForm.surveyContact">
+                      <CheckSquare v-if="apEditVendorContactForm.surveyContact" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                      <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                      <span class="text-small">Survey Contact</span>
+                    </div>
+                    <div class="ap-checkbox-toggle mt-3" @click="apEditVendorContactForm.ackConfirmed = !apEditVendorContactForm.ackConfirmed">
+                      <CheckSquare v-if="apEditVendorContactForm.ackConfirmed" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                      <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                      <span class="text-small">I confirm this external vendor has signed the required data transfer agreement.</span>
+                    </div>
+                  </Dialog>
+
                 </template>
 
                 <!-- Step 2: Network Configuration -->
@@ -496,6 +884,22 @@
                               <span class="ap-field-value">Allow Secondary Payer</span>
                             </div>
                           </div>
+                          <template v-if="plan.allowSecondaryPayer">
+                            <div class="ap-field-row">
+                              <div class="ap-checkbox-row">
+                                <CheckSquare v-if="plan.secondaryPlanOnly" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" @click="plan.secondaryPlanOnly = !plan.secondaryPlanOnly" style="cursor:pointer" />
+                                <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" @click="plan.secondaryPlanOnly = !plan.secondaryPlanOnly" style="cursor:pointer" />
+                                <span class="ap-field-value">Secondary Plan Only</span>
+                              </div>
+                            </div>
+                            <div class="ap-field-row">
+                              <div class="ap-checkbox-row">
+                                <CheckSquare v-if="plan.paySecondaryAsPrimary" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" @click="plan.paySecondaryAsPrimary = !plan.paySecondaryAsPrimary" style="cursor:pointer" />
+                                <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" @click="plan.paySecondaryAsPrimary = !plan.paySecondaryAsPrimary" style="cursor:pointer" />
+                                <span class="ap-field-value">Pay Secondary Claim as Primary if Rejected by Primary Payer</span>
+                              </div>
+                            </div>
+                          </template>
                           <div class="ap-field-row">
                             <div class="ap-field">
                               <span class="ap-field-label">COB configuration</span>
@@ -667,370 +1071,1348 @@
 
                 <!-- Step 4: Transition of Care -->
                 <template v-else-if="currentWizardStep === 3">
+
+                  <!-- Card 1: Transition of Care Setup (Historical Claims + Prior Authorization File) -->
                   <div class="ap-section">
                     <div class="ap-section-header">
-                      <h4 class="text-h4">Transition of Care</h4>
+                      <h4 class="text-h4">Transition of Care Setup</h4>
+                      <button v-if="!tocEditingFiles && !(hcfPending && paPending)" class="button button-thirtiary" @click="startEditFilesCard">
+                        <Pencil :size="14" :stroke-width="1.5" />Edit
+                      </button>
                     </div>
-                    <p class="text-body toc-intro">We understand the importance of providing the best onboarding experience to your members. As you transition, there are options available to help minimize disruption.</p>
+                    <div class="ap-fields">
+                      <template v-if="!tocEditingFiles">
+                        <div class="ap-field-row ap-field-row--multi">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Will Historical Claims data be provided? (HCF)</span>
+                            <span class="ap-field-value">{{ tocHistoricalClaims ? 'Yes' : 'No' }}</span>
+                          </div>
+                          <div v-if="tocHistoricalClaims === true" class="ap-field">
+                            <span class="ap-field-label">Transition of Care Override</span>
+                            <span class="ap-field-value">{{ tocOverrideDays }}</span>
+                          </div>
+                        </div>
+                        <div v-if="tocHistoricalClaims === true" class="ap-field-row ap-field-row--multi">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Historical Claims File</span>
+                            <span class="ap-field-value">{{ tocHistoricalClaimsFile || 'Not uploaded' }}</span>
+                          </div>
+                          <div class="ap-field">
+                            <span class="ap-field-label">Historical Claims File Submitted?</span>
+                            <span class="ap-field-value">{{ hcfPending ? `Yes — Ticket #${hcfTicketNumber}` : 'No' }}</span>
+                          </div>
+                        </div>
 
-                    <!-- Historical Claims -->
-                    <div class="toc-question">
-                      <p class="toc-question-label">Will Historical Claims be provided?</p>
-                      <div class="toc-toggle-group">
-                        <button
-                          :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocHistoricalClaims === false }]"
-                          @click="tocHistoricalClaims = false"
-                        >No</button>
-                        <button
-                          :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocHistoricalClaims === true }]"
-                          @click="tocHistoricalClaims = true"
-                        >Yes</button>
-                      </div>
-                    </div>
+                        <div class="ap-field-row ap-field-row--multi mt-3">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Will a Prior Authorization file be provided? (PA)</span>
+                            <span class="ap-field-value">{{ tocPriorAuth ? 'Yes' : 'No' }}</span>
+                          </div>
+                          <div v-if="tocPriorAuth === true" class="ap-field">
+                            <span class="ap-field-label">Prior Authorization File</span>
+                            <span class="ap-field-value">{{ tocPriorAuthFile || 'Not uploaded' }}</span>
+                          </div>
+                        </div>
+                        <div v-if="tocPriorAuth === true" class="ap-field-row">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Prior Authorization File Submitted?</span>
+                            <span class="ap-field-value">{{ paPending ? `Yes — Ticket #${paTicketNumber}` : 'No' }}</span>
+                          </div>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <div class="prog-required-note">
+                          <Info :size="15" :stroke-width="2" class="prog-required-note-icon" />
+                          <p class="text-body"><strong>Rx Claims Data &amp; Prior Authorization (PA) File:</strong> Requested data must be provided at a minimum of 15 days prior to the effective date. The loading of files and pre-go-live outreach is contingent upon the receipt and successful loading of the eligibility file.</p>
+                        </div>
 
-                    <div v-if="tocHistoricalClaims === false" class="toc-info-box">
-                      <p class="toc-info-text">If historical claims data is not received and a member is currently on a medication regimen that requires a Prior Authorization, the system actively observes rejected claims for 60 days post go-live, provides transition of care overrides for members with ongoing therapies, delivers written communication to disrupted members, and initiates prior authorizations. This allows an override for the member for a period of 30, 60, or 90 days.</p>
-                      <div class="toc-toggle-group">
-                        <button
-                          :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocRxWatchtower === false }]"
-                          @click="tocRxWatchtower = false"
-                        >Allow</button>
-                        <button
-                          :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocRxWatchtower === true }]"
-                          @click="tocRxWatchtower = true"
-                        >Do Not Allow</button>
-                      </div>
-                    </div>
+                        <!-- Historical Claims sub-section -->
+                        <template v-if="hcfPending">
+                          <p class="lc-hcn-label">Historical Claims File</p>
+                          <p class="text-body bl-note">Submitted — Ticket #: <strong>{{ hcfTicketNumber }}</strong></p>
+                        </template>
+                        <template v-else>
+                          <div class="toc-question">
+                            <p class="toc-question-label">Will Historical Claims data be provided? (HCF) <span class="bl-required" aria-label="required">*</span></p>
+                            <div class="toc-toggle-group">
+                              <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocHistoricalClaims === false }]" @click="tocHistoricalClaims = false">No</button>
+                              <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocHistoricalClaims === true }]" @click="tocHistoricalClaims = true">Yes</button>
+                            </div>
+                          </div>
 
-                    <!-- Prior Authorization -->
-                    <div class="toc-question">
-                      <p class="toc-question-label">Will Prior Authorization file be provided?</p>
-                      <div class="toc-toggle-group">
-                        <button
-                          :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocPriorAuth === false }]"
-                          @click="tocPriorAuth = false"
-                        >No</button>
-                        <button
-                          :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocPriorAuth === true }]"
-                          @click="tocPriorAuth = true"
-                        >Yes</button>
-                      </div>
+                          <template v-if="tocHistoricalClaims === true">
+                            <p class="text-body bl-note">Received historical claims data will be checked against the Liviniti Formulary. Members impacted by the transition to Liviniti will receive an override for the duration selected below, allowing time to align their medication(s) with Liviniti.</p>
+                            <div class="bl-field-narrow">
+                              <Select v-model="tocOverrideDays" :items="tocDayOptions" label="Transition of Care Override Period" />
+                            </div>
+
+                            <div class="bl-upload-item">
+                              <p class="lc-hcn-label">Historical Claims File <span class="bl-required" aria-label="required">*</span></p>
+                              <template v-if="tocHistoricalClaimsFile && !tocPendingHcfRemoval">
+                                <v-chip color="primary" variant="flat" class="bl-file-chip">
+                                  <Paperclip :size="12" :stroke-width="2" class="bl-file-chip-icon" />
+                                  <span class="bl-file-chip-label">{{ tocHistoricalClaimsFile }}</span>
+                                  <span class="bl-file-chip-close" @click.stop="tocPendingHcfRemoval = true"><X :size="10" :stroke-width="2.5" /></span>
+                                </v-chip>
+                              </template>
+                              <FileUploader v-else :show-document-type-selection="false" @file-selected="(name) => { tocHistoricalClaimsFile = name; tocPendingHcfRemoval = false }" />
+                            </div>
+
+                            <div v-if="tocHistoricalClaimsFile" class="toc-queue-action">
+                              <button class="button button-primary" @click="openTocSubmitModal('hcf')">Submit to Ticket Queue</button>
+                              <p class="text-body bl-note">Sends this file to the Claims Analysis Queue and stores it under Documents &gt; PHI Documents.</p>
+                            </div>
+                          </template>
+                        </template>
+
+                        <v-divider class="my-4" />
+
+                        <!-- Prior Authorization File sub-section -->
+                        <template v-if="paPending">
+                          <p class="lc-hcn-label">Prior Authorization File</p>
+                          <p class="text-body bl-note">Submitted — Ticket #: <strong>{{ paTicketNumber }}</strong></p>
+                        </template>
+                        <template v-else>
+                          <div class="toc-question">
+                            <p class="toc-question-label">Will a Prior Authorization file be provided? (PA) <span class="toc-recommended">Recommended</span></p>
+                            <div class="toc-toggle-group">
+                              <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocPriorAuth === false }]" @click="tocPriorAuth = false">No</button>
+                              <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocPriorAuth === true }]" @click="tocPriorAuth = true">Yes</button>
+                            </div>
+                          </div>
+
+                          <template v-if="tocPriorAuth === true">
+                            <div class="bl-upload-item">
+                              <p class="lc-hcn-label">Prior Authorization File</p>
+                              <template v-if="tocPriorAuthFile && !tocPendingPaRemoval">
+                                <v-chip color="primary" variant="flat" class="bl-file-chip">
+                                  <Paperclip :size="12" :stroke-width="2" class="bl-file-chip-icon" />
+                                  <span class="bl-file-chip-label">{{ tocPriorAuthFile }}</span>
+                                  <span class="bl-file-chip-close" @click.stop="tocPendingPaRemoval = true"><X :size="10" :stroke-width="2.5" /></span>
+                                </v-chip>
+                              </template>
+                              <FileUploader v-else :show-document-type-selection="false" @file-selected="(name) => { tocPriorAuthFile = name; tocPendingPaRemoval = false }" />
+                            </div>
+
+                            <div v-if="tocPriorAuthFile" class="toc-queue-action">
+                              <button class="button button-primary" @click="openTocSubmitModal('pa')">Submit to Ticket Queue</button>
+                              <p class="text-body bl-note">Sends this file to the PA Import Queue and stores it under Documents &gt; PHI Documents.</p>
+                            </div>
+                          </template>
+                        </template>
+
+                        <div class="ap-section-footer">
+                          <button class="button button-primary" @click="saveFilesCard">Save Changes</button>
+                          <button class="button button-secondary" @click="cancelFilesCard">Cancel</button>
+                        </div>
+                      </template>
                     </div>
                   </div>
+
+                  <!-- Card 2: RxWatchtower -->
+                  <div class="ap-section">
+                    <div class="ap-section-header">
+                      <h4 class="text-h4">RxWatchtower</h4>
+                      <button v-if="!tocEditingWatchtower" class="button button-thirtiary" @click="startEditWatchtowerCard">
+                        <Pencil :size="14" :stroke-width="1.5" />Edit
+                      </button>
+                    </div>
+                    <div class="ap-fields">
+                      <template v-if="!tocEditingWatchtower">
+                        <div class="ap-field-row">
+                          <div class="ap-field">
+                            <span class="ap-field-label">RxWatchtower Override Period</span>
+                            <span class="ap-field-value">{{ tocWatchtowerDays }}</span>
+                          </div>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <p class="text-body toc-intro">All clients are automatically enrolled in the RxWatchtower program. For any member currently on a medication regimen that requires a Prior Authorization, RxWatchtower actively reviews rejected claims post go-live, provides transition of care overrides for members with ongoing therapies, delivers written communication to disrupted members, and initiates prior authorizations.</p>
+                        <div class="bl-field-narrow">
+                          <Select v-model="tocWatchtowerDays" :items="tocDayOptions" label="RxWatchtower Override Period" />
+                        </div>
+                        <div class="ap-section-footer">
+                          <button class="button button-primary" @click="tocEditingWatchtower = false">Save Changes</button>
+                          <button class="button button-secondary" @click="cancelWatchtowerCard">Cancel</button>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+
+                  <!-- Card 3: Open Refill Transfer File (ORTF) -->
+                  <div class="ap-section">
+                    <div class="ap-section-header">
+                      <h4 class="text-h4">Open Refill Transfer File (ORTF) <span class="toc-recommended">Uncommon</span></h4>
+                      <button v-if="!tocEditingOrtf" class="button button-thirtiary" @click="startEditOrtfCard">
+                        <Pencil :size="14" :stroke-width="1.5" />Edit
+                      </button>
+                    </div>
+                    <div class="ap-fields">
+                      <template v-if="!tocEditingOrtf">
+                        <div class="ap-field-row">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Will an Open Refill Transfer File be provided?</span>
+                            <span class="ap-field-value">{{ tocOpenRefillTransfer ? 'Yes' : 'No' }}</span>
+                          </div>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <p class="text-body bl-note mb-3">This option only applies to mail order pharmacies. It involves the client's existing mail order pharmacy sending a one-time snapshot, taken at go-live, of prescriptions with open refills to the mail order pharmacy or pharmacies selected under Liviniti's plans — sometimes affecting as few as one or two members. Implementation must coordinate directly with both the outgoing and incoming mail order pharmacies to arrange this, and it adds limited value for most clients, so it is not generally recommended.</p>
+                        <div class="toc-toggle-group">
+                          <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocOpenRefillTransfer === false }]" @click="tocOpenRefillTransfer = false">No</button>
+                          <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocOpenRefillTransfer === true }]" @click="tocOpenRefillTransfer = true">Yes</button>
+                        </div>
+                        <div class="ap-section-footer">
+                          <button class="button button-primary" @click="tocEditingOrtf = false">Save Changes</button>
+                          <button class="button button-secondary" @click="cancelOrtfCard">Cancel</button>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+
+                  <!-- Card 4: Notes -->
+                  <div class="ap-section">
+                    <div class="ap-section-header">
+                      <h4 class="text-h4">Transition of Care / File Notes</h4>
+                      <button v-if="!tocEditingNotes" class="button button-thirtiary" @click="startEditNotesCard">
+                        <Pencil :size="14" :stroke-width="1.5" />Edit
+                      </button>
+                    </div>
+                    <div class="ap-fields">
+                      <template v-if="!tocEditingNotes">
+                        <div class="ap-field-row">
+                          <div class="ap-field">
+                            <span class="ap-field-value">{{ tocNotes || 'No notes added.' }}</span>
+                          </div>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <v-textarea
+                          v-model="tocNotes"
+                          label="Transition of Care / File Notes"
+                          variant="outlined"
+                          density="compact"
+                          rows="3"
+                          auto-grow
+                          hide-details
+                          class="bl-notes-textarea"
+                        />
+                        <div class="ap-section-footer">
+                          <button class="button button-primary" @click="tocEditingNotes = false">Save Changes</button>
+                          <button class="button button-secondary" @click="cancelNotesCard">Cancel</button>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+
+                  <!-- File Submit Confirm Modal (one item at a time, triggered from inside edit mode) -->
+                  <v-dialog v-model="showTocSubmitModal" max-width="480">
+                    <v-card class="prog-modal-card">
+                      <v-card-title class="prog-modal-title">Submit {{ tocSubmitTarget === 'hcf' ? 'Historical Claims File' : 'Prior Authorization File' }}</v-card-title>
+                      <v-card-text>
+                        <v-divider class="mb-4" />
+                        <p class="text-body mb-3">File: <strong>{{ tocSubmitTarget === 'hcf' ? tocHistoricalClaimsFile : tocPriorAuthFile }}</strong></p>
+                        <p class="prog-confirm-note">A setup ticket will be created and sent to the {{ tocSubmitTarget === 'hcf' ? 'Claims Analysis Queue' : 'PA Import Queue' }}. This file will also be stored under Documents &gt; PHI Documents.</p>
+                      </v-card-text>
+                      <v-card-actions class="nl-dialog-footer">
+                        <button class="button button-secondary" @click="showTocSubmitModal = false">Cancel</button>
+                        <button class="button button-primary" @click="confirmTocSubmit">Confirm &amp; Submit</button>
+                      </v-card-actions>
+                    </v-card>
+                  </v-dialog>
                 </template>
 
                 <!-- Step 5: Programs -->
                 <template v-else-if="currentWizardStep === 4">
-                  <div class="ap-section">
-                    <div class="ap-section-header ap-section-header--space-between">
-                      <h4 class="text-h4">Configured Programs</h4>
-                    </div>
+                  <div class="prog-step">
 
-                  <!-- Filter pills -->
-                  <div class="prog-filters">
-                    <FilteringPill
-                      v-for="f in progFilters"
-                      :key="f"
-                      :is-active="progActiveFilter === f"
-                      @click="progActiveFilter = f"
-                    >{{ f }}</FilteringPill>
-                  </div>
+                    <!-- Widget 1: Programs to Configure -->
+                    <div class="prog-widget">
+                      <div class="prog-widget-header">
+                        <h4 class="text-h4">Programs to Configure</h4>
+                        <p class="prog-widget-desc">Select a program to configure it for this account. Once submitted, a setup ticket will be created for the RxCompass Team or VCP Team.</p>
+                      </div>
+                      <div class="prog-widget-body">
 
-                  <ReportDataTable
-                    :headers="progHeaders"
-                    :items="filteredPrograms"
-                    :show-search-bar="true"
-                    :show-filter-button="false"
-                    :show-filter-pills="false"
-                    :show-selection-checkboxes="false"
-                    :show-row-actions="false"
-                    :show-table-footer="true"
-                    :show-expand="true"
-                    search-placeholder="Search by program name"
-                  >
-                    <template #expanded-row="{ item, columns }">
-                      <tr>
-                        <td :colspan="columns.length" class="prog-detail-td">
-                          <div class="prog-detail">
-                            <h5 class="prog-detail-title">Program Details</h5>
-                            <div class="prog-detail-cols">
-                              <div>
-                                <p class="prog-detail-label">Program Option Name</p>
-                                <p class="prog-detail-value">{{ item.optionName }}</p>
-                              </div>
-                              <div>
-                                <p class="prog-detail-label">Invoice</p>
-                                <p class="prog-detail-value">{{ item.invoice }}</p>
-                              </div>
+                        <div v-if="rxCompassEnrolled && vcpEnrolled" class="prog-all-handled">
+                          <p class="text-body">All available programs have been configured for this account.</p>
+                        </div>
+                        <div v-else>
+                          <div class="prog-required-note mb-4">
+                            <Info :size="15" :stroke-width="2" class="prog-required-note-icon" />
+                            <p class="text-body">A VCP election must be submitted for all accounts before go-live. If this account is not participating, open the VCP tile and select <strong>Opt Out</strong>.</p>
+                          </div>
+                        <div class="prog-tiles">
+
+                          <!-- RxCompass Tile -->
+                          <div
+                            v-if="!rxCompassEnrolled"
+                            :class="['prog-tile', { 'prog-tile--selected': rxCompassInCart, 'prog-tile--pending': rxCompassPending }]"
+                            :role="rxCompassPending ? undefined : 'button'"
+                            :tabindex="rxCompassPending ? -1 : 0"
+                            :aria-disabled="rxCompassPending || undefined"
+                            @click="!rxCompassPending && openProgModal('rxcompass')"
+                            @keydown.enter.prevent="!rxCompassPending && openProgModal('rxcompass')"
+                            @keydown.space.prevent="!rxCompassPending && openProgModal('rxcompass')"
+                          >
+                            <div v-if="rxCompassInCart || rxCompassPending" :class="['prog-tile-badge', { 'prog-tile-badge--pending': rxCompassPending }]">
+                              <Check :size="12" :stroke-width="3" />
                             </div>
-                            <ReportDataTable
-                              :headers="progRatesHeaders"
-                              :items="item.rates"
-                              :show-search-bar="false"
-                              :show-filter-pills="false"
-                              :show-selection-checkboxes="false"
-                              :show-row-actions="false"
-                              :show-table-footer="true"
-                            />
-                            <div class="prog-detail-merp">
-                              <p class="prog-detail-label">MERP Administrator Name</p>
-                              <p class="prog-detail-value">{{ item.merpAdmin || '-' }}</p>
+                            <div class="prog-tile-header">
+                              <span class="prog-tile-name">RxCompass</span>
+                            </div>
+                            <p class="prog-tile-desc">Specialty drug management program providing clinical decision support and member engagement tools.</p>
+                            <div class="prog-tile-footer">
+                              <button v-if="rxCompassPending" class="prog-tile-details-link" @click.stop="openProgDetails('rxcompass')">View Details</button>
+                              <span v-if="rxCompassPending" class="prog-tile-status prog-tile-status--pending">
+                                <Hourglass :size="13" :stroke-width="2" /> Pending Setup
+                              </span>
+                              <span v-else-if="rxCompassInCart" class="prog-tile-status prog-tile-status--added">
+                                <Check :size="13" :stroke-width="2.5" /> Added
+                              </span>
+                              <span v-else class="prog-tile-status prog-tile-status--configure">Click to configure</span>
                             </div>
                           </div>
-                        </td>
-                      </tr>
-                    </template>
-                  </ReportDataTable>
+
+                          <!-- VCP Tile -->
+                          <div
+                            v-if="!vcpEnrolled"
+                            :class="['prog-tile', { 'prog-tile--selected': vcpInCart, 'prog-tile--pending': vcpPending }]"
+                            :role="vcpPending ? undefined : 'button'"
+                            :tabindex="vcpPending ? -1 : 0"
+                            :aria-disabled="vcpPending || undefined"
+                            @click="!vcpPending && openProgModal('vcp')"
+                            @keydown.enter.prevent="!vcpPending && openProgModal('vcp')"
+                            @keydown.space.prevent="!vcpPending && openProgModal('vcp')"
+                          >
+                            <div v-if="vcpInCart || vcpPending" :class="['prog-tile-badge', { 'prog-tile-badge--pending': vcpPending }]">
+                              <Check :size="12" :stroke-width="3" />
+                            </div>
+                            <div class="prog-tile-header">
+                              <span class="prog-tile-name">Variable Copay Program <span class="prog-tile-required" aria-label="required">*</span></span>
+                            </div>
+                            <p class="prog-tile-desc">Configures variable member cost-sharing based on drug type, formulary tier, or network designation.</p>
+                            <div class="prog-tile-footer">
+                              <button v-if="vcpPending" class="prog-tile-details-link" @click.stop="openProgDetails('vcp')">View Details</button>
+                              <span v-if="vcpPending" class="prog-tile-status prog-tile-status--pending">
+                                <Hourglass :size="13" :stroke-width="2" /> Pending Setup
+                              </span>
+                              <span v-else-if="vcpInCart" class="prog-tile-status prog-tile-status--added">
+                                <Check :size="13" :stroke-width="2.5" /> Added
+                              </span>
+                              <span v-else class="prog-tile-status prog-tile-status--configure">Click to configure</span>
+                            </div>
+                          </div>
+
+                        </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Widget 2: Configured Programs -->
+                    <div class="prog-widget">
+                      <div class="prog-widget-header">
+                        <h4 class="text-h4">Configured Programs</h4>
+                      </div>
+                      <div class="prog-widget-body prog-widget-body--table">
+                    <ReportDataTable
+                      :headers="progHeaders"
+                      :items="programs"
+                      :show-search-bar="false"
+                      :show-filter-button="false"
+                      :show-filter-pills="false"
+                      :show-selection-checkboxes="false"
+                      :show-row-actions="false"
+                      :show-table-footer="true"
+                      :show-expand="true"
+                    >
+                      <template #empty-state>
+                        <div class="prog-empty-state">
+                          <p class="text-body">No programs have been configured for this account yet.</p>
+                        </div>
+                      </template>
+                      <template #expanded-row="{ item, columns }">
+                        <tr>
+                          <td :colspan="columns.length" class="prog-detail-td">
+                            <div class="prog-detail">
+                              <h5 class="prog-detail-title">Program Details</h5>
+
+                              <!-- RxCompass details -->
+                              <template v-if="item.programType === 'rxcompass'">
+                                <div class="prog-detail-cols">
+                                  <div>
+                                    <p class="prog-detail-label">Program Option Name</p>
+                                    <p class="prog-detail-value">{{ item.optionName }}</p>
+                                  </div>
+                                  <div>
+                                    <p class="prog-detail-label">Invoice</p>
+                                    <p class="prog-detail-value">{{ item.invoice }}</p>
+                                  </div>
+                                </div>
+                                <div class="prog-detail-cols">
+                                  <div>
+                                    <p class="prog-detail-label">MERP Administrator Name</p>
+                                    <p class="prog-detail-value">{{ item.merpAdmin || '-' }}</p>
+                                  </div>
+                                </div>
+                              </template>
+
+                              <!-- VCP details -->
+                              <template v-else-if="item.programType === 'vcp'">
+                                <div class="prog-detail-cols">
+                                  <div>
+                                    <p class="prog-detail-label">Election Type</p>
+                                    <p class="prog-detail-value">{{ item.election }}</p>
+                                  </div>
+                                  <div>
+                                    <p class="prog-detail-label">Invoice</p>
+                                    <p class="prog-detail-value">{{ item.invoice }}</p>
+                                  </div>
+                                </div>
+                                <div class="prog-detail-cols">
+                                  <div>
+                                    <p class="prog-detail-label">Maximizer Program</p>
+                                    <p class="prog-detail-value">{{ item.isMaximizer ? 'Yes' : 'No' }}</p>
+                                  </div>
+                                  <div>
+                                    <p class="prog-detail-label">Accumulator Program</p>
+                                    <p class="prog-detail-value">{{ item.isAccumulator ? 'Yes' : 'No' }}</p>
+                                  </div>
+                                </div>
+                                <div v-if="item.clientState" class="prog-detail-cols">
+                                  <div>
+                                    <p class="prog-detail-label">Client State</p>
+                                    <p class="prog-detail-value">{{ item.clientState }}</p>
+                                  </div>
+                                </div>
+                              </template>
+
+                            </div>
+                          </td>
+                        </tr>
+                      </template>
+                    </ReportDataTable>
+                      </div>
+                    </div>
+
+                    <!-- Cart Bar -->
+                    <Transition name="prog-cart-slide">
+                      <div v-if="progCart.length > 0" class="prog-cart-bar">
+                        <div class="prog-cart-chips">
+                          <v-chip v-for="prog in progCart" :key="prog" size="small" variant="outlined" class="prog-cart-chip">
+                            {{ prog === 'rxcompass' ? 'RxCompass' : 'Variable Copay Program' }}
+                            <X :size="11" :stroke-width="2.5" class="prog-cart-remove" @click.stop="removeFromProgCart(prog)" />
+                          </v-chip>
+                        </div>
+                        <div class="prog-cart-right">
+                          <span class="prog-cart-count">{{ progCart.length }} {{ progCart.length === 1 ? 'program' : 'programs' }} configured</span>
+                          <button class="button prog-cart-cta" @click="showProgConfirmModal = true">Submit Program Setup</button>
+                        </div>
+                      </div>
+                    </Transition>
+
+                    <!-- Configuration Modal -->
+                    <v-dialog v-model="showProgModal" max-width="560">
+                      <!-- RxCompass -->
+                      <v-card v-if="activeProgModal === 'rxcompass'" class="prog-modal-card">
+                        <v-card-title class="prog-modal-title">Configure RxCompass</v-card-title>
+                        <v-card-text>
+                          <v-divider class="mb-4" />
+                          <div class="nl-alert mb-4">
+                            <div class="nl-alert-badge"><TriangleAlert :size="20" :stroke-width="2" /></div>
+                            <span>Not all plans are eligible to elect the RxCompass program. RxCompass is not recommended for clients with domestic/in-house pharmacy. <strong>Anti-Steerage States: FL, GA, OK, TN, and WV</strong> — cannot be set up with RxCompass per anti-steerage laws of those states.</span>
+                          </div>
+                          <v-row>
+                            <v-col cols="12">
+                              <Select v-model="rxCompassForm.type" :items="rxCompassTypeItems" label="RxCompass Type" :disabled="rxCompassInCart" />
+                            </v-col>
+                            <v-col v-if="rxCompassIsReconsider" cols="12" md="6">
+                              <p class="prog-modal-label">Follow-Up Date</p>
+                              <p class="prog-reconsider-date">{{ rxCompassForm.effectiveDate }}</p>
+                            </v-col>
+                            <v-col v-else-if="rxCompassForm.type" cols="12" md="6">
+                              <DatePicker v-model="rxCompassForm.effectiveDate" label="Effective Date" variant="underlined" />
+                            </v-col>
+                            <v-col v-if="rxCompassForm.type === 'Standard'" cols="12">
+                              <TextField v-model="rxCompassForm.merpVendor" label="MERP Administrator Name" />
+                            </v-col>
+                            <v-col cols="12">
+                              <v-textarea v-model="rxCompassForm.notes" label="Notes (optional)" variant="outlined" density="compact" rows="3" auto-grow hide-details class="bl-notes-textarea" />
+                            </v-col>
+                          </v-row>
+                        </v-card-text>
+                        <v-card-actions class="nl-dialog-footer">
+                          <template v-if="!rxCompassInCart">
+                            <button class="button button-secondary" @click="closeProgModal">Close</button>
+                            <button class="button button-primary" :disabled="!rxCompassFormValid" @click="toggleProgCart('rxcompass')">Add to Queue</button>
+                          </template>
+                          <template v-else-if="!rxCompassFormDirty">
+                            <button class="button button-danger" @click="toggleProgCart('rxcompass')">Remove from Queue</button>
+                            <button class="button button-secondary" @click="closeProgModal">Close</button>
+                          </template>
+                          <template v-else>
+                            <button class="button button-secondary" @click="cancelProgEdit">Cancel</button>
+                            <button class="button button-primary" @click="closeProgModal">Update Queue</button>
+                          </template>
+                        </v-card-actions>
+                      </v-card>
+
+                      <!-- VCP -->
+                      <v-card v-if="activeProgModal === 'vcp'" class="prog-modal-card">
+                        <v-card-title class="prog-modal-title">Configure Variable Copay Program</v-card-title>
+                        <v-card-text>
+                          <v-divider class="mb-4" />
+                          <p class="prog-modal-label mb-2">VCP Election</p>
+                          <div class="toc-toggle-group nl-level-btn-group--wrap mb-5">
+                            <button
+                              v-for="opt in vcpElectionOptions"
+                              :key="opt.value"
+                              :class="['button', 'toc-toggle', 'nl-level-btn', { 'toc-toggle--selected': vcpForm.election === opt.value }]"
+                              :disabled="vcpInCart"
+                              @click="selectVcpElection(opt.value)"
+                            >
+                              <span>{{ opt.label }}</span>
+                              <Check v-if="vcpForm.election === opt.value" :size="13" :stroke-width="2.5" class="nl-level-check" />
+                            </button>
+                          </div>
+
+                          <!-- Election description (non-Opt Out) -->
+                          <div v-if="vcpForm.election && vcpForm.election !== 'OptOut'" class="prog-election-desc mb-4">
+                            <p class="text-body">{{ vcpElectionDescriptions[vcpForm.election] }}</p>
+                          </div>
+
+                          <!-- Opt Out -->
+                          <v-row v-if="vcpForm.election === 'OptOut'">
+                            <v-col cols="12">
+                              <div class="ap-checkbox-row mb-3" @click="vcpForm.optOutViaRxCompass = !vcpForm.optOutViaRxCompass" style="cursor:pointer">
+                                <CheckSquare v-if="vcpForm.optOutViaRxCompass" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                                <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                                <span class="ap-field-value">VCP is through RxCompass</span>
+                              </div>
+                              <v-textarea v-model="vcpForm.optOutNotes" label="Notes" variant="outlined" density="compact" rows="3" auto-grow hide-details class="bl-notes-textarea" />
+                            </v-col>
+                          </v-row>
+
+                          <!-- Configuring VCP -->
+                          <template v-else-if="vcpForm.election">
+                            <v-row>
+                              <v-col cols="12" md="6">
+                                <DatePicker v-model="vcpForm.effectiveDate" label="Effective Date" variant="underlined" />
+                              </v-col>
+                              <v-col cols="12" md="6">
+                                <div class="ap-field">
+                                  <span class="ap-field-label">Client State</span>
+                                  <span class="ap-field-value">{{ editableCompanyInfo.physicalState || '—' }}</span>
+                                </div>
+                                <p class="nl-npi-hint mb-0">Pulled from Account Profile.</p>
+                              </v-col>
+                            </v-row>
+
+                            <v-row>
+                              <v-col cols="12">
+                                <Autocomplete
+                                  :model-value="vcpForm.planIds"
+                                  @update:model-value="onVcpPlansChange"
+                                  :items="vcpPlanItems()"
+                                  label="Applicable Plans"
+                                  :multiple="true"
+                                  hide-details
+                                />
+                              </v-col>
+                            </v-row>
+
+                            <div v-if="vcpForm.planIds.length" class="prog-vcp-plan-rows mt-3">
+                              <div v-for="pid in vcpForm.planIds" :key="pid" class="prog-vcp-plan-row">
+                                <span class="prog-vcp-plan-row-name">{{ planNameById(pid) }}</span>
+                                <div class="toc-toggle-group">
+                                  <button
+                                    type="button"
+                                    :class="['button', 'toc-toggle', { 'toc-toggle--selected': vcpForm.designations[pid] === 'Maximizer' }]"
+                                    @click="setVcpDesignation(pid, 'Maximizer')"
+                                  >Maximizer</button>
+                                  <button
+                                    type="button"
+                                    :class="['button', 'toc-toggle', { 'toc-toggle--selected': vcpForm.designations[pid] === 'Accumulator' }]"
+                                    @click="setVcpDesignation(pid, 'Accumulator')"
+                                  >Accumulator</button>
+                                </div>
+                              </div>
+                            </div>
+                            <p v-else class="prog-modal-hint">Select at least one plan to configure this election.</p>
+
+                            <template v-if="vcpForm.election === 'OffsiteVCP'">
+                              <p class="prog-modal-label mt-4">Offsite Pharmacies</p>
+                              <p class="nl-dialog-field-label">NPI</p>
+                              <v-textarea
+                                v-model="vcpOffsitePharmacyText"
+                                variant="underlined"
+                                density="compact"
+                                messages="Enter one NPI per line"
+                                rows="3"
+                                class="nl-textarea"
+                                @keyup.enter="parseOffsitePharmacies"
+                                @blur="parseOffsitePharmacies"
+                              />
+                              <div v-if="vcpForm.offsitePharmacies.length" class="nl-npi-chips">
+                                <v-chip
+                                  v-for="(chip, idx) in vcpForm.offsitePharmacies"
+                                  :key="idx"
+                                  color="primary"
+                                  variant="flat"
+                                  class="bl-file-chip"
+                                >
+                                  <span class="bl-file-chip-label">{{ chip.name }}</span>
+                                  <span class="bl-file-chip-close" @click.stop="removeOffsitePharmacy(idx)"><X :size="10" :stroke-width="2.5" /></span>
+                                </v-chip>
+                              </div>
+                            </template>
+                          </template>
+
+                          <p v-if="!vcpForm.election" class="prog-modal-hint">Select an election type above to configure this program.</p>
+                        </v-card-text>
+                        <v-card-actions class="nl-dialog-footer">
+                          <template v-if="!vcpInCart">
+                            <button class="button button-secondary" @click="closeProgModal">Close</button>
+                            <button class="button button-primary" :disabled="!vcpFormValid" @click="toggleProgCart('vcp')">Add to Queue</button>
+                          </template>
+                          <template v-else-if="!vcpFormDirty">
+                            <button class="button button-danger" @click="toggleProgCart('vcp')">Remove from Queue</button>
+                            <button class="button button-secondary" @click="closeProgModal">Close</button>
+                          </template>
+                          <template v-else>
+                            <button class="button button-secondary" @click="cancelProgEdit">Cancel</button>
+                            <button class="button button-primary" @click="closeProgModal">Update Queue</button>
+                          </template>
+                        </v-card-actions>
+                      </v-card>
+                    </v-dialog>
+
+                    <!-- Confirm Submit Modal -->
+                    <v-dialog v-model="showProgConfirmModal" max-width="520">
+                      <v-card class="prog-modal-card">
+                        <v-card-title class="prog-modal-title">Submit Program Setup</v-card-title>
+                        <v-card-text>
+                          <v-divider class="mb-4" />
+                          <p class="text-body mb-3">
+                            You are submitting setup requests for the following {{ progCart.length === 1 ? 'program' : 'programs' }}:
+                          </p>
+                          <div class="prog-confirm-list">
+                            <div v-if="progCart.includes('rxcompass')" class="prog-confirm-item">
+                              <p class="prog-confirm-name">RxCompass</p>
+                              <ul class="prog-confirm-details">
+                                <li>Type: {{ rxCompassTypeLabel }}</li>
+                                <li>{{ rxCompassIsReconsider ? 'Follow-Up Date' : 'Effective Date' }}: {{ rxCompassForm.effectiveDate || '—' }}</li>
+                                <li v-if="rxCompassForm.merpVendor">MERP Administrator Name: {{ rxCompassForm.merpVendor }}</li>
+                                <li v-if="rxCompassForm.notes">Notes: {{ rxCompassForm.notes }}</li>
+                              </ul>
+                            </div>
+                            <div v-if="progCart.includes('vcp')" class="prog-confirm-item">
+                              <p class="prog-confirm-name">Variable Copay Program</p>
+                              <ul class="prog-confirm-details">
+                                <li>Election: {{ vcpElectionLabel }}</li>
+                                <template v-if="vcpForm.election !== 'OptOut'">
+                                  <li>Effective Date: {{ vcpForm.effectiveDate || '—' }}</li>
+                                  <li>Client State: {{ editableCompanyInfo.physicalState || '—' }}</li>
+                                  <li v-if="vcpForm.planIds.length">Plans: {{ vcpForm.planIds.map(pid => `${planNameById(pid)} (${vcpForm.designations[pid] || '—'})`).join(', ') }}</li>
+                                  <li v-if="vcpForm.offsitePharmacies.length">Offsite Pharmacies: {{ vcpForm.offsitePharmacies.map(c => c.name).join(', ') }}</li>
+                                </template>
+                                <template v-else>
+                                  <li v-if="vcpForm.optOutViaRxCompass">VCP is through RxCompass</li>
+                                  <li v-if="vcpForm.optOutNotes">Notes: {{ vcpForm.optOutNotes }}</li>
+                                </template>
+                              </ul>
+                            </div>
+                          </div>
+                          <p class="prog-confirm-note">
+                            <template v-if="progCart.includes('rxcompass') && progCart.includes('vcp')">A setup ticket will be created for each program and sent to the RxCompass Team and VCP Team.</template>
+                            <template v-else-if="progCart.includes('rxcompass')">A setup ticket will be created and sent to the RxCompass Team.</template>
+                            <template v-else>A setup ticket will be created and sent to the VCP Team.</template>
+                            Corrections must be made in Solo after submission.
+                          </p>
+                        </v-card-text>
+                        <v-card-actions class="nl-dialog-footer">
+                          <button class="button button-secondary" @click="showProgConfirmModal = false">Cancel</button>
+                          <button class="button button-primary" @click="submitPrograms">Confirm &amp; Submit</button>
+                        </v-card-actions>
+                      </v-card>
+                    </v-dialog>
+
+                    <!-- Pending Details Dialog -->
+                    <v-dialog v-model="showProgDetailsModal" max-width="480">
+                      <v-card class="prog-modal-card">
+                        <v-card-title class="prog-modal-title">
+                          {{ progDetailsTarget === 'rxcompass' ? 'RxCompass' : 'Variable Copay Program' }} — Submitted Request
+                        </v-card-title>
+                        <v-card-text>
+                          <v-divider class="mb-4" />
+                          <p class="prog-confirm-note mb-3">This request is pending setup by the {{ progDetailsTarget === 'rxcompass' ? 'RxCompass Team' : 'VCP Team' }}. To make corrections, contact them directly and reference the ticket number below.</p>
+                          <p class="prog-details-ticket mb-4">
+                            Ticket #: <strong>{{ progDetailsTarget === 'rxcompass' ? rxCompassTicketNumber : vcpTicketNumber }}</strong>
+                          </p>
+
+                          <!-- RxCompass details -->
+                          <ul v-if="progDetailsTarget === 'rxcompass'" class="prog-confirm-details prog-confirm-details--readonly">
+                            <li>Type: {{ rxCompassTypeLabel }}</li>
+                            <li>{{ rxCompassIsReconsider ? 'Follow-Up Date' : 'Effective Date' }}: {{ rxCompassForm.effectiveDate || '—' }}</li>
+                            <li v-if="rxCompassForm.merpVendor">MERP Administrator Name: {{ rxCompassForm.merpVendor }}</li>
+                            <li v-if="rxCompassForm.notes">Notes: {{ rxCompassForm.notes }}</li>
+                          </ul>
+
+                          <!-- VCP details -->
+                          <ul v-if="progDetailsTarget === 'vcp'" class="prog-confirm-details prog-confirm-details--readonly">
+                            <li>Election: {{ vcpElectionLabel }}</li>
+                            <template v-if="vcpForm.election !== 'OptOut'">
+                              <li>Effective Date: {{ vcpForm.effectiveDate || '—' }}</li>
+                              <li>Client State: {{ editableCompanyInfo.physicalState || '—' }}</li>
+                              <li v-if="vcpForm.planIds.length">Plans: {{ vcpForm.planIds.map(pid => `${planNameById(pid)} (${vcpForm.designations[pid] || '—'})`).join(', ') }}</li>
+                              <li v-if="vcpForm.offsitePharmacies.length">Offsite Pharmacies: {{ vcpForm.offsitePharmacies.map(c => c.name).join(', ') }}</li>
+                            </template>
+                            <template v-else>
+                              <li v-if="vcpForm.optOutViaRxCompass">VCP is through RxCompass</li>
+                              <li v-if="vcpForm.optOutNotes">Notes: {{ vcpForm.optOutNotes }}</li>
+                            </template>
+                          </ul>
+                        </v-card-text>
+                        <v-card-actions class="nl-dialog-footer">
+                          <button class="button button-primary" @click="showProgDetailsModal = false">Close</button>
+                        </v-card-actions>
+                      </v-card>
+                    </v-dialog>
+
+                    <!-- Success Snackbar -->
+                    <v-snackbar v-model="showProgSuccessSnackbar" color="success" :timeout="4000" location="bottom right">
+                      <div class="d-flex align-center" style="gap: 8px;">
+                        <CircleCheckBig :size="18" :stroke-width="2" />
+                        <span>Setup requests submitted. The RxCompass Team and/or VCP Team have been notified.</span>
+                      </div>
+                    </v-snackbar>
+
                   </div>
                 </template>
 
                 <!-- Step 6: Limits & Controls -->
                 <template v-else-if="currentWizardStep === 5">
+
+                  <!-- Card 1: Standard Dispensing Limitations -->
                   <div class="ap-section">
                     <div class="ap-section-header">
-                      <h4 class="text-h4">Limits &amp; Controls</h4>
+                      <h4 class="text-h4">Standard Dispensing Limitations</h4>
+                      <button v-if="!lcEditingLimits" class="button button-thirtiary" @click="lcStartEdit">
+                        <Pencil :size="14" :stroke-width="1.5" />Edit
+                      </button>
                     </div>
-                  <p class="text-body lc-intro">Standard dispensing limitations are shown below.</p>
-
-                  <div class="toc-toggle-group lc-toggle-group">
-                    <button
-                      :class="['button', 'toc-toggle', { 'toc-toggle--selected': !lcRequestChange }]"
-                      @click="lcRequestChange = false"
-                    >Keep Standard</button>
-                    <button
-                      :class="['button', 'toc-toggle', { 'toc-toggle--selected': lcRequestChange }]"
-                      @click="lcRequestChange = true"
-                    >Request Change</button>
-                  </div>
-
-                  <div class="lc-fields">
-                    <div v-for="field in lcFields" :key="field.key" class="lc-field-row">
-                      <span class="lc-field-label">{{ field.label }}</span>
-                      <span v-if="!lcRequestChange" class="lc-field-value">{{ field.value }}</span>
-                      <input v-else v-model="field.value" class="lc-field-input" />
-                    </div>
-                  </div>
-
-                  <div class="lc-section-divider" />
-
-                  <!-- High Cost Notifications -->
-                  <p class="text-body lc-hcn-intro">Before a high cost claim exceeding the specified notify amount is processed, a notification will be sent to the indicated users below. Users will have 24 hours to acknowledge the claim before it will automatically be processed.</p>
-
-                  <div class="lc-hcn-field">
-                    <p class="lc-hcn-label">Notify threshold amount:</p>
-                    <input v-model="lcNotifyThreshold" class="lc-field-input lc-hcn-input" />
-                  </div>
-
-                  <div class="lc-hcn-field">
-                    <p class="lc-hcn-label">Who should receive high cost notifications?</p>
-                    <div
-                      v-for="(recipient, idx) in lcRecipients"
-                      :key="idx"
-                      class="lc-recipient-row"
-                    >
-                      <input v-model="lcRecipients[idx]" class="lc-field-input lc-recipient-input" />
-                      <X :size="16" :stroke-width="1.5" class="lc-recipient-remove" @click="lcRecipients.splice(idx, 1)" />
-                    </div>
-                    <button class="button lc-add-btn" @click="lcRecipients.push('')">ADD</button>
-                  </div>
-
-                  <div class="lc-section-divider" />
-
-                  <!-- Overrides & Edits -->
-                  <p class="text-body lc-hcn-intro">We recommend the standard management setup for overrides and edits, as shown below. Changes to clinical edits may impact cost savings and plan performance.</p>
-
-                  <div class="lc-fields">
-                    <div v-for="item in lcOverrides" :key="item" class="lc-field-row">
-                      <span class="lc-field-label">{{ item }}</span>
-                      <Check :size="16" :stroke-width="2" class="lc-check-icon" />
+                    <div class="ap-fields">
+                      <p v-if="lcEditingLimits" class="text-body bl-note">These are Liviniti's standard defaults. Make changes as needed for this account.</p>
+                      <div v-if="!lcEditingLimits" class="ap-field-row ap-field-row--multi ap-field-row--wrap">
+                        <div v-for="field in lcFields" :key="field.key" class="ap-field">
+                          <span class="ap-field-label">{{ field.label }}</span>
+                          <span class="ap-field-value">{{ field.value }}</span>
+                        </div>
+                      </div>
+                      <div v-else class="ap-field-row ap-field-row--multi ap-field-row--wrap">
+                        <div v-for="field in lcFields" :key="field.key" class="ap-field">
+                          <TextField v-model="field.value" :label="field.label" />
+                        </div>
+                      </div>
+                      <div v-if="lcEditingLimits" class="ap-section-footer">
+                        <button class="button button-primary" @click="lcSaveEdit">Save Changes</button>
+                        <button class="button button-secondary" @click="lcCancelEdit">Cancel</button>
+                      </div>
                     </div>
                   </div>
 
-                  <div class="lc-section-divider" />
-
-                  <!-- DAW Penalties -->
-                  <p class="text-body lc-hcn-intro">Dispense as Written standards are below, please indicate if you'd like to apply these penalties.</p>
-
-                  <div v-for="daw in lcDawPenalties" :key="daw.key" class="lc-daw-block">
-                    <h5 class="lc-daw-title">{{ daw.label }}</h5>
-                    <p class="text-body lc-daw-desc">{{ daw.description }}</p>
-                    <div class="toc-toggle-group">
-                      <button
-                        :class="['button', 'toc-toggle', { 'toc-toggle--selected': daw.value === false }]"
-                        @click="daw.value = false"
-                      >Not Applied</button>
-                      <button
-                        :class="['button', 'toc-toggle', { 'toc-toggle--selected': daw.value === true }]"
-                        @click="daw.value = true"
-                      >Applied</button>
+                  <!-- Card 2: High Cost Notifications -->
+                  <div class="ap-section">
+                    <div class="ap-section-header">
+                      <h4 class="text-h4">High Cost Notifications</h4>
+                      <button v-if="!lcEditingHcn" class="button button-thirtiary" @click="lcHcnStartEdit">
+                        <Pencil :size="14" :stroke-width="1.5" />Edit
+                      </button>
+                    </div>
+                    <div class="ap-fields">
+                      <template v-if="!lcEditingHcn">
+                        <div class="ap-field-row ap-field-row--multi">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Notify Threshold Amount</span>
+                            <span class="ap-field-value">${{ lcNotifyThreshold }}</span>
+                          </div>
+                          <div class="ap-field">
+                            <span class="ap-field-label">Notification Recipients</span>
+                            <span class="ap-field-value">{{ lcRecipients.length ? lcRecipients.join(', ') : '—' }}</span>
+                          </div>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <p class="text-body bl-note">Before a high cost claim exceeding the notify amount is processed, the contacts below are notified. They have 24 hours to acknowledge before the claim is automatically processed.</p>
+                        <div class="bl-section">
+                          <p class="lc-hcn-label">Notify threshold amount</p>
+                          <div class="bl-field-narrow">
+                            <TextField v-model="lcNotifyThreshold" label="Notify threshold amount" />
+                          </div>
+                        </div>
+                        <div class="bl-section">
+                          <p class="lc-hcn-label">Who should receive high cost notifications?</p>
+                          <p class="text-body bl-note">Selected contacts will be notified when a high cost claim is pending approval.</p>
+                          <div class="bl-field-narrow">
+                            <Autocomplete v-model="lcRecipients" :items="lcHcnContactOptions" label="Select contacts" :multiple="true" />
+                          </div>
+                        </div>
+                        <div class="ap-section-footer">
+                          <button class="button button-primary" @click="lcHcnSaveEdit">Save Changes</button>
+                          <button class="button button-secondary" @click="lcHcnCancelEdit">Cancel</button>
+                        </div>
+                      </template>
                     </div>
                   </div>
 
-                  <textarea v-model="lcDawNotes" class="lc-daw-notes" placeholder="DAW Notes" />
+                  <!-- Card 3: Overrides & Edits (read-only) -->
+                  <div class="ap-section">
+                    <div class="ap-section-header">
+                      <h4 class="text-h4">Overrides &amp; Edits</h4>
+                    </div>
+                    <div class="ap-fields">
+                      <p class="text-body bl-note">Liviniti recommends the standard management setup for overrides and edits. Changes to clinical edits may impact cost savings and plan performance. The following are included by default:</p>
+                      <ul class="lc-overrides-list">
+                        <li v-for="item in lcOverrides" :key="item">{{ item }}</li>
+                      </ul>
+                    </div>
                   </div>
+
+                  <!-- Card 4: Dispense as Written (DAW) -->
+                  <div class="ap-section">
+                    <div class="ap-section-header">
+                      <h4 class="text-h4">Dispense as Written (DAW)</h4>
+                      <button v-if="!lcEditingDaw" class="button button-thirtiary" @click="lcDawStartEdit">
+                        <Pencil :size="14" :stroke-width="1.5" />Edit
+                      </button>
+                    </div>
+                    <div class="ap-fields">
+                      <template v-if="!lcEditingDaw">
+                        <div v-for="daw in lcDawPenalties" :key="daw.key" class="ap-field-row">
+                          <div class="ap-field">
+                            <span class="ap-field-label">{{ daw.label }}</span>
+                            <span class="ap-field-value">{{ daw.value || '—' }}</span>
+                          </div>
+                        </div>
+                        <div v-if="lcDawNotes" class="ap-field-row">
+                          <div class="ap-field">
+                            <span class="ap-field-label">DAW Notes</span>
+                            <span class="ap-field-value">{{ lcDawNotes }}</span>
+                          </div>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <p class="text-body bl-note">Indicate whether you would like to apply these DAW penalties.</p>
+                        <div v-for="daw in lcDawPenalties" :key="daw.key" class="bl-section">
+                          <p class="lc-hcn-label">{{ daw.label }}</p>
+                          <p class="text-body bl-note">{{ daw.description }}</p>
+                          <div class="bl-field-narrow">
+                            <Select v-model="daw.value" :items="daw.options" label="Apply penalty?" />
+                          </div>
+                        </div>
+                        <div class="bl-section">
+                          <v-textarea v-model="lcDawNotes" label="DAW Notes" variant="outlined" density="compact" rows="2" auto-grow hide-details class="bl-notes-textarea" />
+                        </div>
+                        <div class="ap-section-footer">
+                          <button class="button button-primary" @click="lcDawSaveEdit">Save Changes</button>
+                          <button class="button button-secondary" @click="lcDawCancelEdit">Cancel</button>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+
+                  <!-- Card 5: Manual Claims -->
+                  <div class="ap-section">
+                    <div class="ap-section-header">
+                      <h4 class="text-h4">Manual Claims</h4>
+                      <button v-if="!lcEditingManual" class="button button-thirtiary" @click="lcManualStartEdit">
+                        <Pencil :size="14" :stroke-width="1.5" />Edit
+                      </button>
+                    </div>
+                    <div class="ap-fields">
+                      <template v-if="!lcEditingManual">
+                        <div class="ap-field-row">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Reimbursement Type</span>
+                            <span class="ap-field-value">{{ lcManualReimbursement || '—' }}</span>
+                          </div>
+                        </div>
+                        <div v-if="lcManualNotes" class="ap-field-row">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Manual Claim Notes</span>
+                            <span class="ap-field-value">{{ lcManualNotes }}</span>
+                          </div>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <p class="text-body bl-note">Manual claims are processed for up to 30 days after the date of service.</p>
+                        <div class="bl-section">
+                          <p class="lc-hcn-label">Reimbursement type</p>
+                          <div class="bl-field-narrow">
+                            <Select v-model="lcManualReimbursement" :items="lcManualReimbursementOptions" label="Select reimbursement type" />
+                          </div>
+                        </div>
+                        <div class="bl-section">
+                          <v-textarea v-model="lcManualNotes" label="Manual Claim Notes" variant="outlined" density="compact" rows="2" auto-grow hide-details class="bl-notes-textarea" />
+                        </div>
+                        <div class="ap-section-footer">
+                          <button class="button button-primary" @click="lcManualSaveEdit">Save Changes</button>
+                          <button class="button button-secondary" @click="lcManualCancelEdit">Cancel</button>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+
                 </template>
 
                 <!-- Step 7: Billing -->
                 <template v-else-if="currentWizardStep === 6">
+
+                  <!-- Card 1: Billing Setup -->
                   <div class="ap-section">
                     <div class="ap-section-header">
-                      <h4 class="text-h4">Billing</h4>
+                      <h4 class="text-h4">Billing Setup</h4>
+                      <button v-if="!blEditingSetup" class="button button-thirtiary" @click="blSetupStartEdit">
+                        <Pencil :size="14" :stroke-width="1.5" />Edit
+                      </button>
                     </div>
-
-                  <!-- EIN Number -->
-                  <div class="bl-section bl-section--no-gap">
-                    <p class="wizard-step-description">Review and confirm this account's EIN Number to ensure proper billing.</p>
-                    <div class="bl-field-narrow">
-                      <TextField
-                        v-model="blEinNumber"
-                        label="EIN Number"
-                      />
+                    <div class="ap-fields">
+                      <template v-if="!blEditingSetup">
+                        <div class="ap-field-row ap-field-row--multi">
+                          <div class="ap-field">
+                            <span class="ap-field-label">EIN Number</span>
+                            <span class="ap-field-value">{{ blEinNumber || '—' }}</span>
+                          </div>
+                          <div class="ap-field">
+                            <span class="ap-field-label">Billing managed by a third party</span>
+                            <span class="ap-field-value">{{ blExistingParty === 'yes' ? 'Yes' : 'No' }}</span>
+                          </div>
+                          <div v-if="blExistingParty === 'yes'" class="ap-field">
+                            <span class="ap-field-label">Billing Party</span>
+                            <span class="ap-field-value">{{ blSelectedCarrier || '—' }}</span>
+                          </div>
+                        </div>
+                        <div class="ap-field-row">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Responsible Party</span>
+                            <span class="ap-field-value">{{ blResponsibleContacts.length ? blResponsibleContacts.join(', ') : '—' }}</span>
+                          </div>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <div class="form-row">
+                          <TextField :model-value="blEinNumber" label="EIN Number" placeholder="00-0000000" maxlength="10" @update:model-value="blEinNumber = formatEin($event)" />
+                        </div>
+                        <div class="bl-section">
+                          <p class="lc-hcn-label">Is billing managed by a third party?</p>
+                          <div class="toc-toggle-group">
+                            <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blExistingParty === 'yes' }]" @click="blExistingParty = 'yes'">Yes</button>
+                            <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blExistingParty === 'no' }]" @click="blExistingParty = 'no'">No</button>
+                          </div>
+                          <div v-if="blExistingParty === 'yes'" class="bl-subsection">
+                            <div class="bl-field-narrow">
+                              <Select v-model="blSelectedCarrier" :items="blCarrierOptions" label="Select billing party" />
+                            </div>
+                            <p class="text-body bl-note">Don't see the billing party? Third party vendors must be added in SoloRx before they appear here.</p>
+                            <p v-if="blSelectedCarrier" class="text-body bl-note">Contacts from the selected billing party will populate the Responsible Party field below.</p>
+                          </div>
+                        </div>
+                        <div class="bl-section">
+                          <p class="lc-hcn-label">Responsible Party</p>
+                          <div class="bl-field-narrow">
+                            <Autocomplete v-model="blResponsibleContacts" :items="blResponsibleContactOptions" label="Select contacts" :multiple="true" />
+                          </div>
+                        </div>
+                        <div class="ap-section-footer">
+                          <button class="button button-primary" @click="blSetupSaveEdit">Save Changes</button>
+                          <button class="button button-secondary" @click="blSetupCancelEdit">Cancel</button>
+                        </div>
+                      </template>
                     </div>
                   </div>
 
-                  <div class="lc-section-divider" />
-
-                  <!-- Payment Method -->
-                  <div class="bl-section">
-                    <p class="lc-hcn-label">Payment Method</p>
-                    <div class="toc-toggle-group">
-                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blPaymentMethod === 'ACH' }]" @click="blPaymentMethod = 'ACH'">ACH</button>
-                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blPaymentMethod === 'Check' }]" @click="blPaymentMethod = 'Check'">Check</button>
+                  <!-- Card 2: Payment Method (always visible; content varies when third party = Yes) -->
+                  <div class="ap-section">
+                    <div class="ap-section-header">
+                      <h4 class="text-h4">Payment Method</h4>
+                      <button v-if="!blEditingPayment" class="button button-thirtiary" @click="blPaymentStartEdit">
+                        <Pencil :size="14" :stroke-width="1.5" />Edit
+                      </button>
                     </div>
-
-                    <div v-if="blPaymentMethod === 'ACH'" class="bl-subsection">
-                      <p class="lc-hcn-label">ACH Method</p>
-                      <div class="toc-toggle-group">
-                        <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blAchMethod === 'send' }]" @click="blAchMethod = 'send'">Send to Liviniti</button>
-                        <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blAchMethod === 'debit' }]" @click="blAchMethod = 'debit'">Debited by Liviniti</button>
-                      </div>
-                    </div>
-
-                    <div v-if="blPaymentMethod === 'Check'" class="bl-subsection">
-                      <p class="text-body bl-note">Please send all checks to the following address:</p>
-                      <div class="bl-address">
-                        <p>Liviniti</p>
-                        <p>PO Box 896599</p>
-                        <p>Charlotte, NC 28289</p>
-                      </div>
-                    </div>
-
-                    <div class="bl-subsection">
-                      <FileUploader :show-document-type-selection="false">
-                        <template #label>
-                          <p class="bl-upload-label">
-                            Upload <a href="#" class="bl-upload-link" @click.prevent>W-9 form</a> or drag and drop
-                          </p>
+                    <div class="ap-fields">
+                      <template v-if="!blEditingPayment">
+                        <template v-if="blExistingParty === 'yes' && blSkipAchSetup">
+                          <div class="ap-field-row">
+                            <div class="ap-field">
+                              <span class="ap-field-value">Payment handled under existing Carrier billing agreement.</span>
+                            </div>
+                          </div>
                         </template>
-                      </FileUploader>
+                        <template v-else>
+                          <div class="ap-field-row ap-field-row--multi">
+                            <div class="ap-field">
+                              <span class="ap-field-label">Payment Method</span>
+                              <span class="ap-field-value">{{ blPaymentMethod || '—' }}</span>
+                            </div>
+                            <div v-if="blPaymentMethod === 'ACH'" class="ap-field">
+                              <span class="ap-field-label">ACH Method</span>
+                              <span class="ap-field-value">{{ blAchMethod === 'send' ? 'Send to Liviniti' : blAchMethod === 'debit' ? 'Debited by Liviniti' : '—' }}</span>
+                            </div>
+                            <div v-if="blAchMethod === 'debit' && blExistingParty !== 'yes'" class="ap-field">
+                              <span class="ap-field-label">Debit Pull Timing</span>
+                              <span class="ap-field-value">{{ blDebitTiming || '—' }}</span>
+                            </div>
+                          </div>
+                          <div v-if="blAchMethod === 'debit'" class="ap-field-row ap-field-row--multi">
+                            <div class="ap-field">
+                              <span class="ap-field-label">Completed W-9</span>
+                              <span class="ap-field-value">{{ blW9File || 'Not uploaded' }}</span>
+                            </div>
+                            <div class="ap-field">
+                              <span class="ap-field-label">Completed ACH Authorization</span>
+                              <span class="ap-field-value">{{ blAchAuthFile || 'Not uploaded' }}</span>
+                            </div>
+                          </div>
+                        </template>
+                      </template>
+                      <template v-else>
+                        <div v-if="blExistingParty === 'yes'" class="bl-section">
+                          <div class="ap-checkbox-row mb-3" @click="blSkipAchSetup = !blSkipAchSetup" style="cursor:pointer">
+                            <CheckSquare v-if="blSkipAchSetup" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                            <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                            <span class="ap-field-value">Skip ACH setup — Carrier has an existing billing agreement with Liviniti.</span>
+                          </div>
+                        </div>
+                        <div v-if="!blSkipAchSetup" class="bl-section">
+                          <p class="lc-hcn-label">Payment Method</p>
+                          <div class="toc-toggle-group">
+                            <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blPaymentMethod === 'ACH' }]" @click="blPaymentMethod = 'ACH'">ACH</button>
+                            <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blPaymentMethod === 'Check' }]" @click="blPaymentMethod = 'Check'">Check</button>
+                          </div>
+                          <div v-if="blPaymentMethod === 'ACH'" class="bl-subsection">
+                            <p class="lc-hcn-label">ACH Method <span class="bl-required">*</span></p>
+                            <div class="toc-toggle-group">
+                              <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blAchMethod === 'send' }]" @click="blAchMethod = 'send'">Send to Liviniti</button>
+                              <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blAchMethod === 'debit' }]" @click="blAchMethod = 'debit'">Debited by Liviniti</button>
+                            </div>
+                            <div v-if="blAchMethod === 'send'" class="bl-subsection">
+                              <p class="text-body bl-note">Download Liviniti's completed W-9 and ACH forms for your records.</p>
+                              <div class="bl-download-group">
+                                <button class="button bl-download-btn" @click.prevent>
+                                  <CloudDownload :size="16" :stroke-width="2" />Download W-9 (Liviniti)
+                                </button>
+                                <button class="button bl-download-btn" @click.prevent>
+                                  <CloudDownload :size="16" :stroke-width="2" />Download ACH Form (Liviniti)
+                                </button>
+                              </div>
+                            </div>
+                            <div v-else-if="blAchMethod === 'debit'" class="bl-subsection">
+                              <p v-if="blExistingParty !== 'yes'" class="text-body bl-note">W-9 and ACH authorization forms are required for Billing to complete account setup. Download, complete, and upload the signed forms.</p>
+                              <p v-else class="text-body bl-note">Up-to-date W-9 and ACH authorization forms are required for Billing to complete account setup. If this billing party is already established with Liviniti, forms may already be on file — please confirm they are current. Upload updated forms below if needed.</p>
+                              <div class="bl-download-group">
+                                <button class="button bl-download-btn" @click.prevent>
+                                  <CloudDownload :size="16" :stroke-width="2" />Download Blank W-9
+                                </button>
+                                <button class="button bl-download-btn" @click.prevent>
+                                  <CloudDownload :size="16" :stroke-width="2" />Download ACH Authorization Form
+                                </button>
+                              </div>
+                              <div class="bl-upload-item">
+                                <p class="lc-hcn-label">Completed W-9</p>
+                                <template v-if="blW9File && !blPendingW9Removal">
+                                  <v-chip color="primary" variant="flat" class="bl-file-chip">
+                                    <Paperclip :size="12" :stroke-width="2" class="bl-file-chip-icon" />
+                                    <span class="bl-file-chip-label">{{ blW9File }}</span>
+                                    <span class="bl-file-chip-close" @click.stop="blPendingW9Removal = true"><X :size="10" :stroke-width="2.5" /></span>
+                                  </v-chip>
+                                </template>
+                                <FileUploader v-else :show-document-type-selection="false" @file-selected="(name) => { blW9File = name; blPendingW9Removal = false }" />
+                              </div>
+                              <div class="bl-upload-item">
+                                <p class="lc-hcn-label">Completed ACH Authorization</p>
+                                <template v-if="blAchAuthFile && !blPendingAchAuthRemoval">
+                                  <v-chip color="primary" variant="flat" class="bl-file-chip">
+                                    <Paperclip :size="12" :stroke-width="2" class="bl-file-chip-icon" />
+                                    <span class="bl-file-chip-label">{{ blAchAuthFile }}</span>
+                                    <span class="bl-file-chip-close" @click.stop="blPendingAchAuthRemoval = true"><X :size="10" :stroke-width="2.5" /></span>
+                                  </v-chip>
+                                </template>
+                                <FileUploader v-else :show-document-type-selection="false" @file-selected="(name) => { blAchAuthFile = name; blPendingAchAuthRemoval = false }" />
+                              </div>
+                            </div>
+                            <div v-if="blAchMethod === 'debit' && blExistingParty !== 'yes'" class="bl-subsection">
+                              <p class="lc-hcn-label">Debit Pull Timing</p>
+                              <p class="text-body bl-note">For informational purposes only. Records the client's preferred debit schedule for Accounting's reference — does not automate or trigger debit pulls.</p>
+                              <div class="bl-field-narrow">
+                                <Select v-model="blDebitTiming" :items="blDebitTimingOptions" label="Select timing" />
+                              </div>
+                              <div v-if="blDebitTiming === 'Prior approval required'" class="bl-subsection">
+                                <TextField v-model="blDebitApprovalEmail" label="Approval notification email" />
+                              </div>
+                              <div v-if="blDebitTiming === 'Custom'" class="bl-subsection">
+                                <v-textarea v-model="blDebitTimingNote" label="Describe the debit pull schedule" variant="outlined" density="compact" rows="2" auto-grow hide-details class="bl-notes-textarea" />
+                              </div>
+                            </div>
+                          </div>
+                          <div v-if="blPaymentMethod === 'Check'" class="bl-subsection">
+                            <p class="text-body bl-note">Please send all checks to the following address:</p>
+                            <div class="bl-address">
+                              <p>Liviniti</p>
+                              <p>PO Box 896599</p>
+                              <p>Charlotte, NC 28289</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="ap-section-footer">
+                          <button class="button button-primary" @click="savePaymentCard">Save Changes</button>
+                          <button class="button button-secondary" @click="cancelPaymentCard">Cancel</button>
+                        </div>
+                      </template>
                     </div>
                   </div>
 
-                  <div class="lc-section-divider" />
-
-                  <!-- Responsible Party -->
-                  <div class="bl-section">
-                    <p class="lc-hcn-label">Responsible Party</p>
-                    <div class="toc-toggle-group">
-                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blResponsibleParty === 'existing' }]" @click="blResponsibleParty = 'existing'">Existing Contact</button>
-                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blResponsibleParty === 'new' }]" @click="blResponsibleParty = 'new'">New Contact</button>
+                  <!-- Card 3: Invoice Configuration -->
+                  <div class="ap-section">
+                    <div class="ap-section-header">
+                      <h4 class="text-h4">Invoice Configuration</h4>
+                      <button v-if="!blEditingInvoice" class="button button-thirtiary" @click="blInvoiceStartEdit">
+                        <Pencil :size="14" :stroke-width="1.5" />Edit
+                      </button>
                     </div>
-                    <div class="lc-fields bl-contact-list">
-                      <div
-                        v-for="contact in blContactOptions"
-                        :key="contact"
-                        :class="['lc-field-row', 'bl-contact-row', { 'bl-contact-row--selected': blResponsibleContact === contact }]"
-                        @click="blResponsibleContact = contact"
-                      >
-                        <span class="lc-field-label">{{ contact }}</span>
-                        <Check v-if="blResponsibleContact === contact" :size="16" :stroke-width="2" class="lc-check-icon" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="lc-section-divider" />
-
-                  <!-- Billing Report Configuration -->
-                  <h4 class="text-h4 bl-section-heading">Billing Report Configuration</h4>
-
-                  <!-- Include Claim Details -->
-                  <div class="bl-section">
-                    <p class="lc-hcn-label">Include Claim Details in Billing Reports</p>
-                    <div class="toc-toggle-group">
-                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blClaimDetails === 'no' }]" @click="blClaimDetails = 'no'">No</button>
-                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blClaimDetails === 'yes' }]" @click="blClaimDetails = 'yes'">Yes</button>
-                    </div>
-
-                    <div v-if="blClaimDetails === 'yes'" class="bl-subsection">
-                      <p class="lc-hcn-label">Include PHI in Claim Details</p>
-                      <div class="toc-toggle-group">
-                        <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blIncludePhi === 'no' }]" @click="blIncludePhi = 'no'">No</button>
-                        <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blIncludePhi === 'yes' }]" @click="blIncludePhi = 'yes'">Yes</button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Billing Cycle -->
-                  <div class="bl-section">
-                    <p class="lc-hcn-label">Billing Cycle</p>
-                    <div class="bl-field-narrow">
-                      <Select
-                        v-model="blBillingCycle"
-                        :items="blCycleOptions"
-                        label="Billing Cycle"
-                      />
-                    </div>
-                  </div>
-
-                  <!-- Division/Location breakdown -->
-                  <div class="bl-section">
-                    <p class="lc-hcn-label">Does reporting need to be broken down by division or location?</p>
-                    <div class="toc-toggle-group">
-                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blDivisionBreakdown === 'no' }]" @click="blDivisionBreakdown = 'no'">No</button>
-                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blDivisionBreakdown === 'yes' }]" @click="blDivisionBreakdown = 'yes'">Yes</button>
-                    </div>
-                    <div v-if="blDivisionBreakdown === 'yes'" class="bl-subsection-select">
-                      <Select
-                        v-model="blDivisionOption"
-                        :items="blDivisionOptions"
-                        label="Select option"
-                      />
-                    </div>
-                  </div>
-
-                  <!-- Member level breakdown -->
-                  <div class="bl-section">
-                    <p class="lc-hcn-label">Does reporting need to be broken down at the member level?</p>
-                    <div class="toc-toggle-group">
-                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blMemberBreakdown === 'no' }]" @click="blMemberBreakdown = 'no'">No</button>
-                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blMemberBreakdown === 'yes' }]" @click="blMemberBreakdown = 'yes'">Yes</button>
-                    </div>
-                  </div>
-
-                  <!-- Invoice breakout -->
-                  <div class="bl-section">
-                    <p class="lc-hcn-label">Do invoices need to be broken out?</p>
-                    <div class="toc-toggle-group">
-                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blInvoiceBreakout === 'no' }]" @click="blInvoiceBreakout = 'no'">No</button>
-                      <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blInvoiceBreakout === 'yes' }]" @click="blInvoiceBreakout = 'yes'">Yes</button>
+                    <div class="ap-fields">
+                      <template v-if="!blEditingInvoice">
+                        <div class="ap-field-row ap-field-row--multi">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Billing Cycle</span>
+                            <span class="ap-field-value">{{ blBillingCycle || '—' }}</span>
+                          </div>
+                          <div class="ap-field">
+                            <span class="ap-field-label">Separate Invoices</span>
+                            <span class="ap-field-value">{{ blSeparateInvoices === 'yes' ? `Yes — ${blSeparateInvoicesSplit || 'split not set'}` : 'No' }}</span>
+                          </div>
+                          <div class="ap-field">
+                            <span class="ap-field-label">Invoice Breakout</span>
+                            <span class="ap-field-value">{{ blInvoiceBreakout === 'yes' ? `Yes — ${blInvoiceBreakoutSelection || 'type not set'}` : 'No' }}</span>
+                          </div>
+                        </div>
+                        <div v-if="blBillingCycle === 'Custom'" class="ap-field-row">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Billing Schedule Note</span>
+                            <span class="ap-field-value">{{ blCustomCycleNote || '—' }}</span>
+                          </div>
+                        </div>
+                        <div v-if="blInvoiceBreakoutSelection === 'Custom'" class="ap-field-row">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Custom Breakout Note</span>
+                            <span class="ap-field-value">{{ blInvoiceBreakoutNote || '—' }}</span>
+                          </div>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <div class="bl-section">
+                          <p class="lc-hcn-label">Billing Cycle</p>
+                          <div class="bl-field-narrow">
+                            <Select v-model="blBillingCycle" :items="blCycleOptions" label="Billing Cycle" />
+                          </div>
+                          <div v-if="blBillingCycle === 'Custom'" class="bl-subsection">
+                            <v-textarea v-model="blCustomCycleNote" label="Describe the billing schedule" variant="outlined" density="compact" rows="2" auto-grow hide-details class="bl-notes-textarea" />
+                          </div>
+                        </div>
+                        <div class="bl-section">
+                          <p class="lc-hcn-label">Are separate invoices required?</p>
+                          <div class="toc-toggle-group">
+                            <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blSeparateInvoices === 'no' }]" @click="blSeparateInvoices = 'no'">No</button>
+                            <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blSeparateInvoices === 'yes' }]" @click="blSeparateInvoices = 'yes'">Yes</button>
+                          </div>
+                          <div v-if="blSeparateInvoices === 'yes'" class="bl-subsection-select">
+                            <Select v-model="blSeparateInvoicesSplit" :items="blInvoiceSplitOptions" label="Split invoices by" />
+                          </div>
+                        </div>
+                        <div class="bl-section">
+                          <p class="lc-hcn-label">Are invoice breakouts required?</p>
+                          <div class="toc-toggle-group">
+                            <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blInvoiceBreakout === 'no' }]" @click="blInvoiceBreakout = 'no'">No</button>
+                            <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blInvoiceBreakout === 'yes' }]" @click="blInvoiceBreakout = 'yes'">Yes</button>
+                          </div>
+                          <div v-if="blInvoiceBreakout === 'yes'" class="bl-subsection">
+                            <div class="bl-field-narrow">
+                              <Select v-model="blInvoiceBreakoutSelection" :items="blInvoiceBreakoutItems" label="Select breakout type" />
+                            </div>
+                            <div v-if="blInvoiceBreakoutSelection === 'Custom'" class="bl-custom-warning">
+                              <TriangleAlert :size="16" :stroke-width="2" class="bl-warning-icon" />
+                              <p class="text-body bl-warning-text">Custom invoice breakouts require coordination with Accounting. Open a ticket with Accounting to coordinate setup before proceeding.</p>
+                            </div>
+                            <div v-if="blInvoiceBreakoutSelection === 'Custom'" class="bl-subsection">
+                              <v-textarea v-model="blInvoiceBreakoutNote" label="Describe the custom breakout requirement" variant="outlined" density="compact" rows="2" auto-grow hide-details class="bl-notes-textarea" />
+                            </div>
+                          </div>
+                        </div>
+                        <div class="ap-section-footer">
+                          <button class="button button-primary" @click="blInvoiceSaveEdit">Save Changes</button>
+                          <button class="button button-secondary" @click="blInvoiceCancelEdit">Cancel</button>
+                        </div>
+                      </template>
                     </div>
                   </div>
 
-                  <div class="lc-section-divider" />
-
-                  <!-- Billing Notes -->
-                  <div class="bl-section">
-                    <v-textarea
-                      v-model="blNotes"
-                      label="Billing Notes"
-                      variant="outlined"
-                      density="compact"
-                      rows="3"
-                      auto-grow
-                      hide-details
-                      class="bl-notes-textarea"
-                    />
+                  <!-- Card 4: Report Configuration -->
+                  <div class="ap-section">
+                    <div class="ap-section-header">
+                      <h4 class="text-h4">Report Configuration</h4>
+                      <button v-if="!blEditingReport" class="button button-thirtiary" @click="blReportStartEdit">
+                        <Pencil :size="14" :stroke-width="1.5" />Edit
+                      </button>
+                    </div>
+                    <div class="ap-fields">
+                      <template v-if="!blEditingReport">
+                        <div class="ap-field-row ap-field-row--multi">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Show PHI in Billing Reports</span>
+                            <span class="ap-field-value">{{ blIncludePhi === 'yes' ? 'Yes' : 'No' }}</span>
+                          </div>
+                          <div class="ap-field">
+                            <span class="ap-field-label">Reporting Breakouts Required</span>
+                            <span class="ap-field-value">{{ blReportingBreakouts === 'yes' ? 'Yes' : 'No' }}</span>
+                          </div>
+                        </div>
+                        <div v-if="blReportingBreakouts === 'yes'" class="ap-field-row">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Breakout Types</span>
+                            <span class="ap-field-value">{{ blReportingBreakoutSelections.length ? blReportingBreakoutSelections.join(', ') : '—' }}</span>
+                          </div>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <div class="bl-section">
+                          <p class="lc-hcn-label">Show PHI in Billing Reports</p>
+                          <div class="toc-toggle-group">
+                            <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blIncludePhi === 'no' }]" @click="blIncludePhi = 'no'">No</button>
+                            <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blIncludePhi === 'yes' }]" @click="blIncludePhi = 'yes'">Yes</button>
+                          </div>
+                        </div>
+                        <div class="bl-section">
+                          <p class="lc-hcn-label">Are reporting breakouts required?</p>
+                          <div class="toc-toggle-group">
+                            <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blReportingBreakouts === 'no' }]" @click="blReportingBreakouts = 'no'">No</button>
+                            <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blReportingBreakouts === 'yes' }]" @click="blReportingBreakouts = 'yes'">Yes</button>
+                          </div>
+                          <div v-if="blReportingBreakouts === 'yes'" class="bl-subsection">
+                            <div class="bl-field-narrow">
+                              <Autocomplete v-model="blReportingBreakoutSelections" :items="blReportingBreakoutItems" :multiple="true" label="Select breakout types" />
+                            </div>
+                          </div>
+                        </div>
+                        <div class="ap-section-footer">
+                          <button class="button button-primary" @click="blReportSaveEdit">Save Changes</button>
+                          <button class="button button-secondary" @click="blReportCancelEdit">Cancel</button>
+                        </div>
+                      </template>
+                    </div>
                   </div>
+
+                  <!-- Card 5: Rebate Setup -->
+                  <div class="ap-section">
+                    <div class="ap-section-header">
+                      <h4 class="text-h4">Rebate Setup</h4>
+                      <button v-if="!blEditingRebate" class="button button-thirtiary" @click="blRebateStartEdit">
+                        <Pencil :size="14" :stroke-width="1.5" />Edit
+                      </button>
+                    </div>
+                    <div class="ap-fields">
+                      <template v-if="!blEditingRebate">
+                        <div class="ap-field-row">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Rebate Notification Contacts</span>
+                            <span class="ap-field-value">{{ blRebateContacts.length ? blRebateContacts.join(', ') : '—' }}</span>
+                          </div>
+                        </div>
+                        <div class="ap-field-row ap-field-row--multi">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Completed W-9</span>
+                            <span class="ap-field-value">{{ blRebateW9File || 'Not uploaded' }}</span>
+                          </div>
+                          <div class="ap-field">
+                            <span class="ap-field-label">Completed ACH Authorization</span>
+                            <span class="ap-field-value">{{ blRebateAchAuthFile || 'Not uploaded' }}</span>
+                          </div>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <div class="bl-section">
+                          <p class="lc-hcn-label">Who should receive rebate notifications?</p>
+                          <p class="text-body bl-note">Selected contacts will be notified when rebates are issued.</p>
+                          <div class="bl-field-narrow">
+                            <Autocomplete v-model="blRebateContacts" :items="blRebateContactOptions" label="Select contacts" :multiple="true" />
+                          </div>
+                        </div>
+                        <div class="bl-section">
+                          <p class="lc-hcn-label">Rebate ACH Setup</p>
+                          <p class="text-body bl-note">Download, complete, and upload the signed W-9 and ACH authorization forms for rebate payments.</p>
+                          <div class="bl-download-group">
+                            <button class="button bl-download-btn" @click.prevent>
+                              <CloudDownload :size="16" :stroke-width="2" />Download Blank W-9
+                            </button>
+                            <button class="button bl-download-btn" @click.prevent>
+                              <CloudDownload :size="16" :stroke-width="2" />Download ACH Authorization Form
+                            </button>
+                          </div>
+                          <div class="bl-upload-item">
+                            <p class="lc-hcn-label">Completed W-9</p>
+                            <template v-if="blRebateW9File && !blPendingRebateW9Removal">
+                              <v-chip color="primary" variant="flat" class="bl-file-chip">
+                                <Paperclip :size="12" :stroke-width="2" class="bl-file-chip-icon" />
+                                <span class="bl-file-chip-label">{{ blRebateW9File }}</span>
+                                <span class="bl-file-chip-close" @click.stop="blPendingRebateW9Removal = true"><X :size="10" :stroke-width="2.5" /></span>
+                              </v-chip>
+                            </template>
+                            <FileUploader v-else :show-document-type-selection="false" @file-selected="(name) => { blRebateW9File = name; blPendingRebateW9Removal = false }" />
+                          </div>
+                          <div class="bl-upload-item">
+                            <p class="lc-hcn-label">Completed ACH Authorization</p>
+                            <template v-if="blRebateAchAuthFile && !blPendingRebateAchAuthRemoval">
+                              <v-chip color="primary" variant="flat" class="bl-file-chip">
+                                <Paperclip :size="12" :stroke-width="2" class="bl-file-chip-icon" />
+                                <span class="bl-file-chip-label">{{ blRebateAchAuthFile }}</span>
+                                <span class="bl-file-chip-close" @click.stop="blPendingRebateAchAuthRemoval = true"><X :size="10" :stroke-width="2.5" /></span>
+                              </v-chip>
+                            </template>
+                            <FileUploader v-else :show-document-type-selection="false" @file-selected="(name) => { blRebateAchAuthFile = name; blPendingRebateAchAuthRemoval = false }" />
+                          </div>
+                        </div>
+                        <div class="ap-section-footer">
+                          <button class="button button-primary" @click="saveRebateCard">Save Changes</button>
+                          <button class="button button-secondary" @click="cancelRebateCard">Cancel</button>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+
+                  <!-- Card 6: Billing Notes -->
+                  <div class="ap-section">
+                    <div class="ap-section-header">
+                      <h4 class="text-h4">Billing Notes</h4>
+                      <button v-if="!blEditingNotes" class="button button-thirtiary" @click="blNotesStartEdit">
+                        <Pencil :size="14" :stroke-width="1.5" />Edit
+                      </button>
+                    </div>
+                    <div class="ap-fields">
+                      <template v-if="!blEditingNotes">
+                        <div class="ap-field-row">
+                          <div class="ap-field">
+                            <span class="ap-field-value">{{ blNotes || '—' }}</span>
+                          </div>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <div class="bl-section">
+                          <v-textarea v-model="blNotes" label="Billing Notes" hint="For special billing instructions only." persistent-hint variant="outlined" density="compact" rows="3" auto-grow class="bl-notes-textarea" />
+                        </div>
+                        <div class="ap-section-footer">
+                          <button class="button button-primary" @click="blNotesSaveEdit">Save Changes</button>
+                          <button class="button button-secondary" @click="blNotesCancelEdit">Cancel</button>
+                        </div>
+                      </template>
+                    </div>
                   </div>
 
                 </template>
@@ -1942,13 +3324,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, nextTick } from 'vue';
 import AccountSelector from '@/components/common/AccountSelector.vue';
 import PageCard from '@/components/common/PageCard.vue';
 import Button from '@/components/ui/Button.vue';
 import ReportDataTable from '@/components/common/ReportDataTable.vue';
 import FilteringPill from '@/components/ui/FilteringPill.vue';
 import Select from '@/components/ui/Select.vue';
+import Dialog from '@/components/ui/Dialog.vue';
 import TextField from '@/components/ui/TextField.vue';
 import FileUploader from '@/components/ui/FileUploader.vue';
 import Autocomplete from '@/components/ui/Autocomplete.vue';
@@ -1957,13 +3340,16 @@ import {
   Hourglass, CircleCheckBig, XCircle,
   Save as SaveIcon, LayoutList as LayoutListIcon, CircleCheck as CircleCheckIcon,
   ArrowRight as ArrowRightIcon, Pencil, CheckSquare, Square, ChevronDown, PlusCircle, X, Check, CloudDownload, TriangleAlert,
-  Building2, Shield, Link2, Users, FileText, Search, Globe, Trash2,
+  Building2, Shield, Link2, Users, FileText, Search, Globe, Trash2, Paperclip, Info,
 } from 'lucide-vue-next';
 import EmptyStateImg from '@/assets/EmptyState.svg';
+import { useDocumentsStore } from '@/stores/documents';
+import { useHighCostNotifications } from '@/composables/useHighCostNotifications';
 import { VRow, VCol, VProgressCircular } from 'vuetify/components';
 
 const STARK_INDUSTRIES_ID = 1;
 const WAYNE_ENTERPRISES_ID = 2;
+const CYBERDYNE_SYSTEMS_ID = 3;
 const OSCORP_ID = 4;
 
 const accountOptions = ref([
@@ -1981,121 +3367,845 @@ const wizardActive = ref(false);
 const currentWizardStep = ref(0);
 
 // Step 4: Transition of Care
-const tocHistoricalClaims = ref<boolean | null>(false);
-const tocRxWatchtower = ref<boolean | null>(true);
-const tocPriorAuth = ref<boolean | null>(false);
+const documentsStore = useDocumentsStore();
+const tocDayOptions = ['30 days', '60 days', '90 days'];
+
+// Card edit-mode flags (read-only by default, matching the Billing card pattern)
+const tocEditingFiles = ref(false); // Historical Claims + Prior Authorization File — shared widget
+const tocEditingWatchtower = ref(false);
+const tocEditingOrtf = ref(false);
+const tocEditingNotes = ref(false);
+
+// Historical Claims (HCF) — required; drives the TOC override
+const tocHistoricalClaims = ref(false);
+const tocOverrideDays = ref('60 days');
+const tocHistoricalClaimsFile = ref('');
+const tocPendingHcfRemoval = ref(false);
+const hcfPending = ref(false);
+const hcfTicketNumber = ref('');
+
+// Prior Authorization File (PA) — recommended, independent of HCF
+const tocPriorAuth = ref(false);
+const tocPriorAuthFile = ref('');
+const tocPendingPaRemoval = ref(false);
+const paPending = ref(false);
+const paTicketNumber = ref('');
+
+// RxWatchtower — always on, own override window, unrelated to HCF/TOC
+const tocWatchtowerDays = ref('60 days');
+
+// Open Refill Transfer File (ORTF) — uncommon, mail order only, no upload/ticket
+const tocOpenRefillTransfer = ref(false);
+
+const tocNotes = ref('');
+
+// Ticket submission — one item at a time, triggered only from inside edit mode.
+// Save never touches this; submitting is a separate, deliberate action you can
+// come back and do later, independent of when the answer/file was saved.
+const showTocSubmitModal = ref(false);
+const tocSubmitTarget = ref<'hcf' | 'pa' | null>(null);
+
+function openTocSubmitModal(target: 'hcf' | 'pa') {
+  tocSubmitTarget.value = target;
+  showTocSubmitModal.value = true;
+}
+
+function confirmTocSubmit() {
+  const today = new Date().toISOString().slice(0, 10);
+  const accountName = accountOptions.value.find(acc => acc.id === selectedAccount.value)?.name ?? '';
+  if (tocSubmitTarget.value === 'hcf' && tocHistoricalClaimsFile.value) {
+    hcfPending.value = true;
+    hcfTicketNumber.value = mockTicketNumber();
+    documentsStore.addDocument({
+      documentName: tocHistoricalClaimsFile.value,
+      type: tocHistoricalClaimsFile.value.split('.').pop() || 'file',
+      uploadDate: today,
+      lastModifiedBy: 'Jane Smith',
+      status: 'Published',
+      category: 'PHI Documents',
+      accountName,
+    });
+    showToast('File submitted. The Claims Analysis Team has been notified.', 'success');
+  } else if (tocSubmitTarget.value === 'pa' && tocPriorAuthFile.value) {
+    paPending.value = true;
+    paTicketNumber.value = mockTicketNumber();
+    documentsStore.addDocument({
+      documentName: tocPriorAuthFile.value,
+      type: tocPriorAuthFile.value.split('.').pop() || 'file',
+      uploadDate: today,
+      lastModifiedBy: 'Jane Smith',
+      status: 'Published',
+      category: 'PHI Documents',
+      accountName,
+    });
+    showToast('File submitted. The PA Import Team has been notified.', 'success');
+  }
+  showTocSubmitModal.value = false;
+  tocSubmitTarget.value = null;
+}
+
+// Snapshots capture each widget's values the moment Edit is clicked, so Cancel can restore
+// every field to exactly what it was before this edit session — not just pending file removals.
+let tocFilesSnapshot = { historicalClaims: false, overrideDays: '', historicalClaimsFile: '', priorAuth: false, priorAuthFile: '' };
+
+function startEditFilesCard() {
+  tocFilesSnapshot = {
+    historicalClaims: tocHistoricalClaims.value,
+    overrideDays: tocOverrideDays.value,
+    historicalClaimsFile: tocHistoricalClaimsFile.value,
+    priorAuth: tocPriorAuth.value,
+    priorAuthFile: tocPriorAuthFile.value,
+  };
+  tocEditingFiles.value = true;
+}
+
+function saveFilesCard() {
+  if (tocPendingHcfRemoval.value) {
+    tocHistoricalClaimsFile.value = '';
+    tocPendingHcfRemoval.value = false;
+  }
+  if (tocPendingPaRemoval.value) {
+    tocPriorAuthFile.value = '';
+    tocPendingPaRemoval.value = false;
+  }
+  tocEditingFiles.value = false;
+}
+
+function cancelFilesCard() {
+  tocHistoricalClaims.value = tocFilesSnapshot.historicalClaims;
+  tocOverrideDays.value = tocFilesSnapshot.overrideDays;
+  tocHistoricalClaimsFile.value = tocFilesSnapshot.historicalClaimsFile;
+  tocPriorAuth.value = tocFilesSnapshot.priorAuth;
+  tocPriorAuthFile.value = tocFilesSnapshot.priorAuthFile;
+  tocPendingHcfRemoval.value = false;
+  tocPendingPaRemoval.value = false;
+  tocEditingFiles.value = false;
+}
+
+let tocWatchtowerSnapshot = '60 days';
+
+function startEditWatchtowerCard() {
+  tocWatchtowerSnapshot = tocWatchtowerDays.value;
+  tocEditingWatchtower.value = true;
+}
+
+function cancelWatchtowerCard() {
+  tocWatchtowerDays.value = tocWatchtowerSnapshot;
+  tocEditingWatchtower.value = false;
+}
+
+let tocOrtfSnapshot = false;
+
+function startEditOrtfCard() {
+  tocOrtfSnapshot = tocOpenRefillTransfer.value;
+  tocEditingOrtf.value = true;
+}
+
+function cancelOrtfCard() {
+  tocOpenRefillTransfer.value = tocOrtfSnapshot;
+  tocEditingOrtf.value = false;
+}
+
+let tocNotesSnapshot = '';
+
+function startEditNotesCard() {
+  tocNotesSnapshot = tocNotes.value;
+  tocEditingNotes.value = true;
+}
+
+function cancelNotesCard() {
+  tocNotes.value = tocNotesSnapshot;
+  tocEditingNotes.value = false;
+}
 
 // ─── Step 5: Programs ─────────────────────────────────────────────────────────
 
-const progFilters = ['All', 'Active', 'Terminated'];
-const progActiveFilter = ref('All');
+// Details modal for pending tiles
+const showProgDetailsModal = ref(false);
+const progDetailsTarget = ref<'rxcompass' | 'vcp' | null>(null);
+function openProgDetails(prog: 'rxcompass' | 'vcp') {
+  progDetailsTarget.value = prog;
+  showProgDetailsModal.value = true;
+}
 
-const programs = ref([
-  {
-    id: 1,
-    name: 'Liviniti',
-    status: 'Active',
-    effStartDate: '03/01/2026',
-    effEndDate: '',
-    optionName: 'Southern Scripts',
-    invoice: 'Yes',
-    merpAdmin: '',
-    rates: [
-      { rate: 'Admin Fee',                    type: 'CLAIM',      amount: '$8',     groupBy: 'Admin Fee', payTo: '-',            comment: '-', effStartDate: '03/01/2026', effEndDate: '02/28/2027' },
-      { rate: 'Admin Fee',                    type: 'CLAIM',      amount: '$8.25',  groupBy: 'Admin Fee', payTo: '-',            comment: '-', effStartDate: '03/01/2027', effEndDate: '02/29/2028' },
-      { rate: 'Admin Fee',                    type: 'CLAIM',      amount: '$8.5',   groupBy: 'Admin Fee', payTo: '-',            comment: '-', effStartDate: '03/01/2028', effEndDate: '-' },
-      { rate: 'Southern Scripts Monthly Minimum', type: 'MONTHLYMIN', amount: '$1200', groupBy: '-',        payTo: '-',            comment: '-', effStartDate: '03/01/2026', effEndDate: '-' },
-      { rate: 'Consultant Fees',              type: 'CLAIM',      amount: '$1',     groupBy: 'Admin Fee', payTo: 'EPIC Brokers', comment: '-', effStartDate: '03/01/2026', effEndDate: '-' },
-    ],
-  },
-  {
-    id: 2,
-    name: 'RxCompass Entity',
-    status: 'Active',
-    effStartDate: '03/01/2026',
-    effEndDate: '',
-    optionName: 'RxCompass Entity',
-    invoice: 'Yes',
-    merpAdmin: '',
-    rates: [],
-  },
-  {
-    id: 3,
-    name: 'RxCompass OLP',
-    status: 'Active',
-    effStartDate: '03/01/2026',
-    effEndDate: '',
-    optionName: 'RxCompass OLP',
-    invoice: 'No',
-    merpAdmin: '',
-    rates: [],
-  },
-]);
+// Enrollment state — true once program appears in Solo2 AccountPrograms
+const rxCompassEnrolled = ref(false);
+const vcpEnrolled = ref(false);
 
-const filteredPrograms = computed(() =>
-  progActiveFilter.value === 'All'
-    ? programs.value
-    : programs.value.filter(p => p.status === progActiveFilter.value)
+// Pending state — true after ticket submitted, until Solo1 finishes setup
+const rxCompassPending = ref(false);
+const vcpPending = ref(false);
+const rxCompassTicketNumber = ref('');
+const vcpTicketNumber = ref('');
+
+// Cart & modal state
+const progCart = ref<string[]>([]);
+const showProgModal = ref(false);
+const activeProgModal = ref<'rxcompass' | 'vcp' | null>(null);
+const showProgConfirmModal = ref(false);
+const showProgSuccessSnackbar = ref(false);
+
+// RxCompass form
+const rxCompassForm = ref({ type: '', effectiveDate: '', merpVendor: '', notes: '' });
+
+// VCP form — election type applies account-wide (single-select, like Opt Out); only the
+// Maximizer/Accumulator designation varies per plan. Confirmed with Implementation 2026-08-03.
+interface VcpFormShape {
+  election: string;
+  effectiveDate: string;
+  optOutNotes: string;
+  optOutViaRxCompass: boolean;
+  planIds: number[];
+  designations: Record<number, string>;
+  offsitePharmacies: { npi: string; name: string }[];
+}
+function emptyVcpForm(): VcpFormShape {
+  return {
+    election: '',
+    effectiveDate: '',
+    optOutNotes: '',
+    optOutViaRxCompass: false,
+    planIds: [],
+    designations: {},
+    offsitePharmacies: [],
+  };
+}
+
+const vcpForm = ref(emptyVcpForm());
+
+const vcpElectionOptions = [
+  { label: 'VCP Hardstops', value: 'VCPHardstops' },
+  { label: 'Voluntary VCP', value: 'VoluntaryVCP' },
+  { label: 'Offsite VCP',   value: 'OffsiteVCP' },
+  { label: 'Opt Out',       value: 'OptOut' },
+];
+
+const vcpElectionDescriptions: Record<string, string> = {
+  VCPHardstops: 'Qualifying medications will reject at non-VCP pharmacies after the selected effective date.',
+  VoluntaryVCP: 'VCP will be available to all members at any time, not promoted at pharmacy.',
+  OffsiteVCP: 'Specific VCP pharmacy to be utilized for VCP eligible medications.',
+};
+
+function planNameById(id: number) {
+  return planDesignPlans.value.find(p => p.id === id)?.name ?? '—';
+}
+
+function vcpPlanItems() {
+  return planDesignPlans.value.map(p => ({ title: `${p.name} (ID ${p.id})`, value: p.id }));
+}
+
+function onVcpPlansChange(planIds: number[]) {
+  vcpForm.value.planIds = planIds;
+  Object.keys(vcpForm.value.designations).forEach(key => {
+    if (!planIds.includes(Number(key))) delete vcpForm.value.designations[Number(key)];
+  });
+}
+
+function setVcpDesignation(planId: number, designation: string) {
+  vcpForm.value.designations[planId] = vcpForm.value.designations[planId] === designation ? '' : designation;
+}
+
+// Explicit handler (not a watcher) so switching elections resets the form without also firing
+// during a snapshot restore (Cancel) or account switch, which would clobber the restored data.
+function selectVcpElection(value: string) {
+  vcpForm.value = { ...emptyVcpForm(), election: value };
+  vcpOffsitePharmacyText.value = '';
+}
+
+const vcpElectionLabel = computed(() =>
+  vcpElectionOptions.find(o => o.value === vcpForm.value.election)?.label ?? '—'
+);
+
+const rxCompassTypeItems = [
+  { title: 'RxCompass (Standard)', value: 'Standard' },
+  { title: 'RxCompass Lite',       value: 'Lite' },
+  { title: 'Reconsider in 3 months', value: '3Months' },
+  { title: 'Reconsider in 6 months', value: '6Months' },
+];
+
+const yesNoItems = [
+  { title: 'Yes', value: true },
+  { title: 'No',  value: false },
+];
+
+const rxCompassInCart = computed(() => progCart.value.includes('rxcompass'));
+const vcpInCart       = computed(() => progCart.value.includes('vcp'));
+
+const rxCompassTypeLabel = computed(() =>
+  rxCompassTypeItems.find(i => i.value === rxCompassForm.value.type)?.title ?? '—'
+);
+
+const rxCompassIsReconsider = computed(() =>
+  rxCompassForm.value.type === '3Months' || rxCompassForm.value.type === '6Months'
+);
+
+watch(() => rxCompassForm.value.type, (type) => {
+  if (type === '3Months') {
+    const d = new Date();
+    d.setDate(d.getDate() + 90);
+    rxCompassForm.value.effectiveDate = d.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+  } else if (type === '6Months') {
+    const d = new Date();
+    d.setDate(d.getDate() + 180);
+    rxCompassForm.value.effectiveDate = d.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+  } else {
+    rxCompassForm.value.effectiveDate = '';
+  }
+});
+
+const rxCompassFormValid = computed(() =>
+  !!rxCompassForm.value.type &&
+  !!rxCompassForm.value.effectiveDate &&
+  (rxCompassForm.value.type !== 'Standard' || !!rxCompassForm.value.merpVendor)
+);
+
+const vcpOffsitePharmacyText = ref('');
+function parseOffsitePharmacies() {
+  vcpForm.value.offsitePharmacies = generateNpiChips(vcpOffsitePharmacyText.value);
+}
+function removeOffsitePharmacy(idx: number) {
+  vcpForm.value.offsitePharmacies.splice(idx, 1);
+  vcpOffsitePharmacyText.value = vcpForm.value.offsitePharmacies.map(c => c.npi).join('\n');
+}
+
+const vcpFormValid = computed(() => {
+  const f = vcpForm.value;
+  if (!f.election) return false;
+  if (f.election === 'OptOut') return true;
+  if (!f.effectiveDate) return false;
+  if (!f.planIds.length) return false;
+  return f.planIds.every(pid => !!f.designations[pid]);
+});
+
+const rxCompassFormSnapshot = ref<typeof rxCompassForm.value | null>(null);
+const vcpFormSnapshot = ref<typeof vcpForm.value | null>(null);
+
+const rxCompassFormDirty = computed(() => {
+  if (!rxCompassFormSnapshot.value) return false;
+  return JSON.stringify(rxCompassForm.value) !== JSON.stringify(rxCompassFormSnapshot.value);
+});
+
+const vcpFormDirty = computed(() => {
+  if (!vcpFormSnapshot.value) return false;
+  return JSON.stringify(vcpForm.value) !== JSON.stringify(vcpFormSnapshot.value);
+});
+
+function openProgModal(prog: 'rxcompass' | 'vcp') {
+  activeProgModal.value = prog;
+  if (prog === 'rxcompass' && progCart.value.includes('rxcompass')) {
+    rxCompassFormSnapshot.value = JSON.parse(JSON.stringify(rxCompassForm.value));
+  } else {
+    rxCompassFormSnapshot.value = null;
+    rxCompassForm.value = { type: '', effectiveDate: '', merpVendor: '', notes: '' };
+  }
+  if (prog === 'vcp' && progCart.value.includes('vcp')) {
+    vcpFormSnapshot.value = JSON.parse(JSON.stringify(vcpForm.value));
+  } else {
+    vcpFormSnapshot.value = null;
+    vcpForm.value = emptyVcpForm();
+    vcpOffsitePharmacyText.value = '';
+  }
+  showProgModal.value = true;
+}
+
+function closeProgModal() {
+  showProgModal.value = false;
+}
+
+function cancelProgEdit() {
+  if (activeProgModal.value === 'rxcompass' && rxCompassFormSnapshot.value) {
+    rxCompassForm.value = JSON.parse(JSON.stringify(rxCompassFormSnapshot.value));
+  }
+  if (activeProgModal.value === 'vcp' && vcpFormSnapshot.value) {
+    vcpForm.value = JSON.parse(JSON.stringify(vcpFormSnapshot.value));
+    vcpOffsitePharmacyText.value = vcpFormSnapshot.value.offsitePharmacies.map((c: { npi: string }) => c.npi).join('\n');
+  }
+  showProgModal.value = false;
+}
+
+function toggleProgCart(prog: 'rxcompass' | 'vcp') {
+  if (progCart.value.includes(prog)) {
+    progCart.value = progCart.value.filter(p => p !== prog);
+  } else {
+    progCart.value.push(prog);
+  }
+  showProgModal.value = false;
+}
+
+function removeFromProgCart(prog: string) {
+  progCart.value = progCart.value.filter(p => p !== prog);
+}
+
+function mockTicketNumber() {
+  return `${Math.floor(1000000 + Math.random() * 9000000)}`;
+}
+
+function submitPrograms() {
+  if (progCart.value.includes('rxcompass')) {
+    rxCompassPending.value = true;
+    rxCompassTicketNumber.value = mockTicketNumber();
+  }
+  if (progCart.value.includes('vcp')) {
+    vcpPending.value = true;
+    vcpTicketNumber.value = mockTicketNumber();
+  }
+  progCart.value = [];
+  showProgConfirmModal.value = false;
+  showProgSuccessSnackbar.value = true;
+}
+
+const programsByAccount: Record<number, object[]> = {
+  [OSCORP_ID]: [
+    {
+      id: 1,
+      programType: 'vcp',
+      name: 'Variable Copay Program',
+      effStartDate: '05/01/2026',
+      election: 'Voluntary VCP',
+      clientState: '',
+      isMaximizer: false,
+      isAccumulator: false,
+      invoice: 'Yes',
+    },
+  ],
+  [CYBERDYNE_SYSTEMS_ID]: [
+    {
+      id: 1,
+      programType: 'rxcompass',
+      name: 'RxCompass',
+      effStartDate: '01/01/2026',
+      optionName: 'RxCompass (Standard)',
+      invoice: 'Yes',
+      merpAdmin: 'Apex Health Partners',
+    },
+    {
+      id: 2,
+      programType: 'vcp',
+      name: 'Variable Copay Program',
+      effStartDate: '01/01/2026',
+      election: 'VCP Hardstops',
+      clientState: '',
+      isMaximizer: true,
+      isAccumulator: false,
+      invoice: 'Yes',
+    },
+  ],
+};
+
+const programs = computed(() =>
+  selectedAccount.value ? (programsByAccount[selectedAccount.value] ?? []) : []
 );
 
 const progHeaders = [
   { title: 'Program Name',    key: 'name' },
   { title: 'Eff. Start Date', key: 'effStartDate' },
-  { title: 'Eff. End Date',   key: 'effEndDate' },
 ];
 
 const progRatesHeaders = [
-  { title: 'Rate',             key: 'rate' },
-  { title: 'Type',             key: 'type' },
-  { title: 'Amount',           key: 'amount' },
-  { title: 'Group By',         key: 'groupBy' },
-  { title: 'Pay To',           key: 'payTo' },
-  { title: 'Comment',          key: 'comment' },
-  { title: 'Eff. Start Date',  key: 'effStartDate' },
-  { title: 'Eff. End Date',    key: 'effEndDate' },
+  { title: 'Rate',            key: 'rate' },
+  { title: 'Type',            key: 'type' },
+  { title: 'Amount',          key: 'amount' },
+  { title: 'Group By',        key: 'groupBy' },
+  { title: 'Pay To',          key: 'payTo' },
+  { title: 'Comment',         key: 'comment' },
+  { title: 'Eff. Start Date', key: 'effStartDate' },
+  { title: 'Eff. End Date',   key: 'effEndDate' },
 ];
 
 // ─── Step 6: Limits & Controls ────────────────────────────────────────────────
 
-const lcRequestChange = ref(false);
+const lcEditingLimits = ref(false);
+let lcFieldsSnapshot: { key: string; label: string; value: string }[] = [];
 
-const lcNotifyThreshold = ref('10000');
-const lcRecipients = ref<string[]>([]);
+function lcStartEdit() {
+  lcFieldsSnapshot = JSON.parse(JSON.stringify(lcFields.value));
+  lcEditingLimits.value = true;
+}
 
+function lcSaveEdit() {
+  lcEditingLimits.value = false;
+}
+
+function lcCancelEdit() {
+  lcFields.value = JSON.parse(JSON.stringify(lcFieldsSnapshot));
+  lcEditingLimits.value = false;
+}
+
+const { lcEditingHcn, lcNotifyThreshold, lcRecipients, lcHcnStartEdit, lcHcnSaveEdit, lcHcnCancelEdit } = useHighCostNotifications();
+
+const lcHcnContactOptions = computed(() => {
+  const items: any[] = [
+    { type: 'subheader', title: 'Client Contacts' },
+    ...apClientContacts.value.map(c => ({ title: c.name, value: c.name })),
+  ];
+  const vendorGroups = new Map<string, string[]>();
+  apVendorContacts.value.forEach(c => {
+    if (!vendorGroups.has(c.vendor)) vendorGroups.set(c.vendor, []);
+    vendorGroups.get(c.vendor)!.push(c.name);
+  });
+  vendorGroups.forEach((names, vendor) => {
+    items.push({ type: 'divider' });
+    items.push({ type: 'subheader', title: vendor });
+    names.forEach(name => items.push({ title: name, value: name }));
+  });
+  return items;
+});
+
+const lcEditingDaw = ref(false);
+const lcDaw1Options = ['No (Recommended)', 'Yes – Brand Copay', 'Yes – Generic Copay'];
+const lcDaw2Options = ['Yes – Brand Copay (Recommended)', 'No', 'Yes – Generic Copay'];
 const lcDawNotes = ref('');
 const lcDawPenalties = ref([
   {
     key: 'daw1',
     label: 'DAW Penalty 1',
-    description: 'The member requests a brand name drug when a generic equivalent is available and the prescriber has not indicated "dispense as written." The member pays the brand copay plus the difference between the brand and generic price.',
-    value: true,
+    description: 'When a Prescription is presented to the Pharmacy signed "Brand Medically Necessary" by the prescriber, if marked Yes, the member will be charged the below selected copay plus the difference between the generic and brand name medication will be charged. DAW 1 prescriptions are also subject to Prior Authorization before they can be dispensed. If marked No, members will not be charged a penalty, and the applicable brand name co-pay will apply.',
+    value: 'No (Recommended)',
+    options: lcDaw1Options,
   },
   {
     key: 'daw2',
     label: 'DAW Penalty 2',
-    description: 'The prescriber indicates "dispense as written" for a brand name drug when a generic equivalent is available. The member pays the brand copay plus the difference between the brand and generic price.',
-    value: true,
+    description: 'When a member refuses a generic equivalent when both the physician allows it and one exists, if marked Yes, the below selected copay plus the difference between the generic and brand name medication will be charged. This penalty will not be applied to either deductible or OOP (out-of-pocket) expense. If marked No, members will not be charged a penalty, and the applicable brand name co-pay will apply.',
+    value: 'Yes – Brand Copay (Recommended)',
+    options: lcDaw2Options,
   },
 ]);
+let lcDawSnapshot = { values: ['', ''], notes: '' };
+
+function lcDawStartEdit() {
+  lcDawSnapshot = { values: lcDawPenalties.value.map(d => d.value), notes: lcDawNotes.value };
+  lcEditingDaw.value = true;
+}
+
+function lcDawSaveEdit() {
+  lcEditingDaw.value = false;
+}
+
+function lcDawCancelEdit() {
+  lcDawPenalties.value.forEach((d, i) => { d.value = lcDawSnapshot.values[i]; });
+  lcDawNotes.value = lcDawSnapshot.notes;
+  lcEditingDaw.value = false;
+}
+
+const lcEditingManual = ref(false);
+const lcManualReimbursementOptions = [
+  "Liviniti's pharmacy network rate less copayment",
+  'What the member paid less applicable copayment',
+];
+const lcManualReimbursement = ref(lcManualReimbursementOptions[0]);
+const lcManualNotes = ref('');
+let lcManualSnapshot = { reimbursement: '', notes: '' };
+
+function lcManualStartEdit() {
+  lcManualSnapshot = { reimbursement: lcManualReimbursement.value, notes: lcManualNotes.value };
+  lcEditingManual.value = true;
+}
+
+function lcManualSaveEdit() {
+  lcEditingManual.value = false;
+}
+
+function lcManualCancelEdit() {
+  lcManualReimbursement.value = lcManualSnapshot.reimbursement;
+  lcManualNotes.value = lcManualSnapshot.notes;
+  lcEditingManual.value = false;
+}
 
 // ─── Step 7: Billing ─────────────────────────────────────────────────────────
 
+const blEinNumber = ref('');
+const formatEin = (val: string) => {
+  const digits = val.replace(/\D/g, '').slice(0, 9);
+  return digits.length > 2 ? `${digits.slice(0, 2)}-${digits.slice(2)}` : digits;
+};
+
+// B-21: Existing billing party
+const blExistingParty = ref('no');
+const blCarrierOptions = ['Southern Scripts Carrier', 'Acclaim Benefits', 'Benefit Advantage'];
+const blSelectedCarrier = ref('');
+
+// B-01/B-02: Payment method
 const blPaymentMethod = ref('ACH');
-const blAchMethod = ref('send');
-const blResponsibleParty = ref('existing');
-const blResponsibleContact = ref('Nick Johnson');
-const blContactOptions = ['Nick Johnson', 'Sarah Lee', 'Mark Davis'];
-const blClaimDetails = ref('yes');
+const blAchMethod = ref('debit');
+
+// Skip ACH setup — Carrier already has an existing billing agreement with Liviniti
+const blSkipAchSetup = ref(false);
+let suppressPaymentFieldsReset = false;
+const resetPaymentFields = () => {
+  blPaymentMethod.value = 'ACH';
+  blAchMethod.value = 'debit';
+  blDebitTiming.value = '';
+  blDebitApprovalEmail.value = '';
+  blDebitTimingNote.value = '';
+  blW9File.value = null;
+  blAchAuthFile.value = null;
+  blPendingW9Removal.value = false;
+  blPendingAchAuthRemoval.value = false;
+};
+watch(blSkipAchSetup, (val) => {
+  if (suppressPaymentFieldsReset) return;
+  if (val) resetPaymentFields();
+});
+
+// B-04: Debit pull timing
+const blDebitTiming = ref('');
+const blDebitTimingOptions = ['3–5 business days after billing complete', '10 business days', 'Prior approval required', 'Custom'];
+const blDebitApprovalEmail = ref('');
+const blDebitTimingNote = ref('');
+
+// B-05/B-14: Contacts
+const blResponsibleContactOptions = computed(() => {
+  if (blExistingParty.value === 'yes' && blSelectedCarrier.value) {
+    return apVendorContacts.value
+      .filter(c => c.vendor === blSelectedCarrier.value)
+      .map(c => c.name);
+  }
+  return apClientContacts.value.map(c => c.name);
+});
+const blRebateContactOptions = computed(() => {
+  const items: any[] = [
+    { type: 'subheader', title: 'Client Contacts' },
+    ...apClientContacts.value.map(c => ({ title: c.name, value: c.name })),
+  ];
+  const vendorGroups = new Map<string, string[]>();
+  apVendorContacts.value.forEach(c => {
+    if (!vendorGroups.has(c.vendor)) vendorGroups.set(c.vendor, []);
+    vendorGroups.get(c.vendor)!.push(c.name);
+  });
+  vendorGroups.forEach((names, vendor) => {
+    items.push({ type: 'divider' });
+    items.push({ type: 'subheader', title: vendor });
+    names.forEach(name => items.push({ title: name, value: name }));
+  });
+  return items;
+});
+const blResponsibleContacts = ref<string[]>([]);
+const blRebateContacts = ref<string[]>([]);
+let suppressResponsibleContactsReset = false;
+watch([() => blExistingParty.value, () => blSelectedCarrier.value], () => {
+  if (suppressResponsibleContactsReset) return;
+  blResponsibleContacts.value = [];
+});
+watch(() => blExistingParty.value, () => {
+  blSkipAchSetup.value = false;
+});
+
+// B-07: PHI toggle
 const blIncludePhi = ref('no');
-const blBillingCycle = ref('Weekly');
-const blCycleOptions = ['Weekly', 'Bi-Weekly', 'Monthly'];
-const blDivisionBreakdown = ref('no');
-const blDivisionOption = ref('');
-const blDivisionOptions = ['Division', 'Location', 'Both'];
-const blMemberBreakdown = ref('yes');
+
+// B-11: Billing cycle
+const blBillingCycle = ref('Bi-Weekly');
+const blCycleOptions = ['Weekly', 'Bi-Weekly', 'Semi-Monthly', 'Monthly', 'Quad-Monthly', 'Custom'];
+const blCustomCycleNote = ref('');
+
+// B-20: Separate invoices
+const blSeparateInvoices = ref('no');
+const blSeparateInvoicesSplit = ref('');
+const blInvoiceSplitOptions = ['AR Type', 'Employee Location', 'Member', 'Employee Status'];
+
+// B-08/B-09: Reporting breakouts
+const blReportingBreakouts = ref('no');
+const blReportingBreakoutSelections = ref<string[]>([]);
+const blReportingBreakoutItems = [
+  'Detail by AR Type',
+  'Detail by Employee Location',
+  'Detail by Employee Location and AR Type',
+  'Detail by Employee Location and Member',
+  'Detail by Employee Status',
+  'Detail by Group ID',
+  'Detail by Member',
+  'Summary by AR Type',
+  'Summary by Employee Location',
+  'Summary by Employee Status',
+];
+
+// B-12: Invoice breakout
 const blInvoiceBreakout = ref('no');
-const blEinNumber = ref('111111111');
+const blInvoiceBreakoutSelection = ref('');
+const blInvoiceBreakoutItems = ['AR Type', 'Employee Location', 'Member', 'Employee Status', 'Custom'];
+const blInvoiceBreakoutNote = ref('');
+
 const blNotes = ref('');
+
+const blEditingSetup = ref(false);
+const blEditingPayment = ref(false);
+const blEditingInvoice = ref(false);
+const blEditingReport = ref(false);
+const blEditingRebate = ref(false);
+const blEditingNotes = ref(false);
+
+// Card 1: Billing Setup — snapshot/restore so Cancel undoes every field, not just uploads
+let blSetupSnapshot = { einNumber: '', existingParty: 'no', selectedCarrier: '', responsibleContacts: [] as string[] };
+const blSetupStartEdit = () => {
+  blSetupSnapshot = {
+    einNumber: blEinNumber.value,
+    existingParty: blExistingParty.value,
+    selectedCarrier: blSelectedCarrier.value,
+    responsibleContacts: [...blResponsibleContacts.value],
+  };
+  blEditingSetup.value = true;
+};
+const blSetupSaveEdit = () => {
+  blEditingSetup.value = false;
+};
+const blSetupCancelEdit = () => {
+  suppressResponsibleContactsReset = true;
+  blEinNumber.value = blSetupSnapshot.einNumber;
+  blExistingParty.value = blSetupSnapshot.existingParty;
+  blSelectedCarrier.value = blSetupSnapshot.selectedCarrier;
+  blResponsibleContacts.value = blSetupSnapshot.responsibleContacts;
+  blEditingSetup.value = false;
+  nextTick(() => { suppressResponsibleContactsReset = false; });
+};
+
+// ACH upload state — Payment Method card
+const blW9File = ref<string | null>(null);
+const blAchAuthFile = ref<string | null>(null);
+const blPendingW9Removal = ref(false);
+const blPendingAchAuthRemoval = ref(false);
+
+let blPaymentSnapshot = {
+  skipAchSetup: false, paymentMethod: 'ACH', achMethod: 'debit',
+  w9File: null as string | null, achAuthFile: null as string | null,
+  debitTiming: '', debitApprovalEmail: '', debitTimingNote: '',
+};
+const blPaymentStartEdit = () => {
+  blPaymentSnapshot = {
+    skipAchSetup: blSkipAchSetup.value,
+    paymentMethod: blPaymentMethod.value,
+    achMethod: blAchMethod.value,
+    w9File: blW9File.value,
+    achAuthFile: blAchAuthFile.value,
+    debitTiming: blDebitTiming.value,
+    debitApprovalEmail: blDebitApprovalEmail.value,
+    debitTimingNote: blDebitTimingNote.value,
+  };
+  blEditingPayment.value = true;
+};
+const savePaymentCard = () => {
+  if (blPendingW9Removal.value) blW9File.value = null;
+  blPendingW9Removal.value = false;
+  if (blPendingAchAuthRemoval.value) blAchAuthFile.value = null;
+  blPendingAchAuthRemoval.value = false;
+  blEditingPayment.value = false;
+};
+const cancelPaymentCard = () => {
+  suppressPaymentFieldsReset = true;
+  blSkipAchSetup.value = blPaymentSnapshot.skipAchSetup;
+  blPaymentMethod.value = blPaymentSnapshot.paymentMethod;
+  blAchMethod.value = blPaymentSnapshot.achMethod;
+  blW9File.value = blPaymentSnapshot.w9File;
+  blAchAuthFile.value = blPaymentSnapshot.achAuthFile;
+  blDebitTiming.value = blPaymentSnapshot.debitTiming;
+  blDebitApprovalEmail.value = blPaymentSnapshot.debitApprovalEmail;
+  blDebitTimingNote.value = blPaymentSnapshot.debitTimingNote;
+  blPendingW9Removal.value = false;
+  blPendingAchAuthRemoval.value = false;
+  blEditingPayment.value = false;
+  nextTick(() => { suppressPaymentFieldsReset = false; });
+};
+
+// Card 3: Invoice Configuration
+let blInvoiceSnapshot = {
+  billingCycle: 'Bi-Weekly', customCycleNote: '',
+  separateInvoices: 'no', separateInvoicesSplit: '',
+  invoiceBreakout: 'no', invoiceBreakoutSelection: '', invoiceBreakoutNote: '',
+};
+const blInvoiceStartEdit = () => {
+  blInvoiceSnapshot = {
+    billingCycle: blBillingCycle.value,
+    customCycleNote: blCustomCycleNote.value,
+    separateInvoices: blSeparateInvoices.value,
+    separateInvoicesSplit: blSeparateInvoicesSplit.value,
+    invoiceBreakout: blInvoiceBreakout.value,
+    invoiceBreakoutSelection: blInvoiceBreakoutSelection.value,
+    invoiceBreakoutNote: blInvoiceBreakoutNote.value,
+  };
+  blEditingInvoice.value = true;
+};
+const blInvoiceSaveEdit = () => {
+  blEditingInvoice.value = false;
+};
+const blInvoiceCancelEdit = () => {
+  blBillingCycle.value = blInvoiceSnapshot.billingCycle;
+  blCustomCycleNote.value = blInvoiceSnapshot.customCycleNote;
+  blSeparateInvoices.value = blInvoiceSnapshot.separateInvoices;
+  blSeparateInvoicesSplit.value = blInvoiceSnapshot.separateInvoicesSplit;
+  blInvoiceBreakout.value = blInvoiceSnapshot.invoiceBreakout;
+  blInvoiceBreakoutSelection.value = blInvoiceSnapshot.invoiceBreakoutSelection;
+  blInvoiceBreakoutNote.value = blInvoiceSnapshot.invoiceBreakoutNote;
+  blEditingInvoice.value = false;
+};
+
+// Card 4: Report Configuration
+let blReportSnapshot = { includePhi: 'no', reportingBreakouts: 'no', reportingBreakoutSelections: [] as string[] };
+const blReportStartEdit = () => {
+  blReportSnapshot = {
+    includePhi: blIncludePhi.value,
+    reportingBreakouts: blReportingBreakouts.value,
+    reportingBreakoutSelections: [...blReportingBreakoutSelections.value],
+  };
+  blEditingReport.value = true;
+};
+const blReportSaveEdit = () => {
+  blEditingReport.value = false;
+};
+const blReportCancelEdit = () => {
+  blIncludePhi.value = blReportSnapshot.includePhi;
+  blReportingBreakouts.value = blReportSnapshot.reportingBreakouts;
+  blReportingBreakoutSelections.value = blReportSnapshot.reportingBreakoutSelections;
+  blEditingReport.value = false;
+};
+
+// ACH upload state — Rebate Setup card
+const blRebateW9File = ref<string | null>(null);
+const blRebateAchAuthFile = ref<string | null>(null);
+const blPendingRebateW9Removal = ref(false);
+const blPendingRebateAchAuthRemoval = ref(false);
+
+let blRebateSnapshot = {
+  contacts: [] as string[],
+  w9File: null as string | null,
+  achAuthFile: null as string | null,
+};
+const blRebateStartEdit = () => {
+  blRebateSnapshot = {
+    contacts: [...blRebateContacts.value],
+    w9File: blRebateW9File.value,
+    achAuthFile: blRebateAchAuthFile.value,
+  };
+  blEditingRebate.value = true;
+};
+const saveRebateCard = () => {
+  if (blPendingRebateW9Removal.value) blRebateW9File.value = null;
+  blPendingRebateW9Removal.value = false;
+  if (blPendingRebateAchAuthRemoval.value) blRebateAchAuthFile.value = null;
+  blPendingRebateAchAuthRemoval.value = false;
+  blEditingRebate.value = false;
+};
+const cancelRebateCard = () => {
+  blRebateContacts.value = blRebateSnapshot.contacts;
+  blRebateW9File.value = blRebateSnapshot.w9File;
+  blRebateAchAuthFile.value = blRebateSnapshot.achAuthFile;
+  blPendingRebateW9Removal.value = false;
+  blPendingRebateAchAuthRemoval.value = false;
+  blEditingRebate.value = false;
+};
+
+// Card 6: Billing Notes
+let blNotesSnapshot = '';
+const blNotesStartEdit = () => {
+  blNotesSnapshot = blNotes.value;
+  blEditingNotes.value = true;
+};
+const blNotesSaveEdit = () => {
+  blEditingNotes.value = false;
+};
+const blNotesCancelEdit = () => {
+  blNotes.value = blNotesSnapshot;
+  blEditingNotes.value = false;
+};
 
 // ─── Step 8: ID Cards ─────────────────────────────────────────────────────────
 const idVendorType = ref('Internal');
@@ -2151,8 +4261,9 @@ const lcFields = ref([
 
 const isStarkIndustries = computed(() => selectedAccount.value === STARK_INDUSTRIES_ID);
 const isWayneEnterprises = computed(() => selectedAccount.value === WAYNE_ENTERPRISES_ID);
+const isCyberdyne = computed(() => selectedAccount.value === CYBERDYNE_SYSTEMS_ID);
 const isOscorp = computed(() => selectedAccount.value === OSCORP_ID);
-const isWizardAccount = computed(() => isStarkIndustries.value || isOscorp.value);
+const isWizardAccount = computed(() => isStarkIndustries.value || isCyberdyne.value || isOscorp.value);
 
 const gapSections = [
   { label: 'Account Information',  icon: Building2  },
@@ -2180,7 +4291,7 @@ const wizardSteps = ref([
   { name: 'Plan Design',            required: true,  status: 'not-started',  description: 'Configure the benefit structure, cost-sharing rules, and coverage tiers.' },
   { name: 'Transition of Care',     required: false, status: 'not-started',  description: 'Set up transition of care rules for members moving from another plan.' },
   { name: 'Programs',               required: false, status: 'not-started',  description: 'Select and configure clinical and specialty programs for this account.' },
-  { name: 'Limits & Controls',      required: false, status: 'not-started',  description: 'Define quantity limits, step therapy rules, and utilization management controls.' },
+  { name: 'Limits & Controls',      required: false, status: 'not-started',  description: 'Configure dispensing limits, high cost claim notifications, and manual claims handling for the account.' },
   { name: 'Billing',                required: false, status: 'not-started',  description: 'Configure billing preferences, payment terms, and invoice settings.' },
   { name: 'ID Cards',               required: false, status: 'not-started',  description: 'Set up member ID card design and distribution preferences.' },
   { name: 'Verification & Summary', required: false, status: 'not-started',  description: 'Review the completion status of all configuration steps before finishing plan setup.' },
@@ -2314,6 +4425,342 @@ const finishPlanSetup = () => {
 // ─── Step 1 data ──────────────────────────────────────────────────────────────
 
 const statusOptions = ['Implementation', 'Active', 'Inactive', 'Pending'];
+
+// ── Account Profile — Client Portal role/permission taxonomy (shared) ────────
+// Taxonomy validated against both the old Client Portal (Ehn.Web.Pbm.Customers
+// AccountPermissions) and Solo2's GPS report "Client Portal Access" template.
+const apPermissionOptions = [
+  { key: 'reports', label: 'Reports' },
+  { key: 'invoices', label: 'Invoices' },
+  { key: 'rebates', label: 'Rebates' },
+  { key: 'highCostNotifications', label: 'High Cost Notifications' },
+  { key: 'planChanges', label: 'Plan Changes' },
+  { key: 'planApproval', label: 'Plan Approval' },
+  { key: 'overrides', label: 'Overrides' },
+  { key: 'vcpClaims', label: 'VCP Claims' },
+];
+const apClientRoleOptions = ['Administrator', 'Client'];
+const apVendorRoleOptions = ['Broker', 'Consultant', 'Carrier', 'TPV'];
+const apNewPermissions = (): Record<string, boolean> => ({ reports: false, invoices: false, rebates: false, highCostNotifications: false, planChanges: false, planApproval: false, overrides: false, vcpClaims: false });
+const apPortalRoleLabel = (portalAccess: boolean, role: string) => (portalAccess ? role : 'No portal access');
+const apPermissionsSummary = (role: string, permissions: Record<string, boolean>) => {
+  if (role === 'Administrator') return 'All';
+  const selected = apPermissionOptions.filter(p => permissions[p.key]).map(p => p.label);
+  return selected.length ? selected.join(', ') : 'None';
+};
+// Enforces the old portal's rule: only one contact per account can be Main Point of Contact.
+const apEnforceSingleMainPoc = (contacts: any[], keepIdx: number) => {
+  contacts.forEach((c, i) => { if (i !== keepIdx) c.mainPointOfContact = false; });
+};
+// Only one Client Contact per account can be Main Point of Contact — Vendor Contacts don't
+// carry this designation (a client wouldn't dictate a vendor's main point of contact).
+// Returns that contact's name (old portal shows who to find and change), or '' if none.
+const apOtherContactIsMainPoc = (contacts: any[], excludeIdx: number): string => {
+  const other = contacts.find((c, i) => i !== excludeIdx && c.mainPointOfContact);
+  return other?.name ?? '';
+};
+
+// ── Account Profile — Client Contacts ─────────────────────────────────────────
+const apClientContactHeaders = [
+  { title: 'Name', key: 'name' },
+  { title: 'Title', key: 'title' },
+  { title: 'Email', key: 'email' },
+  { title: 'Phone', key: 'phone' },
+  { title: 'Portal Role', key: 'roleLabel' },
+  { title: '', key: 'actions', sortable: false },
+];
+const apPhoneTypes = ['Office', 'Cell', 'Fax'];
+const apNewPhone = () => ({ number: '', type: 'Office', ext: '' });
+interface ApClientContact {
+  name: string;
+  title: string;
+  email: string;
+  phone: string;
+  phones: { number: string; type: string; ext: string }[];
+  primaryPhoneIdx: number;
+  portalAccess: boolean;
+  role: string;
+  permissions: Record<string, boolean>;
+  allowPhi: boolean;
+  mainPointOfContact: boolean;
+  surveyContact: boolean;
+  roleLabel: string;
+}
+const apClientContacts = ref<ApClientContact[]>([
+  { name: 'Nick Johnson', title: 'Benefits Manager', email: 'nick.johnson@starkind.com', phone: '(555) 234-5678', phones: [{ number: '(555) 234-5678', type: 'Office', ext: '' }], primaryPhoneIdx: 0, portalAccess: false, role: 'Client', permissions: apNewPermissions(), allowPhi: false, mainPointOfContact: false, surveyContact: false, roleLabel: 'No portal access' },
+]);
+const apShowAddContactDialog = ref(false);
+const apNewContactForm = () => ({ firstName: '', lastName: '', title: '', email: '', phones: [apNewPhone()], primaryPhoneIdx: 0, portalAccess: false, role: '', permissions: apNewPermissions(), allowPhi: false, mainPointOfContact: false, surveyContact: false });
+const apContactForm = ref(apNewContactForm());
+const apContactErrors = ref({ firstName: '', lastName: '', email: '' });
+const apEditContactErrors = ref({ firstName: '', lastName: '', email: '' });
+const apValidateContact = (form: { firstName: string; lastName: string; email: string }) => {
+  const e = { firstName: '', lastName: '', email: '' };
+  if (!form.firstName.trim()) e.firstName = 'First name is required.';
+  if (!form.lastName.trim()) e.lastName = 'Last name is required.';
+  if (!form.email.trim()) e.email = 'Email is required.';
+  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) e.email = 'Please enter a valid email address.';
+  return e;
+};
+const apResetContactForm = () => {
+  apContactForm.value = apNewContactForm();
+  apContactErrors.value = { firstName: '', lastName: '', email: '' };
+};
+const formatPhone = (val: string): string => {
+  const d = val.replace(/\D/g, '').slice(0, 10);
+  if (d.length <= 3) return d;
+  if (d.length <= 6) return `(${d.slice(0, 3)}) ${d.slice(3)}`;
+  return `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}`;
+};
+watch(() => apContactForm.value.phones, phones => {
+  phones.forEach(ph => { const f = formatPhone(ph.number); if (f !== ph.number) ph.number = f; });
+}, { deep: true });
+const apSaveContact = () => {
+  const errors = apValidateContact(apContactForm.value);
+  apContactErrors.value = errors;
+  if (Object.values(errors).some(e => e)) return;
+  const phones = apContactForm.value.phones.filter(p => p.number);
+  const primaryIdx = apContactForm.value.primaryPhoneIdx;
+  const f = apContactForm.value;
+  apClientContacts.value.push({
+    name: `${f.firstName} ${f.lastName}`,
+    title: f.title,
+    email: f.email,
+    phones,
+    primaryPhoneIdx: primaryIdx,
+    phone: phones[primaryIdx]?.number ?? phones[0]?.number ?? '',
+    portalAccess: f.portalAccess,
+    role: f.role,
+    permissions: { ...f.permissions },
+    allowPhi: f.role === 'Administrator' ? true : f.allowPhi,
+    mainPointOfContact: f.portalAccess ? f.mainPointOfContact : false,
+    surveyContact: f.portalAccess ? f.surveyContact : false,
+    roleLabel: apPortalRoleLabel(f.portalAccess, f.role),
+  });
+  if (f.portalAccess && f.mainPointOfContact) apEnforceSingleMainPoc(apClientContacts.value, apClientContacts.value.length - 1);
+  apShowAddContactDialog.value = false;
+  apResetContactForm();
+};
+const apClientContactRowActions = [
+  { label: 'Edit',   action: 'edit'   },
+  { label: 'Remove', action: 'remove' },
+];
+const apEditingContactIndex = ref(-1);
+const apShowEditContactDialog = ref(false);
+const apEditContactForm = ref(apNewContactForm());
+watch(() => apEditContactForm.value.phones, phones => {
+  phones.forEach(ph => { const f = formatPhone(ph.number); if (f !== ph.number) ph.number = f; });
+}, { deep: true });
+const apShowRemoveContactDialog = ref(false);
+const apPendingRemoveContact = ref<any>(null);
+const apPendingRemoveContactList = ref<any[] | null>(null);
+const apConfirmRemoveContact = () => {
+  const list = apPendingRemoveContactList.value;
+  const idx = list ? list.indexOf(apPendingRemoveContact.value) : -1;
+  if (list && idx > -1) list.splice(idx, 1);
+  apShowRemoveContactDialog.value = false;
+  apPendingRemoveContact.value = null;
+  apPendingRemoveContactList.value = null;
+};
+const apRemoveContactDialogActions = [
+  { text: 'Cancel', styleType: 'secondary' as const, onClick: () => { apShowRemoveContactDialog.value = false; apPendingRemoveContact.value = null; } },
+  { text: 'Remove', onClick: apConfirmRemoveContact, type: 'destructive' as const },
+];
+
+const handleApClientContactRowAction = ({ action, item }: { action: string; item: any }) => {
+  const idx = apClientContacts.value.indexOf(item);
+  if (action === 'remove') {
+    apPendingRemoveContact.value = item;
+    apPendingRemoveContactList.value = apClientContacts.value;
+    apShowRemoveContactDialog.value = true;
+  } else if (action === 'edit') {
+    const nameParts = (item.name as string).split(' ');
+    apEditContactForm.value = {
+      firstName: nameParts[0] ?? '',
+      lastName:  nameParts.slice(1).join(' '),
+      title:     item.title ?? '',
+      email:     item.email ?? '',
+      phones:    item.phones?.length ? item.phones.map((p: any) => ({ ...p })) : [apNewPhone()],
+      primaryPhoneIdx: item.primaryPhoneIdx ?? 0,
+      portalAccess: item.portalAccess ?? false,
+      role: item.role ?? 'Client',
+      permissions: item.permissions ? { ...item.permissions } : apNewPermissions(),
+      allowPhi: item.allowPhi ?? false,
+      mainPointOfContact: item.mainPointOfContact ?? false,
+      surveyContact: item.surveyContact ?? false,
+    };
+    apEditingContactIndex.value = idx;
+    apShowEditContactDialog.value = true;
+  }
+};
+const apSaveEditContact = () => {
+  const errors = apValidateContact(apEditContactForm.value);
+  apEditContactErrors.value = errors;
+  if (Object.values(errors).some(e => e)) return;
+  const idx = apEditingContactIndex.value;
+  if (idx > -1) {
+    const phones = apEditContactForm.value.phones.filter(p => p.number);
+    const primaryIdx = apEditContactForm.value.primaryPhoneIdx;
+    const f = apEditContactForm.value;
+    apClientContacts.value[idx] = {
+      name:  `${f.firstName} ${f.lastName}`,
+      title: f.title,
+      email: f.email,
+      phones,
+      primaryPhoneIdx: primaryIdx,
+      phone: phones[primaryIdx]?.number ?? phones[0]?.number ?? '',
+      portalAccess: f.portalAccess,
+      role: f.role,
+      permissions: { ...f.permissions },
+      allowPhi: f.role === 'Administrator' ? true : f.allowPhi,
+      mainPointOfContact: f.portalAccess ? f.mainPointOfContact : false,
+      surveyContact: f.portalAccess ? f.surveyContact : false,
+      roleLabel: apPortalRoleLabel(f.portalAccess, f.role),
+    };
+    if (f.portalAccess && f.mainPointOfContact) apEnforceSingleMainPoc(apClientContacts.value, idx);
+  }
+  apShowEditContactDialog.value = false;
+};
+const apEditContactDialogActions = computed(() => [
+  { text: 'Cancel', styleType: 'secondary' as const, onClick: () => { apShowEditContactDialog.value = false; apEditContactErrors.value = { firstName: '', lastName: '', email: '' }; } },
+  { text: 'Save Changes', styleType: 'primary' as const, onClick: apSaveEditContact, disabled: apEditContactForm.value.portalAccess && !apEditContactForm.value.role },
+]);
+const apContactDialogActions = computed(() => [
+  { text: 'Cancel', styleType: 'secondary' as const, onClick: () => { apShowAddContactDialog.value = false; apResetContactForm(); } },
+  { text: 'Add Contact', styleType: 'primary' as const, onClick: apSaveContact, disabled: apContactForm.value.portalAccess && !apContactForm.value.role },
+]);
+
+// ── Account Profile — Vendor Contacts ─────────────────────────────────────────
+const apVendorContactHeaders = [
+  { title: 'Name', key: 'name' },
+  { title: 'Vendor', key: 'vendor' },
+  { title: 'Email', key: 'email' },
+  { title: 'Phone', key: 'phone' },
+  { title: 'Business Role', key: 'roleLabel' },
+  { title: '', key: 'actions', sortable: false },
+];
+type ApVendorContact = { name: string; vendor: string; email: string; phone: string; role?: string; permissions?: Record<string, boolean>; allowPhi?: boolean; surveyContact?: boolean; ackConfirmed?: boolean; roleLabel?: string };
+const apVendorContacts = ref<ApVendorContact[]>([
+  { name: 'Mark Tillman', vendor: 'Southern Scripts Carrier', email: 'mtillman@sstpa.com', phone: '(704) 555-0121', role: 'Carrier', permissions: apNewPermissions(), allowPhi: false, surveyContact: false, ackConfirmed: true, roleLabel: 'Carrier' },
+  { name: 'Dana Osei', vendor: 'Southern Scripts Carrier', email: 'dosei@sstpa.com', phone: '(704) 555-0122', role: 'Carrier', permissions: apNewPermissions(), allowPhi: false, surveyContact: false, ackConfirmed: true, roleLabel: 'Carrier' },
+  { name: 'Rachel Vance', vendor: 'Acclaim Benefits', email: 'rvance@acclaim.com', phone: '(615) 555-0188', role: 'Broker', permissions: apNewPermissions(), allowPhi: false, surveyContact: false, ackConfirmed: true, roleLabel: 'Broker' },
+  { name: 'James Pruitt', vendor: 'Acclaim Benefits', email: 'jpruitt@acclaim.com', phone: '(615) 555-0189', role: 'Broker', permissions: apNewPermissions(), allowPhi: false, surveyContact: false, ackConfirmed: true, roleLabel: 'Broker' },
+  { name: 'Tara Mendez', vendor: 'Benefit Advantage', email: 'tmendez@benefitadv.com', phone: '(512) 555-0144', role: 'Consultant', permissions: apNewPermissions(), allowPhi: false, surveyContact: false, ackConfirmed: true, roleLabel: 'Consultant' },
+]);
+const apShowVendorContactDialog = ref(false);
+const apVendorContactSelection = ref('');
+const apVendorRoleSelection = ref('');
+const apVendorPermissions = ref(apNewPermissions());
+const apVendorAllowPhi = ref(false);
+const apVendorSurveyContact = ref(false);
+const apVendorAckConfirmed = ref(false);
+const apVendorContactData = [
+  { name: 'Jordan Mills', title: 'Account Manager',    vendor: '90 Degree Benefits', email: 'jordan.mills@90degreebenefits.com', phone: '(555) 234-5678' },
+  { name: 'Bob Carter',   title: 'Client Specialist',  vendor: '90 Degree Benefits', email: 'bob.carter@90degreebenefits.com',    phone: '(555) 345-6789' },
+  { name: 'Sarah Lee',    title: 'Account Executive',  vendor: 'Acclaim Benefits',   email: 'sarah.lee@acclaimbenefits.com',      phone: '(555) 876-5432' },
+  { name: 'Mark Davis',   title: 'Benefits Consultant',vendor: 'Acclaim Benefits',   email: 'mark.davis@acclaimbenefits.com',     phone: '(555) 456-7890' },
+];
+const apVendorContactOptions = computed(() => {
+  const addedNames = new Set(apVendorContacts.value.map(c => c.name));
+  const byVendor = new Map<string, string[]>();
+  [...apVendorContactData]
+    .filter(c => !addedNames.has(c.name))
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .forEach(c => {
+      if (!byVendor.has(c.vendor)) byVendor.set(c.vendor, []);
+      byVendor.get(c.vendor)!.push(c.name);
+    });
+  const result: (string | { type: string; title: string })[] = [];
+  [...byVendor.keys()].sort().forEach(vendor => {
+    result.push({ type: 'subheader', title: vendor });
+    byVendor.get(vendor)!.forEach(opt => result.push(opt));
+  });
+  return result;
+});
+const apRemoveVendorContact = (item: any) => {
+  apPendingRemoveContact.value = item;
+  apPendingRemoveContactList.value = apVendorContacts.value;
+  apShowRemoveContactDialog.value = true;
+};
+const apResetVendorAddState = () => {
+  apVendorContactSelection.value = '';
+  apVendorRoleSelection.value = '';
+  apVendorPermissions.value = apNewPermissions();
+  apVendorAllowPhi.value = false;
+  apVendorSurveyContact.value = false;
+  apVendorAckConfirmed.value = false;
+};
+const apSaveVendorContacts = () => {
+  if (!apVendorAckConfirmed.value || !apVendorRoleSelection.value || !apVendorContactSelection.value) return;
+  const already = apVendorContacts.value.some(c => c.name === apVendorContactSelection.value);
+  if (!already) {
+    const data = apVendorContactData.find(c => c.name === apVendorContactSelection.value);
+    if (data) {
+      apVendorContacts.value.push({
+        name: data.name,
+        vendor: data.vendor,
+        email: data.email,
+        phone: data.phone,
+        role: apVendorRoleSelection.value,
+        permissions: { ...apVendorPermissions.value },
+        allowPhi: apVendorAllowPhi.value,
+        surveyContact: apVendorSurveyContact.value,
+        ackConfirmed: apVendorAckConfirmed.value,
+        roleLabel: apVendorRoleSelection.value,
+      });
+    }
+  }
+  apResetVendorAddState();
+  apShowVendorContactDialog.value = false;
+};
+const apVendorContactDialogActions = computed(() => [
+  { text: 'Cancel', styleType: 'secondary' as const, onClick: () => { apShowVendorContactDialog.value = false; apResetVendorAddState(); } },
+  { text: 'Add Contact', styleType: 'primary' as const, onClick: apSaveVendorContacts, disabled: !apVendorAckConfirmed.value || !apVendorRoleSelection.value || !apVendorContactSelection.value },
+]);
+
+// Edit Vendor Contact (role/PHI only — identity fields come from the vendor's own contact record)
+const apShowEditVendorContactDialog = ref(false);
+const apEditingVendorContactIndex = ref(-1);
+const apEditingVendorContactName = ref('');
+const apEditVendorContactForm = ref({ role: '', permissions: apNewPermissions(), allowPhi: false, surveyContact: false, ackConfirmed: false });
+const handleEditVendorContact = (item: ApVendorContact) => {
+  const idx = apVendorContacts.value.indexOf(item);
+  apEditingVendorContactName.value = item.name;
+  apEditVendorContactForm.value = {
+    role: item.role ?? '',
+    permissions: item.permissions ? { ...item.permissions } : apNewPermissions(),
+    allowPhi: item.allowPhi ?? false,
+    surveyContact: item.surveyContact ?? false,
+    ackConfirmed: item.ackConfirmed ?? false,
+  };
+  apEditingVendorContactIndex.value = idx;
+  apShowEditVendorContactDialog.value = true;
+};
+const apVendorContactRowActions = [
+  { label: 'Edit',   action: 'edit'   },
+  { label: 'Remove', action: 'remove' },
+];
+const handleApVendorContactRowAction = ({ action, item }: { action: string; item: ApVendorContact }) => {
+  if (action === 'edit') handleEditVendorContact(item);
+  else if (action === 'remove') apRemoveVendorContact(item);
+};
+const apSaveEditVendorContact = () => {
+  const idx = apEditingVendorContactIndex.value;
+  if (idx > -1 && apEditVendorContactForm.value.ackConfirmed && apEditVendorContactForm.value.role) {
+    const c = apVendorContacts.value[idx];
+    c.role = apEditVendorContactForm.value.role;
+    c.permissions = { ...apEditVendorContactForm.value.permissions };
+    c.allowPhi = apEditVendorContactForm.value.allowPhi;
+    c.surveyContact = apEditVendorContactForm.value.surveyContact;
+    c.ackConfirmed = apEditVendorContactForm.value.ackConfirmed;
+    c.roleLabel = apEditVendorContactForm.value.role;
+  }
+  apShowEditVendorContactDialog.value = false;
+};
+const apEditVendorContactDialogActions = computed(() => [
+  { text: 'Cancel', styleType: 'secondary' as const, onClick: () => { apShowEditVendorContactDialog.value = false; } },
+  { text: 'Save Changes', styleType: 'primary' as const, onClick: apSaveEditVendorContact, disabled: !apEditVendorContactForm.value.ackConfirmed || !apEditVendorContactForm.value.role },
+]);
 
 const accountProfile = ref({
   accountName: 'Stark Industries',
@@ -2901,6 +5348,8 @@ const planDesignPlans = ref([
     maxSpendEnabled: false,
     allowSecondaryPayer: false,
     cobConfiguration: '',
+    secondaryPlanOnly: false,
+    paySecondaryAsPrimary: false,
     benefitByFlag: false,
     bpgRows: [
       { bin: '025945', pcn: 'SSN', groupId: '1275', groupName: 'Allied Finishing, Inc', effStartDate: '03/01/2026', effEndDate: '' },
@@ -2921,6 +5370,8 @@ const planDesignPlans = ref([
     maxSpendEnabled: false,
     allowSecondaryPayer: false,
     cobConfiguration: '',
+    secondaryPlanOnly: false,
+    paySecondaryAsPrimary: false,
     benefitByFlag: false,
     bpgRows: [
       { bin: '025945', pcn: 'SSN', groupId: '1275', groupName: 'Allied Finishing, Inc', effStartDate: '03/01/2026', effEndDate: '' },
@@ -3026,6 +5477,33 @@ const markAsPending = (item: any) => { item.status = 'pending'; item.startDate =
 watch(selectedAccount, (newVal) => {
   wizardActive.value = false;
   currentWizardStep.value = 0;
+
+  // Reset programs state on account switch
+  rxCompassPending.value = false;
+  vcpPending.value = false;
+  rxCompassEnrolled.value = false;
+  vcpEnrolled.value = false;
+  rxCompassTicketNumber.value = '';
+  vcpTicketNumber.value = '';
+  progCart.value = [];
+  rxCompassForm.value = { type: '', effectiveDate: '', merpVendor: '', notes: '' };
+  vcpForm.value = emptyVcpForm();
+  vcpOffsitePharmacyText.value = '';
+
+  // Cyberdyne Systems: both programs fully enrolled (tile grid shows "all configured" message)
+  if (newVal === CYBERDYNE_SYSTEMS_ID) {
+    rxCompassEnrolled.value = true;
+    vcpEnrolled.value = true;
+  }
+
+  // Oscorp: VCP already enrolled (shows in Configured Programs table); RxCompass pending
+  if (newVal === OSCORP_ID) {
+    vcpEnrolled.value = true;
+    rxCompassPending.value = true;
+    rxCompassTicketNumber.value = '4829310';
+    rxCompassForm.value = { type: 'Standard', effectiveDate: '08/01/2026', merpVendor: 'Acme Health Solutions', notes: '' };
+  }
+
   if (newVal) {
     implementationSteps.value.forEach((step, index) => { step.active = (index === 0); });
     activeTimelineItem.value = implementationSteps.value[0];
@@ -3452,6 +5930,12 @@ watch(selectedAccount, (newVal) => {
   }
 
   &--thirds .ap-field { flex: 1; }
+
+  &--wrap {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: $spacing-large $spacing-xlarge;
+  }
 }
 
 .ap-field {
@@ -3519,6 +6003,40 @@ watch(selectedAccount, (newVal) => {
   &:hover .ap-checkbox-icon {
     color: $color-primary;
   }
+
+  &--disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+
+    &:hover .ap-checkbox-icon {
+      color: inherit;
+    }
+  }
+}
+
+.ap-contacts-card {
+  margin-top: $spacing-large;
+  border: 1px solid $color-border;
+
+  .v-card-title {
+    padding-bottom: $spacing-small;
+  }
+}
+
+.ap-contacts-table {
+  font-size: $font-size-small;
+}
+
+.ap-permission-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: $spacing-xsmall $spacing-medium;
+  margin: $spacing-small 0;
+}
+
+.ap-role-note {
+  color: $color-text-secondary;
+  margin: $spacing-xsmall 0 $spacing-small;
 }
 
 .ap-section-footer {
@@ -3557,6 +6075,13 @@ watch(selectedAccount, (newVal) => {
   background-color: transparent;
   border-color: $color-primary;
   color: $color-primary;
+}
+
+.button-danger {
+  background-color: transparent;
+  border-color: $color-error;
+  color: $color-error;
+  &:hover { background-color: rgba($color-error, 0.06); }
 }
 
 .button-thirtiary {
@@ -4079,20 +6604,30 @@ watch(selectedAccount, (newVal) => {
     color: $color-primary;
     font-weight: $font-weight-semibold;
   }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 }
 
-.toc-info-box {
-  background-color: #f5f5f5;
-  border-left: 3px solid $color-border;
-  border-radius: 4px;
-  padding: $spacing-medium;
-  margin-bottom: $spacing-large;
+.toc-recommended {
+  font-size: $font-size-small;
+  font-weight: $font-weight-semibold;
+  color: $color-text-secondary;
+  margin-left: $spacing-xsmall;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
 
-  .toc-info-text {
-    font-size: $font-size-small;
-    color: $color-text-secondary;
-    font-style: italic;
-    margin-bottom: $spacing-medium;
+.toc-queue-action {
+  display: flex;
+  align-items: center;
+  gap: $spacing-medium;
+  margin-top: $spacing-small;
+
+  .bl-note {
+    margin: 0;
   }
 }
 
@@ -4146,55 +6681,392 @@ watch(selectedAccount, (newVal) => {
   margin-top: $spacing-medium;
 }
 
-// ─── Step 6: Limits & Controls ────────────────────────────────────────────────
+// Programs to Configure tiles
+.prog-step {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-medium;
+}
 
-.lc-intro {
+.prog-widget {
+  border: 1px solid $color-border;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.prog-widget-header {
+  padding: $spacing-medium $spacing-large;
+  border-bottom: 1px solid $color-border;
+  background-color: $color-neutral-white;
+}
+
+.prog-widget-desc {
   color: $color-text-secondary;
-  font-style: italic;
-  margin-bottom: $spacing-medium;
+  font-size: $font-size-body;
+  margin-top: $spacing-xsmall;
 }
 
-.lc-toggle-group {
-  margin-bottom: $spacing-large;
+.prog-widget-body {
+  padding: $spacing-large;
+  background-color: $color-neutral-white;
+
+  &--table {
+    padding: 0;
+  }
 }
 
-.lc-fields {
-  border-top: 1px solid $color-border;
+.prog-required-note {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-small;
+  background-color: $color-information-background;
+  border-left: 3px solid $color-link;
+  border-radius: 4px;
+  padding: $spacing-small $spacing-medium;
 }
 
-.lc-field-row {
+.prog-required-note-icon {
+  color: $color-link;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.prog-tile-required {
+  color: $color-error;
+  font-weight: $font-weight-bold;
+}
+
+.prog-tile-details-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: $font-size-small;
+  color: $color-primary;
+  cursor: pointer;
+  white-space: nowrap;
+  pointer-events: all;
+
+  &:hover { text-decoration: underline; }
+}
+
+.prog-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: $spacing-medium;
+}
+
+.prog-tile {
+  position: relative;
+  background-color: $color-neutral-white;
+  border: 1.5px solid $color-border;
+  border-radius: 10px;
+  padding: $spacing-medium;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-small;
+  outline: none;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+
+  &:hover:not(.prog-tile--pending) {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-color: $color-primary;
+  }
+
+  &:focus-visible:not(.prog-tile--pending) {
+    box-shadow: 0 0 0 3px rgba($color-primary, 0.25);
+    border-color: $color-primary;
+  }
+
+  &--selected {
+    border-color: $color-primary;
+    background-color: rgba($color-primary, 0.03);
+    box-shadow: 0 2px 8px rgba($color-primary, 0.12);
+  }
+
+  &--pending {
+    border-color: rgba($color-warning, 0.5);
+    background-color: rgba($color-warning, 0.03);
+    cursor: default;
+    pointer-events: none;
+  }
+}
+
+.prog-tile-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background-color: $color-primary;
+  color: $color-neutral-white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &--pending {
+    background-color: $color-warning;
+  }
+}
+
+.prog-tile-header {
+  padding-right: 28px;
+}
+
+.prog-tile-name {
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+  font-size: $font-size-body;
+}
+
+.prog-tile-desc {
+  font-size: $font-size-small;
+  color: $color-text-secondary;
+  line-height: 1.5;
+  flex: 1;
+}
+
+.prog-tile-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: $spacing-small 0;
-  border-bottom: 1px solid $color-border;
+  border-top: 1px solid $color-border;
+  padding-top: $spacing-small;
+  margin-top: auto;
 }
 
-.lc-field-label {
+.prog-tile-status {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: $font-size-small;
+
+  &--added {
+    color: $color-primary;
+    font-weight: $font-weight-bold;
+  }
+
+  &--pending {
+    color: $color-warning;
+    font-weight: $font-weight-bold;
+  }
+
+  &--configure {
+    color: $color-text-secondary;
+  }
+}
+
+.prog-all-handled {
+  text-align: center;
+  padding: $spacing-large;
+  color: $color-text-secondary;
+}
+
+.prog-empty-state {
+  padding: $spacing-large;
+  text-align: center;
+  color: $color-text-secondary;
+}
+
+// Cart bar
+.prog-cart-bar {
+  position: fixed;
+  bottom: 0;
+  left: 120px;
+  right: 0;
+  z-index: 200;
+  background-color: $color-primary-dark;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding: $spacing-small $spacing-large;
+  min-height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.prog-cart-chips {
+  display: flex;
+  gap: $spacing-xsmall;
+  flex-wrap: wrap;
+}
+
+.prog-cart-chip {
+  border-color: rgba(255, 255, 255, 0.6) !important;
+  color: $color-neutral-white !important;
+}
+
+.prog-cart-remove {
+  cursor: pointer;
+  margin-left: 4px;
+  opacity: 0.75;
+
+  &:hover { opacity: 1; }
+}
+
+.prog-cart-right {
+  display: flex;
+  align-items: center;
+  gap: $spacing-medium;
+  flex-shrink: 0;
+}
+
+.prog-cart-count {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: $font-size-small;
+}
+
+.prog-cart-cta {
+  background-color: $color-neutral-white;
+  color: $color-primary-dark;
+  border-radius: 100px;
+  font-size: $font-size-body;
+  padding: 8px 20px;
+
+  &:hover { background-color: rgba(255, 255, 255, 0.9); }
+}
+
+.prog-cart-slide-enter-active,
+.prog-cart-slide-leave-active {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+.prog-cart-slide-enter-from,
+.prog-cart-slide-leave-to {
+  transform: translateY(100%);
+  opacity: 0;
+}
+
+// Modals
+.prog-modal-card {
+  padding: $spacing-small;
+}
+
+.prog-modal-title {
+  font-size: $font-size-h4 !important;
+  font-weight: $font-weight-bold !important;
+  color: $color-primary !important;
+}
+
+
+.prog-modal-label {
+  font-size: $font-size-body;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-small;
+}
+
+.prog-reconsider-date {
   font-size: $font-size-body;
   color: $color-text-primary;
+  margin-top: 4px;
 }
 
-.lc-field-value {
-  font-size: $font-size-body;
-  color: $color-text-primary;
-  min-width: 80px;
-  text-align: right;
+.prog-modal-hint {
+  font-size: $font-size-small;
+  color: $color-text-secondary;
+  font-style: italic;
+  margin-top: $spacing-small;
 }
 
-.lc-field-input {
+.prog-election-desc {
+  padding: $spacing-small $spacing-medium;
+  background-color: $color-information-background;
+  border-left: 3px solid $color-link;
+  border-radius: 0 4px 4px 0;
+
+  p {
+    font-size: $font-size-small;
+    color: $color-text-primary;
+    margin: 0;
+  }
+}
+
+.prog-vcp-plan-rows {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-small;
+}
+
+.prog-vcp-plan-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-medium;
+  padding: $spacing-small $spacing-medium;
   border: 1px solid $color-border;
-  border-radius: 4px;
-  padding: 6px $spacing-small;
-  font-size: $font-size-body;
-  font-family: $font-family-base;
-  color: $color-text-primary;
-  min-width: 120px;
-  text-align: left;
+  border-radius: 6px;
+}
 
-  &:focus {
-    outline: none;
-    border-color: $color-primary;
+.prog-vcp-plan-row-name {
+  font-size: $font-size-body;
+  color: $color-text-primary;
+  font-weight: $font-weight-semibold;
+}
+
+// Confirm modal
+.prog-confirm-list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-medium;
+  margin-bottom: $spacing-medium;
+}
+
+.prog-confirm-item {
+  padding: $spacing-small $spacing-medium;
+  border-left: 3px solid $color-primary;
+  background-color: rgba($color-primary, 0.04);
+  border-radius: 0 4px 4px 0;
+}
+
+.prog-confirm-name {
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+  font-size: $font-size-body;
+  margin-bottom: $spacing-xsmall;
+}
+
+.prog-confirm-details {
+  font-size: $font-size-small;
+  color: $color-text-secondary;
+  padding-left: $spacing-medium;
+
+  li { margin-bottom: 2px; }
+
+  &--readonly {
+    background-color: $color-information-background;
+    border-radius: 6px;
+    padding: $spacing-small $spacing-medium $spacing-small ($spacing-medium + 4px);
+  }
+}
+
+.prog-confirm-note {
+  font-size: $font-size-small;
+  color: $color-text-secondary;
+  background-color: $color-information-background;
+  border-left: 3px solid $color-link;
+  border-radius: 4px;
+  padding: $spacing-small $spacing-medium;
+}
+
+.prog-details-ticket {
+  font-size: $font-size-small;
+  color: $color-text-secondary;
+}
+
+// ─── Step 6: Limits & Controls ────────────────────────────────────────────────
+
+.lc-overrides-list {
+  margin: 0;
+  padding-left: $spacing-medium;
+  font-size: $font-size-body;
+  color: $color-text-primary;
+
+  li {
+    margin-bottom: $spacing-xsmall;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
   }
 }
 
@@ -4204,67 +7076,10 @@ watch(selectedAccount, (newVal) => {
   margin: $spacing-large 0;
 }
 
-.lc-hcn-intro {
-  color: $color-text-secondary;
-  font-style: italic;
-  margin-bottom: $spacing-large;
-}
-
-.lc-hcn-field {
-  margin-bottom: $spacing-large;
-}
-
 .lc-hcn-label {
   font-size: $font-size-body;
   font-weight: $font-weight-bold;
   color: $color-text-primary;
-  margin-bottom: $spacing-small;
-}
-
-.lc-hcn-input {
-  min-width: 200px;
-}
-
-.lc-recipient-row {
-  display: flex;
-  align-items: center;
-  gap: $spacing-small;
-  margin-bottom: $spacing-small;
-}
-
-.lc-recipient-input {
-  flex: 1;
-  min-width: unset;
-}
-
-.lc-recipient-remove {
-  cursor: pointer;
-  color: $color-text-secondary;
-  flex-shrink: 0;
-
-  &:hover {
-    color: $color-error;
-  }
-}
-
-.lc-check-icon {
-  color: $color-text-primary;
-  flex-shrink: 0;
-}
-
-.lc-daw-block {
-  margin-bottom: $spacing-large;
-}
-
-.lc-daw-title {
-  font-size: $font-size-body;
-  font-weight: $font-weight-bold;
-  color: $color-primary;
-  margin-bottom: $spacing-small;
-}
-
-.lc-daw-desc {
-  color: $color-text-secondary;
   margin-bottom: $spacing-small;
 }
 
@@ -4329,6 +7144,11 @@ watch(selectedAccount, (newVal) => {
   margin: $spacing-small 0;
 }
 
+.bl-required {
+  color: $color-error;
+  margin-left: 2px;
+}
+
 .bl-upload-label {
   font-size: $font-size-body;
   color: $color-text-primary;
@@ -4338,6 +7158,48 @@ watch(selectedAccount, (newVal) => {
     font-weight: $font-weight-semibold;
     text-decoration: underline;
     cursor: pointer;
+  }
+}
+
+.bl-upload-item {
+  margin-top: $spacing-medium;
+}
+
+.bl-file-chip {
+  padding: 0 8px;
+
+  :deep(.v-chip__content) {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .bl-file-chip-icon {
+    color: $color-neutral-white;
+    flex-shrink: 0;
+  }
+
+  .bl-file-chip-label {
+    color: $color-neutral-white;
+    font-size: $font-size-small;
+  }
+
+  .bl-file-chip-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background-color: $color-neutral-white;
+    color: $color-primary;
+    cursor: pointer;
+    flex-shrink: 0;
+    opacity: 0.9;
+
+    &:hover {
+      opacity: 1;
+    }
   }
 }
 
@@ -4353,21 +7215,55 @@ watch(selectedAccount, (newVal) => {
   }
 }
 
-.bl-contact-list {
+.bl-contact-group {
+  margin-top: $spacing-medium;
+}
+
+.bl-download-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-small;
   margin-top: $spacing-small;
 }
 
-.bl-contact-row {
+.bl-download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-xsmall;
+  padding: $spacing-xsmall $spacing-medium;
+  border: 1px solid $color-primary;
+  border-radius: 6px;
+  color: $color-primary;
+  font-size: $font-size-small;
+  font-weight: $font-weight-semibold;
+  background: transparent;
   cursor: pointer;
 
   &:hover {
-    background-color: #f9f9f9;
+    background-color: rgba($color-primary, 0.06);
   }
+}
 
-  &--selected .lc-field-label {
-    color: $color-primary;
-    font-weight: $font-weight-semibold;
-  }
+.bl-custom-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-small;
+  margin-top: $spacing-medium;
+  padding: $spacing-small $spacing-medium;
+  background-color: rgba($color-warning, 0.12);
+  border-left: 3px solid $color-warning;
+  border-radius: 6px;
+}
+
+.bl-warning-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: $color-warning;
+}
+
+.bl-warning-text {
+  color: $color-text-primary;
+  margin: 0;
 }
 
 .bl-section-heading {
@@ -5323,6 +8219,46 @@ watch(selectedAccount, (newVal) => {
     color: $color-error;
     background-color: rgba($color-error, 0.08);
   }
+}
+
+.ap-radio-option {
+  display: flex;
+  align-items: center;
+  gap: $spacing-small;
+  padding: $spacing-xsmall 0;
+  cursor: pointer;
+}
+
+.ap-radio-input {
+  display: none;
+}
+
+.ap-radio-custom {
+  width: 18px;
+  height: 18px;
+  border: 2px solid $color-border;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s;
+
+  &.active {
+    border-color: $color-primary;
+  }
+}
+
+.ap-radio-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: $color-primary;
+}
+
+.ap-radio-label {
+  font-size: $font-size-body;
+  color: var(--color-text-primary);
 }
 </style>
 

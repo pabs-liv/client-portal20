@@ -41,10 +41,10 @@ const toggleUserType = (value: boolean) => {
 
 .dev-switcher {
   position: fixed;
-  bottom: 20px;
+  top: 12px;
   right: 20px;
   background: rgba(255, 255, 255, 0.8);
-  padding: 10px;
+  padding: 4px 10px;
   border-radius: 8px;
   z-index: 9999;
 }

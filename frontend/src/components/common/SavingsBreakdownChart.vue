@@ -72,6 +72,7 @@ const donutOptions = computed(() => {
     },
     tooltip: {
       theme: isDark.value ? 'dark' : 'light',
+      fillSeriesColor: false,
       y: {
         formatter: (val: number) => `${val}%`,
       },
