@@ -1112,8 +1112,8 @@
                             <span class="ap-field-label">Will Historical Claims data be provided? (HCF)</span>
                             <span class="ap-field-value">{{ tocHistoricalClaims ? 'Yes' : 'No' }}</span>
                           </div>
-                          <div v-if="tocHistoricalClaims === true" class="ap-field">
-                            <span class="ap-field-label">Transition of Care Override</span>
+                          <div class="ap-field">
+                            <span class="ap-field-label">Override Period</span>
                             <span class="ap-field-value">{{ tocOverrideDays }}</span>
                           </div>
                         </div>
@@ -1158,7 +1158,7 @@
                         </template>
                         <template v-else>
                           <div class="toc-question">
-                            <p class="toc-question-label">Will Historical Claims data be provided? (HCF) <span class="bl-required" aria-label="required">*</span></p>
+                            <p class="toc-question-label">Will Historical Claims data be provided? (HCF)</p>
                             <div class="toc-toggle-group">
                               <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocHistoricalClaims === false }]" @click="tocHistoricalClaims = false">No</button>
                               <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocHistoricalClaims === true }]" @click="tocHistoricalClaims = true">Yes</button>
@@ -1166,13 +1166,9 @@
                           </div>
 
                           <template v-if="tocHistoricalClaims === true">
-                            <p class="text-body bl-note">Received historical claims data will be checked against the Liviniti Formulary. Members impacted by the transition to Liviniti will receive an override for the duration selected below, allowing time to align their medication(s) with Liviniti.</p>
-                            <div class="bl-field-narrow">
-                              <Select v-model="tocOverrideDays" :items="tocDayOptions" label="Transition of Care Override Period" />
-                            </div>
-
                             <div class="bl-upload-item">
                               <p class="lc-hcn-label">Historical Claims File <span class="bl-required" aria-label="required">*</span></p>
+                              <p class="text-small bl-note mb-2">* Required once Historical Claims is set to Yes.</p>
                               <template v-if="tocHistoricalClaimsFile && !tocPendingHcfRemoval">
                                 <v-chip color="primary" variant="flat" class="bl-file-chip">
                                   <Paperclip :size="12" :stroke-width="2" class="bl-file-chip-icon" />
@@ -1189,6 +1185,12 @@
                             </div>
                           </template>
                         </template>
+
+                        <p v-if="tocHistoricalClaims === true" class="text-body bl-note">This account is automatically enrolled in RxWatchtower, which reviews rejected Prior Authorization claims post go-live and provides overrides for the duration selected below. Received historical claims data will also be checked against the Liviniti Formulary using this same period, giving affected members time to align their medications with Liviniti.</p>
+                        <p v-else class="text-body bl-note">This account is automatically enrolled in RxWatchtower, which reviews rejected Prior Authorization claims post go-live and provides overrides for the duration selected below.</p>
+                        <div class="bl-field-narrow">
+                          <Select v-model="tocOverrideDays" :items="tocDayOptions" label="Override Period" />
+                        </div>
 
                         <v-divider class="my-4" />
 
@@ -1234,40 +1236,10 @@
                     </div>
                   </div>
 
-                  <!-- Card 2: RxWatchtower -->
+                  <!-- Card 2: Open Refill Transfer File (ORTF) -->
                   <div class="ap-section">
                     <div class="ap-section-header">
-                      <h4 class="text-h4">RxWatchtower</h4>
-                      <button v-if="!tocEditingWatchtower" class="button button-thirtiary" @click="startEditWatchtowerCard">
-                        <Pencil :size="14" :stroke-width="1.5" />Edit
-                      </button>
-                    </div>
-                    <div class="ap-fields">
-                      <template v-if="!tocEditingWatchtower">
-                        <div class="ap-field-row">
-                          <div class="ap-field">
-                            <span class="ap-field-label">RxWatchtower Override Period</span>
-                            <span class="ap-field-value">{{ tocWatchtowerDays }}</span>
-                          </div>
-                        </div>
-                      </template>
-                      <template v-else>
-                        <p class="text-body toc-intro">All clients are automatically enrolled in the RxWatchtower program. For any member currently on a medication regimen that requires a Prior Authorization, RxWatchtower actively reviews rejected claims post go-live, provides transition of care overrides for members with ongoing therapies, delivers written communication to disrupted members, and initiates prior authorizations.</p>
-                        <div class="bl-field-narrow">
-                          <Select v-model="tocWatchtowerDays" :items="tocDayOptions" label="RxWatchtower Override Period" />
-                        </div>
-                        <div class="ap-section-footer">
-                          <button class="button button-primary" @click="tocEditingWatchtower = false">Save Changes</button>
-                          <button class="button button-secondary" @click="cancelWatchtowerCard">Cancel</button>
-                        </div>
-                      </template>
-                    </div>
-                  </div>
-
-                  <!-- Card 3: Open Refill Transfer File (ORTF) -->
-                  <div class="ap-section">
-                    <div class="ap-section-header">
-                      <h4 class="text-h4">Open Refill Transfer File (ORTF) <span class="toc-recommended">Uncommon</span></h4>
+                      <h4 class="text-h4">Open Refill Transfer File (ORTF) <span class="toc-recommended">Rarely Used</span></h4>
                       <button v-if="!tocEditingOrtf" class="button button-thirtiary" @click="startEditOrtfCard">
                         <Pencil :size="14" :stroke-width="1.5" />Edit
                       </button>
@@ -1295,7 +1267,7 @@
                     </div>
                   </div>
 
-                  <!-- Card 4: Notes -->
+                  <!-- Card 3: Notes -->
                   <div class="ap-section">
                     <div class="ap-section-header">
                       <h4 class="text-h4">Transition of Care / File Notes</h4>
@@ -3524,12 +3496,13 @@ const documentsStore = useDocumentsStore();
 const tocDayOptions = ['30 days', '60 days', '90 days'];
 
 // Card edit-mode flags (read-only by default, matching the Billing card pattern)
-const tocEditingFiles = ref(false); // Historical Claims + Prior Authorization File — shared widget
-const tocEditingWatchtower = ref(false);
+const tocEditingFiles = ref(false); // Historical Claims + Prior Authorization File + RxWatchtower — shared widget
 const tocEditingOrtf = ref(false);
 const tocEditingNotes = ref(false);
 
-// Historical Claims (HCF) — required; drives the TOC override
+// Historical Claims (HCF) — required; drives the TOC override.
+// Override Period is shared with RxWatchtower (Solo2 stores both in the same AccountGapOption.TOC column),
+// so there is a single editable value even though HCF can be No while RxWatchtower stays always-on.
 const tocHistoricalClaims = ref(false);
 const tocOverrideDays = ref('60 days');
 const tocHistoricalClaimsFile = ref('');
@@ -3543,9 +3516,6 @@ const tocPriorAuthFile = ref('');
 const tocPendingPaRemoval = ref(false);
 const paPending = ref(false);
 const paTicketNumber = ref('');
-
-// RxWatchtower — always on, own override window, unrelated to HCF/TOC
-const tocWatchtowerDays = ref('60 days');
 
 // Open Refill Transfer File (ORTF) — uncommon, mail order only, no upload/ticket
 const tocOpenRefillTransfer = ref(false);
@@ -3613,11 +3583,11 @@ function startEditFilesCard() {
 }
 
 function saveFilesCard() {
-  if (tocPendingHcfRemoval.value) {
+  if (tocPendingHcfRemoval.value || tocHistoricalClaims.value === false) {
     tocHistoricalClaimsFile.value = '';
     tocPendingHcfRemoval.value = false;
   }
-  if (tocPendingPaRemoval.value) {
+  if (tocPendingPaRemoval.value || tocPriorAuth.value === false) {
     tocPriorAuthFile.value = '';
     tocPendingPaRemoval.value = false;
   }
@@ -3633,18 +3603,6 @@ function cancelFilesCard() {
   tocPendingHcfRemoval.value = false;
   tocPendingPaRemoval.value = false;
   tocEditingFiles.value = false;
-}
-
-let tocWatchtowerSnapshot = '60 days';
-
-function startEditWatchtowerCard() {
-  tocWatchtowerSnapshot = tocWatchtowerDays.value;
-  tocEditingWatchtower.value = true;
-}
-
-function cancelWatchtowerCard() {
-  tocWatchtowerDays.value = tocWatchtowerSnapshot;
-  tocEditingWatchtower.value = false;
 }
 
 let tocOrtfSnapshot = false;
