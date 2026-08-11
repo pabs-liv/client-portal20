@@ -276,12 +276,13 @@
             :show-secondary-button="true"
             :actions="userAdminDialogActions"
           >
+            <p class="ua-required-legend">Fields marked <span class="ua-required-asterisk">*</span> are required.</p>
             <v-row class="mt-1">
               <v-col cols="12" sm="6">
                 <Select
                   v-model="userAdminForm.role"
                   :items="userAdminDialogMode === 'edit' ? (userAdminEditingIsVendorSourced ? userAdminExternalRoles : ['Client']) : userAdminRoleOptions"
-                  label="Role"
+                  label="Role *"
                 />
               </v-col>
             </v-row>
@@ -337,9 +338,10 @@
             <div v-if="userAdminExternalRoles.includes(userAdminForm.role)" class="ua-checkbox-toggle" @click="userAdminForm.ackConfirmed = !userAdminForm.ackConfirmed">
               <CheckSquare v-if="userAdminForm.ackConfirmed" :size="18" :stroke-width="1.5" class="ua-checkbox-icon ua-checkbox-icon--checked" />
               <Square v-else :size="18" :stroke-width="1.5" class="ua-checkbox-icon" />
-              <span class="text-small">I confirm this external vendor has signed the required data transfer agreement.</span>
+              <span class="text-small">I confirm this external vendor has signed the required data transfer agreement.<span class="ua-required-asterisk">*</span></span>
             </div>
-            <h5 class="ua-subsection-heading">Permissions</h5>
+            <h5 class="ua-subsection-heading">Permissions<span class="ua-required-asterisk">*</span></h5>
+            <p class="text-small ua-role-note">At least one permission is required.</p>
             <div class="ua-permission-grid">
               <div v-for="perm in userAdminPermissionOptions" :key="perm.key" class="ua-checkbox-toggle" @click="userAdminForm.permissions[perm.key] = !userAdminForm.permissions[perm.key]">
                 <CheckSquare v-if="userAdminForm.permissions[perm.key]" :size="18" :stroke-width="1.5" class="ua-checkbox-icon ua-checkbox-icon--checked" />
@@ -2433,6 +2435,17 @@ const userAdminDialogActions = computed(() => [
 .ua-role-note {
   color: $color-text-secondary;
   margin: $spacing-xsmall 0 $spacing-small;
+}
+
+.ua-required-asterisk {
+  color: $color-error;
+  margin-left: 2px;
+}
+
+.ua-required-legend {
+  font-size: $font-size-small;
+  color: $color-text-secondary;
+  margin: $spacing-small 0;
 }
 
 .ua-checkbox-toggle {
