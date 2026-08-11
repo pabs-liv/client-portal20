@@ -18,8 +18,10 @@
         <div v-if="selectedAccount && activeTab === 'company-information'">
           <!-- Mirrors Plan Explorer > Account Profile step (Account Profile + About This
                Company cards) — see project_settings_master_divergences.md. High Cost
-               Notification Settings removed: it's Solo2-owned and already editable via
-               Plan Explorer > Limits & Controls, not a Client Portal setting. -->
+               Notifications widget re-added 2026-08-10 per Alex: needs to stay editable
+               post-go-live, not just during Implementation. Shares state with Plan
+               Explorer > Limits & Controls via useHighCostNotifications() — same setting,
+               not a duplicate. -->
 
           <!-- Section: Account Profile -->
           <div class="ap-section">
@@ -201,11 +203,47 @@
               </template>
             </div>
           </div>
+
+          <!-- Section: High Cost Notifications — shares state with Plan Explorer > Limits & Controls -->
+          <div class="ap-section">
+            <div class="ap-section-header ap-section-header--space-between">
+              <h4 class="text-h4">High Cost Notifications</h4>
+              <Button v-if="!lcEditingHcn" @click="lcHcnStartEdit" label="Edit" variant="thirtiary" />
+            </div>
+            <div class="ap-fields">
+              <template v-if="!lcEditingHcn">
+                <div class="ap-field-row ap-field-row--multi">
+                  <div class="ap-field">
+                    <span class="ap-field-label">Notify Threshold Amount</span>
+                    <span class="ap-field-value">${{ lcNotifyThreshold }}</span>
+                  </div>
+                  <div class="ap-field">
+                    <span class="ap-field-label">Notification Recipients</span>
+                    <span class="ap-field-value">{{ lcRecipients.length ? lcRecipients.join(', ') : '—' }}</span>
+                  </div>
+                </div>
+              </template>
+              <template v-else>
+                <p class="text-body">Before a high cost claim exceeding the notify amount is processed, the contacts below are notified. They have 24 hours to acknowledge before the claim is automatically processed.</p>
+                <div class="form-row">
+                  <TextField v-model="lcNotifyThreshold" label="Notify threshold amount" />
+                </div>
+                <div class="form-row">
+                  <Autocomplete v-model="lcRecipients" :items="lcHcnContactOptions" label="Select contacts" :multiple="true" />
+                </div>
+                <div class="ap-section-footer">
+                  <Button variant="primary" label="Save Changes" @click="lcHcnSaveEdit" />
+                  <Button variant="secondary" label="Cancel" @click="lcHcnCancelEdit" />
+                </div>
+              </template>
+            </div>
+          </div>
         </div>
         <div v-if="selectedAccount && activeTab === 'user-administration'">
           <div class="ua-header">
-            <p class="text-body ua-header-note">Manage Client Portal access and permissions for this account.</p>
-            <Button label="+ Add User" variant="primary" @click="openAddUser" />
+            <p v-if="isUserAdminReadOnly" class="text-body ua-header-note">You have view-only access to this account's Client Portal users. To add, edit, or remove access, please contact your Liviniti Account Manager.</p>
+            <p v-else class="text-body ua-header-note">Manage Client Portal access and permissions for this account.</p>
+            <Button v-if="!isUserAdminReadOnly" label="+ Add User" variant="primary" @click="openAddUser" />
           </div>
           <ReportDataTable
             :headers="userAdminHeaders"
@@ -213,13 +251,22 @@
             :show-search-bar="true"
             :show-filter-button="false"
             search-placeholder="Search users"
-            :show-row-actions="true"
+            :show-row-actions="!isUserAdminReadOnly"
             :row-action-items="userAdminRowActions"
             @row-action="handleUserAdminRowAction"
             :show-table-footer="true"
             :show-selection-checkboxes="false"
-            :boolean-columns="['activated', 'mainPoc', 'surveyContact']"
           >
+            <template #item.permissionsLabel="{ item }"><span class="ua-permissions-cell">{{ item.permissionsLabel }}</span></template>
+            <template #item.activated="{ item }">{{ item.activated ? 'Yes' : 'No' }}</template>
+            <template #item.mainPoc="{ item }">
+              <Check v-if="item.mainPoc" :size="16" :stroke-width="2" class="ua-table-check" />
+              <span v-else>—</span>
+            </template>
+            <template #item.surveyContact="{ item }">
+              <Check v-if="item.surveyContact" :size="16" :stroke-width="2" class="ua-table-check" />
+              <span v-else>—</span>
+            </template>
           </ReportDataTable>
 
           <!-- Add/Edit User Dialog -->
@@ -230,42 +277,92 @@
             :actions="userAdminDialogActions"
           >
             <v-row class="mt-1">
-              <v-col cols="6"><TextField v-model="userAdminForm.firstName" label="First Name" :error-messages="userAdminErrors.firstName" /></v-col>
-              <v-col cols="6"><TextField v-model="userAdminForm.lastName" label="Last Name" :error-messages="userAdminErrors.lastName" /></v-col>
+              <v-col cols="12" sm="6">
+                <Select
+                  v-model="userAdminForm.role"
+                  :items="userAdminDialogMode === 'edit' ? (userAdminEditingIsVendorSourced ? userAdminExternalRoles : ['Client']) : userAdminRoleOptions"
+                  label="Role"
+                />
+              </v-col>
             </v-row>
-            <v-row>
-              <v-col cols="12"><TextField v-model="userAdminForm.email" label="Email" :error-messages="userAdminErrors.email" /></v-col>
-            </v-row>
-            <v-row>
-              <v-col cols="12" sm="6"><Select v-model="userAdminForm.role" :items="userAdminRoleOptions" label="Role" /></v-col>
-            </v-row>
+
+            <template v-if="userAdminExternalRoles.includes(userAdminForm.role)">
+              <template v-if="userAdminDialogMode === 'add'">
+                <p class="text-small ua-role-note">Vendor contacts are sourced from vendors already associated to this account.</p>
+                <v-row>
+                  <v-col cols="12" sm="8"><Autocomplete v-model="userAdminVendorSelection" :items="userAdminVendorOptions" label="Select vendor contact" /></v-col>
+                </v-row>
+              </template>
+              <template v-else>
+                <div class="ap-field">
+                  <span class="ap-field-label">Name</span>
+                  <span class="ap-field-value">{{ userAdminForm.firstName }} {{ userAdminForm.lastName }}</span>
+                </div>
+              </template>
+            </template>
+            <template v-else>
+              <v-row class="mt-1">
+                <v-col cols="6"><TextField v-model="userAdminForm.firstName" label="First Name" :error-messages="userAdminErrors.firstName" /></v-col>
+                <v-col cols="6"><TextField v-model="userAdminForm.lastName" label="Last Name" :error-messages="userAdminErrors.lastName" /></v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="12"><TextField v-model="userAdminForm.email" label="Email" :error-messages="userAdminErrors.email" /></v-col>
+              </v-row>
+              <div v-for="(ph, idx) in userAdminForm.phones" :key="idx" class="nl-repeatable-row">
+                <div v-if="userAdminForm.phones.length > 1" class="nl-repeatable-row-header">
+                  <span class="nl-repeatable-row-label">Phone {{ idx + 1 }}</span>
+                  <button class="nl-remove-row-btn" @click="userAdminForm.phones.splice(idx, 1); if (userAdminForm.primaryPhoneIdx >= userAdminForm.phones.length) userAdminForm.primaryPhoneIdx = 0" title="Remove">
+                    <Trash2 :size="16" :stroke-width="1.75" />
+                  </button>
+                </div>
+                <v-row>
+                  <v-col cols="5"><TextField v-model="ph.number" label="Number" /></v-col>
+                  <v-col cols="4">
+                    <Select v-model="ph.type" :items="uaPhoneTypes" label="Type" />
+                  </v-col>
+                  <v-col cols="3"><TextField v-model="ph.ext" label="Ext" /></v-col>
+                </v-row>
+                <label class="ap-radio-option">
+                  <input type="radio" :value="idx" v-model="userAdminForm.primaryPhoneIdx" class="ap-radio-input" />
+                  <span class="ap-radio-custom" :class="{ active: userAdminForm.primaryPhoneIdx === idx }">
+                    <span v-if="userAdminForm.primaryPhoneIdx === idx" class="ap-radio-dot" />
+                  </span>
+                  <span class="ap-radio-label">Primary</span>
+                </label>
+                <v-divider v-if="idx < userAdminForm.phones.length - 1" class="nl-row-divider" />
+              </div>
+              <button v-if="userAdminForm.phones.length < 3" class="nl-add-link" @click="userAdminForm.phones.push(uaNewPhone())">+ Add Phone Number</button>
+            </template>
+
             <div v-if="userAdminExternalRoles.includes(userAdminForm.role)" class="ua-checkbox-toggle" @click="userAdminForm.ackConfirmed = !userAdminForm.ackConfirmed">
               <CheckSquare v-if="userAdminForm.ackConfirmed" :size="18" :stroke-width="1.5" class="ua-checkbox-icon ua-checkbox-icon--checked" />
               <Square v-else :size="18" :stroke-width="1.5" class="ua-checkbox-icon" />
               <span class="text-small">I confirm this external vendor has signed the required data transfer agreement.</span>
             </div>
-            <p v-if="userAdminForm.role === 'Administrator'" class="text-small ua-role-note">Administrators have full access to all Client Portal features, including PHI — permissions below don't apply.</p>
-            <template v-else>
-              <p v-if="userAdminInternalRoles.includes(userAdminForm.role)" class="text-small ua-role-note">Liviniti internal role — set the specific portal permissions this person needs below; internal role assignment itself doesn't imply any particular permission set.</p>
-              <h5 class="ua-subsection-heading">Permissions</h5>
-              <div class="ua-permission-grid">
-                <div v-for="perm in userAdminPermissionOptions" :key="perm.key" class="ua-checkbox-toggle" @click="userAdminForm.permissions[perm.key] = !userAdminForm.permissions[perm.key]">
-                  <CheckSquare v-if="userAdminForm.permissions[perm.key]" :size="18" :stroke-width="1.5" class="ua-checkbox-icon ua-checkbox-icon--checked" />
-                  <Square v-else :size="18" :stroke-width="1.5" class="ua-checkbox-icon" />
-                  <span class="text-small">{{ perm.label }}</span>
-                </div>
-              </div>
-              <div class="ua-checkbox-toggle" @click="userAdminForm.allowPhi = !userAdminForm.allowPhi">
-                <CheckSquare v-if="userAdminForm.allowPhi" :size="18" :stroke-width="1.5" class="ua-checkbox-icon ua-checkbox-icon--checked" />
+            <h5 class="ua-subsection-heading">Permissions</h5>
+            <div class="ua-permission-grid">
+              <div v-for="perm in userAdminPermissionOptions" :key="perm.key" class="ua-checkbox-toggle" @click="userAdminForm.permissions[perm.key] = !userAdminForm.permissions[perm.key]">
+                <CheckSquare v-if="userAdminForm.permissions[perm.key]" :size="18" :stroke-width="1.5" class="ua-checkbox-icon ua-checkbox-icon--checked" />
                 <Square v-else :size="18" :stroke-width="1.5" class="ua-checkbox-icon" />
-                <span class="text-small">Allow PHI access</span>
+                <span class="text-small">{{ perm.label }}</span>
               </div>
-            </template>
-            <div class="ua-checkbox-toggle mt-2" @click="userAdminForm.mainPoc = !userAdminForm.mainPoc">
+            </div>
+            <div class="ua-checkbox-toggle" @click="userAdminForm.allowPhi = !userAdminForm.allowPhi">
+              <CheckSquare v-if="userAdminForm.allowPhi" :size="18" :stroke-width="1.5" class="ua-checkbox-icon ua-checkbox-icon--checked" />
+              <Square v-else :size="18" :stroke-width="1.5" class="ua-checkbox-icon" />
+              <span class="text-small">Allow PHI access</span>
+            </div>
+            <h5 class="ua-subsection-heading">Contact Designations</h5>
+            <div
+              class="ua-checkbox-toggle"
+              :class="{ 'ua-checkbox-toggle--disabled': otherUserIsMainPoc(userAdminDialogMode === 'edit' ? userAdminEditingIndex : -1) }"
+              @click="!otherUserIsMainPoc(userAdminDialogMode === 'edit' ? userAdminEditingIndex : -1) && (userAdminForm.mainPoc = !userAdminForm.mainPoc)"
+            >
               <CheckSquare v-if="userAdminForm.mainPoc" :size="18" :stroke-width="1.5" class="ua-checkbox-icon ua-checkbox-icon--checked" />
               <Square v-else :size="18" :stroke-width="1.5" class="ua-checkbox-icon" />
               <span class="text-small">Main Point of Contact</span>
             </div>
+            <p v-if="otherUserIsMainPoc(userAdminDialogMode === 'edit' ? userAdminEditingIndex : -1)" class="text-small ua-role-note">{{ otherUserIsMainPoc(userAdminDialogMode === 'edit' ? userAdminEditingIndex : -1) }} is already the Main Point of Contact for this account. Remove that designation from them before assigning a new one.</p>
             <div class="ua-checkbox-toggle" @click="userAdminForm.surveyContact = !userAdminForm.surveyContact">
               <CheckSquare v-if="userAdminForm.surveyContact" :size="18" :stroke-width="1.5" class="ua-checkbox-icon ua-checkbox-icon--checked" />
               <Square v-else :size="18" :stroke-width="1.5" class="ua-checkbox-icon" />
@@ -536,11 +633,11 @@
                       <span class="ap-field-value">{{ editableCaaData.planSponsorEin || '—' }}</span>
                     </div>
                     <div class="ap-field">
-                      <span class="ap-field-label">TPA name</span>
+                      <span class="ap-field-label">Carrier name</span>
                       <span class="ap-field-value">{{ editableCaaData.tpaName || '—' }}</span>
                     </div>
                     <div class="ap-field">
-                      <span class="ap-field-label">TPA EIN</span>
+                      <span class="ap-field-label">Carrier EIN</span>
                       <span class="ap-field-value">{{ editableCaaData.tpaEin || '—' }}</span>
                     </div>
                   </div>
@@ -562,12 +659,12 @@
                     persistent-hint
                   />
                   <TextField
-                    label="TPA name"
+                    label="Carrier name"
                     :model-value="editableCaaData.tpaName"
                     @update:model-value="updateCaaField('tpaName', $event)"
                   />
                   <TextField
-                    label="TPA EIN"
+                    label="Carrier EIN"
                     :model-value="editableCaaData.tpaEin"
                     @update:model-value="updateCaaField('tpaEin', $event)"
                     :error-messages="caaEinErrors.tpaEin"
@@ -593,7 +690,7 @@
                 <thead>
                   <tr>
                     <th>File</th>
-                    <th>Plan Sponsor/TPA Information</th>
+                    <th>Plan Sponsor/Carrier Information</th>
                     <th>Information Posted to Client Portal or Submitted on Client's Behalf Pending Client Election by Liviniti</th>
                   </tr>
                 </thead>
@@ -656,7 +753,7 @@
                   <tr class="caa-row--narrative">
                     <td>Narrative Response File</td>
                     <td>
-                      <p class="caa-narrative-label">Plan Sponsors/TPAs are responsible for providing narrative responses for the following:</p>
+                      <p class="caa-narrative-label">Plan Sponsors/Carriers are responsible for providing narrative responses for the following:</p>
                       <ul>
                         <li>Employer size for self-funded plans</li>
                         <li>Net payments from federal or state reinsurance or cost-sharing reduction programs</li>
@@ -1039,9 +1136,10 @@ import DatePicker from '@/components/ui/DatePicker.vue';
 import Select from '@/components/ui/Select.vue';
 import Button from '@/components/ui/Button.vue';
 import Banner from '@/components/common/Banner.vue';
-import { ChevronDown, CheckSquare, Square, Trash2 } from 'lucide-vue-next';
+import { ChevronDown, CheckSquare, Square, Trash2, Check } from 'lucide-vue-next';
 import Dialog from '@/components/ui/Dialog.vue';
 import { ref, computed, watch } from 'vue';
+import { useHighCostNotifications } from '@/composables/useHighCostNotifications';
 
 const accountOptions = ref([
   { id: 1, name: 'Company A' },
@@ -1790,7 +1888,8 @@ const userAdminHeaders = ref([
   { title: 'User', key: 'user' },
   { title: 'Role', key: 'role' },
   { title: 'Email', key: 'email' },
-  { title: 'Permissions', key: 'permissionsLabel' },
+  { title: 'Phone', key: 'phone' },
+  { title: 'Permissions', key: 'permissionsLabel', width: '260px' },
   { title: 'Activated', key: 'activated', align: 'center' },
   { title: 'Main POC', key: 'mainPoc', align: 'center' },
   { title: 'Survey Contact', key: 'surveyContact', align: 'center' },
@@ -1810,22 +1909,13 @@ const userAdminPermissionOptions = [
   { key: 'overrides', label: 'Overrides' },
   { key: 'vcpClaims', label: 'VCP Claims' },
 ];
-// Full live role catalog confirmed against the old portal's Admin > Roles screen 2026-08-07
-// (screenshot review) — "Global" excluded (synthetic display-only pseudo-role, not
-// assignable; no Delete action in that screen). "Rebates" excluded (appeared once as a
-// role name but is a permission everywhere else researched — treated as a stray old-portal
-// entry, not replicated here; revisit if someone confirms it was intentional).
-const userAdminRoleOptions = [
-  { type: 'subheader', title: 'Client-Facing' },
-  'Administrator', 'Client', 'Broker', 'Consultant', 'TPA', 'TPV',
-  { type: 'subheader', title: 'Liviniti Internal' },
-  'Account Manager', 'Account Executive', 'Implementation Manager', 'Implementation Coordinator', 'Accounting', 'Clinical Account Executive',
-];
-const userAdminExternalRoles = ['Broker', 'Consultant', 'TPA', 'TPV'];
-const userAdminInternalRoles = ['Account Manager', 'Account Executive', 'Implementation Manager', 'Implementation Coordinator', 'Accounting', 'Clinical Account Executive'];
+// Client Portal only assigns Client and external Carrier/vendor roles — Administrator and
+// Liviniti internal staff roles (Account Manager, Implementation Coordinator, etc.) are
+// assigned in SoloRx, not here.
+const userAdminRoleOptions = ['Client', 'Broker', 'Consultant', 'Carrier', 'TPV'];
+const userAdminExternalRoles = ['Broker', 'Consultant', 'Carrier', 'TPV'];
 const newUserAdminPermissions = (): Record<string, boolean> => ({ reports: false, invoices: false, rebates: false, highCostNotifications: false, planChanges: false, planApproval: false, overrides: false, vcpClaims: false });
-const permissionsLabel = (role: string, permissions: Record<string, boolean>) => {
-  if (role === 'Administrator') return 'All';
+const permissionsLabel = (_role: string, permissions: Record<string, boolean>) => {
   const selected = userAdminPermissionOptions.filter(p => permissions[p.key]).map(p => p.label);
   return selected.length ? selected.join(', ') : 'None';
 };
@@ -1833,6 +1923,10 @@ const permissionsLabel = (role: string, permissions: Record<string, boolean>) =>
 interface UserAdminEntry {
   user: string;
   email: string;
+  phone: string;
+  phones?: { number: string; type: string; ext: string }[];
+  primaryPhoneIdx?: number;
+  vendor?: string;
   role: string;
   permissions: Record<string, boolean>;
   permissionsLabel: string;
@@ -1843,32 +1937,109 @@ interface UserAdminEntry {
   ackConfirmed: boolean;
 }
 
+const allUserAdminPermissions = (): Record<string, boolean> => ({ reports: true, invoices: true, rebates: true, highCostNotifications: true, planChanges: true, planApproval: true, overrides: true, vcpClaims: true });
 const userAdminByAccount = ref<{ [key: number]: UserAdminEntry[] }>({
   1: [
-    { user: 'Tony Stark', email: 'tony.stark@companya.com', role: 'Administrator', permissions: newUserAdminPermissions(), permissionsLabel: 'All', allowPhi: true, activated: true, mainPoc: true, surveyContact: false, ackConfirmed: false },
-    { user: 'Pepper Potts', email: 'pepper.potts@companya.com', role: 'Administrator', permissions: newUserAdminPermissions(), permissionsLabel: 'All', allowPhi: true, activated: true, mainPoc: false, surveyContact: true, ackConfirmed: false },
+    { user: 'Tony Stark', email: 'tony.stark@companya.com', phone: '(555) 234-5678', phones: [{ number: '(555) 234-5678', type: 'Office', ext: '' }], primaryPhoneIdx: 0, role: 'Client', permissions: allUserAdminPermissions(), permissionsLabel: 'All', allowPhi: true, activated: true, mainPoc: true, surveyContact: false, ackConfirmed: false },
+    { user: 'Pepper Potts', email: 'pepper.potts@companya.com', phone: '(555) 234-5679', phones: [{ number: '(555) 234-5679', type: 'Office', ext: '' }], primaryPhoneIdx: 0, role: 'Client', permissions: allUserAdminPermissions(), permissionsLabel: 'All', allowPhi: true, activated: true, mainPoc: false, surveyContact: true, ackConfirmed: false },
   ],
   2: [
-    { user: 'Bruce Wayne', email: 'bruce.wayne@companyb.com', role: 'Administrator', permissions: newUserAdminPermissions(), permissionsLabel: 'All', allowPhi: true, activated: true, mainPoc: true, surveyContact: false, ackConfirmed: false },
+    { user: 'Bruce Wayne', email: 'bruce.wayne@companyb.com', phone: '(555) 876-5432', phones: [{ number: '(555) 876-5432', type: 'Office', ext: '' }], primaryPhoneIdx: 0, role: 'Client', permissions: allUserAdminPermissions(), permissionsLabel: 'All', allowPhi: true, activated: true, mainPoc: true, surveyContact: false, ackConfirmed: false },
+    { user: 'Lucius Fox', email: 'lucius.fox@companyb.com', phone: '(555) 876-5433', phones: [{ number: '(555) 876-5433', type: 'Office', ext: '' }], primaryPhoneIdx: 0, role: 'Client', permissions: { reports: true, invoices: true, rebates: true, highCostNotifications: true, planChanges: false, planApproval: false, overrides: false, vcpClaims: false }, permissionsLabel: 'Reports, Invoices, Rebates, High Cost Notifications', allowPhi: false, activated: true, mainPoc: false, surveyContact: true, ackConfirmed: false },
+    { user: 'Alfred Pennyworth', email: 'alfred.pennyworth@companyb.com', phone: '(555) 876-5434', phones: [{ number: '(555) 876-5434', type: 'Office', ext: '' }], primaryPhoneIdx: 0, role: 'Client', permissions: { reports: true, invoices: false, rebates: false, highCostNotifications: true, planChanges: false, planApproval: false, overrides: false, vcpClaims: false }, permissionsLabel: 'Reports, High Cost Notifications', allowPhi: true, activated: false, mainPoc: false, surveyContact: false, ackConfirmed: false },
+    { user: 'Alicia Reyes', email: 'areyes@gothamhealth.com', phone: '(212) 555-0177', phones: [{ number: '(212) 555-0177', type: 'Office', ext: '' }], primaryPhoneIdx: 0, role: 'Carrier', vendor: 'Gotham Health Partners', permissions: { reports: true, invoices: false, rebates: false, highCostNotifications: false, planChanges: false, planApproval: false, overrides: false, vcpClaims: false }, permissionsLabel: 'Reports', allowPhi: false, activated: true, mainPoc: false, surveyContact: true, ackConfirmed: false },
   ],
   3: [],
   4: [],
   5: [],
 });
 
+// Vendor contacts already associated to the account in SoloRx (Solo2) — sourced from a
+// dropdown here rather than typed manually, same pattern as Account Profile > Vendor
+// Contacts. Kept as a local mock per-account directory since this prototype has no
+// shared store; a real build would pull this from Solo2.
+const userAdminVendorDirectory: { [key: number]: { name: string; vendor: string; email: string; phone: string }[] } = {
+  1: [
+    { name: 'Mark Tillman', vendor: 'Southern Scripts Carrier', email: 'mtillman@sstpa.com', phone: '(704) 555-0121' },
+    { name: 'Dana Osei', vendor: 'Southern Scripts Carrier', email: 'dosei@sstpa.com', phone: '(704) 555-0122' },
+    { name: 'Rachel Vance', vendor: 'Acclaim Benefits', email: 'rvance@acclaim.com', phone: '(615) 555-0188' },
+    { name: 'James Pruitt', vendor: 'Acclaim Benefits', email: 'jpruitt@acclaim.com', phone: '(615) 555-0189' },
+    { name: 'Tara Mendez', vendor: 'Benefit Advantage', email: 'tmendez@benefitadv.com', phone: '(512) 555-0144' },
+  ],
+  2: [
+    { name: 'Alicia Reyes', vendor: 'Gotham Health Partners', email: 'areyes@gothamhealth.com', phone: '(212) 555-0177' },
+  ],
+  3: [],
+  4: [],
+  5: [],
+};
+
 const userAdminData = computed<UserAdminEntry[]>(() => (selectedAccount.value ? userAdminByAccount.value[selectedAccount.value] ?? [] : []));
+
+// Company B (account id 2) is used to demo the client-side, read-only User Admin view
+// (AM-09: clients see who has access but can't edit it). Picked over Company A/id 1
+// since Plan Explorer's Account Profile is a single hardcoded object (not per-account)
+// and always shows "Implementation" status — there's no real "Active" account to tie
+// this to yet, so this is just a populated account (has a seeded user + vendor contact)
+// rather than one of the empty ones (3-5).
+const CLIENT_READONLY_USER_ADMIN_ACCOUNT_ID = 2;
+const isUserAdminReadOnly = computed(() => selectedAccount.value === CLIENT_READONLY_USER_ADMIN_ACCOUNT_ID);
+
+// Only vendor contacts not already added as a User Admin entry — mirrors Account Profile >
+// Vendor Contacts' "already added" filter.
+const userAdminVendorOptions = computed(() => {
+  const directory = selectedAccount.value ? userAdminVendorDirectory[selectedAccount.value] ?? [] : [];
+  const addedNames = new Set(userAdminData.value.map(u => u.user));
+  const byVendor = new Map<string, string[]>();
+  directory.filter(c => !addedNames.has(c.name)).forEach(c => {
+    if (!byVendor.has(c.vendor)) byVendor.set(c.vendor, []);
+    byVendor.get(c.vendor)!.push(c.name);
+  });
+  const result: (string | { type: string; title: string })[] = [];
+  [...byVendor.keys()].sort().forEach(vendor => {
+    result.push({ type: 'subheader', title: vendor });
+    byVendor.get(vendor)!.forEach(name => result.push(name));
+  });
+  return result;
+});
+
+const { lcEditingHcn, lcNotifyThreshold, lcRecipients, lcHcnStartEdit, lcHcnSaveEdit, lcHcnCancelEdit } = useHighCostNotifications();
+// Recipient choices sourced from this account's activated portal users — a previously
+// selected name from Plan Explorer's broader contact list still displays even if it
+// isn't a portal user here (see useHighCostNotifications.ts for why this stays synced).
+const lcHcnContactOptions = computed(() => {
+  const names = new Set(userAdminData.value.map(u => u.user));
+  lcRecipients.value.forEach(name => names.add(name));
+  return [...names].sort();
+});
 
 const userAdminRowActions = [
   { label: 'Edit', action: 'edit' },
   { label: 'Remove', action: 'remove' },
 ];
 
+const uaPhoneTypes = ['Office', 'Cell', 'Fax'];
+const uaNewPhone = () => ({ number: '', type: 'Office', ext: '' });
+const formatPhone = (val: string): string => {
+  const d = val.replace(/\D/g, '').slice(0, 10);
+  if (d.length <= 3) return d;
+  if (d.length <= 6) return `(${d.slice(0, 3)}) ${d.slice(3)}`;
+  return `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}`;
+};
+
 const showUserAdminDialog = ref(false);
 const userAdminDialogMode = ref<'add' | 'edit'>('add');
 const userAdminEditingIndex = ref(-1);
-const newUserAdminForm = () => ({ firstName: '', lastName: '', email: '', role: 'Client', permissions: newUserAdminPermissions(), allowPhi: false, mainPoc: false, surveyContact: false, ackConfirmed: false });
+const userAdminVendorSelection = ref('');
+// Locked once a vendor-sourced user is being edited — their identity comes from the
+// vendor's own record, not something Client Portal lets you rename.
+const userAdminEditingIsVendorSourced = ref(false);
+const newUserAdminForm = () => ({ firstName: '', lastName: '', email: '', phones: [uaNewPhone()], primaryPhoneIdx: 0, role: '', permissions: newUserAdminPermissions(), allowPhi: false, mainPoc: false, surveyContact: false, ackConfirmed: false });
 const userAdminForm = ref(newUserAdminForm());
 const userAdminErrors = ref({ firstName: '', lastName: '', email: '' });
+watch(() => userAdminForm.value.phones, phones => {
+  phones.forEach(ph => { const f = formatPhone(ph.number); if (f !== ph.number) ph.number = f; });
+}, { deep: true });
 
 const validateUserAdminForm = (form: { firstName: string; lastName: string; email: string }) => {
   const e = { firstName: '', lastName: '', email: '' };
@@ -1883,10 +2054,20 @@ const validateUserAdminForm = (form: { firstName: string; lastName: string; emai
 const enforceSingleMainPoc = (entries: UserAdminEntry[], keepIdx: number) => {
   entries.forEach((entry, i) => { if (i !== keepIdx) entry.mainPoc = false; });
 };
+// Returns the other Main Point of Contact's name (old portal shows who to find and
+// change), or '' if none — matches old Client Portal behavior.
+const otherUserIsMainPoc = (excludeIdx: number): string => {
+  const entries = selectedAccount.value ? userAdminByAccount.value[selectedAccount.value] : undefined;
+  if (!entries) return '';
+  const other = entries.find((entry, i) => i !== excludeIdx && entry.mainPoc);
+  return other?.user ?? '';
+};
 
 const openAddUser = () => {
   userAdminDialogMode.value = 'add';
   userAdminForm.value = newUserAdminForm();
+  userAdminVendorSelection.value = '';
+  userAdminEditingIsVendorSourced.value = false;
   userAdminErrors.value = { firstName: '', lastName: '', email: '' };
   showUserAdminDialog.value = true;
 };
@@ -1904,6 +2085,8 @@ const handleUserAdminRowAction = ({ action, item }: { action: string; item: User
       firstName: nameParts[0] ?? '',
       lastName: nameParts.slice(1).join(' '),
       email: item.email,
+      phones: item.phones?.length ? item.phones.map(p => ({ ...p })) : [uaNewPhone()],
+      primaryPhoneIdx: item.primaryPhoneIdx ?? 0,
       role: item.role,
       permissions: { ...item.permissions },
       allowPhi: item.allowPhi,
@@ -1912,6 +2095,7 @@ const handleUserAdminRowAction = ({ action, item }: { action: string; item: User
       ackConfirmed: item.ackConfirmed,
     };
     userAdminEditingIndex.value = idx;
+    userAdminEditingIsVendorSourced.value = userAdminExternalRoles.includes(item.role);
     userAdminDialogMode.value = 'edit';
     userAdminErrors.value = { firstName: '', lastName: '', email: '' };
     showUserAdminDialog.value = true;
@@ -1941,21 +2125,50 @@ const removeUserDialogActions = [
 ];
 
 const saveUserAdmin = () => {
-  const errors = validateUserAdminForm(userAdminForm.value);
-  userAdminErrors.value = errors;
-  if (Object.values(errors).some(e => e)) return;
-  if (userAdminExternalRoles.includes(userAdminForm.value.role) && !userAdminForm.value.ackConfirmed) return;
+  const f = userAdminForm.value;
+  const isVendorRole = userAdminExternalRoles.includes(f.role);
+  const isNewVendorPick = isVendorRole && userAdminDialogMode.value === 'add';
+
+  if (isNewVendorPick) {
+    userAdminErrors.value = { firstName: '', lastName: '', email: '' };
+    if (!userAdminVendorSelection.value) return;
+  } else if (!userAdminEditingIsVendorSourced.value) {
+    const errors = validateUserAdminForm(f);
+    userAdminErrors.value = errors;
+    if (Object.values(errors).some(e => e)) return;
+  }
+  if (isVendorRole && !f.ackConfirmed) return;
   if (!selectedAccount.value) return;
   if (!userAdminByAccount.value[selectedAccount.value]) userAdminByAccount.value[selectedAccount.value] = [];
   const entries = userAdminByAccount.value[selectedAccount.value];
-  const f = userAdminForm.value;
+
+  let identity: { user: string; email: string; phone: string; phones?: { number: string; type: string; ext: string }[]; primaryPhoneIdx?: number; vendor?: string };
+  if (isNewVendorPick) {
+    const directory = userAdminVendorDirectory[selectedAccount.value] ?? [];
+    const picked = directory.find(c => c.name === userAdminVendorSelection.value);
+    if (!picked) return;
+    identity = { user: picked.name, email: picked.email, phone: picked.phone, vendor: picked.vendor };
+  } else if (userAdminEditingIsVendorSourced.value && userAdminEditingIndex.value > -1) {
+    const existing = entries[userAdminEditingIndex.value];
+    identity = { user: existing.user, email: existing.email, phone: existing.phone, vendor: existing.vendor };
+  } else {
+    const phones = f.phones.filter(p => p.number);
+    const primaryIdx = f.primaryPhoneIdx;
+    identity = {
+      user: `${f.firstName} ${f.lastName}`,
+      email: f.email,
+      phones,
+      primaryPhoneIdx: primaryIdx,
+      phone: phones[primaryIdx]?.number ?? phones[0]?.number ?? '',
+    };
+  }
+
   const entry: UserAdminEntry = {
-    user: `${f.firstName} ${f.lastName}`,
-    email: f.email,
+    ...identity,
     role: f.role,
     permissions: { ...f.permissions },
     permissionsLabel: permissionsLabel(f.role, f.permissions),
-    allowPhi: f.role === 'Administrator' ? true : f.allowPhi,
+    allowPhi: f.allowPhi,
     activated: false,
     mainPoc: f.mainPoc,
     surveyContact: f.surveyContact,
@@ -1972,13 +2185,19 @@ const saveUserAdmin = () => {
   showUserAdminDialog.value = false;
 };
 
+const hasAnyPermission = (permissions: Record<string, boolean>) => Object.values(permissions).some(v => v);
+
 const userAdminDialogActions = computed(() => [
   { text: 'Cancel', styleType: 'secondary' as const, onClick: () => { showUserAdminDialog.value = false; } },
   {
     text: userAdminDialogMode.value === 'add' ? 'Add User' : 'Save Changes',
     styleType: 'primary' as const,
     onClick: saveUserAdmin,
-    disabled: userAdminExternalRoles.includes(userAdminForm.value.role) && !userAdminForm.value.ackConfirmed,
+    disabled:
+      !userAdminForm.value.role ||
+      (userAdminExternalRoles.includes(userAdminForm.value.role) && !userAdminForm.value.ackConfirmed) ||
+      (userAdminExternalRoles.includes(userAdminForm.value.role) && userAdminDialogMode.value === 'add' && !userAdminVendorSelection.value) ||
+      !hasAnyPermission(userAdminForm.value.permissions),
   },
 ]);
 
@@ -2227,11 +2446,24 @@ const userAdminDialogActions = computed(() => [
   &:hover .ua-checkbox-icon {
     color: $color-primary;
   }
+
+  &--disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+
+    &:hover .ua-checkbox-icon {
+      color: inherit;
+    }
+  }
 }
 
 .ua-checkbox-icon {
   color: $color-border;
   &--checked { color: $color-primary; }
+}
+
+.ua-table-check {
+  color: $color-primary;
 }
 
 .caa-field-with-hint {
@@ -2482,6 +2714,107 @@ const userAdminDialogActions = computed(() => [
   &:hover {
     text-decoration: underline;
   }
+}
+
+.nl-repeatable-row {
+  margin-bottom: $spacing-small;
+}
+
+.nl-row-divider {
+  margin: $spacing-medium 0;
+}
+
+.nl-add-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: $font-family-base;
+  font-size: $font-size-body;
+  color: $color-link;
+  cursor: pointer;
+  margin-top: $spacing-small;
+
+  &:hover { text-decoration: underline; }
+}
+
+.nl-repeatable-row-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-small;
+}
+
+.nl-repeatable-row-label {
+  font-size: $font-size-small;
+  font-weight: $font-weight-semibold;
+  color: $color-text-secondary;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.nl-remove-row-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  color: $color-text-secondary;
+  border-radius: 4px;
+  transition: color 0.15s, background-color 0.15s;
+
+  &:hover {
+    color: $color-error;
+    background-color: rgba($color-error, 0.08);
+  }
+}
+
+.ap-radio-option {
+  display: flex;
+  align-items: center;
+  gap: $spacing-small;
+  padding: $spacing-xsmall 0;
+  cursor: pointer;
+}
+
+.ap-radio-input {
+  display: none;
+}
+
+.ap-radio-custom {
+  width: 18px;
+  height: 18px;
+  border: 2px solid $color-border;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s;
+
+  &.active {
+    border-color: $color-primary;
+  }
+}
+
+.ap-radio-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: $color-primary;
+}
+
+.ap-radio-label {
+  font-size: $font-size-body;
+  color: var(--color-text-primary);
+}
+
+.ua-permissions-cell {
+  display: block;
+  max-width: 260px;
+  white-space: normal;
+  word-break: break-word;
 }
 
 </style>

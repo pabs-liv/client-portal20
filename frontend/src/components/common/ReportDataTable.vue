@@ -125,8 +125,8 @@
       <template v-slot:item.ruleChangeLog="{ item }">
         <slot name="item.ruleChangeLog" :item="item"></slot>
       </template>
-      <template v-for="(_, name) in $slots" v-slot:[`item.${name}`]="slotData">
-        <slot :name="`item.${name}`" v-bind="slotData" />
+      <template v-for="(_, name) in $slots" v-slot:[name]="slotData">
+        <slot :name="name" v-bind="slotData" />
       </template>
       <template v-slot:no-data>
         <slot name="empty-state">

@@ -311,8 +311,40 @@
                           :show-row-actions="true"
                           :row-action-items="apClientContactRowActions"
                           :show-table-footer="false"
+                          :show-expand="true"
+                          item-value="email"
                           @row-action="handleApClientContactRowAction"
-                        />
+                        >
+                          <template #expanded-row="{ item, columns }">
+                            <tr>
+                              <td :colspan="columns.length" class="prog-detail-td">
+                                <div class="prog-detail">
+                                  <template v-if="!item.portalAccess">
+                                    <p class="prog-detail-value">No Client Portal access.</p>
+                                  </template>
+                                  <template v-else>
+                                    <div class="prog-detail-cols">
+                                      <div>
+                                        <p class="prog-detail-label">Main Point of Contact</p>
+                                        <p class="prog-detail-value">{{ item.mainPointOfContact ? 'Yes' : 'No' }}</p>
+                                      </div>
+                                      <div>
+                                        <p class="prog-detail-label">Survey Contact</p>
+                                        <p class="prog-detail-value">{{ item.surveyContact ? 'Yes' : 'No' }}</p>
+                                      </div>
+                                      <div>
+                                        <p class="prog-detail-label">Allow PHI Access</p>
+                                        <p class="prog-detail-value">{{ item.role === 'Administrator' ? 'Yes' : (item.allowPhi ? 'Yes' : 'No') }}</p>
+                                      </div>
+                                    </div>
+                                    <p class="prog-detail-label">Permissions</p>
+                                    <p class="prog-detail-value">{{ apPermissionsSummary(item.role, item.permissions) }}</p>
+                                  </template>
+                                </div>
+                              </td>
+                            </tr>
+                          </template>
+                        </ReportDataTable>
                       </div>
                       <div v-else class="nc-empty-state">
                         <img :src="EmptyStateImg" alt="No data" class="nc-empty-icon" />
@@ -392,11 +424,17 @@
                           <span class="text-small">Allow PHI access</span>
                         </div>
                       </template>
-                      <div class="ap-checkbox-toggle mt-3" @click="apContactForm.mainPointOfContact = !apContactForm.mainPointOfContact">
+                      <h6 class="ap-subsection-heading">Contact Designations</h6>
+                      <div
+                        class="ap-checkbox-toggle"
+                        :class="{ 'ap-checkbox-toggle--disabled': apOtherContactIsMainPoc(apClientContacts, -1) }"
+                        @click="!apOtherContactIsMainPoc(apClientContacts, -1) && (apContactForm.mainPointOfContact = !apContactForm.mainPointOfContact)"
+                      >
                         <CheckSquare v-if="apContactForm.mainPointOfContact" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
                         <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
                         <span class="text-small">Main Point of Contact</span>
                       </div>
+                      <p v-if="apOtherContactIsMainPoc(apClientContacts, -1)" class="text-small ap-role-note">{{ apOtherContactIsMainPoc(apClientContacts, -1) }} is already the Main Point of Contact for this account. Remove that designation from them before assigning a new one.</p>
                       <div class="ap-checkbox-toggle" @click="apContactForm.surveyContact = !apContactForm.surveyContact">
                         <CheckSquare v-if="apContactForm.surveyContact" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
                         <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
@@ -474,11 +512,17 @@
                           <span class="text-small">Allow PHI access</span>
                         </div>
                       </template>
-                      <div class="ap-checkbox-toggle mt-3" @click="apEditContactForm.mainPointOfContact = !apEditContactForm.mainPointOfContact">
+                      <h6 class="ap-subsection-heading">Contact Designations</h6>
+                      <div
+                        class="ap-checkbox-toggle"
+                        :class="{ 'ap-checkbox-toggle--disabled': apOtherContactIsMainPoc(apClientContacts, apEditingContactIndex) }"
+                        @click="!apOtherContactIsMainPoc(apClientContacts, apEditingContactIndex) && (apEditContactForm.mainPointOfContact = !apEditContactForm.mainPointOfContact)"
+                      >
                         <CheckSquare v-if="apEditContactForm.mainPointOfContact" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
                         <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
                         <span class="text-small">Main Point of Contact</span>
                       </div>
+                      <p v-if="apOtherContactIsMainPoc(apClientContacts, apEditingContactIndex)" class="text-small ap-role-note">{{ apOtherContactIsMainPoc(apClientContacts, apEditingContactIndex) }} is already the Main Point of Contact for this account. Remove that designation from them before assigning a new one.</p>
                       <div class="ap-checkbox-toggle" @click="apEditContactForm.surveyContact = !apEditContactForm.surveyContact">
                         <CheckSquare v-if="apEditContactForm.surveyContact" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
                         <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
@@ -486,6 +530,16 @@
                       </div>
                     </template>
                   </Dialog>
+
+                  <!-- Remove Contact Confirmation Dialog (shared by Client + Vendor Contacts) -->
+                  <Dialog
+                    v-model="apShowRemoveContactDialog"
+                    :icon="Trash2"
+                    heading="Remove Contact"
+                    :text="`Are you sure you want to remove ${apPendingRemoveContact?.name} from this account?`"
+                    :actions="apRemoveContactDialogActions"
+                    :show-secondary-button="true"
+                  />
 
                   <!-- Section: Vendor Contacts -->
                   <v-card class="ap-contacts-card">
@@ -495,22 +549,41 @@
                     </v-card-title>
                     <v-card-text>
                       <div v-if="apVendorContacts.length > 0">
-                        <v-data-table
+                        <ReportDataTable
                           :headers="apVendorContactHeaders"
                           :items="apVendorContacts"
-                          density="compact"
-                          hide-default-footer
-                          class="ap-contacts-table"
+                          :show-search-bar="false"
+                          :show-filter-button="false"
+                          :show-filter-pills="false"
+                          :show-selection-checkboxes="false"
+                          :show-row-actions="true"
+                          :row-action-items="apVendorContactRowActions"
+                          :show-table-footer="false"
+                          :show-expand="true"
+                          item-value="email"
+                          @row-action="handleApVendorContactRowAction"
                         >
-                          <template #item.actions="{ item }">
-                            <v-btn icon variant="plain" size="small" @click="handleEditVendorContact(item)" title="Edit role &amp; permissions">
-                              <Pencil :size="16" :stroke-width="1.75" />
-                            </v-btn>
-                            <v-btn icon variant="plain" size="small" color="error" @click="apRemoveVendorContact(item)" title="Remove">
-                              <Trash2 :size="16" :stroke-width="1.75" />
-                            </v-btn>
+                          <template #expanded-row="{ item, columns }">
+                            <tr>
+                              <td :colspan="columns.length" class="prog-detail-td">
+                                <div class="prog-detail">
+                                  <div class="prog-detail-cols">
+                                    <div>
+                                      <p class="prog-detail-label">Survey Contact</p>
+                                      <p class="prog-detail-value">{{ item.surveyContact ? 'Yes' : 'No' }}</p>
+                                    </div>
+                                    <div>
+                                      <p class="prog-detail-label">Allow PHI Access</p>
+                                      <p class="prog-detail-value">{{ item.allowPhi ? 'Yes' : 'No' }}</p>
+                                    </div>
+                                  </div>
+                                  <p class="prog-detail-label">Permissions</p>
+                                  <p class="prog-detail-value">{{ apPermissionsSummary(item.role, item.permissions) }}</p>
+                                </div>
+                              </td>
+                            </tr>
                           </template>
-                        </v-data-table>
+                        </ReportDataTable>
                       </div>
                       <div v-else class="nc-empty-state">
                         <img :src="EmptyStateImg" alt="No data" class="nc-empty-icon" />
@@ -528,26 +601,40 @@
                     :show-secondary-button="true"
                     :actions="apVendorContactDialogActions"
                   >
-                    <p class="text-body mb-4">The contacts below are from vendors already linked to this account.</p>
+                    <p class="text-body mb-4">The contact below is from a vendor already linked to this account.</p>
                     <Autocomplete
-                      v-model="apVendorContactSelections"
+                      v-model="apVendorContactSelection"
                       :items="apVendorContactOptions"
-                      :multiple="true"
-                      label="Select vendor contacts"
+                      :multiple="false"
+                      label="Select vendor contact"
                     />
 
                     <v-divider class="my-4" />
                     <h5 class="ap-subsection-heading">Client Portal Access</h5>
-                    <p class="text-small ap-role-note">Applies to all contacts selected above. External vendors must be defined on the applicable agreement and have signed the required data transfer agreement before Client Portal access is granted.</p>
+                    <p class="text-small ap-role-note">External vendors must be defined on the applicable agreement and have signed the required data transfer agreement before Client Portal access is granted.</p>
                     <v-row class="mt-1">
                       <v-col cols="12" sm="6"><Select v-model="apVendorRoleSelection" :items="apVendorRoleOptions" label="Business Role" /></v-col>
                     </v-row>
+                    <h6 class="ap-subsection-heading">Permissions</h6>
+                    <div class="ap-permission-grid">
+                      <div v-for="perm in apPermissionOptions" :key="perm.key" class="ap-checkbox-toggle" @click="apVendorPermissions[perm.key] = !apVendorPermissions[perm.key]">
+                        <CheckSquare v-if="apVendorPermissions[perm.key]" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                        <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                        <span class="text-small">{{ perm.label }}</span>
+                      </div>
+                    </div>
                     <div class="ap-checkbox-toggle" @click="apVendorAllowPhi = !apVendorAllowPhi">
                       <CheckSquare v-if="apVendorAllowPhi" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
                       <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
                       <span class="text-small">Allow PHI access</span>
                     </div>
-                    <div class="ap-checkbox-toggle" @click="apVendorAckConfirmed = !apVendorAckConfirmed">
+                    <h6 class="ap-subsection-heading">Contact Designations</h6>
+                    <div class="ap-checkbox-toggle" @click="apVendorSurveyContact = !apVendorSurveyContact">
+                      <CheckSquare v-if="apVendorSurveyContact" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                      <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                      <span class="text-small">Survey Contact</span>
+                    </div>
+                    <div class="ap-checkbox-toggle mt-3" @click="apVendorAckConfirmed = !apVendorAckConfirmed">
                       <CheckSquare v-if="apVendorAckConfirmed" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
                       <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
                       <span class="text-small">I confirm this external vendor has signed the required data transfer agreement.</span>
@@ -557,19 +644,37 @@
                   <!-- Edit Vendor Contact Dialog -->
                   <Dialog
                     v-model="apShowEditVendorContactDialog"
-                    heading="Edit Vendor Contact Access"
+                    :heading="`Edit Vendor Contact — ${apEditingVendorContactName}`"
                     :show-secondary-button="true"
                     :actions="apEditVendorContactDialogActions"
                   >
+                    <div class="ap-field mb-3">
+                      <span class="ap-field-label">Name</span>
+                      <span class="ap-field-value">{{ apEditingVendorContactName }}</span>
+                    </div>
                     <v-row class="mt-1">
                       <v-col cols="12" sm="6"><Select v-model="apEditVendorContactForm.role" :items="apVendorRoleOptions" label="Business Role" /></v-col>
                     </v-row>
+                    <h6 class="ap-subsection-heading">Permissions</h6>
+                    <div class="ap-permission-grid">
+                      <div v-for="perm in apPermissionOptions" :key="perm.key" class="ap-checkbox-toggle" @click="apEditVendorContactForm.permissions[perm.key] = !apEditVendorContactForm.permissions[perm.key]">
+                        <CheckSquare v-if="apEditVendorContactForm.permissions[perm.key]" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                        <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                        <span class="text-small">{{ perm.label }}</span>
+                      </div>
+                    </div>
                     <div class="ap-checkbox-toggle" @click="apEditVendorContactForm.allowPhi = !apEditVendorContactForm.allowPhi">
                       <CheckSquare v-if="apEditVendorContactForm.allowPhi" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
                       <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
                       <span class="text-small">Allow PHI access</span>
                     </div>
-                    <div class="ap-checkbox-toggle" @click="apEditVendorContactForm.ackConfirmed = !apEditVendorContactForm.ackConfirmed">
+                    <h6 class="ap-subsection-heading">Contact Designations</h6>
+                    <div class="ap-checkbox-toggle" @click="apEditVendorContactForm.surveyContact = !apEditVendorContactForm.surveyContact">
+                      <CheckSquare v-if="apEditVendorContactForm.surveyContact" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                      <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                      <span class="text-small">Survey Contact</span>
+                    </div>
+                    <div class="ap-checkbox-toggle mt-3" @click="apEditVendorContactForm.ackConfirmed = !apEditVendorContactForm.ackConfirmed">
                       <CheckSquare v-if="apEditVendorContactForm.ackConfirmed" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
                       <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
                       <span class="text-small">I confirm this external vendor has signed the required data transfer agreement.</span>
@@ -1884,7 +1989,7 @@
                           </div>
                           <div v-if="blExistingParty === 'yes'" class="ap-field">
                             <span class="ap-field-label">Billing Party</span>
-                            <span class="ap-field-value">{{ blSelectedTpa || '—' }}</span>
+                            <span class="ap-field-value">{{ blSelectedCarrier || '—' }}</span>
                           </div>
                         </div>
                         <div class="ap-field-row">
@@ -1906,10 +2011,10 @@
                           </div>
                           <div v-if="blExistingParty === 'yes'" class="bl-subsection">
                             <div class="bl-field-narrow">
-                              <Select v-model="blSelectedTpa" :items="blTpaOptions" label="Select billing party" />
+                              <Select v-model="blSelectedCarrier" :items="blCarrierOptions" label="Select billing party" />
                             </div>
                             <p class="text-body bl-note">Don't see the billing party? Third party vendors must be added in SoloRx before they appear here.</p>
-                            <p v-if="blSelectedTpa" class="text-body bl-note">Contacts from the selected billing party will populate the Responsible Party field below.</p>
+                            <p v-if="blSelectedCarrier" class="text-body bl-note">Contacts from the selected billing party will populate the Responsible Party field below.</p>
                           </div>
                         </div>
                         <div class="bl-section">
@@ -1939,7 +2044,7 @@
                         <template v-if="blExistingParty === 'yes' && blSkipAchSetup">
                           <div class="ap-field-row">
                             <div class="ap-field">
-                              <span class="ap-field-value">Payment handled under existing TPA billing agreement.</span>
+                              <span class="ap-field-value">Payment handled under existing Carrier billing agreement.</span>
                             </div>
                           </div>
                         </template>
@@ -1975,7 +2080,7 @@
                           <div class="ap-checkbox-row mb-3" @click="blSkipAchSetup = !blSkipAchSetup" style="cursor:pointer">
                             <CheckSquare v-if="blSkipAchSetup" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
                             <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
-                            <span class="ap-field-value">Skip ACH setup — TPA has an existing billing agreement with Liviniti.</span>
+                            <span class="ap-field-value">Skip ACH setup — Carrier has an existing billing agreement with Liviniti.</span>
                           </div>
                         </div>
                         <div v-if="!blSkipAchSetup" class="bl-section">
@@ -3239,6 +3344,7 @@ import {
 } from 'lucide-vue-next';
 import EmptyStateImg from '@/assets/EmptyState.svg';
 import { useDocumentsStore } from '@/stores/documents';
+import { useHighCostNotifications } from '@/composables/useHighCostNotifications';
 import { VRow, VCol, VProgressCircular } from 'vuetify/components';
 
 const STARK_INDUSTRIES_ID = 1;
@@ -3725,25 +3831,7 @@ function lcCancelEdit() {
   lcEditingLimits.value = false;
 }
 
-const lcEditingHcn = ref(false);
-const lcNotifyThreshold = ref('10000');
-const lcRecipients = ref<string[]>([]);
-let lcHcnSnapshot = { threshold: '', recipients: [] as string[] };
-
-function lcHcnStartEdit() {
-  lcHcnSnapshot = { threshold: lcNotifyThreshold.value, recipients: [...lcRecipients.value] };
-  lcEditingHcn.value = true;
-}
-
-function lcHcnSaveEdit() {
-  lcEditingHcn.value = false;
-}
-
-function lcHcnCancelEdit() {
-  lcNotifyThreshold.value = lcHcnSnapshot.threshold;
-  lcRecipients.value = [...lcHcnSnapshot.recipients];
-  lcEditingHcn.value = false;
-}
+const { lcEditingHcn, lcNotifyThreshold, lcRecipients, lcHcnStartEdit, lcHcnSaveEdit, lcHcnCancelEdit } = useHighCostNotifications();
 
 const lcHcnContactOptions = computed(() => {
   const items: any[] = [
@@ -3834,14 +3922,14 @@ const formatEin = (val: string) => {
 
 // B-21: Existing billing party
 const blExistingParty = ref('no');
-const blTpaOptions = ['Southern Scripts TPA', 'Acclaim Benefits', 'Benefit Advantage'];
-const blSelectedTpa = ref('');
+const blCarrierOptions = ['Southern Scripts Carrier', 'Acclaim Benefits', 'Benefit Advantage'];
+const blSelectedCarrier = ref('');
 
 // B-01/B-02: Payment method
 const blPaymentMethod = ref('ACH');
 const blAchMethod = ref('debit');
 
-// Skip ACH setup — TPA already has an existing billing agreement with Liviniti
+// Skip ACH setup — Carrier already has an existing billing agreement with Liviniti
 const blSkipAchSetup = ref(false);
 let suppressPaymentFieldsReset = false;
 const resetPaymentFields = () => {
@@ -3868,9 +3956,9 @@ const blDebitTimingNote = ref('');
 
 // B-05/B-14: Contacts
 const blResponsibleContactOptions = computed(() => {
-  if (blExistingParty.value === 'yes' && blSelectedTpa.value) {
+  if (blExistingParty.value === 'yes' && blSelectedCarrier.value) {
     return apVendorContacts.value
-      .filter(c => c.vendor === blSelectedTpa.value)
+      .filter(c => c.vendor === blSelectedCarrier.value)
       .map(c => c.name);
   }
   return apClientContacts.value.map(c => c.name);
@@ -3895,7 +3983,7 @@ const blRebateContactOptions = computed(() => {
 const blResponsibleContacts = ref<string[]>([]);
 const blRebateContacts = ref<string[]>([]);
 let suppressResponsibleContactsReset = false;
-watch([() => blExistingParty.value, () => blSelectedTpa.value], () => {
+watch([() => blExistingParty.value, () => blSelectedCarrier.value], () => {
   if (suppressResponsibleContactsReset) return;
   blResponsibleContacts.value = [];
 });
@@ -3948,12 +4036,12 @@ const blEditingRebate = ref(false);
 const blEditingNotes = ref(false);
 
 // Card 1: Billing Setup — snapshot/restore so Cancel undoes every field, not just uploads
-let blSetupSnapshot = { einNumber: '', existingParty: 'no', selectedTpa: '', responsibleContacts: [] as string[] };
+let blSetupSnapshot = { einNumber: '', existingParty: 'no', selectedCarrier: '', responsibleContacts: [] as string[] };
 const blSetupStartEdit = () => {
   blSetupSnapshot = {
     einNumber: blEinNumber.value,
     existingParty: blExistingParty.value,
-    selectedTpa: blSelectedTpa.value,
+    selectedCarrier: blSelectedCarrier.value,
     responsibleContacts: [...blResponsibleContacts.value],
   };
   blEditingSetup.value = true;
@@ -3965,7 +4053,7 @@ const blSetupCancelEdit = () => {
   suppressResponsibleContactsReset = true;
   blEinNumber.value = blSetupSnapshot.einNumber;
   blExistingParty.value = blSetupSnapshot.existingParty;
-  blSelectedTpa.value = blSetupSnapshot.selectedTpa;
+  blSelectedCarrier.value = blSetupSnapshot.selectedCarrier;
   blResponsibleContacts.value = blSetupSnapshot.responsibleContacts;
   blEditingSetup.value = false;
   nextTick(() => { suppressResponsibleContactsReset = false; });
@@ -4352,12 +4440,24 @@ const apPermissionOptions = [
   { key: 'vcpClaims', label: 'VCP Claims' },
 ];
 const apClientRoleOptions = ['Administrator', 'Client'];
-const apVendorRoleOptions = ['Broker', 'Consultant', 'TPA', 'TPV'];
+const apVendorRoleOptions = ['Broker', 'Consultant', 'Carrier', 'TPV'];
 const apNewPermissions = (): Record<string, boolean> => ({ reports: false, invoices: false, rebates: false, highCostNotifications: false, planChanges: false, planApproval: false, overrides: false, vcpClaims: false });
 const apPortalRoleLabel = (portalAccess: boolean, role: string) => (portalAccess ? role : 'No portal access');
+const apPermissionsSummary = (role: string, permissions: Record<string, boolean>) => {
+  if (role === 'Administrator') return 'All';
+  const selected = apPermissionOptions.filter(p => permissions[p.key]).map(p => p.label);
+  return selected.length ? selected.join(', ') : 'None';
+};
 // Enforces the old portal's rule: only one contact per account can be Main Point of Contact.
 const apEnforceSingleMainPoc = (contacts: any[], keepIdx: number) => {
   contacts.forEach((c, i) => { if (i !== keepIdx) c.mainPointOfContact = false; });
+};
+// Only one Client Contact per account can be Main Point of Contact — Vendor Contacts don't
+// carry this designation (a client wouldn't dictate a vendor's main point of contact).
+// Returns that contact's name (old portal shows who to find and change), or '' if none.
+const apOtherContactIsMainPoc = (contacts: any[], excludeIdx: number): string => {
+  const other = contacts.find((c, i) => i !== excludeIdx && c.mainPointOfContact);
+  return other?.name ?? '';
 };
 
 // ── Account Profile — Client Contacts ─────────────────────────────────────────
@@ -4390,7 +4490,7 @@ const apClientContacts = ref<ApClientContact[]>([
   { name: 'Nick Johnson', title: 'Benefits Manager', email: 'nick.johnson@starkind.com', phone: '(555) 234-5678', phones: [{ number: '(555) 234-5678', type: 'Office', ext: '' }], primaryPhoneIdx: 0, portalAccess: false, role: 'Client', permissions: apNewPermissions(), allowPhi: false, mainPointOfContact: false, surveyContact: false, roleLabel: 'No portal access' },
 ]);
 const apShowAddContactDialog = ref(false);
-const apNewContactForm = () => ({ firstName: '', lastName: '', title: '', email: '', phones: [apNewPhone()], primaryPhoneIdx: 0, portalAccess: false, role: 'Client', permissions: apNewPermissions(), allowPhi: false, mainPointOfContact: false, surveyContact: false });
+const apNewContactForm = () => ({ firstName: '', lastName: '', title: '', email: '', phones: [apNewPhone()], primaryPhoneIdx: 0, portalAccess: false, role: '', permissions: apNewPermissions(), allowPhi: false, mainPointOfContact: false, surveyContact: false });
 const apContactForm = ref(apNewContactForm());
 const apContactErrors = ref({ firstName: '', lastName: '', email: '' });
 const apEditContactErrors = ref({ firstName: '', lastName: '', email: '' });
@@ -4451,10 +4551,28 @@ const apEditContactForm = ref(apNewContactForm());
 watch(() => apEditContactForm.value.phones, phones => {
   phones.forEach(ph => { const f = formatPhone(ph.number); if (f !== ph.number) ph.number = f; });
 }, { deep: true });
+const apShowRemoveContactDialog = ref(false);
+const apPendingRemoveContact = ref<any>(null);
+const apPendingRemoveContactList = ref<any[] | null>(null);
+const apConfirmRemoveContact = () => {
+  const list = apPendingRemoveContactList.value;
+  const idx = list ? list.indexOf(apPendingRemoveContact.value) : -1;
+  if (list && idx > -1) list.splice(idx, 1);
+  apShowRemoveContactDialog.value = false;
+  apPendingRemoveContact.value = null;
+  apPendingRemoveContactList.value = null;
+};
+const apRemoveContactDialogActions = [
+  { text: 'Cancel', styleType: 'secondary' as const, onClick: () => { apShowRemoveContactDialog.value = false; apPendingRemoveContact.value = null; } },
+  { text: 'Remove', onClick: apConfirmRemoveContact, type: 'destructive' as const },
+];
+
 const handleApClientContactRowAction = ({ action, item }: { action: string; item: any }) => {
   const idx = apClientContacts.value.indexOf(item);
   if (action === 'remove') {
-    if (idx > -1) apClientContacts.value.splice(idx, 1);
+    apPendingRemoveContact.value = item;
+    apPendingRemoveContactList.value = apClientContacts.value;
+    apShowRemoveContactDialog.value = true;
   } else if (action === 'edit') {
     const nameParts = (item.name as string).split(' ');
     apEditContactForm.value = {
@@ -4505,11 +4623,11 @@ const apSaveEditContact = () => {
 };
 const apEditContactDialogActions = computed(() => [
   { text: 'Cancel', styleType: 'secondary' as const, onClick: () => { apShowEditContactDialog.value = false; apEditContactErrors.value = { firstName: '', lastName: '', email: '' }; } },
-  { text: 'Save Changes', styleType: 'primary' as const, onClick: apSaveEditContact },
+  { text: 'Save Changes', styleType: 'primary' as const, onClick: apSaveEditContact, disabled: apEditContactForm.value.portalAccess && !apEditContactForm.value.role },
 ]);
 const apContactDialogActions = computed(() => [
   { text: 'Cancel', styleType: 'secondary' as const, onClick: () => { apShowAddContactDialog.value = false; apResetContactForm(); } },
-  { text: 'Add Contact', styleType: 'primary' as const, onClick: apSaveContact },
+  { text: 'Add Contact', styleType: 'primary' as const, onClick: apSaveContact, disabled: apContactForm.value.portalAccess && !apContactForm.value.role },
 ]);
 
 // ── Account Profile — Vendor Contacts ─────────────────────────────────────────
@@ -4521,18 +4639,20 @@ const apVendorContactHeaders = [
   { title: 'Business Role', key: 'roleLabel' },
   { title: '', key: 'actions', sortable: false },
 ];
-type ApVendorContact = { name: string; vendor: string; email: string; phone: string; role?: string; allowPhi?: boolean; ackConfirmed?: boolean; roleLabel?: string };
+type ApVendorContact = { name: string; vendor: string; email: string; phone: string; role?: string; permissions?: Record<string, boolean>; allowPhi?: boolean; surveyContact?: boolean; ackConfirmed?: boolean; roleLabel?: string };
 const apVendorContacts = ref<ApVendorContact[]>([
-  { name: 'Mark Tillman', vendor: 'Southern Scripts TPA', email: 'mtillman@sstpa.com', phone: '(704) 555-0121', role: 'TPA', allowPhi: false, ackConfirmed: true, roleLabel: 'TPA' },
-  { name: 'Dana Osei', vendor: 'Southern Scripts TPA', email: 'dosei@sstpa.com', phone: '(704) 555-0122', role: 'TPA', allowPhi: false, ackConfirmed: true, roleLabel: 'TPA' },
-  { name: 'Rachel Vance', vendor: 'Acclaim Benefits', email: 'rvance@acclaim.com', phone: '(615) 555-0188', role: 'Broker', allowPhi: false, ackConfirmed: true, roleLabel: 'Broker' },
-  { name: 'James Pruitt', vendor: 'Acclaim Benefits', email: 'jpruitt@acclaim.com', phone: '(615) 555-0189', role: 'Broker', allowPhi: false, ackConfirmed: true, roleLabel: 'Broker' },
-  { name: 'Tara Mendez', vendor: 'Benefit Advantage', email: 'tmendez@benefitadv.com', phone: '(512) 555-0144', role: 'Consultant', allowPhi: false, ackConfirmed: true, roleLabel: 'Consultant' },
+  { name: 'Mark Tillman', vendor: 'Southern Scripts Carrier', email: 'mtillman@sstpa.com', phone: '(704) 555-0121', role: 'Carrier', permissions: apNewPermissions(), allowPhi: false, surveyContact: false, ackConfirmed: true, roleLabel: 'Carrier' },
+  { name: 'Dana Osei', vendor: 'Southern Scripts Carrier', email: 'dosei@sstpa.com', phone: '(704) 555-0122', role: 'Carrier', permissions: apNewPermissions(), allowPhi: false, surveyContact: false, ackConfirmed: true, roleLabel: 'Carrier' },
+  { name: 'Rachel Vance', vendor: 'Acclaim Benefits', email: 'rvance@acclaim.com', phone: '(615) 555-0188', role: 'Broker', permissions: apNewPermissions(), allowPhi: false, surveyContact: false, ackConfirmed: true, roleLabel: 'Broker' },
+  { name: 'James Pruitt', vendor: 'Acclaim Benefits', email: 'jpruitt@acclaim.com', phone: '(615) 555-0189', role: 'Broker', permissions: apNewPermissions(), allowPhi: false, surveyContact: false, ackConfirmed: true, roleLabel: 'Broker' },
+  { name: 'Tara Mendez', vendor: 'Benefit Advantage', email: 'tmendez@benefitadv.com', phone: '(512) 555-0144', role: 'Consultant', permissions: apNewPermissions(), allowPhi: false, surveyContact: false, ackConfirmed: true, roleLabel: 'Consultant' },
 ]);
 const apShowVendorContactDialog = ref(false);
-const apVendorContactSelections = ref<string[]>([]);
-const apVendorRoleSelection = ref('Broker');
+const apVendorContactSelection = ref('');
+const apVendorRoleSelection = ref('');
+const apVendorPermissions = ref(apNewPermissions());
 const apVendorAllowPhi = ref(false);
+const apVendorSurveyContact = ref(false);
 const apVendorAckConfirmed = ref(false);
 const apVendorContactData = [
   { name: 'Jordan Mills', title: 'Account Manager',    vendor: '90 Degree Benefits', email: 'jordan.mills@90degreebenefits.com', phone: '(555) 234-5678' },
@@ -4558,59 +4678,80 @@ const apVendorContactOptions = computed(() => {
   return result;
 });
 const apRemoveVendorContact = (item: any) => {
-  const idx = apVendorContacts.value.indexOf(item);
-  if (idx > -1) apVendorContacts.value.splice(idx, 1);
+  apPendingRemoveContact.value = item;
+  apPendingRemoveContactList.value = apVendorContacts.value;
+  apShowRemoveContactDialog.value = true;
 };
 const apResetVendorAddState = () => {
-  apVendorContactSelections.value = [];
-  apVendorRoleSelection.value = 'Broker';
+  apVendorContactSelection.value = '';
+  apVendorRoleSelection.value = '';
+  apVendorPermissions.value = apNewPermissions();
   apVendorAllowPhi.value = false;
+  apVendorSurveyContact.value = false;
   apVendorAckConfirmed.value = false;
 };
 const apSaveVendorContacts = () => {
-  if (!apVendorAckConfirmed.value) return;
-  apVendorContactSelections.value.forEach(selection => {
-    const already = apVendorContacts.value.some(c => c.name === selection);
-    if (!already) {
-      const data = apVendorContactData.find(c => c.name === selection);
-      if (data) {
-        apVendorContacts.value.push({
-          name: data.name,
-          vendor: data.vendor,
-          email: data.email,
-          phone: data.phone,
-          role: apVendorRoleSelection.value,
-          allowPhi: apVendorAllowPhi.value,
-          ackConfirmed: apVendorAckConfirmed.value,
-          roleLabel: apVendorRoleSelection.value,
-        });
-      }
+  if (!apVendorAckConfirmed.value || !apVendorRoleSelection.value || !apVendorContactSelection.value) return;
+  const already = apVendorContacts.value.some(c => c.name === apVendorContactSelection.value);
+  if (!already) {
+    const data = apVendorContactData.find(c => c.name === apVendorContactSelection.value);
+    if (data) {
+      apVendorContacts.value.push({
+        name: data.name,
+        vendor: data.vendor,
+        email: data.email,
+        phone: data.phone,
+        role: apVendorRoleSelection.value,
+        permissions: { ...apVendorPermissions.value },
+        allowPhi: apVendorAllowPhi.value,
+        surveyContact: apVendorSurveyContact.value,
+        ackConfirmed: apVendorAckConfirmed.value,
+        roleLabel: apVendorRoleSelection.value,
+      });
     }
-  });
+  }
   apResetVendorAddState();
   apShowVendorContactDialog.value = false;
 };
 const apVendorContactDialogActions = computed(() => [
   { text: 'Cancel', styleType: 'secondary' as const, onClick: () => { apShowVendorContactDialog.value = false; apResetVendorAddState(); } },
-  { text: 'Add Contact', styleType: 'primary' as const, onClick: apSaveVendorContacts, disabled: !apVendorAckConfirmed.value },
+  { text: 'Add Contact', styleType: 'primary' as const, onClick: apSaveVendorContacts, disabled: !apVendorAckConfirmed.value || !apVendorRoleSelection.value || !apVendorContactSelection.value },
 ]);
 
 // Edit Vendor Contact (role/PHI only — identity fields come from the vendor's own contact record)
 const apShowEditVendorContactDialog = ref(false);
 const apEditingVendorContactIndex = ref(-1);
-const apEditVendorContactForm = ref({ role: 'Broker', allowPhi: false, ackConfirmed: false });
+const apEditingVendorContactName = ref('');
+const apEditVendorContactForm = ref({ role: '', permissions: apNewPermissions(), allowPhi: false, surveyContact: false, ackConfirmed: false });
 const handleEditVendorContact = (item: ApVendorContact) => {
   const idx = apVendorContacts.value.indexOf(item);
-  apEditVendorContactForm.value = { role: item.role ?? 'Broker', allowPhi: item.allowPhi ?? false, ackConfirmed: item.ackConfirmed ?? false };
+  apEditingVendorContactName.value = item.name;
+  apEditVendorContactForm.value = {
+    role: item.role ?? '',
+    permissions: item.permissions ? { ...item.permissions } : apNewPermissions(),
+    allowPhi: item.allowPhi ?? false,
+    surveyContact: item.surveyContact ?? false,
+    ackConfirmed: item.ackConfirmed ?? false,
+  };
   apEditingVendorContactIndex.value = idx;
   apShowEditVendorContactDialog.value = true;
 };
+const apVendorContactRowActions = [
+  { label: 'Edit',   action: 'edit'   },
+  { label: 'Remove', action: 'remove' },
+];
+const handleApVendorContactRowAction = ({ action, item }: { action: string; item: ApVendorContact }) => {
+  if (action === 'edit') handleEditVendorContact(item);
+  else if (action === 'remove') apRemoveVendorContact(item);
+};
 const apSaveEditVendorContact = () => {
   const idx = apEditingVendorContactIndex.value;
-  if (idx > -1 && apEditVendorContactForm.value.ackConfirmed) {
+  if (idx > -1 && apEditVendorContactForm.value.ackConfirmed && apEditVendorContactForm.value.role) {
     const c = apVendorContacts.value[idx];
     c.role = apEditVendorContactForm.value.role;
+    c.permissions = { ...apEditVendorContactForm.value.permissions };
     c.allowPhi = apEditVendorContactForm.value.allowPhi;
+    c.surveyContact = apEditVendorContactForm.value.surveyContact;
     c.ackConfirmed = apEditVendorContactForm.value.ackConfirmed;
     c.roleLabel = apEditVendorContactForm.value.role;
   }
@@ -4618,7 +4759,7 @@ const apSaveEditVendorContact = () => {
 };
 const apEditVendorContactDialogActions = computed(() => [
   { text: 'Cancel', styleType: 'secondary' as const, onClick: () => { apShowEditVendorContactDialog.value = false; } },
-  { text: 'Save Changes', styleType: 'primary' as const, onClick: apSaveEditVendorContact, disabled: !apEditVendorContactForm.value.ackConfirmed },
+  { text: 'Save Changes', styleType: 'primary' as const, onClick: apSaveEditVendorContact, disabled: !apEditVendorContactForm.value.ackConfirmed || !apEditVendorContactForm.value.role },
 ]);
 
 const accountProfile = ref({
@@ -5861,6 +6002,15 @@ watch(selectedAccount, (newVal) => {
 
   &:hover .ap-checkbox-icon {
     color: $color-primary;
+  }
+
+  &--disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+
+    &:hover .ap-checkbox-icon {
+      color: inherit;
+    }
   }
 }
 
