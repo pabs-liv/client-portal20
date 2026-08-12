@@ -241,9 +241,8 @@
         </div>
         <div v-if="selectedAccount && activeTab === 'user-administration'">
           <div class="ua-header">
-            <p v-if="isUserAdminReadOnly" class="text-body ua-header-note">You have view-only access to this account's Client Portal users. To add, edit, or remove access, please contact your Liviniti Account Manager.</p>
-            <p v-else class="text-body ua-header-note">Manage Client Portal access and permissions for this account.</p>
-            <Button v-if="!isUserAdminReadOnly" label="+ Add User" variant="primary" @click="openAddUser" />
+            <p v-if="isClientUserAdminView" class="text-body ua-header-note">You have view-only access to this account's Client Portal users. To add, edit, or remove access, please contact your Liviniti Account Manager.</p>
+            <p v-else class="text-body ua-header-note">Client Portal users are managed in SoloRx. To add, edit, or remove access, navigate to the Contacts tab for this account in SoloRx.</p>
           </div>
           <ReportDataTable
             :headers="userAdminHeaders"
@@ -251,7 +250,7 @@
             :show-search-bar="true"
             :show-filter-button="false"
             search-placeholder="Search users"
-            :show-row-actions="!isUserAdminReadOnly"
+            :show-row-actions="false"
             :row-action-items="userAdminRowActions"
             @row-action="handleUserAdminRowAction"
             :show-table-footer="true"
@@ -1985,7 +1984,7 @@ const userAdminData = computed<UserAdminEntry[]>(() => (selectedAccount.value ? 
 // this to yet, so this is just a populated account (has a seeded user + vendor contact)
 // rather than one of the empty ones (3-5).
 const CLIENT_READONLY_USER_ADMIN_ACCOUNT_ID = 2;
-const isUserAdminReadOnly = computed(() => selectedAccount.value === CLIENT_READONLY_USER_ADMIN_ACCOUNT_ID);
+const isClientUserAdminView = computed(() => selectedAccount.value === CLIENT_READONLY_USER_ADMIN_ACCOUNT_ID);
 
 // Only vendor contacts not already added as a User Admin entry — mirrors Account Profile >
 // Vendor Contacts' "already added" filter.

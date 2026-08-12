@@ -367,35 +367,15 @@
                       <v-col cols="6"><TextField v-model="apContactForm.lastName" label="Last Name *" :error-messages="apContactErrors.lastName" /></v-col>
                     </v-row>
                     <v-row>
-                      <v-col cols="12"><TextField v-model="apContactForm.title" label="Title" /></v-col>
+                      <v-col cols="6"><Select v-model="apContactForm.salutation" :items="apSalutationOptions" label="Title" /></v-col>
+                      <v-col cols="6"><Select v-model="apContactForm.businessRole" :items="apClientBusinessRoleOptions" label="Business Role *" /></v-col>
                     </v-row>
                     <v-row>
                       <v-col cols="12"><TextField v-model="apContactForm.email" label="Email *" :error-messages="apContactErrors.email" /></v-col>
                     </v-row>
-                    <div v-for="(ph, idx) in apContactForm.phones" :key="idx" class="nl-repeatable-row">
-                      <div v-if="apContactForm.phones.length > 1" class="nl-repeatable-row-header">
-                        <span class="nl-repeatable-row-label">Phone {{ idx + 1 }}</span>
-                        <button class="nl-remove-row-btn" @click="apContactForm.phones.splice(idx, 1); if (apContactForm.primaryPhoneIdx >= apContactForm.phones.length) apContactForm.primaryPhoneIdx = 0" title="Remove">
-                          <Trash2 :size="16" :stroke-width="1.75" />
-                        </button>
-                      </div>
-                      <v-row>
-                        <v-col cols="5"><TextField v-model="ph.number" label="Number" /></v-col>
-                        <v-col cols="4">
-                          <Select v-model="ph.type" :items="apPhoneTypes" label="Type" />
-                        </v-col>
-                        <v-col cols="3"><TextField v-model="ph.ext" label="Ext" /></v-col>
-                      </v-row>
-                      <label class="ap-radio-option">
-                        <input type="radio" :value="idx" v-model="apContactForm.primaryPhoneIdx" class="ap-radio-input" />
-                        <span class="ap-radio-custom" :class="{ active: apContactForm.primaryPhoneIdx === idx }">
-                          <span v-if="apContactForm.primaryPhoneIdx === idx" class="ap-radio-dot" />
-                        </span>
-                        <span class="ap-radio-label">Primary</span>
-                      </label>
-                      <v-divider v-if="idx < apContactForm.phones.length - 1" class="nl-row-divider" />
-                    </div>
-                    <button v-if="apContactForm.phones.length < 3" class="nl-add-link" @click="apContactForm.phones.push(apNewPhone())">+ Add Phone Number</button>
+                    <v-row>
+                      <v-col cols="12"><TextField v-model="apContactForm.phone" label="Phone" /></v-col>
+                    </v-row>
 
                     <v-divider class="my-4" />
                     <h5 class="ap-subsection-heading">Client Portal Access</h5>
@@ -451,35 +431,15 @@
                       <v-col cols="6"><TextField v-model="apEditContactForm.lastName" label="Last Name *" :error-messages="apEditContactErrors.lastName" /></v-col>
                     </v-row>
                     <v-row>
-                      <v-col cols="12"><TextField v-model="apEditContactForm.title" label="Title" /></v-col>
+                      <v-col cols="6"><Select v-model="apEditContactForm.salutation" :items="apSalutationOptions" label="Title" /></v-col>
+                      <v-col cols="6"><Select v-model="apEditContactForm.businessRole" :items="apClientBusinessRoleOptions" label="Business Role *" /></v-col>
                     </v-row>
                     <v-row>
                       <v-col cols="12"><TextField v-model="apEditContactForm.email" label="Email *" :error-messages="apEditContactErrors.email" /></v-col>
                     </v-row>
-                    <div v-for="(ph, idx) in apEditContactForm.phones" :key="idx" class="nl-repeatable-row">
-                      <div v-if="apEditContactForm.phones.length > 1" class="nl-repeatable-row-header">
-                        <span class="nl-repeatable-row-label">Phone {{ idx + 1 }}</span>
-                        <button class="nl-remove-row-btn" @click="apEditContactForm.phones.splice(idx, 1); if (apEditContactForm.primaryPhoneIdx >= apEditContactForm.phones.length) apEditContactForm.primaryPhoneIdx = 0" title="Remove">
-                          <Trash2 :size="16" :stroke-width="1.75" />
-                        </button>
-                      </div>
-                      <v-row>
-                        <v-col cols="5"><TextField v-model="ph.number" label="Number" /></v-col>
-                        <v-col cols="4">
-                          <Select v-model="ph.type" :items="apPhoneTypes" label="Type" />
-                        </v-col>
-                        <v-col cols="3"><TextField v-model="ph.ext" label="Ext" /></v-col>
-                      </v-row>
-                      <label class="ap-radio-option">
-                        <input type="radio" :value="idx" v-model="apEditContactForm.primaryPhoneIdx" class="ap-radio-input" />
-                        <span class="ap-radio-custom" :class="{ active: apEditContactForm.primaryPhoneIdx === idx }">
-                          <span v-if="apEditContactForm.primaryPhoneIdx === idx" class="ap-radio-dot" />
-                        </span>
-                        <span class="ap-radio-label">Primary</span>
-                      </label>
-                      <v-divider v-if="idx < apEditContactForm.phones.length - 1" class="nl-row-divider" />
-                    </div>
-                    <button v-if="apEditContactForm.phones.length < 3" class="nl-add-link" @click="apEditContactForm.phones.push(apNewPhone())">+ Add Phone Number</button>
+                    <v-row>
+                      <v-col cols="12"><TextField v-model="apEditContactForm.phone" label="Phone" /></v-col>
+                    </v-row>
 
                     <v-divider class="my-4" />
                     <h5 class="ap-subsection-heading">Client Portal Access</h5>
@@ -4717,9 +4677,26 @@ const apPermissionOptions = [
   { key: 'vcpClaims', label: 'VCP Claims' },
 ];
 const apVendorRoleOptions = ['Broker', 'Consultant', 'Carrier', 'TPV'];
+const apSalutationOptions = ['Mr.', 'Mrs.', 'Ms.', 'Miss', 'Dr.'];
+const apClientBusinessRoleOptions = [
+  'Account Manager',
+  'Account Executive',
+  'CEO / President / Owner / Founder',
+  'CFO / Finance / Controller / Accounting',
+  'COO / Operations Manager',
+  'Human Resources',
+  'Client Manager / Client Relations',
+  'Implementation Specialist / Manager / Coordinator',
+  'Sales / Business Development',
+  'Billing / Invoices',
+  'Data & Analytics',
+  'Pharmacy / PBM',
+  'Marketing',
+  'Compliance / Risk / Legal',
+  'Other',
+];
 const apNewPermissions = (): Record<string, boolean> => ({ reports: false, invoices: false, rebates: false, highCostNotifications: false, planChanges: false, planApproval: false, overrides: false, vcpClaims: false });
 const apHasAnyPermission = (perms: Record<string, boolean>) => Object.values(perms).some(v => v);
-const apPortalRoleLabel = (portalAccess: boolean, role: string) => (portalAccess ? role : 'No portal access');
 const apPermissionsSummary = (role: string, permissions: Record<string, boolean>) => {
   const selected = apPermissionOptions.filter(p => permissions[p.key]).map(p => p.label);
   return selected.length ? selected.join(', ') : 'None';
@@ -4745,34 +4722,29 @@ const apOtherContactIsMainPoc = (current: ApMainPocRef): string => {
 // ── Account Profile — Client Contacts ─────────────────────────────────────────
 const apClientContactHeaders = [
   { title: 'Name', key: 'name' },
-  { title: 'Title', key: 'title' },
   { title: 'Email', key: 'email' },
   { title: 'Phone', key: 'phone' },
-  { title: 'Portal Role', key: 'roleLabel' },
+  { title: 'Business Role', key: 'businessRole' },
   { title: '', key: 'actions', sortable: false },
 ];
-const apPhoneTypes = ['Office', 'Cell', 'Fax'];
-const apNewPhone = () => ({ number: '', type: 'Office', ext: '' });
 interface ApClientContact {
   name: string;
-  title: string;
+  salutation: string;
+  businessRole: string;
   email: string;
   phone: string;
-  phones: { number: string; type: string; ext: string }[];
-  primaryPhoneIdx: number;
   portalAccess: boolean;
   role: string;
   permissions: Record<string, boolean>;
   allowPhi: boolean;
   mainPointOfContact: boolean;
   surveyContact: boolean;
-  roleLabel: string;
 }
 const apClientContacts = ref<ApClientContact[]>([
-  { name: 'Nick Johnson', title: 'Benefits Manager', email: 'nick.johnson@starkind.com', phone: '(555) 234-5678', phones: [{ number: '(555) 234-5678', type: 'Office', ext: '' }], primaryPhoneIdx: 0, portalAccess: false, role: 'Client', permissions: apNewPermissions(), allowPhi: false, mainPointOfContact: false, surveyContact: false, roleLabel: 'No portal access' },
+  { name: 'Nick Johnson', salutation: 'Mr.', businessRole: 'Client Manager / Client Relations', email: 'nick.johnson@starkind.com', phone: '(555) 234-5678', portalAccess: false, role: 'Client', permissions: apNewPermissions(), allowPhi: false, mainPointOfContact: false, surveyContact: false },
 ]);
 const apShowAddContactDialog = ref(false);
-const apNewContactForm = () => ({ firstName: '', lastName: '', title: '', email: '', phones: [apNewPhone()], primaryPhoneIdx: 0, portalAccess: false, role: 'Client', permissions: apNewPermissions(), allowPhi: false, mainPointOfContact: false, surveyContact: false });
+const apNewContactForm = () => ({ firstName: '', lastName: '', salutation: '', businessRole: '', email: '', phone: '', portalAccess: false, role: 'Client', permissions: apNewPermissions(), allowPhi: false, mainPointOfContact: false, surveyContact: false });
 const apContactForm = ref(apNewContactForm());
 const apContactErrors = ref({ firstName: '', lastName: '', email: '' });
 const apEditContactErrors = ref({ firstName: '', lastName: '', email: '' });
@@ -4794,30 +4766,27 @@ const formatPhone = (val: string): string => {
   if (d.length <= 6) return `(${d.slice(0, 3)}) ${d.slice(3)}`;
   return `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}`;
 };
-watch(() => apContactForm.value.phones, phones => {
-  phones.forEach(ph => { const f = formatPhone(ph.number); if (f !== ph.number) ph.number = f; });
-}, { deep: true });
+watch(() => apContactForm.value.phone, val => {
+  const f = formatPhone(val);
+  if (f !== val) apContactForm.value.phone = f;
+});
 const apSaveContact = () => {
   const errors = apValidateContact(apContactForm.value);
   apContactErrors.value = errors;
   if (Object.values(errors).some(e => e)) return;
-  const phones = apContactForm.value.phones.filter(p => p.number);
-  const primaryIdx = apContactForm.value.primaryPhoneIdx;
   const f = apContactForm.value;
   apClientContacts.value.push({
     name: `${f.firstName} ${f.lastName}`,
-    title: f.title,
+    salutation: f.salutation,
+    businessRole: f.businessRole,
     email: f.email,
-    phones,
-    primaryPhoneIdx: primaryIdx,
-    phone: phones[primaryIdx]?.number ?? phones[0]?.number ?? '',
+    phone: f.phone,
     portalAccess: f.portalAccess,
     role: f.role,
     permissions: { ...f.permissions },
     allowPhi: f.allowPhi,
     mainPointOfContact: f.mainPointOfContact,
     surveyContact: f.surveyContact,
-    roleLabel: apPortalRoleLabel(f.portalAccess, f.role),
   });
   if (f.mainPointOfContact) apEnforceSingleMainPoc({ list: 'client', index: apClientContacts.value.length - 1 });
   apShowAddContactDialog.value = false;
@@ -4830,9 +4799,10 @@ const apClientContactRowActions = [
 const apEditingContactIndex = ref(-1);
 const apShowEditContactDialog = ref(false);
 const apEditContactForm = ref(apNewContactForm());
-watch(() => apEditContactForm.value.phones, phones => {
-  phones.forEach(ph => { const f = formatPhone(ph.number); if (f !== ph.number) ph.number = f; });
-}, { deep: true });
+watch(() => apEditContactForm.value.phone, val => {
+  const f = formatPhone(val);
+  if (f !== val) apEditContactForm.value.phone = f;
+});
 const apShowRemoveContactDialog = ref(false);
 const apPendingRemoveContact = ref<any>(null);
 const apPendingRemoveContactList = ref<any[] | null>(null);
@@ -4860,10 +4830,10 @@ const handleApClientContactRowAction = ({ action, item }: { action: string; item
     apEditContactForm.value = {
       firstName: nameParts[0] ?? '',
       lastName:  nameParts.slice(1).join(' '),
-      title:     item.title ?? '',
+      salutation: item.salutation ?? '',
+      businessRole: item.businessRole ?? '',
       email:     item.email ?? '',
-      phones:    item.phones?.length ? item.phones.map((p: any) => ({ ...p })) : [apNewPhone()],
-      primaryPhoneIdx: item.primaryPhoneIdx ?? 0,
+      phone:     item.phone ?? '',
       portalAccess: item.portalAccess ?? false,
       role: item.role ?? 'Client',
       permissions: item.permissions ? { ...item.permissions } : apNewPermissions(),
@@ -4881,29 +4851,26 @@ const apSaveEditContact = () => {
   if (Object.values(errors).some(e => e)) return;
   const idx = apEditingContactIndex.value;
   if (idx > -1) {
-    const phones = apEditContactForm.value.phones.filter(p => p.number);
-    const primaryIdx = apEditContactForm.value.primaryPhoneIdx;
     const f = apEditContactForm.value;
     apClientContacts.value[idx] = {
       name:  `${f.firstName} ${f.lastName}`,
-      title: f.title,
+      salutation: f.salutation,
+      businessRole: f.businessRole,
       email: f.email,
-      phones,
-      primaryPhoneIdx: primaryIdx,
-      phone: phones[primaryIdx]?.number ?? phones[0]?.number ?? '',
+      phone: f.phone,
       portalAccess: f.portalAccess,
       role: f.role,
       permissions: { ...f.permissions },
       allowPhi: f.allowPhi,
       mainPointOfContact: f.mainPointOfContact,
       surveyContact: f.surveyContact,
-      roleLabel: apPortalRoleLabel(f.portalAccess, f.role),
     };
     if (f.mainPointOfContact) apEnforceSingleMainPoc({ list: 'client', index: idx });
   }
   apShowEditContactDialog.value = false;
 };
-const apContactSaveDisabled = (f: { portalAccess: boolean; permissions: Record<string, boolean> }) => {
+const apContactSaveDisabled = (f: { businessRole: string; portalAccess: boolean; permissions: Record<string, boolean> }) => {
+  if (!f.businessRole) return true;
   if (!f.portalAccess) return false;
   return !apHasAnyPermission(f.permissions);
 };
