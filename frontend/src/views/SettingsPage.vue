@@ -340,7 +340,7 @@
               <Square v-else :size="18" :stroke-width="1.5" class="ua-checkbox-icon" />
               <span class="text-small">I confirm this external vendor has signed the required data transfer agreement.<span class="ua-required-asterisk">*</span></span>
             </div>
-            <h5 class="ua-subsection-heading">Permissions<span class="ua-required-asterisk">*</span></h5>
+            <h5 class="ua-subsection-heading">Client Portal Permissions<span class="ua-required-asterisk">*</span></h5>
             <p class="text-small ua-role-note">At least one permission is required.</p>
             <div class="ua-permission-grid">
               <div v-for="perm in userAdminPermissionOptions" :key="perm.key" class="ua-checkbox-toggle" @click="userAdminForm.permissions[perm.key] = !userAdminForm.permissions[perm.key]">

@@ -5,7 +5,7 @@
     :items="items"
     :item-title="itemTitle"
     :item-value="itemValue"
-    :label="label"
+    :label="hasRequiredMarker ? undefined : label"
     :variant="variant"
     :hide-selected="false"
     :no-data-text="noDataText"
@@ -17,11 +17,13 @@
     :menu-icon="ChevronDown"
     :base-color="isDark ? 'rgba(255,255,255,0.6)' : undefined"
     :bg-color="isDark ? 'var(--color-input-bg)' : undefined"
-  ></v-select>
+  >
+    <template v-if="hasRequiredMarker" #label>{{ labelWithoutAsterisk }}<span class="select-required-asterisk">*</span></template>
+  </v-select>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { ChevronDown } from 'lucide-vue-next';
 import { useDarkMode } from '@/composables/useDarkMode';
 
@@ -49,6 +51,12 @@ const props = withDefaults(defineProps<Props>(), {
 
 const internalSearch = ref<string>('');
 
+// Vuetify's :label prop only accepts plain text, so a trailing "*" typed into the label
+// string inherits the same muted label color below — invisible as a required-field cue.
+// Detect it and re-render it via the label slot so it can be colored independently.
+const hasRequiredMarker = computed(() => /\*\s*$/.test(props.label ?? ''));
+const labelWithoutAsterisk = computed(() => (props.label ?? '').replace(/\*\s*$/, '').trimEnd());
+
 // Custom filter function for searchable select
 const customFilter = (itemTitle: string, query: string, item: any) => {
   const textOne = item.raw[props.itemTitle]?.toLowerCase();
@@ -66,6 +74,11 @@ watch(() => props.modelValue, () => {
 
 <style lang="scss" scoped>
 @import '@/style.scss';
+
+.select-required-asterisk {
+  color: $color-error;
+  margin-left: 2px;
+}
 
 .v-select {
   :deep(.v-field__input) {
