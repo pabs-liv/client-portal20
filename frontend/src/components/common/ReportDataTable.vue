@@ -21,6 +21,8 @@
       <div class="bulk-action-left">
         <span class="bulk-action-count">{{ selected.length }} selected</span>
         <div class="bulk-action-divider"></div>
+        <button v-if="showBulkApprove" class="bulk-action-btn" @click="handleBulkApprove">Approve</button>
+        <button v-if="showBulkReject" class="bulk-action-btn" @click="handleBulkReject">Reject</button>
         <button class="bulk-action-btn" @click="handleBulkDownload">Download</button>
       </div>
       <button class="bulk-action-btn" @click="clearSelection">Clear Selection</button>
@@ -92,6 +94,7 @@
               <v-list-item
                 v-for="actionItem in rowActionItems"
                 :key="actionItem.action"
+                :disabled="rowActionDisabled(item, actionItem)"
                 @click="emit('row-action', { action: actionItem.action, item })"
               >
                 <v-list-item-title>{{ actionItem.label }}</v-list-item-title>
@@ -173,6 +176,9 @@ interface Props {
   items?: any[];
   showRowActions?: boolean;
   rowActionItems?: RowActionItem[];
+  rowActionDisabled?: (item: any, actionItem: RowActionItem) => boolean;
+  showBulkApprove?: boolean;
+  showBulkReject?: boolean;
   showTableFooter?: boolean;
   showSelectionCheckboxes?: boolean;
   initialFilterPills?: Pill[];
@@ -199,6 +205,8 @@ const emit = defineEmits<{
   'toggle-cell': [payload: { key: string; item: any }];
   'click:filter': [];
   'bulk-download': [items: any[]];
+  'bulk-approve': [items: any[]];
+  'bulk-reject': [items: any[]];
 }>();
 
 const props = withDefaults(defineProps<Props>(), {
@@ -208,6 +216,9 @@ const props = withDefaults(defineProps<Props>(), {
   items: () => [],
   showRowActions: true,
   rowActionItems: () => [],
+  rowActionDisabled: () => false,
+  showBulkApprove: false,
+  showBulkReject: false,
   showTableFooter: true,
   showSelectionCheckboxes: true,
   initialFilterPills: () => [],
@@ -263,6 +274,16 @@ const handleBulkDownload = () => {
 const clearSelection = () => {
   selected.value = [] as any[];
 };
+
+const handleBulkApprove = () => {
+  emit('bulk-approve', [...selected.value]);
+};
+
+const handleBulkReject = () => {
+  emit('bulk-reject', [...selected.value]);
+};
+
+defineExpose({ clearSelection });
 
 const handleRequestInfo = (item: any) => {
   if (item.status !== 'Approved' && item.status !== 'Rejected') {
