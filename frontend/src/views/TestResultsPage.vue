@@ -44,14 +44,13 @@
         :show-search-bar="false"
         :show-filter-button="false"
         :show-filter-pills="false"
-        :show-selection-checkboxes="isInternal"
-        :show-row-actions="isInternal"
+        :show-selection-checkboxes="true"
+        :show-row-actions="true"
         :row-action-items="rowActionItems"
         :row-action-disabled="isRowActionDisabled"
-        :show-action-icons="isExternal"
-        :action-icons="downloadOnlyActionIcon"
-        :show-bulk-approve="isInternal"
-        :show-bulk-reject="isInternal"
+        :show-bulk-approve="true"
+        :show-bulk-reject="true"
+        :bulk-action-available="isBulkActionAvailable"
         @row-action="handleRowAction"
         @bulk-approve="handleBulkApprove"
         @bulk-reject="handleBulkReject"
@@ -223,14 +222,6 @@
       :actions="rejectDialogActions"
     />
 
-    <Dialog
-      :model-value="showDownloadDialog"
-      @update:model-value="showDownloadDialog = $event"
-      :icon="CloudDownload"
-      heading="Download Test Result"
-      :text="`Are you sure you want to download the test result for ${selectedTestResult?.accountName}?`"
-      :actions="downloadDialogActions"
-    />
 
     <Dialog
       :model-value="showBulkApproveDialog"
@@ -249,6 +240,10 @@
       :text="bulkDialogText('reject')"
       :actions="bulkRejectDialogActions"
     />
+
+    <v-snackbar v-model="showDownloadSnackbar" :timeout="3000" color="success">
+      {{ downloadSnackbarText }}
+    </v-snackbar>
   </div>
 </template>
 <script setup lang="ts">
@@ -261,22 +256,21 @@ import AdvancedFiltersButton from '@/components/ui/AdvancedFiltersButton.vue';
 import AdvancedFiltersDialog from '@/components/common/AdvancedFiltersDialog.vue';
 import FilteringPillsGroup from '@/components/ui/FilteringPillsGroup.vue';
 import DatePicker from '@/components/ui/DatePicker.vue';
-import { CircleCheckBig, BanknoteX, FileText, Hourglass, SlidersHorizontal, Check, X, CloudDownload } from 'lucide-vue-next';
-import { useUserType } from '@/composables/useUserType';
+import { CircleCheckBig, BanknoteX, FileText, Hourglass, SlidersHorizontal, Check, X } from 'lucide-vue-next';
 import type { FilterGroup } from '@/types/filters';
 import type { FilterPill } from '@/components/ui/FilteringPill.vue';
-
-const { isExternal, isInternal } = useUserType();
 
 const testResultsTable = ref<InstanceType<typeof ReportDataTable> | null>(null);
 
 const showApproveDialog = ref(false);
 const showRejectDialog = ref(false);
-const showDownloadDialog = ref(false);
 const showBulkApproveDialog = ref(false);
 const showBulkRejectDialog = ref(false);
 const selectedTestResult = ref<any>(null);
 const bulkSelectedItems = ref<any[]>([]);
+
+const showDownloadSnackbar = ref(false);
+const downloadSnackbarText = ref('');
 
 const isAdvancedFiltersOpen = ref(false);
 
@@ -314,8 +308,9 @@ const handleRejectClick = (item: any) => {
 };
 
 const handleDownloadClick = (item: any) => {
-  selectedTestResult.value = item;
-  showDownloadDialog.value = true;
+  console.log('downloaded', item);
+  downloadSnackbarText.value = `Test result for ${item.accountName} downloaded successfully!`;
+  showDownloadSnackbar.value = true;
 };
 
 const rowActionItems = [
@@ -331,15 +326,13 @@ const isRowActionDisabled = (item: any, actionItem: { action: string }) => {
   return false;
 };
 
+const isBulkActionAvailable = (items: any[]) => items.some((item) => item.status === 'Pending');
+
 const handleRowAction = ({ action, item }: { action: string; item: any }) => {
   if (action === 'approve') handleApproveClick(item);
   else if (action === 'reject') handleRejectClick(item);
   else if (action === 'download') handleDownloadClick(item);
 };
-
-const downloadOnlyActionIcon = [
-  { icon: CloudDownload, tooltip: 'Download', size: 20, onClick: handleDownloadClick },
-];
 
 const approveDialogActions = [
   { text: 'Cancel', onClick: () => (showApproveDialog.value = false), variant: 'text' as const },
@@ -351,14 +344,10 @@ const rejectDialogActions = [
   { text: 'Reject', onClick: () => { console.log('rejected', selectedTestResult.value); showRejectDialog.value = false; }, color: 'error', variant: 'flat' as const, type: 'destructive' as const }
 ];
 
-const downloadDialogActions = [
-  { text: 'Cancel', onClick: () => (showDownloadDialog.value = false), variant: 'text' as const },
-  { text: 'Download', onClick: () => { console.log('downloaded', selectedTestResult.value); showDownloadDialog.value = false; }, color: 'primary', variant: 'flat' as const }
-];
-
 const bulkDialogText = (type: 'approve' | 'reject') => {
-  const isBulk = bulkSelectedItems.value.length > 1;
-  return `Are you sure you want to ${type} the test result${isBulk ? 's' : ''} for the selected ${isBulk ? 'reports' : 'report'}?`;
+  const count = bulkSelectedItems.value.filter((item) => item.status === 'Pending').length;
+  const isBulk = count !== 1;
+  return `Are you sure you want to ${type} ${count} test result${isBulk ? 's' : ''}?`;
 };
 
 const handleBulkApprove = (items: any[]) => {
@@ -373,6 +362,10 @@ const handleBulkReject = (items: any[]) => {
 
 const handleBulkDownload = (items: any[]) => {
   console.log('bulk downloaded', items);
+  downloadSnackbarText.value = items.length === 1
+    ? `Test result for ${items[0].accountName} downloaded successfully!`
+    : `${items.length} test results downloaded successfully!`;
+  showDownloadSnackbar.value = true;
 };
 
 const bulkApproveDialogActions = [

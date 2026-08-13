@@ -2035,10 +2035,10 @@
                             <div v-if="blAchMethod === 'send'" class="bl-subsection">
                               <p class="text-body bl-note">Download Liviniti's completed W-9 and ACH forms for your records.</p>
                               <div class="bl-download-group">
-                                <button class="button bl-download-btn" @click.prevent>
+                                <button class="button bl-download-btn" @click.prevent="handleFormDownload('W-9 (Liviniti)')">
                                   <CloudDownload :size="16" :stroke-width="2" />Download W-9 (Liviniti)
                                 </button>
-                                <button class="button bl-download-btn" @click.prevent>
+                                <button class="button bl-download-btn" @click.prevent="handleFormDownload('ACH Form (Liviniti)')">
                                   <CloudDownload :size="16" :stroke-width="2" />Download ACH Form (Liviniti)
                                 </button>
                               </div>
@@ -2047,10 +2047,10 @@
                               <p v-if="blExistingParty !== 'yes'" class="text-body bl-note">W-9 and ACH authorization forms are required for Billing to complete account setup. Download, complete, and upload the signed forms.</p>
                               <p v-else class="text-body bl-note">Up-to-date W-9 and ACH authorization forms are required for Billing to complete account setup. If this billing party is already established with Liviniti, forms may already be on file — please confirm they are current. Upload updated forms below if needed.</p>
                               <div class="bl-download-group">
-                                <button class="button bl-download-btn" @click.prevent>
+                                <button class="button bl-download-btn" @click.prevent="handleFormDownload('Blank W-9')">
                                   <CloudDownload :size="16" :stroke-width="2" />Download Blank W-9
                                 </button>
-                                <button class="button bl-download-btn" @click.prevent>
+                                <button class="button bl-download-btn" @click.prevent="handleFormDownload('ACH Authorization Form')">
                                   <CloudDownload :size="16" :stroke-width="2" />Download ACH Authorization Form
                                 </button>
                               </div>
@@ -4409,6 +4409,12 @@ const idDatesCancelEdit = () => {
 const downloadLivinitiLogo = () => {
   console.log('Download Liviniti logo');
   // Production: trigger static asset download
+  showToast('Liviniti Logo downloaded successfully!', 'success');
+};
+
+const handleFormDownload = (formName: string) => {
+  console.log('Download form:', formName);
+  showToast(`${formName} downloaded successfully!`, 'success');
 };
 
 const lcOverrides = [

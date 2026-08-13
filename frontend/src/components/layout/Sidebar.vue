@@ -92,7 +92,7 @@ const navItems = ref([
 
 const filteredNavItems = computed(() => {
   return navItems.value.filter(item => {
-    if (item.title === 'Approvals' && isExternal.value) {
+    if ((item.title === 'Approvals' || item.title === 'Test Results') && isExternal.value) {
       return false;
     }
     return true;

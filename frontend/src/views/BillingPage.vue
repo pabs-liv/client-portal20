@@ -42,6 +42,7 @@
           { value: 100, title: '100' },
           { value: -1, title: 'All' },
         ]"
+        @bulk-download="handleBulkDownload"
       >
         <template #empty-state>
           <div class="billing-no-results">No records found</div>
@@ -110,6 +111,10 @@
         </div>
       </template>
     </AdvancedFiltersDialog>
+
+    <v-snackbar v-model="showDownloadSnackbar" :timeout="3000" color="success">
+      {{ downloadSnackbarText }}
+    </v-snackbar>
   </div>
 </template>
 
@@ -291,14 +296,29 @@ const billingCustomKeySort = {
   endDate:   (a: string, b: string) => parseMDYYYY(a) - parseMDYYYY(b),
 };
 
+const showDownloadSnackbar = ref(false);
+const downloadSnackbarText = ref('');
+
 const billingActionIcons = ref([
   {
     icon: CloudDownload,
     tooltip: 'Download',
     size: 20,
-    onClick: (item: any) => console.log('Download item:', item),
+    onClick: (item: any) => {
+      console.log('Download item:', item);
+      downloadSnackbarText.value = `${item.accountName} statement downloaded successfully!`;
+      showDownloadSnackbar.value = true;
+    },
   },
 ]);
+
+const handleBulkDownload = (items: any[]) => {
+  console.log('bulk downloaded', items);
+  downloadSnackbarText.value = items.length === 1
+    ? `${items[0].accountName} statement downloaded successfully!`
+    : `${items.length} statements downloaded successfully!`;
+  showDownloadSnackbar.value = true;
+};
 
 const advancedFiltersDialogActions = [
   { text: 'Cancel', type: 'cancel' as const, onClick: cancelFilters },

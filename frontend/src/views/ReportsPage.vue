@@ -36,6 +36,7 @@
           { value: 50, title: '50' },
           { value: 100, title: '100' },
         ]"
+        @bulk-download="handleBulkDownload"
       >
         <template #item.status="{ item }">
           <v-chip
@@ -180,6 +181,10 @@
         </div>
       </template>
     </AdvancedFiltersDialog>
+
+    <v-snackbar v-model="showDownloadSnackbar" :timeout="3000" color="success">
+      {{ downloadSnackbarText }}
+    </v-snackbar>
   </div>
 </template>
 
@@ -409,14 +414,29 @@ const reportCustomKeySort = {
   endDate:      (a: string, b: string) => parseMDYYYY(a) - parseMDYYYY(b),
 };
 
+const showDownloadSnackbar = ref(false);
+const downloadSnackbarText = ref('');
+
 const reportActionIcons = ref([
   {
     icon: CloudDownload,
     tooltip: 'Download',
     size: 20,
-    onClick: (item: any) => console.log('Download report:', item),
+    onClick: (item: any) => {
+      console.log('Download report:', item);
+      downloadSnackbarText.value = `${item.accountName} report downloaded successfully!`;
+      showDownloadSnackbar.value = true;
+    },
   },
 ]);
+
+const handleBulkDownload = (items: any[]) => {
+  console.log('bulk downloaded', items);
+  downloadSnackbarText.value = items.length === 1
+    ? `${items[0].accountName} report downloaded successfully!`
+    : `${items.length} reports downloaded successfully!`;
+  showDownloadSnackbar.value = true;
+};
 
 const advancedFiltersDialogActions = [
   { text: 'Cancel',         type: 'cancel'  as const, onClick: cancelFilters },

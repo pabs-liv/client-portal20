@@ -21,8 +21,8 @@
       <div class="bulk-action-left">
         <span class="bulk-action-count">{{ selected.length }} selected</span>
         <div class="bulk-action-divider"></div>
-        <button v-if="showBulkApprove" class="bulk-action-btn" @click="handleBulkApprove">Approve</button>
-        <button v-if="showBulkReject" class="bulk-action-btn" @click="handleBulkReject">Reject</button>
+        <button v-if="showBulkApprove && bulkActionAvailable(selected)" class="bulk-action-btn" @click="handleBulkApprove">Approve</button>
+        <button v-if="showBulkReject && bulkActionAvailable(selected)" class="bulk-action-btn" @click="handleBulkReject">Reject</button>
         <button class="bulk-action-btn" @click="handleBulkDownload">Download</button>
       </div>
       <button class="bulk-action-btn" @click="clearSelection">Clear Selection</button>
@@ -38,6 +38,7 @@
       :items-per-page-props="{ color: 'var(--color-text-primary)' }"
       :show-select="showSelectionCheckboxes"
       :select-strategy="'all'"
+      return-object
       v-model="selected"
       v-model:sort-by="sortByState"
       :custom-key-sort="customKeySort"
@@ -179,6 +180,7 @@ interface Props {
   rowActionDisabled?: (item: any, actionItem: RowActionItem) => boolean;
   showBulkApprove?: boolean;
   showBulkReject?: boolean;
+  bulkActionAvailable?: (items: any[]) => boolean;
   showTableFooter?: boolean;
   showSelectionCheckboxes?: boolean;
   initialFilterPills?: Pill[];
@@ -219,6 +221,7 @@ const props = withDefaults(defineProps<Props>(), {
   rowActionDisabled: () => false,
   showBulkApprove: false,
   showBulkReject: false,
+  bulkActionAvailable: () => true,
   showTableFooter: true,
   showSelectionCheckboxes: true,
   initialFilterPills: () => [],
