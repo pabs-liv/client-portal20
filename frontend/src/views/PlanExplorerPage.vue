@@ -368,7 +368,7 @@
                     </v-row>
                     <v-row>
                       <v-col cols="6"><Select v-model="apContactForm.salutation" :items="apSalutationOptions" label="Title" /></v-col>
-                      <v-col cols="6"><Select v-model="apContactForm.businessRole" :items="apClientBusinessRoleOptions" label="Business Role *" /></v-col>
+                      <v-col cols="6"><Select v-model="apContactForm.businessRole" :items="apClientBusinessRoleOptions" label="Business Role" /></v-col>
                     </v-row>
                     <v-row>
                       <v-col cols="12"><TextField v-model="apContactForm.email" label="Email *" :error-messages="apContactErrors.email" /></v-col>
@@ -379,43 +379,29 @@
 
                     <v-divider class="my-4" />
                     <h5 class="ap-subsection-heading">Client Portal Access</h5>
-                    <div class="ap-checkbox-toggle" @click="apContactForm.portalAccess = !apContactForm.portalAccess">
-                      <CheckSquare v-if="apContactForm.portalAccess" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
-                      <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
-                      <span class="text-small">Grant Client Portal access</span>
-                    </div>
+                    <v-checkbox v-model="apContactForm.portalAccess" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox" label="Grant Client Portal access" />
                     <template v-if="apContactForm.portalAccess">
                       <h6 class="ap-subsection-heading">Client Portal Permissions<span class="ap-required-asterisk">*</span></h6>
                       <p class="text-small ap-role-note">At least one permission is required to grant portal access.</p>
                       <div class="ap-permission-grid">
-                        <div v-for="perm in apPermissionOptions" :key="perm.key" class="ap-checkbox-toggle" @click="apContactForm.permissions[perm.key] = !apContactForm.permissions[perm.key]">
-                          <CheckSquare v-if="apContactForm.permissions[perm.key]" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
-                          <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
-                          <span class="text-small">{{ perm.label }}</span>
-                        </div>
+                        <v-checkbox v-for="perm in apPermissionOptions" :key="perm.key" v-model="apContactForm.permissions[perm.key]" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox" :label="perm.label" />
                       </div>
-                      <div class="ap-checkbox-toggle" @click="apContactForm.allowPhi = !apContactForm.allowPhi">
-                        <CheckSquare v-if="apContactForm.allowPhi" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
-                        <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
-                        <span class="text-small">Allow PHI access (Client Portal only)</span>
-                      </div>
+                      <v-checkbox v-model="apContactForm.allowPhi" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox" label="Allow PHI access (Client Portal only)" />
                     </template>
                     <h6 class="ap-subsection-heading">Contact Designations</h6>
-                    <div
-                      class="ap-checkbox-toggle"
-                      :class="{ 'ap-checkbox-toggle--disabled': apOtherContactIsMainPoc({ list: 'client', index: -1 }) }"
-                      @click="!apOtherContactIsMainPoc({ list: 'client', index: -1 }) && (apContactForm.mainPointOfContact = !apContactForm.mainPointOfContact)"
-                    >
-                      <CheckSquare v-if="apContactForm.mainPointOfContact" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
-                      <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
-                      <span class="text-small">Main Point of Contact</span>
-                    </div>
+                    <v-checkbox
+                      v-model="apContactForm.mainPointOfContact"
+                      :disabled="!!apOtherContactIsMainPoc({ list: 'client', index: -1 })"
+                      :true-icon="CheckSquare"
+                      :false-icon="Square"
+                      color="primary"
+                      density="compact"
+                      hide-details
+                      class="ap-vcheckbox"
+                      label="Main Point of Contact"
+                    />
                     <p v-if="apOtherContactIsMainPoc({ list: 'client', index: -1 })" class="text-small ap-role-note">{{ apOtherContactIsMainPoc({ list: 'client', index: -1 }) }} is already the Main Point of Contact for this account. Remove that designation from them before assigning a new one.</p>
-                    <div class="ap-checkbox-toggle" @click="apContactForm.surveyContact = !apContactForm.surveyContact">
-                      <CheckSquare v-if="apContactForm.surveyContact" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
-                      <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
-                      <span class="text-small">Survey Contact</span>
-                    </div>
+                    <v-checkbox v-model="apContactForm.surveyContact" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox" label="Survey Contact" />
                   </Dialog>
 
                   <!-- Edit Client Contact Dialog -->
@@ -432,7 +418,7 @@
                     </v-row>
                     <v-row>
                       <v-col cols="6"><Select v-model="apEditContactForm.salutation" :items="apSalutationOptions" label="Title" /></v-col>
-                      <v-col cols="6"><Select v-model="apEditContactForm.businessRole" :items="apClientBusinessRoleOptions" label="Business Role *" /></v-col>
+                      <v-col cols="6"><Select v-model="apEditContactForm.businessRole" :items="apClientBusinessRoleOptions" label="Business Role" /></v-col>
                     </v-row>
                     <v-row>
                       <v-col cols="12"><TextField v-model="apEditContactForm.email" label="Email *" :error-messages="apEditContactErrors.email" /></v-col>
@@ -443,43 +429,29 @@
 
                     <v-divider class="my-4" />
                     <h5 class="ap-subsection-heading">Client Portal Access</h5>
-                    <div class="ap-checkbox-toggle" @click="apEditContactForm.portalAccess = !apEditContactForm.portalAccess">
-                      <CheckSquare v-if="apEditContactForm.portalAccess" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
-                      <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
-                      <span class="text-small">Grant Client Portal access</span>
-                    </div>
+                    <v-checkbox v-model="apEditContactForm.portalAccess" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox" label="Grant Client Portal access" />
                     <template v-if="apEditContactForm.portalAccess">
                       <h6 class="ap-subsection-heading">Client Portal Permissions<span class="ap-required-asterisk">*</span></h6>
                       <p class="text-small ap-role-note">At least one permission is required to grant portal access.</p>
                       <div class="ap-permission-grid">
-                        <div v-for="perm in apPermissionOptions" :key="perm.key" class="ap-checkbox-toggle" @click="apEditContactForm.permissions[perm.key] = !apEditContactForm.permissions[perm.key]">
-                          <CheckSquare v-if="apEditContactForm.permissions[perm.key]" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
-                          <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
-                          <span class="text-small">{{ perm.label }}</span>
-                        </div>
+                        <v-checkbox v-for="perm in apPermissionOptions" :key="perm.key" v-model="apEditContactForm.permissions[perm.key]" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox" :label="perm.label" />
                       </div>
-                      <div class="ap-checkbox-toggle" @click="apEditContactForm.allowPhi = !apEditContactForm.allowPhi">
-                        <CheckSquare v-if="apEditContactForm.allowPhi" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
-                        <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
-                        <span class="text-small">Allow PHI access (Client Portal only)</span>
-                      </div>
+                      <v-checkbox v-model="apEditContactForm.allowPhi" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox" label="Allow PHI access (Client Portal only)" />
                     </template>
                     <h6 class="ap-subsection-heading">Contact Designations</h6>
-                    <div
-                      class="ap-checkbox-toggle"
-                      :class="{ 'ap-checkbox-toggle--disabled': apOtherContactIsMainPoc({ list: 'client', index: apEditingContactIndex }) }"
-                      @click="!apOtherContactIsMainPoc({ list: 'client', index: apEditingContactIndex }) && (apEditContactForm.mainPointOfContact = !apEditContactForm.mainPointOfContact)"
-                    >
-                      <CheckSquare v-if="apEditContactForm.mainPointOfContact" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
-                      <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
-                      <span class="text-small">Main Point of Contact</span>
-                    </div>
+                    <v-checkbox
+                      v-model="apEditContactForm.mainPointOfContact"
+                      :disabled="!!apOtherContactIsMainPoc({ list: 'client', index: apEditingContactIndex })"
+                      :true-icon="CheckSquare"
+                      :false-icon="Square"
+                      color="primary"
+                      density="compact"
+                      hide-details
+                      class="ap-vcheckbox"
+                      label="Main Point of Contact"
+                    />
                     <p v-if="apOtherContactIsMainPoc({ list: 'client', index: apEditingContactIndex })" class="text-small ap-role-note">{{ apOtherContactIsMainPoc({ list: 'client', index: apEditingContactIndex }) }} is already the Main Point of Contact for this account. Remove that designation from them before assigning a new one.</p>
-                    <div class="ap-checkbox-toggle" @click="apEditContactForm.surveyContact = !apEditContactForm.surveyContact">
-                      <CheckSquare v-if="apEditContactForm.surveyContact" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
-                      <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
-                      <span class="text-small">Survey Contact</span>
-                    </div>
+                    <v-checkbox v-model="apEditContactForm.surveyContact" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox" label="Survey Contact" />
                   </Dialog>
 
                   <!-- Remove Contact Confirmation Dialog (shared by Client + Vendor Contacts) -->
@@ -575,64 +547,46 @@
                       </v-row>
                       <p class="ap-required-legend">Fields marked <span class="ap-required-asterisk">*</span> are required.</p>
                       <v-row class="mt-1">
-                        <v-col cols="12" sm="6"><Select v-model="apVendorRoleSelection" :items="apVendorRoleOptions" label="Business Role *" /></v-col>
+                        <v-col cols="12" sm="6"><Select v-model="apVendorRoleSelection" :items="apVendorRoleOptions" label="Business Role" /></v-col>
                       </v-row>
-                      <div class="ap-checkbox-toggle" @click="apVendorAllowPhi = !apVendorAllowPhi">
-                        <CheckSquare v-if="apVendorAllowPhi" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
-                        <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
-                        <span class="text-small">Allow access to PHI</span>
-                      </div>
+                      <v-checkbox v-model="apVendorAllowPhi" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox" label="Allow access to PHI" />
                       <p class="text-small ap-role-note">Allows this contact to receive PHI in any communication — email, phone, or mail — not just within the Client Portal.</p>
 
                       <h6 class="ap-subsection-heading">Contact Designations</h6>
-                      <div
-                        class="ap-checkbox-toggle"
-                        :class="{ 'ap-checkbox-toggle--disabled': apOtherContactIsMainPoc({ list: 'vendor', index: -1 }) }"
-                        @click="!apOtherContactIsMainPoc({ list: 'vendor', index: -1 }) && (apVendorMainPointOfContact = !apVendorMainPointOfContact)"
-                      >
-                        <CheckSquare v-if="apVendorMainPointOfContact" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
-                        <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
-                        <span class="text-small">Main Point of Contact</span>
-                      </div>
+                      <v-checkbox
+                        v-model="apVendorMainPointOfContact"
+                        :disabled="!!apOtherContactIsMainPoc({ list: 'vendor', index: -1 })"
+                        :true-icon="CheckSquare"
+                        :false-icon="Square"
+                        color="primary"
+                        density="compact"
+                        hide-details
+                        class="ap-vcheckbox"
+                        label="Main Point of Contact"
+                      />
                       <p v-if="apOtherContactIsMainPoc({ list: 'vendor', index: -1 })" class="text-small ap-role-note">{{ apOtherContactIsMainPoc({ list: 'vendor', index: -1 }) }} is already the Main Point of Contact for this account. Remove that designation from them before assigning a new one.</p>
-                      <div class="ap-checkbox-toggle" @click="apVendorSurveyContact = !apVendorSurveyContact">
-                        <CheckSquare v-if="apVendorSurveyContact" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
-                        <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
-                        <span class="text-small">Survey Contact</span>
-                      </div>
+                      <v-checkbox v-model="apVendorSurveyContact" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox" label="Survey Contact" />
 
                       <h5 class="ap-subsection-heading">Client Portal Access</h5>
-                      <div class="ap-checkbox-toggle" @click="apVendorPortalAccess = !apVendorPortalAccess">
-                        <CheckSquare v-if="apVendorPortalAccess" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
-                        <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
-                        <span class="text-small">Grant Client Portal access</span>
-                      </div>
+                      <v-checkbox v-model="apVendorPortalAccess" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox" label="Grant Client Portal access" />
                       <template v-if="apVendorPortalAccess">
                         <h6 class="ap-subsection-heading">Client Portal Permissions<span class="ap-required-asterisk">*</span></h6>
                         <p class="text-small ap-role-note">At least one permission is required to grant portal access.</p>
                         <div class="ap-permission-grid">
-                          <div v-for="perm in apPermissionOptions" :key="perm.key" class="ap-checkbox-toggle" @click="apVendorPermissions[perm.key] = !apVendorPermissions[perm.key]">
-                            <CheckSquare v-if="apVendorPermissions[perm.key]" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
-                            <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
-                            <span class="text-small">{{ perm.label }}</span>
-                          </div>
+                          <v-checkbox v-for="perm in apPermissionOptions" :key="perm.key" v-model="apVendorPermissions[perm.key]" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox" :label="perm.label" />
                         </div>
 
                         <h6 class="ap-subsection-heading">Access Request Form Acknowledgement</h6>
-                        <div class="ap-checkbox-toggle" @click="apVendorAccessFormConfirmed = !apVendorAccessFormConfirmed">
-                          <CheckSquare v-if="apVendorAccessFormConfirmed" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
-                          <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
-                          <span class="text-small">I confirm the Client Portal Access Request Form has been completed and signed by the client.<span class="ap-required-asterisk">*</span></span>
-                        </div>
+                        <v-checkbox v-model="apVendorAccessFormConfirmed" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox">
+                          <template #label><span class="text-small">I confirm the Client Portal Access Request Form has been completed and signed by the client.<span class="ap-required-asterisk">*</span></span></template>
+                        </v-checkbox>
                       </template>
 
                       <h5 class="ap-subsection-heading">Data Transfer Agreement Acknowledgement</h5>
                       <p class="text-small ap-role-note">External vendors must be defined on the PPSAA and must have signed the Global Data Transfer Agreement. If you are unsure if the proper paperwork has been signed, please contact the legal team.</p>
-                      <div class="ap-checkbox-toggle" @click="apVendorAckConfirmed = !apVendorAckConfirmed">
-                        <CheckSquare v-if="apVendorAckConfirmed" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
-                        <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
-                        <span class="text-small">I confirm the proper paperwork has been completed.<span class="ap-required-asterisk">*</span></span>
-                      </div>
+                      <v-checkbox v-model="apVendorAckConfirmed" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox">
+                        <template #label><span class="text-small">I confirm the proper paperwork has been completed.<span class="ap-required-asterisk">*</span></span></template>
+                      </v-checkbox>
                     </template>
                   </Dialog>
 
@@ -643,74 +597,53 @@
                     :show-secondary-button="true"
                     :actions="apEditVendorContactDialogActions"
                   >
-                    <div class="ap-field mb-3">
-                      <span class="ap-field-label">Name</span>
-                      <span class="ap-field-value">{{ apEditingVendorContactName }}</span>
-                    </div>
+                    <TextField :model-value="apEditingVendorContactName" label="Name" readonly class="mb-3" />
                     <v-row>
                       <v-col cols="12" sm="6"><Select v-model="apEditVendorContactForm.email" :items="apEditVendorContactEmailOptions" label="Email" /></v-col>
                       <v-col cols="12" sm="6"><Select v-model="apEditVendorContactForm.phone" :items="apEditVendorContactPhoneOptions" label="Phone" /></v-col>
                     </v-row>
                     <p class="ap-required-legend">Fields marked <span class="ap-required-asterisk">*</span> are required.</p>
                     <v-row class="mt-1">
-                      <v-col cols="12" sm="6"><Select v-model="apEditVendorContactForm.role" :items="apVendorRoleOptions" label="Business Role *" /></v-col>
+                      <v-col cols="12" sm="6"><Select v-model="apEditVendorContactForm.role" :items="apVendorRoleOptions" label="Business Role" /></v-col>
                     </v-row>
-                    <div class="ap-checkbox-toggle" @click="apEditVendorContactForm.allowPhi = !apEditVendorContactForm.allowPhi">
-                      <CheckSquare v-if="apEditVendorContactForm.allowPhi" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
-                      <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
-                      <span class="text-small">Allow access to PHI</span>
-                    </div>
+                    <v-checkbox v-model="apEditVendorContactForm.allowPhi" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox" label="Allow access to PHI" />
                     <p class="text-small ap-role-note">Allows this contact to receive PHI in any communication — email, phone, or mail — not just within the Client Portal.</p>
 
                     <h6 class="ap-subsection-heading">Contact Designations</h6>
-                    <div
-                      class="ap-checkbox-toggle"
-                      :class="{ 'ap-checkbox-toggle--disabled': apOtherContactIsMainPoc({ list: 'vendor', index: apEditingVendorContactIndex }) }"
-                      @click="!apOtherContactIsMainPoc({ list: 'vendor', index: apEditingVendorContactIndex }) && (apEditVendorContactForm.mainPointOfContact = !apEditVendorContactForm.mainPointOfContact)"
-                    >
-                      <CheckSquare v-if="apEditVendorContactForm.mainPointOfContact" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
-                      <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
-                      <span class="text-small">Main Point of Contact</span>
-                    </div>
+                    <v-checkbox
+                      v-model="apEditVendorContactForm.mainPointOfContact"
+                      :disabled="!!apOtherContactIsMainPoc({ list: 'vendor', index: apEditingVendorContactIndex })"
+                      :true-icon="CheckSquare"
+                      :false-icon="Square"
+                      color="primary"
+                      density="compact"
+                      hide-details
+                      class="ap-vcheckbox"
+                      label="Main Point of Contact"
+                    />
                     <p v-if="apOtherContactIsMainPoc({ list: 'vendor', index: apEditingVendorContactIndex })" class="text-small ap-role-note">{{ apOtherContactIsMainPoc({ list: 'vendor', index: apEditingVendorContactIndex }) }} is already the Main Point of Contact for this account. Remove that designation from them before assigning a new one.</p>
-                    <div class="ap-checkbox-toggle" @click="apEditVendorContactForm.surveyContact = !apEditVendorContactForm.surveyContact">
-                      <CheckSquare v-if="apEditVendorContactForm.surveyContact" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
-                      <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
-                      <span class="text-small">Survey Contact</span>
-                    </div>
+                    <v-checkbox v-model="apEditVendorContactForm.surveyContact" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox" label="Survey Contact" />
 
                     <h5 class="ap-subsection-heading">Client Portal Access</h5>
-                    <div class="ap-checkbox-toggle" @click="apEditVendorContactForm.portalAccess = !apEditVendorContactForm.portalAccess">
-                      <CheckSquare v-if="apEditVendorContactForm.portalAccess" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
-                      <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
-                      <span class="text-small">Grant Client Portal access</span>
-                    </div>
+                    <v-checkbox v-model="apEditVendorContactForm.portalAccess" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox" label="Grant Client Portal access" />
                     <template v-if="apEditVendorContactForm.portalAccess">
                       <h6 class="ap-subsection-heading">Client Portal Permissions<span class="ap-required-asterisk">*</span></h6>
                       <p class="text-small ap-role-note">At least one permission is required to grant portal access.</p>
                       <div class="ap-permission-grid">
-                        <div v-for="perm in apPermissionOptions" :key="perm.key" class="ap-checkbox-toggle" @click="apEditVendorContactForm.permissions[perm.key] = !apEditVendorContactForm.permissions[perm.key]">
-                          <CheckSquare v-if="apEditVendorContactForm.permissions[perm.key]" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
-                          <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
-                          <span class="text-small">{{ perm.label }}</span>
-                        </div>
+                        <v-checkbox v-for="perm in apPermissionOptions" :key="perm.key" v-model="apEditVendorContactForm.permissions[perm.key]" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox" :label="perm.label" />
                       </div>
 
                       <h6 class="ap-subsection-heading">Access Request Form Acknowledgement</h6>
-                      <div class="ap-checkbox-toggle" @click="apEditVendorContactForm.accessFormConfirmed = !apEditVendorContactForm.accessFormConfirmed">
-                        <CheckSquare v-if="apEditVendorContactForm.accessFormConfirmed" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
-                        <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
-                        <span class="text-small">I confirm the Client Portal Access Request Form has been completed and signed by the client.<span class="ap-required-asterisk">*</span></span>
-                      </div>
+                      <v-checkbox v-model="apEditVendorContactForm.accessFormConfirmed" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox">
+                        <template #label><span class="text-small">I confirm the Client Portal Access Request Form has been completed and signed by the client.<span class="ap-required-asterisk">*</span></span></template>
+                      </v-checkbox>
                     </template>
 
                     <h5 class="ap-subsection-heading">Data Transfer Agreement Acknowledgement</h5>
                     <p class="text-small ap-role-note">External vendors must be defined on the PPSAA and must have signed the Global Data Transfer Agreement. If you are unsure if the proper paperwork has been signed, please contact the legal team.</p>
-                    <div class="ap-checkbox-toggle" @click="apEditVendorContactForm.ackConfirmed = !apEditVendorContactForm.ackConfirmed">
-                      <CheckSquare v-if="apEditVendorContactForm.ackConfirmed" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
-                      <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
-                      <span class="text-small">I confirm the proper paperwork has been completed.<span class="ap-required-asterisk">*</span></span>
-                    </div>
+                    <v-checkbox v-model="apEditVendorContactForm.ackConfirmed" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox">
+                      <template #label><span class="text-small">I confirm the proper paperwork has been completed.<span class="ap-required-asterisk">*</span></span></template>
+                    </v-checkbox>
                   </Dialog>
 
                 </template>
@@ -4676,7 +4609,7 @@ const apPermissionOptions = [
   { key: 'overrides', label: 'Overrides' },
   { key: 'vcpClaims', label: 'VCP Claims' },
 ];
-const apVendorRoleOptions = ['Broker', 'Consultant', 'Carrier', 'TPV'];
+const apVendorRoleOptions = ['Broker', 'Consultant', 'Captive/Coalition', 'PA Vendor', 'Rebate Aggregator', 'Introducer'];
 const apSalutationOptions = ['Mr.', 'Mrs.', 'Ms.', 'Miss', 'Dr.'];
 const apClientBusinessRoleOptions = [
   'Account Manager',
@@ -4869,8 +4802,7 @@ const apSaveEditContact = () => {
   }
   apShowEditContactDialog.value = false;
 };
-const apContactSaveDisabled = (f: { businessRole: string; portalAccess: boolean; permissions: Record<string, boolean> }) => {
-  if (!f.businessRole) return true;
+const apContactSaveDisabled = (f: { portalAccess: boolean; permissions: Record<string, boolean> }) => {
   if (!f.portalAccess) return false;
   return !apHasAnyPermission(f.permissions);
 };
@@ -4894,8 +4826,8 @@ const apVendorContactHeaders = [
 ];
 type ApVendorContact = { name: string; vendor: string; email: string; phone: string; portalAccess?: boolean; role?: string; permissions?: Record<string, boolean>; allowPhi?: boolean; mainPointOfContact?: boolean; surveyContact?: boolean; ackConfirmed?: boolean; accessFormConfirmed?: boolean; roleLabel?: string };
 const apVendorContacts = ref<ApVendorContact[]>([
-  { name: 'Mark Tillman', vendor: 'Southern Scripts Carrier', email: 'mtillman@sstpa.com', phone: '(704) 555-0121', portalAccess: true, role: 'Carrier', permissions: apNewPermissions(), allowPhi: false, mainPointOfContact: false, surveyContact: false, ackConfirmed: true, accessFormConfirmed: true, roleLabel: 'Carrier' },
-  { name: 'Dana Osei', vendor: 'Southern Scripts Carrier', email: 'dosei@sstpa.com', phone: '(704) 555-0122', portalAccess: true, role: 'Carrier', permissions: apNewPermissions(), allowPhi: false, mainPointOfContact: false, surveyContact: false, ackConfirmed: true, accessFormConfirmed: true, roleLabel: 'Carrier' },
+  { name: 'Mark Tillman', vendor: 'Southern Scripts Carrier', email: 'mtillman@sstpa.com', phone: '(704) 555-0121', portalAccess: true, role: 'Broker', permissions: apNewPermissions(), allowPhi: false, mainPointOfContact: false, surveyContact: false, ackConfirmed: true, accessFormConfirmed: true, roleLabel: 'Broker' },
+  { name: 'Dana Osei', vendor: 'Southern Scripts Carrier', email: 'dosei@sstpa.com', phone: '(704) 555-0122', portalAccess: true, role: 'Broker', permissions: apNewPermissions(), allowPhi: false, mainPointOfContact: false, surveyContact: false, ackConfirmed: true, accessFormConfirmed: true, roleLabel: 'Broker' },
   { name: 'Rachel Vance', vendor: 'Acclaim Benefits', email: 'rvance@acclaim.com', phone: '(615) 555-0188', portalAccess: true, role: 'Broker', permissions: apNewPermissions(), allowPhi: false, mainPointOfContact: false, surveyContact: false, ackConfirmed: true, accessFormConfirmed: true, roleLabel: 'Broker' },
   { name: 'James Pruitt', vendor: 'Acclaim Benefits', email: 'jpruitt@acclaim.com', phone: '(615) 555-0189', portalAccess: true, role: 'Broker', permissions: apNewPermissions(), allowPhi: false, mainPointOfContact: false, surveyContact: false, ackConfirmed: true, accessFormConfirmed: true, roleLabel: 'Broker' },
   { name: 'Tara Mendez', vendor: 'Benefit Advantage', email: 'tmendez@benefitadv.com', phone: '(512) 555-0144', portalAccess: true, role: 'Consultant', permissions: apNewPermissions(), allowPhi: false, mainPointOfContact: false, surveyContact: false, ackConfirmed: true, accessFormConfirmed: true, roleLabel: 'Consultant' },
@@ -4964,7 +4896,7 @@ const apResetVendorAddState = () => {
   apVendorAccessFormConfirmed.value = false;
 };
 const apVendorAddDisabled = computed(() => {
-  if (!apVendorContactSelection.value || !apVendorRoleSelection.value || !apVendorAckConfirmed.value) return true;
+  if (!apVendorContactSelection.value || !apVendorAckConfirmed.value) return true;
   if (apVendorPortalAccess.value) return !apHasAnyPermission(apVendorPermissions.value) || !apVendorAccessFormConfirmed.value;
   return false;
 });
@@ -5042,7 +4974,7 @@ const handleApVendorContactRowAction = ({ action, item }: { action: string; item
   else if (action === 'remove') apRemoveVendorContact(item);
 };
 const apEditVendorSaveDisabled = computed(() => {
-  if (!apEditVendorContactForm.value.role || !apEditVendorContactForm.value.ackConfirmed) return true;
+  if (!apEditVendorContactForm.value.ackConfirmed) return true;
   if (apEditVendorContactForm.value.portalAccess) return !apHasAnyPermission(apEditVendorContactForm.value.permissions) || !apEditVendorContactForm.value.accessFormConfirmed;
   return false;
 });
@@ -6319,6 +6251,46 @@ watch(selectedAccount, (newVal) => {
 
     &:hover .ap-checkbox-icon {
       color: inherit;
+    }
+  }
+}
+
+// Native v-checkbox used in Client/Vendor Contact modals — true-icon/false-icon props
+// point at Lucide icons (project has no MDI icon font loaded), styled to match the
+// look of the .ap-checkbox-toggle divs used elsewhere on this page.
+.ap-vcheckbox {
+  flex: 0 0 auto;
+
+  :deep(.v-selection-control) {
+    min-height: unset;
+  }
+
+  :deep(.v-label) {
+    font-family: $font-family-base;
+    font-size: $font-size-small;
+    font-weight: $font-weight-normal;
+    line-height: $line-height-tight;
+    color: $color-text-primary;
+    opacity: 1;
+  }
+
+  :deep(.v-selection-control__off-icon) {
+    color: $color-border !important;
+  }
+
+  :deep(.v-selection-control__on-icon) {
+    color: $color-primary !important;
+  }
+
+  &:hover :deep(.v-selection-control__off-icon) {
+    color: $color-primary !important;
+  }
+
+  &.v-input--disabled {
+    opacity: 0.5;
+
+    &:hover :deep(.v-selection-control__off-icon) {
+      color: $color-border !important;
     }
   }
 }
