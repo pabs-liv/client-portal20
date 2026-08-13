@@ -4738,6 +4738,8 @@ const apClientContactRowActions = [
 const apEditingContactIndex = ref(-1);
 const apShowEditContactDialog = ref(false);
 const apEditContactForm = ref(apNewContactForm());
+const apEditContactSnapshot = ref('');
+const apEditContactHasChanges = computed(() => JSON.stringify(apEditContactForm.value) !== apEditContactSnapshot.value);
 watch(() => apEditContactForm.value.phone, val => {
   const f = formatPhone(val);
   if (f !== val) apEditContactForm.value.phone = f;
@@ -4780,6 +4782,7 @@ const handleApClientContactRowAction = ({ action, item }: { action: string; item
       mainPointOfContact: item.mainPointOfContact ?? false,
       surveyContact: item.surveyContact ?? false,
     };
+    apEditContactSnapshot.value = JSON.stringify(apEditContactForm.value);
     apEditingContactIndex.value = idx;
     apShowEditContactDialog.value = true;
   }
@@ -4812,9 +4815,10 @@ const apContactSaveDisabled = (f: { portalAccess: boolean; permissions: Record<s
   if (!f.portalAccess) return false;
   return !apHasAnyPermission(f.permissions);
 };
+const apEditContactSaveDisabled = computed(() => apContactSaveDisabled(apEditContactForm.value) || !apEditContactHasChanges.value);
 const apEditContactDialogActions = computed(() => [
   { text: 'Cancel', styleType: 'secondary' as const, onClick: () => { apShowEditContactDialog.value = false; apEditContactErrors.value = { firstName: '', lastName: '', email: '' }; } },
-  { text: 'Save Changes', styleType: 'primary' as const, onClick: apSaveEditContact, disabled: apContactSaveDisabled(apEditContactForm.value) },
+  { text: 'Save Changes', styleType: 'primary' as const, onClick: apSaveEditContact, disabled: apEditContactSaveDisabled.value },
 ]);
 const apContactDialogActions = computed(() => [
   { text: 'Cancel', styleType: 'secondary' as const, onClick: () => { apShowAddContactDialog.value = false; apResetContactForm(); } },
@@ -4832,11 +4836,11 @@ const apVendorContactHeaders = [
 ];
 type ApVendorContact = { name: string; vendor: string; email: string; phone: string; portalAccess?: boolean; role?: string; permissions?: Record<string, boolean>; allowPhi?: boolean; mainPointOfContact?: boolean; surveyContact?: boolean; ackConfirmed?: boolean; accessFormConfirmed?: boolean; roleLabel?: string };
 const apVendorContacts = ref<ApVendorContact[]>([
-  { name: 'Mark Tillman', vendor: 'Southern Scripts Carrier', email: 'mtillman@sstpa.com', phone: '(704) 555-0121', portalAccess: true, role: 'Broker', permissions: apNewPermissions(), allowPhi: false, mainPointOfContact: false, surveyContact: false, ackConfirmed: true, accessFormConfirmed: true, roleLabel: 'Broker' },
-  { name: 'Dana Osei', vendor: 'Southern Scripts Carrier', email: 'dosei@sstpa.com', phone: '(704) 555-0122', portalAccess: true, role: 'Broker', permissions: apNewPermissions(), allowPhi: false, mainPointOfContact: false, surveyContact: false, ackConfirmed: true, accessFormConfirmed: true, roleLabel: 'Broker' },
-  { name: 'Rachel Vance', vendor: 'Acclaim Benefits', email: 'rvance@acclaim.com', phone: '(615) 555-0188', portalAccess: true, role: 'Broker', permissions: apNewPermissions(), allowPhi: false, mainPointOfContact: false, surveyContact: false, ackConfirmed: true, accessFormConfirmed: true, roleLabel: 'Broker' },
-  { name: 'James Pruitt', vendor: 'Acclaim Benefits', email: 'jpruitt@acclaim.com', phone: '(615) 555-0189', portalAccess: true, role: 'Broker', permissions: apNewPermissions(), allowPhi: false, mainPointOfContact: false, surveyContact: false, ackConfirmed: true, accessFormConfirmed: true, roleLabel: 'Broker' },
-  { name: 'Tara Mendez', vendor: 'Benefit Advantage', email: 'tmendez@benefitadv.com', phone: '(512) 555-0144', portalAccess: true, role: 'Consultant', permissions: apNewPermissions(), allowPhi: false, mainPointOfContact: false, surveyContact: false, ackConfirmed: true, accessFormConfirmed: true, roleLabel: 'Consultant' },
+  { name: 'Mark Tillman', vendor: 'Southern Scripts Carrier', email: 'mtillman@sstpa.com', phone: '(704) 555-0121', portalAccess: true, role: 'Broker', permissions: { ...apNewPermissions(), reports: true, invoices: true }, allowPhi: false, mainPointOfContact: false, surveyContact: false, ackConfirmed: true, accessFormConfirmed: true, roleLabel: 'Broker' },
+  { name: 'Dana Osei', vendor: 'Southern Scripts Carrier', email: 'dosei@sstpa.com', phone: '(704) 555-0122', portalAccess: true, role: 'Broker', permissions: { ...apNewPermissions(), reports: true }, allowPhi: false, mainPointOfContact: false, surveyContact: false, ackConfirmed: true, accessFormConfirmed: true, roleLabel: 'Broker' },
+  { name: 'Rachel Vance', vendor: 'Acclaim Benefits', email: 'rvance@acclaim.com', phone: '(615) 555-0188', portalAccess: true, role: 'Broker', permissions: { ...apNewPermissions(), reports: true, rebates: true }, allowPhi: false, mainPointOfContact: false, surveyContact: false, ackConfirmed: true, accessFormConfirmed: true, roleLabel: 'Broker' },
+  { name: 'James Pruitt', vendor: 'Acclaim Benefits', email: 'jpruitt@acclaim.com', phone: '(615) 555-0189', portalAccess: true, role: 'Broker', permissions: { ...apNewPermissions(), invoices: true }, allowPhi: false, mainPointOfContact: false, surveyContact: false, ackConfirmed: true, accessFormConfirmed: true, roleLabel: 'Broker' },
+  { name: 'Tara Mendez', vendor: 'Benefit Advantage', email: 'tmendez@benefitadv.com', phone: '(512) 555-0144', portalAccess: true, role: 'Consultant', permissions: { ...apNewPermissions(), reports: true, planChanges: true }, allowPhi: false, mainPointOfContact: false, surveyContact: false, ackConfirmed: true, accessFormConfirmed: true, roleLabel: 'Consultant' },
 ]);
 const apShowVendorContactDialog = ref(false);
 const apVendorContactSelection = ref('');
@@ -4953,6 +4957,8 @@ const apEditVendorContactPhoneOptions = computed(() => {
   const current = apEditVendorContactForm.value.phone;
   return current && !options.includes(current) ? [current, ...options] : options;
 });
+const apEditVendorContactSnapshot = ref('');
+const apEditVendorContactHasChanges = computed(() => JSON.stringify(apEditVendorContactForm.value) !== apEditVendorContactSnapshot.value);
 const handleEditVendorContact = (item: ApVendorContact) => {
   const idx = apVendorContacts.value.indexOf(item);
   apEditingVendorContactName.value = item.name;
@@ -4968,6 +4974,7 @@ const handleEditVendorContact = (item: ApVendorContact) => {
     ackConfirmed: item.ackConfirmed ?? false,
     accessFormConfirmed: item.accessFormConfirmed ?? false,
   };
+  apEditVendorContactSnapshot.value = JSON.stringify(apEditVendorContactForm.value);
   apEditingVendorContactIndex.value = idx;
   apShowEditVendorContactDialog.value = true;
 };
@@ -4980,6 +4987,7 @@ const handleApVendorContactRowAction = ({ action, item }: { action: string; item
   else if (action === 'remove') apRemoveVendorContact(item);
 };
 const apEditVendorSaveDisabled = computed(() => {
+  if (!apEditVendorContactHasChanges.value) return true;
   if (!apEditVendorContactForm.value.ackConfirmed) return true;
   if (apEditVendorContactForm.value.portalAccess) return !apHasAnyPermission(apEditVendorContactForm.value.permissions) || !apEditVendorContactForm.value.accessFormConfirmed;
   return false;
