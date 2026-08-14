@@ -21,6 +21,10 @@
     >
       <!-- Wayne Enterprises: Active/fully-implemented view -->
       <div v-if="isWayneEnterprises" class="gap-view">
+        <p class="text-body gap-dev-note">
+          <strong>Design Note for Dev/QA:</strong> This section is an exact replication of Solo2 &rarr; Member InSites &rarr; Member Search &rarr; GAP tab. Do not use this mockup as the visual source of truth — reference the live GAP tab in Solo2 directly for exact fields, order, and behavior (including live search-highlighting and conditional field visibility).
+        </p>
+
         <div class="gap-meta">
           <Building2 :size="14" :stroke-width="1.5" class="gap-meta-icon" />
           <span>Wayne Enterprises – 11250</span>
@@ -7850,6 +7854,15 @@ watch(selectedAccount, (newVal) => {
 
 .gap-view {
   padding: $spacing-small 0;
+}
+
+.gap-dev-note {
+  border: 1px solid $color-error;
+  background-color: $color-error-background;
+  color: $color-error;
+  border-radius: 6px;
+  padding: $spacing-small $spacing-medium;
+  margin-bottom: $spacing-medium;
 }
 
 .gap-meta {
