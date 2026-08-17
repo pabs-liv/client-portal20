@@ -21,9 +21,10 @@
       <div class="bulk-action-left">
         <span class="bulk-action-count">{{ selected.length }} selected</span>
         <div class="bulk-action-divider"></div>
-        <button v-if="showBulkApprove && bulkActionAvailable(selected)" class="bulk-action-btn" @click="handleBulkApprove">Approve</button>
-        <button v-if="showBulkReject && bulkActionAvailable(selected)" class="bulk-action-btn" @click="handleBulkReject">Reject</button>
-        <button class="bulk-action-btn" @click="handleBulkDownload">Download</button>
+        <button v-if="showBulkApprove && bulkActionAvailable(selected)" class="bulk-action-btn" @click="handleBulkApprove">{{ bulkApproveLabel }}</button>
+        <button v-if="showBulkReject && bulkActionAvailable(selected)" class="bulk-action-btn" @click="handleBulkReject">{{ bulkRejectLabel }}</button>
+        <slot name="bulk-actions-extra" :selected="selected" />
+        <button v-if="showBulkDownload" class="bulk-action-btn" @click="handleBulkDownload">Download</button>
       </div>
       <button class="bulk-action-btn" @click="clearSelection">Clear Selection</button>
     </div>
@@ -38,6 +39,7 @@
       :items-per-page-props="{ color: 'var(--color-text-primary)' }"
       :show-select="showSelectionCheckboxes"
       :select-strategy="'all'"
+      :item-selectable="itemSelectable"
       return-object
       v-model="selected"
       v-model:sort-by="sortByState"
@@ -60,31 +62,37 @@
 
       <template v-slot:item.actions="{ item }">
         <div v-if="showActionIcons" class="d-flex align-center" :class="actionsClass">
-          <v-tooltip v-for="(iconDef, index) in actionIcons" :key="index" :text="iconDef.tooltip">
+          <v-tooltip
+            v-for="(iconDef, index) in actionIcons"
+            :key="index"
+            :text="isIconDisabled(item, iconDef) && iconDef.tooltipWhenDisabled ? iconDef.tooltipWhenDisabled : iconDef.tooltip"
+          >
             <template v-slot:activator="{ props: tooltipProps }">
               <component
                 :is="iconDef.icon"
                 v-bind="tooltipProps"
                 :size="iconDef.size || 25"
                 :stroke-width="1"
-                :class="['row-action-icon', iconDef.class, {'mr-2': index < actionIcons.length - 1}, {'disabled-icon': (item.status === 'Approved' && iconDef.type !== 'approve') || (item.status === 'Rejected' && iconDef.type !== 'reject')}]"
+                :class="['row-action-icon', iconDef.class, {'mr-2': index < actionIcons.length - 1}, {'disabled-icon': isIconDisabled(item, iconDef)}]"
                 :style="{color: (item.status === 'Approved' && iconDef.type === 'approve') ? 'var(--color-approved)' : (item.status === 'Rejected' && iconDef.type === 'reject') ? 'var(--color-denied)' : 'var(--color-text-primary)'}"
-                @click="iconDef.onClick(item)"
+                @click="isIconDisabled(item, iconDef) ? undefined : iconDef.onClick(item)"
               />
             </template>
           </v-tooltip>
         </div>
-        <div v-else-if="showInternalUserActions">
-          <span
-            v-if="internalUserActionFormatter(item) === 'Information Requested'"
-            class="link"
-            @click="internalUserActionClickHandler(item)"
-          >
-            {{ internalUserActionFormatter(item) }}
-          </span>
-          <span v-else>
-            {{ internalUserActionFormatter(item) }}
-          </span>
+        <div v-else-if="showInternalUserActions" class="d-flex align-center" :class="actionsClass">
+          <v-tooltip v-if="internalUserActionFormatter(item) === 'Information Requested'" text="View Assistance Request">
+            <template v-slot:activator="{ props: tooltipProps }">
+              <CircleHelp
+                v-bind="tooltipProps"
+                :size="18"
+                :stroke-width="1.5"
+                class="internal-action-icon"
+                @click="internalUserActionClickHandler(item)"
+              />
+            </template>
+          </v-tooltip>
+          <span v-else>-</span>
         </div>
         <v-menu v-else-if="showRowActions" location="end">
           <template v-slot:activator="{ props }">
@@ -148,7 +156,7 @@
 import { ref, computed, watch, nextTick } from 'vue';
 import SearchBar from '../ui/SearchBar.vue';
 import FilteringPill from '../ui/FilteringPill.vue';
-import { EllipsisVertical, CircleCheckBig, BanknoteX, Info, ChevronRight, ChevronDown, CheckSquare, Square } from 'lucide-vue-next';
+import { EllipsisVertical, CircleCheckBig, BanknoteX, Info, ChevronRight, ChevronDown, CheckSquare, Square, CircleHelp } from 'lucide-vue-next';
 import EmptyStateImg from '@/assets/EmptyState.svg';
 
 interface Header {
@@ -180,12 +188,16 @@ interface Props {
   rowActionDisabled?: (item: any, actionItem: RowActionItem) => boolean;
   showBulkApprove?: boolean;
   showBulkReject?: boolean;
+  showBulkDownload?: boolean;
+  bulkApproveLabel?: string;
+  bulkRejectLabel?: string;
   bulkActionAvailable?: (items: any[]) => boolean;
+  itemSelectable?: string;
   showTableFooter?: boolean;
   showSelectionCheckboxes?: boolean;
   initialFilterPills?: Pill[];
   showActionIcons?: boolean;
-  actionIcons?: { icon: any; tooltip: string; onClick: (item: any) => void; class?: string; type?: 'approve' | 'reject' | 'info'; }[];
+  actionIcons?: { icon: any; tooltip: string; tooltipWhenDisabled?: string; onClick: (item: any) => void; class?: string; type?: 'approve' | 'reject' | 'info'; disabled?: (item: any) => boolean; }[];
   actionsClass?: string;
   searchPlaceholder?: string;
   showInternalUserActions?: boolean;
@@ -221,7 +233,11 @@ const props = withDefaults(defineProps<Props>(), {
   rowActionDisabled: () => false,
   showBulkApprove: false,
   showBulkReject: false,
+  showBulkDownload: true,
+  bulkApproveLabel: 'Approve',
+  bulkRejectLabel: 'Reject',
   bulkActionAvailable: () => true,
+  itemSelectable: undefined,
   showTableFooter: true,
   showSelectionCheckboxes: true,
   initialFilterPills: () => [],
@@ -247,6 +263,11 @@ const props = withDefaults(defineProps<Props>(), {
   defaultSortBy: () => [],
   customKeySort: () => ({}),
 });
+
+function isIconDisabled(item: any, iconDef: { type?: 'approve' | 'reject' | 'info'; disabled?: (item: any) => boolean }): boolean {
+  if (iconDef.disabled) return iconDef.disabled(item);
+  return (item.status === 'Approved' && iconDef.type !== 'approve') || (item.status === 'Rejected' && iconDef.type !== 'reject');
+}
 
 const searchTerm = ref('');
 const activeFilters = ref<Pill[]>([]);
@@ -448,7 +469,8 @@ const filteredItems = computed(() => {
   background-color: rgba(255, 255, 255, 0.4);
 }
 
-.bulk-action-btn {
+.bulk-action-btn,
+:slotted(.bulk-action-btn) {
   background: transparent;
   border: 1px solid $color-neutral-white;
   color: $color-neutral-white;
@@ -617,8 +639,13 @@ const filteredItems = computed(() => {
   }
 }
 
+.internal-action-icon {
+  color: $color-link;
+  cursor: pointer;
+}
+
 .disabled-icon {
-  pointer-events: none;
   cursor: not-allowed;
+  opacity: 0.4;
 }
 </style>

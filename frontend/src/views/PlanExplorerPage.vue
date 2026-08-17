@@ -106,7 +106,7 @@
                 <p class="text-body wizard-step-description">{{ wizardSteps[currentWizardStep].description }}</p>
               </div>
 
-              <div class="wizard-step-body">
+              <div class="wizard-step-body" @click.capture="handleWizardStepBodySaveClick">
                 <!-- Step 1: Account Profile -->
                 <template v-if="currentWizardStep === 0">
 
@@ -2781,11 +2781,107 @@
                           {{ step.status === 'complete' ? 'Complete' : step.status === 'in-progress' ? 'In Progress' : 'Not Started' }}
                         </span>
                         <button
-                          v-if="step.status !== 'complete'"
                           class="button vs-edit-btn"
                           @click="currentWizardStep = index"
-                        >Edit</button>
+                        >{{ step.status === 'complete' ? 'Review' : 'Edit' }}</button>
                       </div>
+                    </div>
+                  </div>
+
+                  <v-divider class="my-4" />
+
+                  <div class="vs-gps-section">
+                    <!-- Upload Inclusion/Exclusion Document -->
+                    <div class="ap-section">
+                      <div class="ap-section-header">
+                        <h4 class="text-h4">Upload Inclusion/Exclusion Document</h4>
+                        <button v-if="!gpsEditingIe" class="button button-thirtiary" @click="gpsIeStartEdit">
+                          <Pencil :size="14" :stroke-width="1.5" />Edit
+                        </button>
+                      </div>
+                      <template v-if="!gpsEditingIe">
+                        <div class="ap-field-row">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Inclusion/Exclusion Document</span>
+                            <span class="ap-field-value">{{ gpsIeFile || 'Not uploaded' }}</span>
+                          </div>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <p class="text-small bl-note mb-2">Required to generate the GPS below. Upload Clinical's completed Inclusion/Exclusion PDF — its pages will be included automatically.</p>
+                        <div class="bl-upload-item">
+                          <template v-if="gpsIeFile && !gpsPendingIeRemoval">
+                            <v-chip color="primary" variant="flat" class="bl-file-chip">
+                              <Paperclip :size="12" :stroke-width="2" class="bl-file-chip-icon" />
+                              <span class="bl-file-chip-label">{{ gpsIeFile }}</span>
+                              <span class="bl-file-chip-close" @click.stop="gpsPendingIeRemoval = true"><X :size="10" :stroke-width="2.5" /></span>
+                            </v-chip>
+                          </template>
+                          <FileUploader v-else :show-document-type-selection="false" @file-selected="(name) => { gpsIeFile = name; gpsPendingIeRemoval = false }" />
+                        </div>
+                        <div class="ap-section-footer">
+                          <button class="button button-primary" @click="gpsIeSaveEdit">Save Changes</button>
+                          <button class="button button-secondary" @click="gpsIeCancelEdit">Cancel</button>
+                        </div>
+                      </template>
+                    </div>
+
+                    <!-- Generate GPS Document -->
+                    <div class="ap-section">
+                      <div class="ap-section-header">
+                        <h4 class="text-h4">Generate GPS Document</h4>
+                      </div>
+                      <p v-if="wizardCompletionPercent !== 100" class="text-small bl-note mb-2">All steps above must be complete before generating.</p>
+                      <p v-else-if="!gpsIeFile || gpsPendingIeRemoval" class="text-small bl-note mb-2">Upload the Inclusion/Exclusion document before generating.</p>
+                      <button
+                        class="button button-primary vs-gps-generate-btn"
+                        :disabled="wizardCompletionPercent !== 100 || !gpsIeFile || gpsPendingIeRemoval"
+                        @click="generateGpsDocument"
+                      >
+                        <CloudDownload :size="16" :stroke-width="2" />Generate &amp; Download GPS
+                      </button>
+                      <template v-if="gpsGeneratedFile">
+                        <v-chip color="primary" variant="flat" class="bl-file-chip">
+                          <Paperclip :size="12" :stroke-width="2" class="bl-file-chip-icon" />
+                          <span class="bl-file-chip-label">{{ gpsGeneratedFile }}</span>
+                        </v-chip>
+                      </template>
+                    </div>
+
+                    <!-- Upload Signed GPS -->
+                    <div class="ap-section">
+                      <div class="ap-section-header">
+                        <h4 class="text-h4">Upload Signed GPS <span class="bl-required" aria-label="required">*</span></h4>
+                        <button v-if="!gpsEditingSigned && !gpsSignedFile" class="button button-thirtiary" @click="gpsSignedStartEdit">
+                          <Pencil :size="14" :stroke-width="1.5" />Edit
+                        </button>
+                      </div>
+                      <template v-if="!gpsEditingSigned">
+                        <div class="ap-field-row">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Signed GPS</span>
+                            <span class="ap-field-value">{{ gpsSignedFile || 'Not uploaded' }}</span>
+                          </div>
+                        </div>
+                        <p v-if="gpsSignedFile" class="text-small bl-note mt-2">To replace this file, upload a new version in Documents &gt; Plan &amp; Compliance.</p>
+                      </template>
+                      <template v-else>
+                        <p class="text-small bl-note mb-2">Required to finish Plan Setup. Once the client has signed and returned the GPS, upload it here to save it to Documents &gt; Plan &amp; Compliance.</p>
+                        <div class="bl-upload-item">
+                          <template v-if="gpsSignedFile && !gpsPendingSignedRemoval">
+                            <v-chip color="primary" variant="flat" class="bl-file-chip">
+                              <Paperclip :size="12" :stroke-width="2" class="bl-file-chip-icon" />
+                              <span class="bl-file-chip-label">{{ gpsSignedFile }}</span>
+                              <span class="bl-file-chip-close" @click.stop="gpsPendingSignedRemoval = true"><X :size="10" :stroke-width="2.5" /></span>
+                            </v-chip>
+                          </template>
+                          <FileUploader v-else :show-document-type-selection="false" @file-selected="(name) => { gpsSignedFile = name; gpsPendingSignedRemoval = false }" />
+                        </div>
+                        <div class="ap-section-footer">
+                          <button class="button button-primary" @click="gpsSignedSaveEdit">Save Changes</button>
+                          <button class="button button-secondary" @click="gpsSignedCancelEdit">Cancel</button>
+                        </div>
+                      </template>
                     </div>
                   </div>
                 </template>
@@ -2815,7 +2911,12 @@
                     @click="markCurrentStepIncomplete"
                   >Mark as Incomplete</button>
                   <button v-if="currentWizardStep < wizardSteps.length - 1" class="button button-primary" @click="nextWizardStep">Next</button>
-                  <button v-if="currentWizardStep === wizardSteps.length - 1" class="button button-primary" @click="finishPlanSetup">Finish Plan Setup</button>
+                  <button
+                    v-if="currentWizardStep === wizardSteps.length - 1"
+                    class="button button-primary"
+                    :disabled="wizardCompletionPercent !== 100 || !gpsSignedFile || gpsPendingSignedRemoval"
+                    @click="finishPlanSetup"
+                  >Finish Plan Setup</button>
                 </div>
               </div>
             </div>
@@ -4421,6 +4522,69 @@ const handleFormDownload = (formName: string) => {
   showToast(`${formName} downloaded successfully!`, 'success');
 };
 
+// Step 9: Verification & Summary — GPS document generation, I/E merge, signed upload
+const gpsGeneratedFile = ref('');
+const gpsIeFile = ref('');
+const gpsPendingIeRemoval = ref(false);
+const gpsSignedFile = ref('');
+const gpsPendingSignedRemoval = ref(false);
+
+const gpsAccountName = () => accountOptions.value.find(acc => acc.id === selectedAccount.value)?.name ?? 'Account';
+
+const generateGpsDocument = () => {
+  gpsGeneratedFile.value = `Group Plan Setup - ${gpsAccountName()}.pdf`;
+  showToast('GPS document generated successfully — Inclusion/Exclusion pages included!', 'success');
+};
+
+// Step 1 widget: Upload Inclusion/Exclusion Document
+const gpsEditingIe = ref(false);
+let gpsIeSnapshot: { ieFile: string } = { ieFile: '' };
+const gpsIeStartEdit = () => {
+  gpsIeSnapshot = { ieFile: gpsIeFile.value };
+  gpsEditingIe.value = true;
+};
+const gpsIeSaveEdit = () => {
+  if (gpsPendingIeRemoval.value) gpsIeFile.value = '';
+  gpsPendingIeRemoval.value = false;
+  gpsEditingIe.value = false;
+};
+const gpsIeCancelEdit = () => {
+  gpsIeFile.value = gpsIeSnapshot.ieFile;
+  gpsPendingIeRemoval.value = false;
+  gpsEditingIe.value = false;
+};
+
+// Step 3 widget: Upload Signed GPS
+const gpsEditingSigned = ref(false);
+let gpsSignedSnapshot: { signedFile: string } = { signedFile: '' };
+const gpsSignedStartEdit = () => {
+  gpsSignedSnapshot = { signedFile: gpsSignedFile.value };
+  gpsEditingSigned.value = true;
+};
+const gpsSignedSaveEdit = () => {
+  if (gpsPendingSignedRemoval.value) gpsSignedFile.value = '';
+  gpsPendingSignedRemoval.value = false;
+  gpsEditingSigned.value = false;
+
+  if (gpsSignedFile.value) {
+    documentsStore.addDocument({
+      documentName: gpsSignedFile.value,
+      type: gpsSignedFile.value.split('.').pop() ?? 'pdf',
+      uploadDate: new Date().toISOString().slice(0, 10),
+      lastModifiedBy: 'Implementation',
+      status: 'Published',
+      category: 'Plan & Compliance',
+      accountName: gpsAccountName(),
+    });
+    showToast('Signed GPS uploaded to Documents > Plan & Compliance!', 'success');
+  }
+};
+const gpsSignedCancelEdit = () => {
+  gpsSignedFile.value = gpsSignedSnapshot.signedFile;
+  gpsPendingSignedRemoval.value = false;
+  gpsEditingSigned.value = false;
+};
+
 const lcOverrides = [
   'Vacation Supply',
   'Lost/Stolen Meds',
@@ -4474,7 +4638,7 @@ const wizardSteps = ref([
   { name: 'Limits & Controls',      required: false, status: 'not-started',  description: 'Configure dispensing limits, high cost claim notifications, and manual claims handling for the account.' },
   { name: 'Billing',                required: false, status: 'not-started',  description: 'Configure billing preferences, payment terms, and invoice settings.' },
   { name: 'ID Cards',               required: false, status: 'not-started',  description: 'Set up member ID card design and distribution preferences.' },
-  { name: 'Verification & Summary', required: false, status: 'not-started',  description: 'Review the completion status of all configuration steps before finishing plan setup.' },
+  { name: 'Verification & Summary', required: false, status: 'not-started',  description: 'Review completion status and generate the final GPS document.' },
 ]);
 
 const wizardCompletionPercent = computed(() => {
@@ -4568,11 +4732,28 @@ const selectWizardStep = (index: number) => {
 };
 
 const nextWizardStep = () => {
-  if (wizardSteps.value[currentWizardStep.value].status === 'not-started') {
-    wizardSteps.value[currentWizardStep.value].status = 'in-progress';
-  }
   currentWizardStep.value++;
   window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+// Marks the current wizard step In Progress the moment any widget inside it is saved,
+// rather than waiting for the user to click Next — a step can be saved-into without ever
+// being navigated away from (e.g. the user saves one card then closes the tab).
+// Uses event delegation on the step body so every current and future "Save"-style button
+// is covered without having to instrument each individual save handler.
+const markCurrentStepInProgress = () => {
+  const step = wizardSteps.value[currentWizardStep.value];
+  if (step && step.status === 'not-started') {
+    step.status = 'in-progress';
+  }
+};
+
+const handleWizardStepBodySaveClick = (event: MouseEvent) => {
+  const target = event.target as HTMLElement | null;
+  const button = target?.closest('button');
+  if (button && /save|update|add|link|submit/i.test(button.textContent ?? '')) {
+    markCurrentStepInProgress();
+  }
 };
 
 const prevWizardStep = () => {
@@ -7834,6 +8015,17 @@ watch(selectedAccount, (newVal) => {
     background-color: rgba($color-neutral-disabled, 0.12);
     color: $color-neutral-disabled;
   }
+}
+
+.vs-gps-section {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-medium;
+}
+
+.vs-gps-generate-btn {
+  gap: $spacing-xsmall;
+  align-self: flex-start;
 }
 
 .vs-edit-btn {

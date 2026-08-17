@@ -53,7 +53,7 @@ const iconComponent = computed(() => {
   align-items: center;
   border: 1px solid;
   border-radius: 4px;
-  padding: $spacing-nano $spacing-xsmall;
+  padding: $spacing-xsmall $spacing-small;
   box-sizing: border-box;
 }
 
@@ -61,23 +61,23 @@ const iconComponent = computed(() => {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 32px; /* Adjust size as needed */
-  height: 32px; /* Adjust size as needed */
+  width: 40px; /* Adjust size as needed */
+  height: 40px; /* Adjust size as needed */
   border-radius: 50%;
-  margin-right: $spacing-xsmall;
+  margin-right: $spacing-small;
   flex-shrink: 0;
 }
 
 .icon {
   color: $color-neutral-white; /* Set icon color to white */
-  font-size: 1.2rem;
+  font-size: 1.5rem;
 }
 
 .message {
   flex-grow: 1; /* Allow message to take up available space */
-  font-size: 0.8rem;
+  font-size: $font-size-body;
   font-weight: 400;
-  line-height: 120%;
+  line-height: 130%;
   margin: 0;
 }
 

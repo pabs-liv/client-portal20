@@ -183,23 +183,18 @@
       </template>
       <template #filter-status="{ filter }">
         <p class="filter-section-label">{{ filter.label }}</p>
-        <div class="approval-radio-group">
-          <label
-            v-for="option in ['Any', 'Approved', 'Pending', 'Rejected']"
-            :key="option"
-            class="approval-radio-option"
+        <div>
+          <div
+            v-for="opt in filter.options"
+            :key="String(opt.value)"
+            class="account-option"
+            @click="toggleDialogStatus(opt.value as string)"
           >
-            <input
-              type="radio"
-              :value="option === 'Any' ? '' : option"
-              v-model="dialogStatus"
-              class="approval-radio-input"
-            />
-            <span class="approval-radio-custom" :class="{ active: option === 'Any' ? dialogStatus === '' : dialogStatus === option }">
-              <span v-if="option === 'Any' ? dialogStatus === '' : dialogStatus === option" class="approval-radio-dot" />
-            </span>
-            <span class="approval-radio-label">{{ option }}</span>
-          </label>
+            <div class="acct-checkbox" :class="{ active: dialogStatuses.includes(opt.value as string) }">
+              <Check v-if="dialogStatuses.includes(opt.value as string)" :size="12" :stroke-width="3" />
+            </div>
+            <span>{{ opt.text }}</span>
+          </div>
         </div>
       </template>
     </AdvancedFiltersDialog>
@@ -281,7 +276,7 @@ const appliedTestDateTo = ref('');
 const appliedApprovedBy = ref<string[]>([]);
 const appliedApprovedDateFrom = ref('');
 const appliedApprovedDateTo = ref('');
-const appliedStatus = ref('');
+const appliedStatuses = ref<string[]>([]);
 
 // Dialog draft state — only committed when Apply is clicked
 const dialogAccounts = ref<string[]>([]);
@@ -290,7 +285,13 @@ const dialogTestDateTo = ref('');
 const dialogApprovedBy = ref<string[]>([]);
 const dialogApprovedDateFrom = ref('');
 const dialogApprovedDateTo = ref('');
-const dialogStatus = ref('');
+const dialogStatuses = ref<string[]>([]);
+
+const toggleDialogStatus = (value: string) => {
+  dialogStatuses.value = dialogStatuses.value.includes(value)
+    ? dialogStatuses.value.filter(v => v !== value)
+    : [...dialogStatuses.value, value];
+};
 
 const accountSearch = ref('');
 const showAccountList = ref(false);
@@ -461,12 +462,19 @@ const handleApprovedByPickerBlur = () => {
   setTimeout(() => { showApprovedByList.value = false; }, 150);
 };
 
+const testResultStatusOptions = [
+  { text: 'Pending', value: 'Pending', active: false },
+  { text: 'Approved', value: 'Approved', active: false },
+  { text: 'Rejected', value: 'Rejected', active: false },
+];
+
+// Status is always last in the filter list, for consistency across pages.
 const testResultFilters = computed<FilterGroup[]>(() => [
   { type: 'account', label: 'Account', multiselect: true, options: [], modelValue: null },
   { type: 'dateRange', label: 'Test Date Range', multiselect: false, options: [], modelValue: null },
   { type: 'approvedBy', label: 'Approved By', multiselect: true, options: [], modelValue: null },
   { type: 'approvedDateRange', label: 'Approved Date Range', multiselect: false, options: [], modelValue: null },
-  { type: 'status', label: 'Status', multiselect: false, options: [], modelValue: null },
+  { type: 'status', label: 'Status', multiselect: true, options: testResultStatusOptions, modelValue: null },
 ]);
 
 const dateRangeFilter = computed(() => testResultFilters.value.find(f => f.type === 'dateRange'));
@@ -478,7 +486,7 @@ const openFilters = () => {
   dialogApprovedBy.value = [...appliedApprovedBy.value];
   dialogApprovedDateFrom.value = appliedApprovedDateFrom.value;
   dialogApprovedDateTo.value = appliedApprovedDateTo.value;
-  dialogStatus.value = appliedStatus.value;
+  dialogStatuses.value = [...appliedStatuses.value];
   accountSearch.value = '';
   showAccountList.value = false;
   approvedBySearch.value = '';
@@ -493,7 +501,7 @@ const applyFilters = () => {
   appliedApprovedBy.value = [...dialogApprovedBy.value];
   appliedApprovedDateFrom.value = dialogApprovedDateFrom.value;
   appliedApprovedDateTo.value = dialogApprovedDateTo.value;
-  appliedStatus.value = dialogStatus.value;
+  appliedStatuses.value = [...dialogStatuses.value];
   isAdvancedFiltersOpen.value = false;
 };
 
@@ -528,9 +536,9 @@ const activeFilterPills = computed<FilterPill[]>(() => {
     const parts = [appliedApprovedDateFrom.value, appliedApprovedDateTo.value].filter(Boolean).map(formatDateDisplay);
     pills.push({ type: 'approvedDateRange', value: null, label: `Approved Date: ${parts.join(' – ')}`, isActive: true });
   }
-  if (appliedStatus.value) {
-    pills.push({ type: 'status', value: appliedStatus.value, label: appliedStatus.value, isActive: true });
-  }
+  appliedStatuses.value.forEach(status => {
+    pills.push({ type: 'status', value: status, label: status, isActive: true });
+  });
   return pills;
 });
 
@@ -546,7 +554,7 @@ const handleFilterPillClose = (pill: FilterPill) => {
     appliedApprovedDateFrom.value = '';
     appliedApprovedDateTo.value = '';
   } else if (pill.type === 'status') {
-    appliedStatus.value = '';
+    appliedStatuses.value = appliedStatuses.value.filter(v => v !== pill.value);
   }
 };
 
@@ -580,8 +588,8 @@ const filteredTestResultsData = computed(() => {
       return approved >= fromTs && approved <= toTs;
     });
   }
-  if (appliedStatus.value) {
-    items = items.filter(item => item.status === appliedStatus.value);
+  if (appliedStatuses.value.length > 0) {
+    items = items.filter(item => appliedStatuses.value.includes(item.status));
   }
   return items;
 });
@@ -739,54 +747,4 @@ const pendingReports = computed(() => testResultsData.value.filter(item => item.
   }
 }
 
-.approval-radio-group {
-  display: flex;
-  flex-direction: row;
-  gap: $spacing-large;
-  margin-bottom: $spacing-small;
-}
-
-.approval-radio-option {
-  display: flex;
-  align-items: center;
-  gap: $spacing-small;
-  padding: $spacing-xsmall 0;
-  cursor: pointer;
-
-  &:hover .approval-radio-custom {
-    border-color: $color-primary;
-  }
-}
-
-.approval-radio-input {
-  display: none;
-}
-
-.approval-radio-custom {
-  width: 18px;
-  height: 18px;
-  border: 2px solid $color-border;
-  border-radius: 50%;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: border-color 0.15s;
-
-  &.active {
-    border-color: $color-primary;
-  }
-}
-
-.approval-radio-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: $color-primary;
-}
-
-.approval-radio-label {
-  font-size: $font-size-body;
-  color: var(--color-text-primary);
-}
 </style>
