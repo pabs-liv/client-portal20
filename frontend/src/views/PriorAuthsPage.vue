@@ -64,7 +64,6 @@
         :show-filter-button="false"
         :show-filter-pills="false"
         :show-selection-checkboxes="isExternal"
-        item-selectable="selectable"
         :show-action-icons="isExternal"
         :action-icons="actionIcons"
         :show-internal-user-actions="!isExternal"
@@ -192,7 +191,14 @@
           </tr>
         </tbody>
       </table>
-      <v-textarea v-model="assistanceNotes" label="Notes" variant="outlined" hide-details class="mt-3" />
+      <v-textarea
+        v-model="assistanceNotes"
+        label="Notes"
+        variant="outlined"
+        maxlength="1000"
+        counter
+        class="mt-3"
+      />
     </Dialog>
 
     <Dialog
@@ -314,13 +320,13 @@ function getStatusBucket(rawStatus: string): 'Pending' | 'Approved' | 'Denied' {
   return 'Pending';
 }
 
-// Once assistance has been requested (notes set), the claim is done being
-// actionable by the client — checkbox selection and the request icon both
-// gray out, mirroring HCC's canAcknowledge/selectable pattern.
+// Every claim row stays selectable and Request Clinical Assistance stays
+// available regardless of prior requests — mirrors HCC's pattern (confirmed
+// against the old portal's actual RequestMoreInformation/
+// RequestClinicalAssistance handlers, neither of which locks re-requesting).
 const tableItems = computed(() =>
   filteredPriorAuthData.value.map(item => ({
     ...item,
-    selectable: !item.notes,
   }))
 );
 
@@ -375,8 +381,6 @@ const actionIcons = ref([
   {
     icon: Info,
     tooltip: 'Request Clinical Assistance',
-    tooltipWhenDisabled: 'Assistance Requested',
-    disabled: (item: any) => !!item.notes,
     onClick: (item: any) => openAssistanceDialog([item]),
   },
 ]);

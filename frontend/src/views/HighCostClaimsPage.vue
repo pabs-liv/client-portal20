@@ -37,7 +37,7 @@
 
     <PageCard
       headerText="High Cost Claim Manager"
-      :descriptionText="isExternal ? 'Review claims, acknowledge or ask questions about high cost claims and take advantage of savings for your members.' : 'Review claims and acknowledge client questions about high cost claims.'"
+      :descriptionText="isExternal ? 'Review, acknowledge, or ask questions about high-cost claims.' : 'Review high-cost claims and monitor clinical assistance requests submitted by clients.'"
     >
       <Banner
         variant="warning"
@@ -71,7 +71,6 @@
         :show-filter-button="false"
         :show-filter-pills="false"
         :show-selection-checkboxes="isExternal"
-        item-selectable="selectable"
         :show-row-actions="isExternal"
         :row-action-items="rowActionItems"
         :row-action-disabled="rowActionDisabled"
@@ -90,20 +89,12 @@
           </v-chip>
         </template>
         <template #item.assistanceRequested="{ item }">
-          <v-tooltip v-if="isExternal && (item as any).notes" text="Assistance Requested">
+          <v-tooltip
+            v-if="(item as any).notes"
+            :text="`Assistance Requested by ${(item as any).requestedBy} on ${formatRequestedDate((item as any).requestedDate)}`"
+          >
             <template #activator="{ props: tooltipProps }">
               <CircleHelp v-bind="tooltipProps" :size="18" :stroke-width="1.5" class="assistance-requested-icon" />
-            </template>
-          </v-tooltip>
-          <v-tooltip v-else-if="!isExternal && (item as any).notes" text="View Assistance Request">
-            <template #activator="{ props: tooltipProps }">
-              <CircleHelp
-                v-bind="tooltipProps"
-                :size="18"
-                :stroke-width="1.5"
-                class="assistance-requested-icon assistance-requested-icon--clickable"
-                @click="openAssistanceInfoDialog(item)"
-              />
             </template>
           </v-tooltip>
         </template>
@@ -176,22 +167,28 @@
           <v-text-field
             v-model="dialogMinCost"
             type="number"
+            min="0"
+            step="1000"
             variant="outlined"
             density="compact"
             prefix="$"
             label="Minimum"
             placeholder="e.g. 25000"
-            hide-details
+            :rules="[(v: string) => v === '' || Number(v) >= 0 || 'Enter a positive amount']"
+            hide-details="auto"
           />
           <v-text-field
             v-model="dialogMaxCost"
             type="number"
+            min="0"
+            step="1000"
             variant="outlined"
             density="compact"
             prefix="$"
             label="Maximum"
             placeholder="e.g. 100000"
-            hide-details
+            :rules="[(v: string) => v === '' || Number(v) >= 0 || 'Enter a positive amount']"
+            hide-details="auto"
           />
         </div>
       </template>
@@ -255,40 +252,14 @@
           </tr>
         </tbody>
       </table>
-      <v-textarea v-model="assistanceNotes" label="Notes" variant="outlined" hide-details class="mt-3" />
-    </Dialog>
-
-    <Dialog
-      :model-value="showAssistanceInfoDialog"
-      @update:model-value="showAssistanceInfoDialog = $event"
-      :icon="CircleHelp"
-      heading="Clinical Assistance Requested"
-      :actions="assistanceInfoDialogActions"
-    >
-      <p class="text-body mb-small">
-        The client has requested clinical assistance for the following claim. Please follow up as soon as possible.
-      </p>
-      <table class="claim-summary-table" v-if="selectedAssistanceClaim">
-        <thead>
-          <tr>
-            <th>Account</th>
-            <th>EOC ID</th>
-            <th>Drug Name</th>
-            <th>Cost</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>{{ selectedAssistanceClaim.accountName }}</td>
-            <td>{{ selectedAssistanceClaim.eocId }}</td>
-            <td>{{ selectedAssistanceClaim.drugName }}</td>
-            <td>{{ selectedAssistanceClaim.cost }}</td>
-          </tr>
-        </tbody>
-      </table>
-      <p class="text-small text-neutral-disabled mt-small">
-        Notes: {{ selectedAssistanceClaim?.notes }}
-      </p>
+      <v-textarea
+        v-model="assistanceNotes"
+        label="Notes"
+        variant="outlined"
+        maxlength="1000"
+        counter
+        class="mt-3"
+      />
     </Dialog>
 
     <v-snackbar v-model="showSuccessSnackbar" :timeout="3000" color="success">
@@ -341,11 +312,11 @@ const claimsHeaders = computed(() => {
 // that — mock costs reflect realistic specialty-drug pricing, not the old
 // low-dollar placeholder amounts.
 const claimsData = ref([
-  { id: 157826931, eocId: 'EOC30021', accountName: 'Company A', drugName: 'Drug A', ndc: '00071-0155-23', claimDate: '2025-07-15', quantity: 1, daysSupply: 30, cost: '$12,450.00', status: 'Pending', notes: null as string | null },
-  { id: 158088181, eocId: 'EOC30047', accountName: 'Company B', drugName: 'Drug B', ndc: '00069-0944-30', claimDate: '2025-07-14', quantity: 2, daysSupply: 90, cost: '$45,800.00', status: 'Acknowledged', notes: null as string | null },
-  { id: 158480891, eocId: 'EOC30058', accountName: 'Company C', drugName: 'Drug C', ndc: '00078-0421-15', claimDate: '2025-07-13', quantity: 4, daysSupply: 30, cost: '$18,750.00', status: 'Pending', notes: 'Can you confirm if a savings program applies to this claim?' as string | null },
-  { id: 152987510, eocId: 'EOC30063', accountName: 'Company D', drugName: 'Drug D', ndc: '00006-0749-31', claimDate: '2025-07-12', quantity: 1, daysSupply: 28, cost: '$92,300.00', status: 'Acknowledged', notes: null as string | null },
-  { id: 153219641, eocId: 'EOC30079', accountName: 'Company E', drugName: 'Drug E', ndc: '00173-0879-00', claimDate: '2025-07-11', quantity: 3, daysSupply: 84, cost: '$61,200.00', status: 'Pending', notes: null as string | null },
+  { id: 157826931, eocId: 'EOC30021', accountName: 'Company A', drugName: 'Drug A', ndc: '00071-0155-23', claimDate: '2025-07-15', quantity: 1, daysSupply: 30, cost: '$12,450.00', status: 'Pending', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null },
+  { id: 158088181, eocId: 'EOC30047', accountName: 'Company B', drugName: 'Drug B', ndc: '00069-0944-30', claimDate: '2025-07-14', quantity: 2, daysSupply: 90, cost: '$45,800.00', status: 'Acknowledged', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null },
+  { id: 158480891, eocId: 'EOC30058', accountName: 'Company C', drugName: 'Drug C', ndc: '00078-0421-15', claimDate: '2025-07-13', quantity: 4, daysSupply: 30, cost: '$18,750.00', status: 'Pending', notes: 'Can you confirm if a savings program applies to this claim?' as string | null, requestedBy: 'Jane Doe' as string | null, requestedDate: '2025-07-16' as string | null },
+  { id: 152987510, eocId: 'EOC30063', accountName: 'Company D', drugName: 'Drug D', ndc: '00006-0749-31', claimDate: '2025-07-12', quantity: 1, daysSupply: 28, cost: '$92,300.00', status: 'Acknowledged', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null },
+  { id: 153219641, eocId: 'EOC30079', accountName: 'Company E', drugName: 'Drug E', ndc: '00173-0879-00', claimDate: '2025-07-11', quantity: 3, daysSupply: 84, cost: '$61,200.00', status: 'Pending', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null },
 ]);
 
 // The checkbox itself only grays out once a claim is fully wrapped up —
@@ -354,6 +325,10 @@ const claimsData = ref([
 // selected to bulk-request assistance). The kebab's Acknowledge item is
 // available any time a claim is still Pending — Pending means only "not
 // yet acknowledged by the client," nothing more.
+// Every claim row stays selectable regardless of status or prior assistance
+// requests — Request Clinical Assistance is always available (even after
+// Acknowledge, and even if a request is already open), so a claim never
+// reaches a state with nothing left to do.
 const tableItems = computed(() =>
   filteredClaimsData.value.map(claim => {
     const assistanceRequested = !!claim.notes;
@@ -361,7 +336,6 @@ const tableItems = computed(() =>
       ...claim,
       assistanceRequested,
       canAcknowledge: claim.status !== 'Acknowledged',
-      selectable: !(claim.status === 'Acknowledged' && assistanceRequested),
     };
   })
 );
@@ -438,15 +412,21 @@ const openAssistanceDialog = (items: any[]) => {
 
 const confirmAssistanceRequest = () => {
   const requestedIds = pendingAssistanceItems.value.map(claim => claim.id);
+  // Design placeholder — production pulls the logged-in user's name instead
+  // of this hardcoded string.
+  const requestedBy = 'Current User';
+  const requestedDate = new Date().toISOString().slice(0, 10);
   claimsData.value.forEach(claim => {
     if (requestedIds.includes(claim.id)) {
       claim.notes = assistanceNotes.value;
+      claim.requestedBy = requestedBy;
+      claim.requestedDate = requestedDate;
     }
   });
   const count = pendingAssistanceItems.value.length;
   showAssistanceDialog.value = false;
   claimsTable.value?.clearSelection();
-  successSnackbarText.value = `Request sent for ${count} claim${count > 1 ? 's' : ''}`;
+  successSnackbarText.value = `Clinical assistance request sent for ${count} claim${count > 1 ? 's' : ''}`;
   showSuccessSnackbar.value = true;
   pendingAssistanceItems.value = [];
 };
@@ -456,19 +436,13 @@ const assistanceDialogActions = computed(() => [
   { text: 'Send Request', onClick: confirmAssistanceRequest, color: 'primary', variant: 'flat' as const, disabled: assistanceNotes.value.trim() === '' },
 ]);
 
-// === VIEW ASSISTANCE REQUEST (internal users only, read-only) === //
-
-const showAssistanceInfoDialog = ref(false);
-const selectedAssistanceClaim = ref<any>(null);
-
-const openAssistanceInfoDialog = (item: any) => {
-  selectedAssistanceClaim.value = item;
-  showAssistanceInfoDialog.value = true;
+// The assistance indicator's tooltip shows the requestor and date of the
+// most recent request — same for external and internal, no separate
+// internal-only view. See formatRequestedDate below.
+const formatRequestedDate = (dateString: string | null) => {
+  if (!dateString) return '';
+  return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 };
-
-const assistanceInfoDialogActions = [
-  { text: 'Close', onClick: () => (showAssistanceInfoDialog.value = false), styleType: 'primary' as const },
-];
 
 const rowActionItems = [
   { label: 'Acknowledge', action: 'acknowledge' },
