@@ -380,6 +380,8 @@
                     <v-row>
                       <v-col cols="12"><TextField v-model="apContactForm.phone" label="Phone" /></v-col>
                     </v-row>
+                    <v-checkbox v-model="apContactForm.allowPhi" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox" label="Allow access to PHI" />
+                    <p class="text-small ap-role-note">Allows this contact to receive PHI in any communication — email, phone, or mail — not just within the Client Portal.</p>
 
                     <v-divider class="my-4" />
                     <h5 class="ap-subsection-heading">Client Portal Access</h5>
@@ -390,7 +392,6 @@
                       <div class="ap-permission-grid">
                         <v-checkbox v-for="perm in apPermissionOptions" :key="perm.key" v-model="apContactForm.permissions[perm.key]" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox" :label="perm.label" />
                       </div>
-                      <v-checkbox v-model="apContactForm.allowPhi" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox" label="Allow PHI access (Client Portal only)" />
                     </template>
                     <h6 class="ap-subsection-heading">Contact Designations</h6>
                     <v-checkbox
@@ -430,6 +431,8 @@
                     <v-row>
                       <v-col cols="12"><TextField v-model="apEditContactForm.phone" label="Phone" /></v-col>
                     </v-row>
+                    <v-checkbox v-model="apEditContactForm.allowPhi" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox" label="Allow access to PHI" />
+                    <p class="text-small ap-role-note">Allows this contact to receive PHI in any communication — email, phone, or mail — not just within the Client Portal.</p>
 
                     <v-divider class="my-4" />
                     <h5 class="ap-subsection-heading">Client Portal Access</h5>
@@ -440,7 +443,6 @@
                       <div class="ap-permission-grid">
                         <v-checkbox v-for="perm in apPermissionOptions" :key="perm.key" v-model="apEditContactForm.permissions[perm.key]" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox" :label="perm.label" />
                       </div>
-                      <v-checkbox v-model="apEditContactForm.allowPhi" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox" label="Allow PHI access (Client Portal only)" />
                     </template>
                     <h6 class="ap-subsection-heading">Contact Designations</h6>
                     <v-checkbox
