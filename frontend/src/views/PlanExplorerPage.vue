@@ -2842,12 +2842,6 @@
                       >
                         <CloudDownload :size="16" :stroke-width="2" />Generate &amp; Download GPS
                       </button>
-                      <template v-if="gpsGeneratedFile">
-                        <v-chip color="primary" variant="flat" class="bl-file-chip">
-                          <Paperclip :size="12" :stroke-width="2" class="bl-file-chip-icon" />
-                          <span class="bl-file-chip-label">{{ gpsGeneratedFile }}</span>
-                        </v-chip>
-                      </template>
                     </div>
 
                     <!-- Upload Signed GPS -->
@@ -4525,7 +4519,6 @@ const handleFormDownload = (formName: string) => {
 };
 
 // Step 9: Verification & Summary — GPS document generation, I/E merge, signed upload
-const gpsGeneratedFile = ref('');
 const gpsIeFile = ref('');
 const gpsPendingIeRemoval = ref(false);
 const gpsSignedFile = ref('');
@@ -4534,7 +4527,6 @@ const gpsPendingSignedRemoval = ref(false);
 const gpsAccountName = () => accountOptions.value.find(acc => acc.id === selectedAccount.value)?.name ?? 'Account';
 
 const generateGpsDocument = () => {
-  gpsGeneratedFile.value = `Group Plan Setup - ${gpsAccountName()}.pdf`;
   showToast('GPS document generated successfully — Inclusion/Exclusion pages included!', 'success');
 };
 
@@ -4644,8 +4636,9 @@ const wizardSteps = ref([
 ]);
 
 const wizardCompletionPercent = computed(() => {
-  const completed = wizardSteps.value.filter(s => s.status === 'complete').length;
-  return Math.round((completed / wizardSteps.value.length) * 100);
+  const trackedSteps = wizardSteps.value.slice(0, 8);
+  const completed = trackedSteps.filter(s => s.status === 'complete').length;
+  return Math.round((completed / trackedSteps.length) * 100);
 });
 
 const implementationSteps = ref([
