@@ -257,13 +257,20 @@
             :show-selection-checkboxes="false"
           >
             <template #item.permissionsLabel="{ item }"><span class="ua-permissions-cell">{{ item.permissionsLabel }}</span></template>
-            <template #item.activated="{ item }">{{ item.activated ? 'Yes' : 'No' }}</template>
+            <template #item.activated="{ item }">
+              <Check v-if="item.activated" :size="16" :stroke-width="2" class="ua-table-check" />
+              <span v-else>—</span>
+            </template>
             <template #item.mainPoc="{ item }">
               <Check v-if="item.mainPoc" :size="16" :stroke-width="2" class="ua-table-check" />
               <span v-else>—</span>
             </template>
             <template #item.surveyContact="{ item }">
               <Check v-if="item.surveyContact" :size="16" :stroke-width="2" class="ua-table-check" />
+              <span v-else>—</span>
+            </template>
+            <template #item.allowPhi="{ item }">
+              <Check v-if="item.allowPhi" :size="16" :stroke-width="2" class="ua-table-check" />
               <span v-else>—</span>
             </template>
           </ReportDataTable>
@@ -1894,6 +1901,7 @@ const userAdminHeaders = ref([
   { title: 'Activated', key: 'activated', align: 'center' },
   { title: 'Main POC', key: 'mainPoc', align: 'center' },
   { title: 'Survey Contact', key: 'surveyContact', align: 'center' },
+  { title: 'Allow PHI', key: 'allowPhi', align: 'center' },
   { title: '', key: 'actions', align: 'end', sortable: false },
 ]);
 
