@@ -18,9 +18,6 @@
           <template v-if="item.title === 'Home'">
             <House :stroke-width="1" class="nav-icon" />
           </template>
-          <template v-else-if="item.title === 'Approvals'">
-            <CircleCheckBig  :stroke-width="1" class="nav-icon"  />
-          </template>
           <template v-else-if="item.title === 'Reports'">
             <FileChartColumnIncreasing  :stroke-width="1" class="nav-icon"  />
           </template>
@@ -72,14 +69,13 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { House, CircleCheckBig, FileChartColumnIncreasing, FileText, Tablets, RotateCcwKey, ScrollText, Blocks, CircleGauge, MonitorCog } from 'lucide-vue-next';
+import { House, FileChartColumnIncreasing, FileText, Tablets, RotateCcwKey, ScrollText, Blocks, CircleGauge, MonitorCog } from 'lucide-vue-next';
 import { useUserType } from '@/composables/useUserType';
 
 const { isExternal } = useUserType();
 
 const navItems = ref([
   { title: 'Home', to: '/' },
-  { title: 'Approvals', to: '/approvals' },
   { title: 'Reports', to: '/reports' },
   { title: 'Documents', to: '/documents' },
   { title: 'High-Cost Claims', to: '/high-cost-claims' },
@@ -92,7 +88,7 @@ const navItems = ref([
 
 const filteredNavItems = computed(() => {
   return navItems.value.filter(item => {
-    if ((item.title === 'Approvals' || item.title === 'Test Results') && isExternal.value) {
+    if (item.title === 'Test Results' && isExternal.value) {
       return false;
     }
     return true;

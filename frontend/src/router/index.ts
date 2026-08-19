@@ -1,7 +1,6 @@
 
 import { createRouter, createWebHistory } from 'vue-router';
 import HomePage from '@/views/HomePage.vue';
-import ApprovalsPage from '@/views/ApprovalsPage.vue';
 import ReportsPage from '@/views/ReportsPage.vue';
 import DocumentsPage from '@/views/DocumentsPage.vue';
 import HighCostClaimsPage from '@/views/HighCostClaimsPage.vue';
@@ -14,7 +13,6 @@ import SettingsPage from '@/views/SettingsPage.vue';
 
 const routes = [
   { path: '/', name: 'Home', component: HomePage, meta: { breadcrumb: 'Home' } },
-  { path: '/approvals', name: 'Approvals', component: ApprovalsPage, meta: { breadcrumb: 'Approvals' } },
   { path: '/reports', name: 'Reports', component: ReportsPage, meta: { breadcrumb: 'Reports' } },
   { path: '/documents', name: 'Documents', component: DocumentsPage, meta: { breadcrumb: 'Documents' } },
   { path: '/high-cost-claims', name: 'Claims', component: HighCostClaimsPage, meta: { breadcrumb: 'High-Cost Claims' } },

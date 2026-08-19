@@ -39,7 +39,7 @@
         :icon="ChartNoAxesCombined"
         iconBackgroundColor="#FFF3E0"
         iconColor="#FF9800"
-        @click="goToApprovals"
+        @click="goToHighCostClaims"
       />
       <SummaryWidget
         title="Prior Authorizations"
@@ -204,8 +204,8 @@ const goToReports = () => {
   router.push('/reports');
 };
 
-const goToApprovals = () => {
-  router.push('/approvals');
+const goToHighCostClaims = () => {
+  router.push('/high-cost-claims');
 };
 
 const goToPriorAuths = () => {
