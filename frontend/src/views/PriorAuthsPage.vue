@@ -2,7 +2,7 @@
 <template>
   <div>
     <h1 class="text-h1 mb-large">Prior Authorizations</h1>
-    <div class="widgets-container mb-large">
+    <div v-if="isExternal" class="widgets-container mb-large">
       <SummaryWidget
         title="Pending"
         :count="pendingCount"
@@ -36,7 +36,7 @@
     </div>
     <PageCard
       headerText="Prior Authorization Manager"
-      :descriptionText="isExternal ? 'Review the status of your prior authorizations and request clinical assistance if you have questions about a submission.' : 'Review prior authorization statuses and respond to client requests for clinical assistance.'"
+      :descriptionText="isExternal ? 'Review the status of your prior authorizations, or ask a question about a submission.' : 'Review prior authorization statuses and monitor clinical assistance requests submitted by clients.'"
     >
       <div class="search-filter-row">
         <div class="search-bar-wrapper">
@@ -66,9 +66,6 @@
         :show-selection-checkboxes="isExternal"
         :show-action-icons="isExternal"
         :action-icons="actionIcons"
-        :show-internal-user-actions="!isExternal"
-        :internal-user-action-formatter="formatInternalUserAction"
-        :internal-user-action-click-handler="openAssistanceInfoDialog"
         :show-row-actions="false"
         :show-bulk-approve="false"
         :show-bulk-reject="false"
@@ -83,6 +80,16 @@
             :category="getStatusDisplay((item as any).rawStatus).category"
             :label="getStatusDisplay((item as any).rawStatus).label"
           />
+        </template>
+        <template #item.assistanceRequested="{ item }">
+          <v-tooltip
+            v-if="(item as any).notes"
+            :text="`Assistance Requested by ${(item as any).requestedBy} on ${formatRequestedDate((item as any).requestedDate)}`"
+          >
+            <template #activator="{ props: tooltipProps }">
+              <CircleHelp v-bind="tooltipProps" :size="18" :stroke-width="1.5" class="assistance-requested-icon" />
+            </template>
+          </v-tooltip>
         </template>
       </ReportDataTable>
     </PageCard>
@@ -201,37 +208,6 @@
       />
     </Dialog>
 
-    <Dialog
-      :model-value="showAssistanceInfoDialog"
-      @update:model-value="showAssistanceInfoDialog = $event"
-      :icon="CircleHelp"
-      heading="Clinical Assistance Requested"
-      :actions="assistanceInfoDialogActions"
-    >
-      <p class="text-body mb-small">
-        The client has requested clinical assistance for the following authorization. Please follow up as soon as possible.
-      </p>
-      <table class="claim-summary-table" v-if="selectedAssistanceClaim">
-        <thead>
-          <tr>
-            <th>Account</th>
-            <th>EOC ID</th>
-            <th>Drug Name</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>{{ selectedAssistanceClaim.accountName }}</td>
-            <td>{{ selectedAssistanceClaim.eocId }}</td>
-            <td>{{ selectedAssistanceClaim.drugName }}</td>
-          </tr>
-        </tbody>
-      </table>
-      <p class="text-small text-neutral-disabled mt-small">
-        Notes: {{ selectedAssistanceClaim?.notes }}
-      </p>
-    </Dialog>
-
     <v-snackbar v-model="showSuccessSnackbar" :timeout="3000" color="success">
       {{ successSnackbarText }}
     </v-snackbar>
@@ -257,30 +233,36 @@ import type { FilterPill } from '@/components/ui/FilteringPill.vue';
 // No fixed widths — mixing fixed and auto-sized columns causes the browser's
 // table-layout:auto algorithm to dump all leftover space into whichever
 // flexible column sits next to the fixed ones (same bug fixed on HCC).
-const priorAuthHeaders = ref([
-  { title: 'Account Name', key: 'accountName' },
-  { title: 'EOC ID', key: 'eocId' },
-  { title: 'Drug Name', key: 'drugName' },
-  { title: 'Submission Date', key: 'submissionDate', align: 'end' },
-  { title: 'Status', key: 'status' },
-  { title: 'Actions', key: 'actions', sortable: false, align: 'end' },
-]);
+const priorAuthHeaders = computed(() => {
+  const headers: any[] = [
+    { title: 'Account Name', key: 'accountName' },
+    { title: 'EOC ID', key: 'eocId' },
+    { title: 'Drug Name', key: 'drugName' },
+    { title: 'Submission Date', key: 'submissionDate', align: 'end' },
+    { title: 'Status', key: 'status' },
+    { title: 'Assistance', key: 'assistanceRequested', align: 'center', sortable: false },
+  ];
+  if (isExternal.value) {
+    headers.push({ title: 'Actions', key: 'actions', sortable: false, align: 'end' });
+  }
+  return headers;
+});
 
 // Raw statuses mirror the Member Portal's prior authorization pipeline —
 // several sign-off sub-statuses all display as "Under Review". notes mirrors
 // HCC's model: a real flag for "client has requested clinical assistance,"
 // not a guess derived from status.
 const priorAuthData = ref([
-  { accountName: 'Company A', eocId: 'EOC12345', drugName: 'Drug A', rawStatus: 'Submitted', submissionDate: '2025-07-01', notes: null as string | null },
-  { accountName: 'Company B', eocId: 'EOC67890', drugName: 'Drug B', rawStatus: 'Approved', submissionDate: '2025-06-25', notes: null as string | null },
-  { accountName: 'Company C', eocId: 'EOC11223', drugName: 'Drug C', rawStatus: 'Rejected', submissionDate: '2025-06-20', notes: null as string | null },
-  { accountName: 'Company D', eocId: 'EOC44556', drugName: 'Drug D', rawStatus: 'RPH Sign-Off', submissionDate: '2025-07-05', notes: 'Can you confirm the expected turnaround time for this authorization?' as string | null },
-  { accountName: 'Company E', eocId: 'EOC77889', drugName: 'Drug E', rawStatus: 'Approved', submissionDate: '2025-06-18', notes: null as string | null },
-  { accountName: 'Company F', eocId: 'EOC99001', drugName: 'Drug F', rawStatus: 'Show Review', submissionDate: '2025-07-10', notes: null as string | null },
-  { accountName: 'Company G', eocId: 'EOC22334', drugName: 'Drug G', rawStatus: 'Submitted', submissionDate: '2025-06-15', notes: null as string | null },
-  { accountName: 'Company H', eocId: 'EOC55667', drugName: 'Drug H', rawStatus: 'MD Sign-Off', submissionDate: '2025-07-02', notes: null as string | null },
-  { accountName: 'Company I', eocId: 'EOC88990', drugName: 'Drug I', rawStatus: 'Client Sign-Off', submissionDate: '2025-06-28', notes: 'What additional documentation is needed from the prescriber?' as string | null },
-  { accountName: 'Company J', eocId: 'EOC10112', drugName: 'Drug J', rawStatus: 'Approved', submissionDate: '2025-07-08', notes: null as string | null },
+  { accountName: 'Company A', eocId: 'EOC12345', drugName: 'Drug A', rawStatus: 'Submitted', submissionDate: '2025-07-01', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null },
+  { accountName: 'Company B', eocId: 'EOC67890', drugName: 'Drug B', rawStatus: 'Approved', submissionDate: '2025-06-25', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null },
+  { accountName: 'Company C', eocId: 'EOC11223', drugName: 'Drug C', rawStatus: 'Rejected', submissionDate: '2025-06-20', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null },
+  { accountName: 'Company D', eocId: 'EOC44556', drugName: 'Drug D', rawStatus: 'RPH Sign-Off', submissionDate: '2025-07-05', notes: 'Can you confirm the expected turnaround time for this authorization?' as string | null, requestedBy: 'Jane Doe' as string | null, requestedDate: '2025-07-06' as string | null },
+  { accountName: 'Company E', eocId: 'EOC77889', drugName: 'Drug E', rawStatus: 'Approved', submissionDate: '2025-06-18', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null },
+  { accountName: 'Company F', eocId: 'EOC99001', drugName: 'Drug F', rawStatus: 'Show Review', submissionDate: '2025-07-10', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null },
+  { accountName: 'Company G', eocId: 'EOC22334', drugName: 'Drug G', rawStatus: 'Submitted', submissionDate: '2025-06-15', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null },
+  { accountName: 'Company H', eocId: 'EOC55667', drugName: 'Drug H', rawStatus: 'MD Sign-Off', submissionDate: '2025-07-02', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null },
+  { accountName: 'Company I', eocId: 'EOC88990', drugName: 'Drug I', rawStatus: 'Client Sign-Off', submissionDate: '2025-06-28', notes: 'What additional documentation is needed from the prescriber?' as string | null, requestedBy: 'John Smith' as string | null, requestedDate: '2025-06-29' as string | null },
+  { accountName: 'Company J', eocId: 'EOC10112', drugName: 'Drug J', rawStatus: 'Approved', submissionDate: '2025-07-08', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null },
 ]);
 
 type StatusDisplay = { step: 1 | 2 | 3; category: 'review' | 'approved' | 'denied'; label: string };
@@ -327,6 +309,7 @@ function getStatusBucket(rawStatus: string): 'Pending' | 'Approved' | 'Denied' {
 const tableItems = computed(() =>
   filteredPriorAuthData.value.map(item => ({
     ...item,
+    assistanceRequested: !!item.notes,
   }))
 );
 
@@ -359,15 +342,21 @@ const confirmAssistanceRequest = () => {
   // directly never reaches priorAuthData, so look the real item up by eocId
   // and mutate that instead.
   const requestedEocIds = pendingAssistanceItems.value.map(auth => auth.eocId);
+  // Design placeholder — production pulls the logged-in user's name instead
+  // of this hardcoded string (mirrors HCC's confirmAssistanceRequest).
+  const requestedBy = 'Current User';
+  const requestedDate = new Date().toISOString().slice(0, 10);
   priorAuthData.value.forEach(auth => {
     if (requestedEocIds.includes(auth.eocId)) {
       auth.notes = assistanceNotes.value;
+      auth.requestedBy = requestedBy;
+      auth.requestedDate = requestedDate;
     }
   });
   const count = pendingAssistanceItems.value.length;
   showAssistanceDialog.value = false;
   priorAuthTable.value?.clearSelection();
-  successSnackbarText.value = `Request sent for ${count} authorization${count > 1 ? 's' : ''}`;
+  successSnackbarText.value = `Clinical assistance request sent for ${count} authorization${count > 1 ? 's' : ''}`;
   showSuccessSnackbar.value = true;
   pendingAssistanceItems.value = [];
 };
@@ -385,22 +374,12 @@ const actionIcons = ref([
   },
 ]);
 
-// === VIEW ASSISTANCE REQUEST (internal users only, read-only) === //
-
-const showAssistanceInfoDialog = ref(false);
-const selectedAssistanceClaim = ref<any>(null);
-
-const openAssistanceInfoDialog = (item: any) => {
-  selectedAssistanceClaim.value = item;
-  showAssistanceInfoDialog.value = true;
-};
-
-const assistanceInfoDialogActions = [
-  { text: 'Close', onClick: () => (showAssistanceInfoDialog.value = false), styleType: 'primary' as const },
-];
-
-const formatInternalUserAction = (item: any) => {
-  return item.notes ? 'Information Requested' : '-';
+// The assistance indicator's tooltip shows the requestor and date of the
+// most recent request — same for external and internal, no separate
+// internal-only view (matches HCC's formatRequestedDate).
+const formatRequestedDate = (dateString: string | null) => {
+  if (!dateString) return '';
+  return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 };
 
 // === FILTERS === //
@@ -694,6 +673,10 @@ const filteredPriorAuthData = computed(() => {
   color: $color-text-secondary;
   font-size: $font-size-small;
   text-align: center;
+}
+
+.assistance-requested-icon {
+  color: $color-link;
 }
 
 .claim-summary-table {

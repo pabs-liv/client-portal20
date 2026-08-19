@@ -241,7 +241,7 @@
         </div>
         <div v-if="selectedAccount && activeTab === 'user-administration'">
           <div class="ua-header">
-            <p v-if="isClientUserAdminView" class="text-body ua-header-note">You have view-only access to this account's Client Portal users. To add, edit, or remove access, please contact your Liviniti Account Manager.</p>
+            <p v-if="isExternal" class="text-body ua-header-note">You have view-only access to this account's Client Portal users. To add, edit, or remove access, please contact your Liviniti Account Manager.</p>
             <p v-else class="text-body ua-header-note">Client Portal users are managed in SoloRx. To add, edit, or remove access, navigate to the Contacts tab for this account in SoloRx.</p>
           </div>
           <ReportDataTable
@@ -1147,6 +1147,7 @@ import Banner from '@/components/common/Banner.vue';
 import { ChevronDown, CheckSquare, Square, Trash2, Check } from 'lucide-vue-next';
 import Dialog from '@/components/ui/Dialog.vue';
 import { ref, computed, watch } from 'vue';
+import { useUserType } from '@/composables/useUserType';
 import { useHighCostNotifications } from '@/composables/useHighCostNotifications';
 
 const accountOptions = ref([
@@ -1886,6 +1887,8 @@ const agreementTypes = ref([
   'Type 3',
 ]);
 
+const { isExternal } = useUserType();
+
 const activeTab = ref('company-information');
 
 const handleTabSelected = (tabKey: string) => {
@@ -1984,15 +1987,6 @@ const userAdminVendorDirectory: { [key: number]: { name: string; vendor: string;
 };
 
 const userAdminData = computed<UserAdminEntry[]>(() => (selectedAccount.value ? userAdminByAccount.value[selectedAccount.value] ?? [] : []));
-
-// Company B (account id 2) is used to demo the client-side, read-only User Admin view
-// (AM-09: clients see who has access but can't edit it). Picked over Company A/id 1
-// since Plan Explorer's Account Profile is a single hardcoded object (not per-account)
-// and always shows "Implementation" status — there's no real "Active" account to tie
-// this to yet, so this is just a populated account (has a seeded user + vendor contact)
-// rather than one of the empty ones (3-5).
-const CLIENT_READONLY_USER_ADMIN_ACCOUNT_ID = 2;
-const isClientUserAdminView = computed(() => selectedAccount.value === CLIENT_READONLY_USER_ADMIN_ACCOUNT_ID);
 
 // Only vendor contacts not already added as a User Admin entry — mirrors Account Profile >
 // Vendor Contacts' "already added" filter.
