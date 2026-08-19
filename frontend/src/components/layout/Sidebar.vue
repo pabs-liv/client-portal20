@@ -8,7 +8,7 @@
 
     <v-list nav dense class="nav-list">
       <v-list-item
-        v-for="item in filteredNavItems"
+        v-for="item in navItems"
         :key="item.title"
         :to="item.to"
         class="nav-item"
@@ -68,11 +68,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import { House, FileChartColumnIncreasing, FileText, Tablets, RotateCcwKey, ScrollText, Blocks, CircleGauge, MonitorCog } from 'lucide-vue-next';
-import { useUserType } from '@/composables/useUserType';
-
-const { isExternal } = useUserType();
 
 const navItems = ref([
   { title: 'Home', to: '/' },
@@ -85,15 +82,6 @@ const navItems = ref([
   { title: 'Test Results', to: '/test-results' },
   { title: 'Added Value', to: '/added-value' },
 ]);
-
-const filteredNavItems = computed(() => {
-  return navItems.value.filter(item => {
-    if (item.title === 'Test Results' && isExternal.value) {
-      return false;
-    }
-    return true;
-  });
-});
 </script>
 
 <style lang="scss" scoped>
