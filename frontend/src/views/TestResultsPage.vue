@@ -150,7 +150,7 @@
               v-model="approvedBySearch"
               type="text"
               class="account-search-input"
-              placeholder="Search approvers"
+              placeholder="Search reviewers"
               @mousedown="showApprovedByList = true"
               @blur="handleApprovedByPickerBlur"
             />
@@ -169,7 +169,7 @@
               <span>{{ person }}</span>
             </div>
             <div v-if="filteredApprovedByOptions.length === 0" class="no-acct-results">
-              No approvers found
+              No reviewers found
             </div>
           </div>
         </div>
@@ -404,8 +404,8 @@ const testResultsHeaders = ref([
   { title: 'Start Date', key: 'testStartDate' },
   { title: 'End Date', key: 'testEndDate' },
   { title: 'Status', key: 'status' },
-  { title: 'Approved By', key: 'approvedBy' },
-  { title: 'Approved Date', key: 'approvedDate', align: 'start' },
+  { title: 'Reviewed By', key: 'approvedBy' },
+  { title: 'Review Date', key: 'approvedDate', align: 'start' },
   { title: 'Actions', key: 'actions', sortable: false, align: 'end' },
 ]);
 
@@ -472,8 +472,8 @@ const testResultStatusOptions = [
 const testResultFilters = computed<FilterGroup[]>(() => [
   { type: 'account', label: 'Account', multiselect: true, options: [], modelValue: null },
   { type: 'dateRange', label: 'Test Date Range', multiselect: false, options: [], modelValue: null },
-  { type: 'approvedBy', label: 'Approved By', multiselect: true, options: [], modelValue: null },
-  { type: 'approvedDateRange', label: 'Approved Date Range', multiselect: false, options: [], modelValue: null },
+  { type: 'approvedBy', label: 'Reviewed By', multiselect: true, options: [], modelValue: null },
+  { type: 'approvedDateRange', label: 'Review Date Range', multiselect: false, options: [], modelValue: null },
   { type: 'status', label: 'Status', multiselect: true, options: testResultStatusOptions, modelValue: null },
 ]);
 
@@ -534,7 +534,7 @@ const activeFilterPills = computed<FilterPill[]>(() => {
   });
   if (appliedApprovedDateFrom.value || appliedApprovedDateTo.value) {
     const parts = [appliedApprovedDateFrom.value, appliedApprovedDateTo.value].filter(Boolean).map(formatDateDisplay);
-    pills.push({ type: 'approvedDateRange', value: null, label: `Approved Date: ${parts.join(' – ')}`, isActive: true });
+    pills.push({ type: 'approvedDateRange', value: null, label: `Review Date: ${parts.join(' – ')}`, isActive: true });
   }
   appliedStatuses.value.forEach(status => {
     pills.push({ type: 'status', value: status, label: status, isActive: true });

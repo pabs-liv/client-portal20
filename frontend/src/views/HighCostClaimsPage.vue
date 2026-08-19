@@ -77,6 +77,7 @@
         @row-action="handleRowAction"
         :show-bulk-approve="isExternal"
         bulk-approve-label="Acknowledge Selected"
+        :bulk-action-available="isBulkAcknowledgeAvailable"
         :show-bulk-download="false"
         @bulk-approve="handleBulkAcknowledgeClick"
       >
@@ -209,6 +210,7 @@
         <thead>
           <tr>
             <th>Account</th>
+            <th>EOC ID</th>
             <th>Drug Name</th>
             <th>Cost</th>
           </tr>
@@ -216,6 +218,7 @@
         <tbody>
           <tr v-for="claim in pendingAcknowledgeItems" :key="claim.id">
             <td>{{ claim.accountName }}</td>
+            <td>{{ claim.eocId }}</td>
             <td>{{ claim.drugName }}</td>
             <td>{{ claim.cost }}</td>
           </tr>
@@ -369,8 +372,16 @@ const acknowledgeDialogHeading = computed(() =>
   pendingAcknowledgeItems.value.length > 1 ? 'Acknowledge High-Cost Claims' : 'Acknowledge High-Cost Claim'
 );
 
+// "Acknowledge Selected" hides entirely when none of the selected claims are
+// still eligible (mirrors Test Results' isBulkActionAvailable pattern) —
+// Request Clinical Assistance has no such gate since it's always available.
+const isBulkAcknowledgeAvailable = (items: any[]) => items.some(item => item.canAcknowledge);
+
 const handleBulkAcknowledgeClick = (items: any[]) => {
-  pendingAcknowledgeItems.value = items;
+  // Claims already Acknowledged are excluded from the dialog list and from
+  // the snackbar's count — only claims actually being acknowledged by this
+  // action are shown/counted (Story #34913).
+  pendingAcknowledgeItems.value = items.filter(item => item.canAcknowledge);
   showAcknowledgeDialog.value = true;
 };
 
