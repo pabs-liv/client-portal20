@@ -4765,10 +4765,6 @@ const prevWizardStep = () => {
 
 const markCurrentStepComplete = () => {
   wizardSteps.value[currentWizardStep.value].status = 'complete';
-  if (currentWizardStep.value < wizardSteps.value.length - 1) {
-    currentWizardStep.value++;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
 };
 
 const markCurrentStepIncomplete = () => {
