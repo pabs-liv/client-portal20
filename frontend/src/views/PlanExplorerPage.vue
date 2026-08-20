@@ -667,7 +667,7 @@
                       <ReportDataTable
                         :headers="networkHeaders"
                         :items="currentNetworkRows"
-                        :show-search-bar="true"
+                        :show-search-bar="false"
                         :show-filter-button="false"
                         :show-filter-pills="false"
                         :show-selection-checkboxes="false"
@@ -715,11 +715,18 @@
                         :show-selection-checkboxes="false"
                         :show-row-actions="true"
                         :row-action-items="pharmacyRowActions"
-                        :interactive-boolean-columns="pharmacyBooleanColumnsForTab"
                         :show-table-footer="true"
                         @row-action="handlePharmacyRowAction"
-                        @toggle-cell="handlePharmacyToggleCell"
-                      />
+                      >
+                        <template #item.noBillNoPay="{ item }">
+                          <Check v-if="item.noBillNoPay" :size="16" :stroke-width="2" class="ua-table-check" />
+                          <span v-else>—</span>
+                        </template>
+                        <template #item.displayInPortals="{ item }">
+                          <Check v-if="item.displayInPortals" :size="16" :stroke-width="2" class="ua-table-check" />
+                          <span v-else>—</span>
+                        </template>
+                      </ReportDataTable>
                     </div>
                     <!-- Empty state -->
                     <div v-else class="nc-empty-state nc-empty-state--tab">
@@ -3139,7 +3146,7 @@
   </v-dialog>
 
   <!-- ── Pharmacy Dialog (all 4 types, add + edit mode) ─────────────────── -->
-  <v-dialog v-model="showPharmacyDialog" max-width="500" persistent>
+  <v-dialog v-model="showPharmacyDialog" max-width="560" persistent>
     <v-card class="nl-dialog-card">
       <v-card-title class="nl-dialog-header">
         <Building2 :size="22" :stroke-width="1.5" class="nl-dialog-icon" />
@@ -3156,11 +3163,6 @@
 
           <!-- Mail Order edit -->
           <template v-if="pharmacyDialogTab === 'Mail Order'">
-            <p class="text-body nl-dialog-intro">Select the applicable Mail Order vendor(s) and complete the form below to configure.</p>
-            <div class="nl-edit-field-row">
-              <span class="nl-edit-field-label">NPI</span>
-              <span class="nl-edit-field-value">{{ editingPharmacyItem?.npi || '—' }}</span>
-            </div>
             <div class="nl-edit-field-row">
               <span class="nl-edit-field-label">Vendor Name</span>
               <span class="nl-edit-field-value">{{ editingPharmacyItem?.vendor || '—' }}</span>
@@ -3175,7 +3177,7 @@
               <component :is="mailOrderEditForm.displayInPortals ? CheckSquare : Square" :size="18" :stroke-width="1.5" class="nl-checkbox-icon" />
               <span class="nl-checkbox-label">Display in portals</span>
             </label>
-            <div class="nl-date-row nl-date-row--mt">
+            <div class="nl-date-row nl-date-row--mt nl-date-row--grid">
               <DatePicker
                 v-model="mailOrderEditForm.startDate"
                 label="Effective start date"
@@ -3191,8 +3193,9 @@
                 :error="endDateBeforeStartError(mailOrderEditForm.startDate, mailOrderEditForm.endDate)"
                 :error-messages="endDateBeforeStartError(mailOrderEditForm.startDate, mailOrderEditForm.endDate) ? ['Must be after start date'] : []"
               />
+              <span></span>
+              <p class="nl-date-hint">Optional - Leave blank to keep active</p>
             </div>
-            <p class="nl-date-hint">Optional - Leave blank to keep active</p>
           </template>
 
           <!-- In-House / Custom / Specialty edit -->
@@ -3401,7 +3404,7 @@
                 <component :is="form.displayInPortals ? CheckSquare : Square" :size="18" :stroke-width="1.5" class="nl-checkbox-icon" />
                 <span class="nl-checkbox-label">Display in portals</span>
               </label>
-              <div class="nl-date-row nl-date-row--mt">
+              <div class="nl-date-row nl-date-row--mt nl-date-row--grid">
                 <DatePicker
                   v-model="form.startDate"
                   label="Effective start date"
@@ -3411,8 +3414,9 @@
                   :error-messages="mailOrderAddTouched && !form.startDate ? ['Required'] : []"
                 />
                 <DatePicker v-model="form.endDate" label="Effective end date" variant="underlined" />
+                <span></span>
+                <p class="nl-date-hint">Optional - Leave blank to keep active</p>
               </div>
-              <p class="nl-date-hint">Optional - Leave blank to keep active</p>
               <v-divider v-if="idx < mailOrderForms.length - 1" class="nl-row-divider" />
             </div>
             <button v-if="canAddMoreMailOrders" class="nl-add-link" @click="addMailOrderForm">+ Add New Provider</button>
@@ -5491,18 +5495,16 @@ const pharmacyHeadersForTab = computed(() => {
   ];
 });
 
-const pharmacyBooleanColumnsForTab = computed(() => {
-  if (activePharmacyTab.value === 'Mail Order') return ['noBillNoPay', 'displayInPortals'];
-  return ['noBillNoPay'];
-});
-
 const showPharmacyDialog = ref(false);
 const pharmacyDialogTab = ref('In-House');
 const pharmacyDialogMode = ref<'add' | 'edit'>('add');
 const editingPharmacyItem = ref<any>(null);
 const editingPharmacyIndex = ref(-1);
 
-const pharmacyDialogTitle = computed(() => `${pharmacyDialogTab.value} Pharmacies`);
+const pharmacyDialogTitle = computed(() => {
+  if (pharmacyDialogTab.value === 'Mail Order' && pharmacyDialogMode.value === 'edit') return 'Edit Mail Order Pharmacy';
+  return `${pharmacyDialogTab.value} Pharmacies`;
+});
 
 const mockPharmacyBaseNames = ['CVS Pharmacy', 'Walgreens', 'Rite Aid', 'Walmart Pharmacy', 'Kroger Pharmacy', 'Costco Pharmacy'];
 const generateNpiChips = (text: string): { npi: string; name: string }[] =>
@@ -5634,10 +5636,6 @@ const handlePharmacyRowAction = ({ action, item }: { action: string; item: any }
     mailOrderEditTouched.value = false;
     showPharmacyDialog.value = true;
   }
-};
-
-const handlePharmacyToggleCell = ({ key, item }: { key: string; item: any }) => {
-  item[key] = !item[key];
 };
 
 const handleNetworkRowAction = ({ action, item }: { action: string; item: any }) => {
@@ -5968,6 +5966,10 @@ watch(selectedAccount, (newVal) => {
   :deep(.v-row) {
     overflow: visible;
   }
+}
+
+.ua-table-check {
+  color: $color-primary;
 }
 
 // ─── Timeline sticky wrapper ──────────────────────────────────────────────────
@@ -8283,6 +8285,23 @@ watch(selectedAccount, (newVal) => {
   > * { flex: 1; }
 
   &--mt { margin-top: $spacing-medium; }
+
+  &--grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+    column-gap: $spacing-medium;
+    row-gap: 0;
+
+    :deep(.v-input__details) {
+      min-height: 0;
+      padding-top: 2px;
+    }
+
+    .nl-date-hint {
+      margin-top: 2px;
+    }
+  }
 }
 
 .nl-textarea {
