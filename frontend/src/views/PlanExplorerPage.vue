@@ -307,7 +307,7 @@
                       <div v-if="apClientContacts.length > 0">
                         <ReportDataTable
                           :headers="apClientContactHeaders"
-                          :items="apClientContacts"
+                          :items="apClientContactsSorted"
                           :show-search-bar="false"
                           :show-filter-button="false"
                           :show-filter-pills="false"
@@ -480,7 +480,7 @@
                       <div v-if="apVendorContacts.length > 0">
                         <ReportDataTable
                           :headers="apVendorContactHeaders"
-                          :items="apVendorContacts"
+                          :items="apVendorContactsSorted"
                           :show-search-bar="false"
                           :show-filter-button="false"
                           :show-filter-pills="false"
@@ -4862,6 +4862,11 @@ interface ApClientContact {
 const apClientContacts = ref<ApClientContact[]>([
   { name: 'Nick Johnson', salutation: 'Mr.', businessRole: 'Client Manager / Client Relations', email: 'nick.johnson@starkind.com', phone: '(555) 234-5678', portalAccess: false, role: 'Client', permissions: apNewPermissions(), allowPhi: false, mainPointOfContact: false, surveyContact: false },
 ]);
+const apLastName = (fullName: string) => fullName.split(' ').slice(1).join(' ') || fullName;
+const apFirstName = (fullName: string) => fullName.split(' ')[0] ?? '';
+const apClientContactsSorted = computed(() => [...apClientContacts.value].sort((a, b) =>
+  apLastName(a.name).localeCompare(apLastName(b.name)) || apFirstName(a.name).localeCompare(apFirstName(b.name))
+));
 const apShowAddContactDialog = ref(false);
 const apNewContactForm = () => ({ firstName: '', lastName: '', salutation: '', businessRole: '', email: '', phone: '', portalAccess: false, role: 'Client', permissions: apNewPermissions(), allowPhi: false, mainPointOfContact: false, surveyContact: false });
 const apContactForm = ref(apNewContactForm());
@@ -5022,6 +5027,9 @@ const apVendorContacts = ref<ApVendorContact[]>([
   { name: 'James Pruitt', vendor: 'Acclaim Benefits', email: 'jpruitt@acclaim.com', phone: '(615) 555-0189', portalAccess: true, role: 'Broker', permissions: { ...apNewPermissions(), invoices: true }, allowPhi: false, mainPointOfContact: false, surveyContact: false, ackConfirmed: true, accessFormConfirmed: true, roleLabel: 'Broker' },
   { name: 'Tara Mendez', vendor: 'Benefit Advantage', email: 'tmendez@benefitadv.com', phone: '(512) 555-0144', portalAccess: true, role: 'Consultant', permissions: { ...apNewPermissions(), reports: true, planChanges: true }, allowPhi: false, mainPointOfContact: false, surveyContact: false, ackConfirmed: true, accessFormConfirmed: true, roleLabel: 'Consultant' },
 ]);
+const apVendorContactsSorted = computed(() => [...apVendorContacts.value].sort((a, b) =>
+  a.vendor.localeCompare(b.vendor) || apLastName(a.name).localeCompare(apLastName(b.name)) || apFirstName(a.name).localeCompare(apFirstName(b.name))
+));
 const apShowVendorContactDialog = ref(false);
 const apVendorContactSelection = ref('');
 const apVendorPortalAccess = ref(false);
