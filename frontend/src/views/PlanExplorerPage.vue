@@ -3259,7 +3259,12 @@
                 @blur="form.npiChips = generateNpiChips(form.ncpdp)"
               />
               <div v-if="form.npiChips.length" class="nl-npi-chips">
-                <span v-for="chip in form.npiChips" :key="chip.npi" class="nl-npi-chip">{{ chip.name }}</span>
+                <v-chip v-for="(chip, chipIdx) in form.npiChips" :key="chip.npi" color="primary" variant="flat" class="nl-npi-chip">
+                  <span class="nl-npi-chip-label">{{ chip.name }}</span>
+                  <span class="nl-npi-chip-close" @click="removeInhouseNpiChip(form, chipIdx)">
+                    <X :size="10" :stroke-width="2.5" />
+                  </span>
+                </v-chip>
               </div>
               <label class="nl-checkbox nl-checkbox--mt">
                 <input type="checkbox" v-model="form.noBillNoPay" class="nl-checkbox-input" />
@@ -3313,7 +3318,12 @@
                 <p v-if="specialtyNpiError(form)" class="nl-field-error">Required</p>
                 <p v-else class="nl-npi-hint">Enter one NPI per line</p>
                 <div v-if="form.npiChips.length" class="nl-npi-chips">
-                  <span v-for="chip in form.npiChips" :key="chip.npi" class="nl-npi-chip">{{ chip.name }}</span>
+                  <v-chip v-for="(chip, chipIdx) in form.npiChips" :key="chip.npi" color="primary" variant="flat" class="nl-npi-chip">
+                    <span class="nl-npi-chip-label">{{ chip.name }}</span>
+                    <span class="nl-npi-chip-close" @click="removeSpecialtyNpiChip(form, chipIdx)">
+                      <X :size="10" :stroke-width="2.5" />
+                    </span>
+                  </v-chip>
                 </div>
               </div>
               <label class="nl-checkbox nl-checkbox--mt">
@@ -3444,7 +3454,12 @@
                 @blur="form.npiChips = generateNpiChips(form.ncpdp)"
               />
               <div v-if="form.npiChips.length" class="nl-npi-chips">
-                <span v-for="chip in form.npiChips" :key="chip.npi" class="nl-npi-chip">{{ chip.name }}</span>
+                <v-chip v-for="(chip, chipIdx) in form.npiChips" :key="chip.npi" color="primary" variant="flat" class="nl-npi-chip">
+                  <span class="nl-npi-chip-label">{{ chip.name }}</span>
+                  <span class="nl-npi-chip-close" @click="removeInhouseNpiChip(form, chipIdx)">
+                    <X :size="10" :stroke-width="2.5" />
+                  </span>
+                </v-chip>
               </div>
               <label class="nl-checkbox nl-checkbox--mt">
                 <input type="checkbox" v-model="form.noBillNoPay" class="nl-checkbox-input" />
@@ -5498,7 +5513,7 @@ const editingPharmacyItem = ref<any>(null);
 const editingPharmacyIndex = ref(-1);
 
 const pharmacyDialogTitle = computed(() => {
-  if (pharmacyDialogTab.value === 'Mail Order' && pharmacyDialogMode.value === 'edit') return 'Edit Mail Order Pharmacy';
+  if (pharmacyDialogMode.value === 'edit') return `Edit ${pharmacyDialogTab.value} Pharmacy`;
   return `${pharmacyDialogTab.value} Pharmacies`;
 });
 
@@ -5506,6 +5521,20 @@ const mockPharmacyBaseNames = ['CVS Pharmacy', 'Walgreens', 'Rite Aid', 'Walmart
 const generateNpiChips = (text: string): { npi: string; name: string }[] =>
   text.split('\n').map(l => l.trim()).filter(Boolean)
     .map((npi, i) => ({ npi, name: mockPharmacyBaseNames[i % mockPharmacyBaseNames.length] }));
+
+const removeInhouseNpiChip = (form: InhouseForm, chipIdx: number) => {
+  const lines = form.ncpdp.split('\n').map(l => l.trim()).filter(Boolean);
+  lines.splice(chipIdx, 1);
+  form.ncpdp = lines.join('\n');
+  form.npiChips = generateNpiChips(form.ncpdp);
+};
+
+const removeSpecialtyNpiChip = (form: { npis: string; npiChips: { npi: string; name: string }[] }, chipIdx: number) => {
+  const lines = form.npis.split('\n').map(l => l.trim()).filter(Boolean);
+  lines.splice(chipIdx, 1);
+  form.npis = lines.join('\n');
+  form.npiChips = generateNpiChips(form.npis);
+};
 
 const inhouseAddTouched = ref(false);
 const inhouseEditTouched = ref(false);
@@ -8459,14 +8488,37 @@ watch(selectedAccount, (newVal) => {
 }
 
 .nl-npi-chip {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 10px;
-  background-color: #E8EDF5;
-  border-radius: 12px;
+  padding: 0 8px;
+
+  :deep(.v-chip__content) {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+}
+
+.nl-npi-chip-label {
+  color: $color-neutral-white;
   font-family: $font-family-base;
   font-size: $font-size-small;
-  color: $color-text-primary;
+}
+
+.nl-npi-chip-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background-color: $color-neutral-white;
+  color: $color-primary;
+  cursor: pointer;
+  flex-shrink: 0;
+  opacity: 0.9;
+
+  &:hover {
+    opacity: 1;
+  }
 }
 
 .nl-date-hint {
