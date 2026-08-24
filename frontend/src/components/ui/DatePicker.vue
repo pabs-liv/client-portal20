@@ -9,7 +9,7 @@
     <template v-slot:activator="{ props: menuProps }">
       <v-text-field
         v-bind="{ ...$attrs, ...menuProps }"
-        :label="label"
+        :label="hasRequiredMarker ? undefined : label"
         :model-value="formattedDate"
         :readonly="readonly"
         :variant="variant"
@@ -17,6 +17,7 @@
         @update:model-value="handleManualInput"
         class="custom-date-picker"
       >
+        <template v-if="hasRequiredMarker" #label>{{ labelWithoutAsterisk }}<span class="date-picker-required-asterisk">*</span></template>
         <template #append-inner>
           <Calendar :size="20" :stroke-width="1.5" class="calendar-icon" @click.stop="readonly ? null : (menu = !menu)" />
         </template>
@@ -62,6 +63,12 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits(['update:modelValue']);
+
+// Same issue as TextField.vue/Select.vue: a trailing "*" typed into the label inherits the
+// label's muted color, making it an invisible required-field cue. Split it out so it can be
+// colored independently.
+const hasRequiredMarker = computed(() => /\*\s*$/.test(props.label ?? ''));
+const labelWithoutAsterisk = computed(() => (props.label ?? '').replace(/\*\s*$/, '').trimEnd());
 
 const menu = ref(false);
 const date = ref<Date | null>(null);
@@ -112,6 +119,11 @@ const handleDateSelection = (newDate: Date) => {
 
 <style lang="scss" scoped>
 @import '@/style.scss';
+
+.date-picker-required-asterisk {
+  color: $color-error;
+  margin-left: 2px;
+}
 
 .custom-date-picker {
   .calendar-icon {

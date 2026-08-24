@@ -741,11 +741,47 @@
 
                 <!-- Step 3: Plan Design -->
                 <template v-else-if="currentWizardStep === 2">
-                  <div class="ap-section">
+                  <div class="pd-plans-section">
                     <div class="ap-section-header ap-section-header--space-between">
                       <h4 class="text-h4">All Plans</h4>
-                      <button class="button button-primary">Create New Plan</button>
+                      <button class="button button-primary" @click="pdShowCreateDialog = true">Create New Plan</button>
                     </div>
+
+                  <Dialog
+                    v-model="pdShowCreateDialog"
+                    heading="Create New Plan"
+                    :show-secondary-button="true"
+                    :actions="pdCreateDialogActions"
+                  >
+                    <v-row class="mt-1">
+                      <v-col cols="12">
+                        <TextField
+                          v-model="pdCreateForm.planName"
+                          label="Plan Name *"
+                          :error-messages="pdCreateTouched && !pdCreateForm.planName.trim() ? ['Required'] : []"
+                        />
+                      </v-col>
+                    </v-row>
+                    <div class="nl-date-row nl-date-row--grid">
+                      <DatePicker
+                        v-model="pdCreateForm.startDate"
+                        label="Eff. start date *"
+                        variant="underlined"
+                        :error="pdCreateTouched && !pdCreateForm.startDate"
+                        :error-messages="pdCreateTouched && !pdCreateForm.startDate ? ['Required'] : []"
+                      />
+                      <DatePicker
+                        v-model="pdCreateForm.endDate"
+                        label="Eff. end date"
+                        variant="underlined"
+                        :min="pdCreateForm.startDate"
+                        :error="endDateBeforeStartError(pdCreateForm.startDate, pdCreateForm.endDate)"
+                        :error-messages="endDateBeforeStartError(pdCreateForm.startDate, pdCreateForm.endDate) ? ['Must be after start date'] : []"
+                      />
+                      <span></span>
+                      <p class="nl-date-hint">Optional - Leave blank to keep active</p>
+                    </div>
+                  </Dialog>
 
                   <div class="pd-accordion-list">
                     <div
@@ -771,19 +807,15 @@
                         <div class="pd-section">
                           <div class="pd-section-header">
                             <h4 class="text-h4">Plan Overview</h4>
-                            <button class="button button-thirtiary">
+                            <button v-if="!pdIsEditingOverview(plan.id)" class="button button-thirtiary" @click="pdStartEditOverview(plan)">
                               <Pencil :size="14" :stroke-width="1.5" /> Edit
                             </button>
                           </div>
-                          <div class="ap-field-row ap-field-row--multi ap-field-row--five">
+                          <div v-if="!pdIsEditingOverview(plan.id)" class="ap-field-row ap-field-row--multi ap-field-row--wrap">
                             <div class="ap-field">
                               <span class="ap-field-label">Plan Name</span>
                               <span class="ap-field-value">{{ plan.name }}</span>
                               <span class="ap-field-sub">ID - {{ plan.id }}</span>
-                            </div>
-                            <div class="ap-field">
-                              <span class="ap-field-label">Plan Status</span>
-                              <span :class="['pd-status-badge', `pd-status-badge--${plan.status.toLowerCase()}`]">{{ plan.status }}</span>
                             </div>
                             <div class="ap-field">
                               <span class="ap-field-label">Eff. start date</span>
@@ -797,36 +829,132 @@
                               <span class="ap-field-label">Benefit reset to $0</span>
                               <span class="ap-field-value">{{ plan.benefitReset || '—' }}</span>
                             </div>
+                            <div class="ap-field">
+                              <span class="ap-field-label">Situs State</span>
+                              <span class="ap-field-value">{{ situsStateLabel(plan.situsState) }}</span>
+                            </div>
                           </div>
+                          <template v-else>
+                            <v-row class="mt-1">
+                              <v-col cols="12" sm="6">
+                                <TextField
+                                  v-model="plan.name"
+                                  label="Plan Name *"
+                                  :error-messages="pdOverviewTouched.includes(plan.id) && !plan.name.trim() ? ['Required'] : []"
+                                />
+                              </v-col>
+                            </v-row>
+                            <div class="nl-date-row nl-date-row--grid">
+                              <DatePicker
+                                v-model="plan.effStartDate"
+                                label="Eff. start date *"
+                                variant="underlined"
+                                :error="pdOverviewTouched.includes(plan.id) && !plan.effStartDate"
+                                :error-messages="pdOverviewTouched.includes(plan.id) && !plan.effStartDate ? ['Required'] : []"
+                              />
+                              <DatePicker
+                                v-model="plan.effEndDate"
+                                label="Eff. end date"
+                                variant="underlined"
+                                :min="plan.effStartDate"
+                                :error="endDateBeforeStartError(plan.effStartDate, plan.effEndDate)"
+                                :error-messages="endDateBeforeStartError(plan.effStartDate, plan.effEndDate) ? ['Must be after start date'] : []"
+                              />
+                              <span></span>
+                              <p class="nl-date-hint">Optional - Leave blank to keep active</p>
+                            </div>
+                            <v-row class="mt-2">
+                              <v-col cols="12" sm="6">
+                                <Select v-model="plan.benefitReset" :items="pdBenefitResetOptions" label="Benefit Reset Date" />
+                              </v-col>
+                              <v-col cols="12" sm="6">
+                                <Select v-model="plan.situsState" :items="states" label="Situs State" />
+                              </v-col>
+                            </v-row>
+                            <div class="ap-section-footer">
+                              <button class="button button-primary" @click="pdSaveEditOverview(plan)">Save Changes</button>
+                              <button class="button button-secondary" @click="pdCancelEditOverview(plan)">Cancel</button>
+                            </div>
+                          </template>
                         </div>
-
-                        <div class="pd-section-divider" />
 
                         <!-- Plan Parameters -->
                         <div class="pd-section">
                           <div class="pd-section-header">
                             <h4 class="text-h4">Plan Parameters</h4>
+                            <button v-if="!pdIsEditingParameters(plan.id)" class="button button-thirtiary" @click="pdStartEditParameters(plan)">
+                              <Pencil :size="14" :stroke-width="1.5" /> Edit
+                            </button>
                           </div>
-                          <div class="pd-param-add-card">
-                            <div class="pd-param-add-icon">
-                              <PlusCircle :size="28" :stroke-width="1" />
-                            </div>
-                            <div class="pd-param-add-text">
-                              <span class="pd-param-add-title">Add Plan Parameter Option</span>
-                              <span class="pd-param-add-subtitle">Set applicable plan parameters to enforce as part of this plan's configuration.</span>
-                            </div>
-                          </div>
-
-                          <!-- OCC field shown after a parameter is added -->
-                          <div class="ap-field-row" style="margin-top: 16px;">
+                          <div v-if="!pdIsEditingParameters(plan.id)" class="ap-field-row ap-field-row--multi ap-field-row--wrap">
                             <div class="ap-field">
-                              <span class="ap-field-label">OCC(Other coverage code)</span>
-                              <span class="ap-field-value">1 - No other c...</span>
+                              <span class="ap-field-label">Is the group Grandfathered?</span>
+                              <span class="ap-field-value">{{ plan.isGrandfathered ? 'Yes' : 'No' }}</span>
+                            </div>
+                            <div class="ap-field">
+                              <span class="ap-field-label">Does the Affordable Care Act apply?</span>
+                              <span class="ap-field-value">{{ plan.acaApplies ? 'Yes' : 'No' }}</span>
+                            </div>
+                            <div v-if="plan.acaApplies" class="ap-field">
+                              <span class="ap-field-label">ACA applies at $0 cost share to the member?</span>
+                              <span class="ap-field-value">{{ plan.acaAppliesAtZeroCost ? 'Yes' : 'No' }}</span>
+                            </div>
+                            <div class="ap-field">
+                              <span class="ap-field-label">Qualified HDHP (per ERISA, subject to first dollar coverage)?</span>
+                              <span class="ap-field-value">{{ plan.isHdhp ? 'Yes' : 'No' }}</span>
+                            </div>
+                            <div v-if="plan.isHdhp && plan.hdhpNotes" class="ap-field">
+                              <span class="ap-field-label">HDHP Notes</span>
+                              <span class="ap-field-value">{{ plan.hdhpNotes }}</span>
+                            </div>
+                            <div class="ap-field">
+                              <span class="ap-field-label">Governed by ERISA?</span>
+                              <span class="ap-field-value">{{ plan.governedByErisa ? 'Yes' : 'No' }}</span>
                             </div>
                           </div>
+                          <template v-else>
+                            <div class="toc-question pd-param-question">
+                              <p class="toc-question-label">Is the group Grandfathered?</p>
+                              <div class="toc-toggle-group">
+                                <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': plan.isGrandfathered === false }]" @click="plan.isGrandfathered = false">No</button>
+                                <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': plan.isGrandfathered === true }]" @click="plan.isGrandfathered = true">Yes</button>
+                              </div>
+                            </div>
+                            <div class="toc-question pd-param-question">
+                              <p class="toc-question-label">Does the Affordable Care Act apply?</p>
+                              <div class="toc-toggle-group">
+                                <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': plan.acaApplies === false }]" @click="plan.acaApplies = false; plan.acaAppliesAtZeroCost = false">No</button>
+                                <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': plan.acaApplies === true }]" @click="plan.acaApplies = true">Yes</button>
+                              </div>
+                              <div v-if="plan.acaApplies" class="toc-question ml-6 mt-3">
+                                <p class="toc-question-label">Please confirm if ACA applies at $0 cost share to the member.</p>
+                                <div class="toc-toggle-group">
+                                  <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': plan.acaAppliesAtZeroCost === false }]" @click="plan.acaAppliesAtZeroCost = false">No</button>
+                                  <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': plan.acaAppliesAtZeroCost === true }]" @click="plan.acaAppliesAtZeroCost = true">Yes</button>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="toc-question pd-param-question">
+                              <p class="toc-question-label">Is this health plan a qualified high deductible health plan (HDHP) in accordance with ERISA and subject to first dollar coverage?</p>
+                              <div class="toc-toggle-group">
+                                <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': plan.isHdhp === false }]" @click="plan.isHdhp = false">No</button>
+                                <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': plan.isHdhp === true }]" @click="plan.isHdhp = true">Yes</button>
+                              </div>
+                              <v-textarea v-if="plan.isHdhp" v-model="plan.hdhpNotes" label="HDHP Notes" variant="outlined" density="compact" rows="2" auto-grow hide-details class="bl-notes-textarea mt-3" />
+                            </div>
+                            <div class="toc-question pd-param-question">
+                              <p class="toc-question-label">Is this plan governed by ERISA (Employee Retirement Income Security Act)?</p>
+                              <div class="toc-toggle-group">
+                                <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': plan.governedByErisa === false }]" @click="plan.governedByErisa = false">No</button>
+                                <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': plan.governedByErisa === true }]" @click="plan.governedByErisa = true">Yes</button>
+                              </div>
+                            </div>
+                            <div class="ap-section-footer">
+                              <button class="button button-primary" @click="pdSaveEditParameters(plan)">Save Changes</button>
+                              <button class="button button-secondary" @click="pdCancelEditParameters(plan)">Cancel</button>
+                            </div>
+                          </template>
                         </div>
-
-                        <div class="pd-section-divider" />
 
                         <!-- Plan Max Spend Parameters -->
                         <div class="pd-section">
@@ -848,42 +976,49 @@
                           </div>
                         </div>
 
-                        <div class="pd-section-divider" />
-
                         <!-- Coordination of Benefits -->
                         <div class="pd-section">
                           <div class="pd-section-header">
                             <h4 class="text-h4">Coordination of Benefits</h4>
+                            <button v-if="!pdIsEditingCob(plan.id)" class="button button-thirtiary" @click="pdStartEditCob(plan)">
+                              <Pencil :size="14" :stroke-width="1.5" /> Edit
+                            </button>
                           </div>
-                          <div class="ap-field-row">
-                            <div class="ap-checkbox-row">
-                              <CheckSquare v-if="plan.allowSecondaryPayer" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" @click="plan.allowSecondaryPayer = !plan.allowSecondaryPayer" style="cursor:pointer" />
-                              <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" @click="plan.allowSecondaryPayer = !plan.allowSecondaryPayer" style="cursor:pointer" />
+                          <div v-if="!pdIsEditingCob(plan.id)" class="ap-field-row ap-field-row--multi ap-field-row--wrap">
+                            <div class="ap-field">
+                              <span class="ap-field-label">Allow Secondary Payer?</span>
+                              <span class="ap-field-value">{{ plan.allowSecondaryPayer ? 'Yes' : 'No' }}</span>
+                            </div>
+                            <div v-if="plan.allowSecondaryPayer" class="ap-field">
+                              <span class="ap-field-label">COB Configuration</span>
+                              <span class="ap-field-value">{{ plan.cobConfigOptions.length ? plan.cobConfigOptions.join(', ') : '—' }}</span>
+                            </div>
+                            <div class="ap-field">
+                              <span class="ap-field-label">OCC (Other Coverage Code)</span>
+                              <span class="ap-field-value">{{ plan.occCodes.length ? plan.occCodes.join(', ') : '—' }}</span>
+                            </div>
+                          </div>
+                          <template v-else>
+                            <div class="ap-checkbox-row" style="cursor:pointer" @click="plan.allowSecondaryPayer = !plan.allowSecondaryPayer">
+                              <CheckSquare v-if="plan.allowSecondaryPayer" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                              <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
                               <span class="ap-field-value">Allow Secondary Payer</span>
                             </div>
-                          </div>
-                          <template v-if="plan.allowSecondaryPayer">
-                            <div class="ap-field-row">
-                              <div class="ap-checkbox-row">
-                                <CheckSquare v-if="plan.secondaryPlanOnly" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" @click="plan.secondaryPlanOnly = !plan.secondaryPlanOnly" style="cursor:pointer" />
-                                <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" @click="plan.secondaryPlanOnly = !plan.secondaryPlanOnly" style="cursor:pointer" />
-                                <span class="ap-field-value">Secondary Plan Only</span>
+                            <div v-if="plan.allowSecondaryPayer" class="ap-field-row mt-3">
+                              <div class="ap-field" style="max-width: 400px;">
+                                <Autocomplete v-model="plan.cobConfigOptions" :items="pdCobConfigOptions" :multiple="true" label="COB Configuration" />
                               </div>
                             </div>
-                            <div class="ap-field-row">
-                              <div class="ap-checkbox-row">
-                                <CheckSquare v-if="plan.paySecondaryAsPrimary" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" @click="plan.paySecondaryAsPrimary = !plan.paySecondaryAsPrimary" style="cursor:pointer" />
-                                <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" @click="plan.paySecondaryAsPrimary = !plan.paySecondaryAsPrimary" style="cursor:pointer" />
-                                <span class="ap-field-value">Pay Secondary Claim as Primary if Rejected by Primary Payer</span>
+                            <div class="ap-field-row mt-3">
+                              <div class="ap-field" style="max-width: 400px;">
+                                <Autocomplete v-model="plan.occCodes" :items="pdOccCodeOptions" :multiple="true" label="OCC (Other Coverage Code)" />
                               </div>
+                            </div>
+                            <div class="ap-section-footer">
+                              <button class="button button-primary" @click="pdSaveEditCob(plan)">Save Changes</button>
+                              <button class="button button-secondary" @click="pdCancelEditCob(plan)">Cancel</button>
                             </div>
                           </template>
-                          <div class="ap-field-row">
-                            <div class="ap-field">
-                              <span class="ap-field-label">COB configuration</span>
-                              <span class="ap-field-value">{{ plan.cobConfiguration || '—' }}</span>
-                            </div>
-                          </div>
                         </div>
 
                         <!-- Applicable Benefit Period -->
@@ -927,8 +1062,6 @@
                           />
                         </div>
 
-                        <div class="pd-section-divider" />
-
                         <!-- Associated Plan Codes -->
                         <div class="pd-section">
                           <div class="pd-section-header">
@@ -951,8 +1084,6 @@
                             </template>
                           </ReportDataTable>
                         </div>
-
-                        <div class="pd-section-divider" />
 
                         <!-- Associated Benefit Codes -->
                         <div class="pd-section">
@@ -981,8 +1112,6 @@
                           </ReportDataTable>
                         </div>
 
-                        <div class="pd-section-divider" />
-
                         <!-- Associated Accumulators -->
                         <div class="pd-section">
                           <div class="pd-section-header">
@@ -1001,8 +1130,6 @@
                             :show-table-footer="false"
                           />
                         </div>
-
-                        <div class="pd-section-divider" />
 
                         <!-- Copay Structure card -->
                         <div class="cs-card">
@@ -3516,6 +3643,7 @@ import Button from '@/components/ui/Button.vue';
 import ReportDataTable from '@/components/common/ReportDataTable.vue';
 import FilteringPill from '@/components/ui/FilteringPill.vue';
 import Select from '@/components/ui/Select.vue';
+import { states } from '@/data/common';
 import Dialog from '@/components/ui/Dialog.vue';
 import TextField from '@/components/ui/TextField.vue';
 import FileUploader from '@/components/ui/FileUploader.vue';
@@ -3524,7 +3652,7 @@ import DatePicker from '@/components/ui/DatePicker.vue';
 import {
   Hourglass, CircleCheckBig, XCircle,
   Save as SaveIcon, LayoutList as LayoutListIcon, CircleCheck as CircleCheckIcon,
-  ArrowRight as ArrowRightIcon, Pencil, CheckSquare, Square, ChevronDown, PlusCircle, X, Check, CloudDownload, TriangleAlert,
+  ArrowRight as ArrowRightIcon, Pencil, CheckSquare, Square, ChevronDown, X, Check, CloudDownload, TriangleAlert,
   Building2, Shield, Link2, Users, FileText, Search, Globe, Trash2, Paperclip, Info,
 } from 'lucide-vue-next';
 import EmptyStateImg from '@/assets/EmptyState.svg';
@@ -5811,11 +5939,17 @@ const planDesignPlans = ref([
     effStartDate: '03/06/2026',
     effEndDate: '',
     benefitReset: 'February 1',
+    situsState: 'CA',
+    isGrandfathered: true,
+    acaApplies: true,
+    acaAppliesAtZeroCost: true,
+    isHdhp: true,
+    hdhpNotes: '',
+    governedByErisa: true,
+    occCodes: ['1 - No other coverage'] as string[],
     maxSpendEnabled: false,
-    allowSecondaryPayer: false,
-    cobConfiguration: '',
-    secondaryPlanOnly: false,
-    paySecondaryAsPrimary: false,
+    allowSecondaryPayer: true,
+    cobConfigOptions: ['Secondary Payer Only'] as string[],
     benefitByFlag: false,
     bpgRows: [
       { bin: '025945', pcn: 'SSN', groupId: '1275', groupName: 'Allied Finishing, Inc', effStartDate: '03/01/2026', effEndDate: '' },
@@ -5833,11 +5967,17 @@ const planDesignPlans = ref([
     effStartDate: '03/06/2026',
     effEndDate: '',
     benefitReset: 'February 1',
+    situsState: '',
+    isGrandfathered: false,
+    acaApplies: false,
+    acaAppliesAtZeroCost: false,
+    isHdhp: false,
+    hdhpNotes: '',
+    governedByErisa: false,
+    occCodes: [] as string[],
     maxSpendEnabled: false,
     allowSecondaryPayer: false,
-    cobConfiguration: '',
-    secondaryPlanOnly: false,
-    paySecondaryAsPrimary: false,
+    cobConfigOptions: [] as string[],
     benefitByFlag: false,
     bpgRows: [
       { bin: '025945', pcn: 'SSN', groupId: '1275', groupName: 'Allied Finishing, Inc', effStartDate: '03/01/2026', effEndDate: '' },
@@ -5918,6 +6058,185 @@ const togglePlan = (id: number) => {
   } else {
     expandedPlans.value.splice(idx, 1);
   }
+};
+
+// ─── Plan Design — Create New Plan ────────────────────────────────────────────
+const pdShowCreateDialog = ref(false);
+const pdNewCreateForm = () => ({ planName: '', startDate: '', endDate: '' });
+const pdCreateForm = ref(pdNewCreateForm());
+const pdCreateTouched = ref(false);
+
+const pdCreateFormValid = computed(() => {
+  const f = pdCreateForm.value;
+  return !!f.planName.trim() && !!f.startDate && !endDateBeforeStartError(f.startDate, f.endDate);
+});
+
+const pdResetCreateForm = () => {
+  pdCreateForm.value = pdNewCreateForm();
+  pdCreateTouched.value = false;
+};
+
+const pdSaveNewPlan = () => {
+  pdCreateTouched.value = true;
+  if (!pdCreateFormValid.value) return;
+  const f = pdCreateForm.value;
+  const newId = Math.max(...planDesignPlans.value.map(p => p.id)) + 1;
+  planDesignPlans.value.unshift({
+    id: newId,
+    name: f.planName.trim(),
+    status: 'Active',
+    effStartDate: f.startDate,
+    effEndDate: f.endDate,
+    benefitReset: '',
+    situsState: '',
+    isGrandfathered: false,
+    acaApplies: false,
+    acaAppliesAtZeroCost: false,
+    isHdhp: false,
+    hdhpNotes: '',
+    governedByErisa: false,
+    occCodes: [] as string[],
+    maxSpendEnabled: false,
+    allowSecondaryPayer: false,
+    cobConfigOptions: [] as string[],
+    benefitByFlag: false,
+    bpgRows: [],
+    planCodes: [],
+    benefitCodes: [],
+    accumulators: [],
+  });
+  expandedPlans.value.push(newId);
+  pdShowCreateDialog.value = false;
+  pdResetCreateForm();
+};
+
+const pdCreateDialogActions = computed(() => [
+  { text: 'Cancel', styleType: 'secondary' as const, onClick: () => { pdShowCreateDialog.value = false; pdResetCreateForm(); } },
+  { text: 'Create Plan', styleType: 'primary' as const, onClick: pdSaveNewPlan },
+]);
+
+// ─── Plan Design — Plan Overview edit ─────────────────────────────────────────
+const pdBenefitResetOptions = [
+  'January 1: Calendar Year', 'February 1', 'March 1', 'March 31', 'April 1', 'May 1',
+  'June 1', 'July 1', 'August 1', 'September 1', 'October 1', 'November 1', 'December 1',
+];
+
+type PdOverviewFields = { id: number; name: string; effStartDate: string; effEndDate: string; benefitReset: string; situsState: string };
+
+const pdOverviewEditingIds = ref<number[]>([]);
+const pdOverviewTouched = ref<number[]>([]);
+let pdOverviewSnapshots: Record<number, { name: string; effStartDate: string; effEndDate: string; benefitReset: string; situsState: string }> = {};
+
+const pdIsEditingOverview = (id: number) => pdOverviewEditingIds.value.includes(id);
+
+const situsStateLabel = (value: string) => states.find(s => s.value === value)?.title || '—';
+
+const pdStartEditOverview = (plan: PdOverviewFields) => {
+  pdOverviewSnapshots[plan.id] = { name: plan.name, effStartDate: plan.effStartDate, effEndDate: plan.effEndDate, benefitReset: plan.benefitReset, situsState: plan.situsState };
+  pdOverviewEditingIds.value.push(plan.id);
+};
+
+const pdCancelEditOverview = (plan: PdOverviewFields) => {
+  const snap = pdOverviewSnapshots[plan.id];
+  if (snap) {
+    plan.name = snap.name;
+    plan.effStartDate = snap.effStartDate;
+    plan.effEndDate = snap.effEndDate;
+    plan.benefitReset = snap.benefitReset;
+    plan.situsState = snap.situsState;
+  }
+  pdOverviewEditingIds.value = pdOverviewEditingIds.value.filter(id => id !== plan.id);
+  pdOverviewTouched.value = pdOverviewTouched.value.filter(id => id !== plan.id);
+};
+
+const pdSaveEditOverview = (plan: PdOverviewFields) => {
+  if (!pdOverviewTouched.value.includes(plan.id)) pdOverviewTouched.value.push(plan.id);
+  if (!plan.name.trim() || !plan.effStartDate || endDateBeforeStartError(plan.effStartDate, plan.effEndDate)) return;
+  pdOverviewEditingIds.value = pdOverviewEditingIds.value.filter(id => id !== plan.id);
+  pdOverviewTouched.value = pdOverviewTouched.value.filter(id => id !== plan.id);
+};
+
+// ─── Plan Design — Plan Parameters edit ───────────────────────────────────────
+type PdParameterFields = { id: number; isGrandfathered: boolean; acaApplies: boolean; acaAppliesAtZeroCost: boolean; isHdhp: boolean; hdhpNotes: string; governedByErisa: boolean };
+
+const pdOccCodeOptions = [
+  '0 - Not specified by patient',
+  '1 - No other coverage',
+  '2 - Other coverage exists – payment collected',
+  '3 - Other coverage billed – claim not covered',
+  '4 - Other coverage exists – payment not collected',
+  '6 - Other Coverage Denied — Not a Participating Provider.',
+  '8 - Claim is billing for patient financial responsibility only',
+];
+
+const pdCobConfigOptions = [
+  'Secondary Payer Only',
+  'Pay Secondary Claim As Primary If Rej. By Other Payer',
+  'Consider COB Amount For Claim Limits',
+];
+
+type PdCobFields = { id: number; allowSecondaryPayer: boolean; cobConfigOptions: string[]; occCodes: string[] };
+
+const pdCobEditingIds = ref<number[]>([]);
+let pdCobSnapshots: Record<number, Omit<PdCobFields, 'id'>> = {};
+
+const pdIsEditingCob = (id: number) => pdCobEditingIds.value.includes(id);
+
+const pdStartEditCob = (plan: PdCobFields) => {
+  pdCobSnapshots[plan.id] = {
+    allowSecondaryPayer: plan.allowSecondaryPayer,
+    cobConfigOptions: [...plan.cobConfigOptions],
+    occCodes: [...plan.occCodes],
+  };
+  pdCobEditingIds.value.push(plan.id);
+};
+
+const pdCancelEditCob = (plan: PdCobFields) => {
+  const snap = pdCobSnapshots[plan.id];
+  if (snap) {
+    plan.allowSecondaryPayer = snap.allowSecondaryPayer;
+    plan.cobConfigOptions = [...snap.cobConfigOptions];
+    plan.occCodes = [...snap.occCodes];
+  }
+  pdCobEditingIds.value = pdCobEditingIds.value.filter(id => id !== plan.id);
+};
+
+const pdSaveEditCob = (plan: { id: number }) => {
+  pdCobEditingIds.value = pdCobEditingIds.value.filter(id => id !== plan.id);
+};
+
+const pdParamEditingIds = ref<number[]>([]);
+let pdParamSnapshots: Record<number, Omit<PdParameterFields, 'id'>> = {};
+
+const pdIsEditingParameters = (id: number) => pdParamEditingIds.value.includes(id);
+
+const pdStartEditParameters = (plan: PdParameterFields) => {
+  pdParamSnapshots[plan.id] = {
+    isGrandfathered: plan.isGrandfathered,
+    acaApplies: plan.acaApplies,
+    acaAppliesAtZeroCost: plan.acaAppliesAtZeroCost,
+    isHdhp: plan.isHdhp,
+    hdhpNotes: plan.hdhpNotes,
+    governedByErisa: plan.governedByErisa,
+  };
+  pdParamEditingIds.value.push(plan.id);
+};
+
+const pdCancelEditParameters = (plan: PdParameterFields) => {
+  const snap = pdParamSnapshots[plan.id];
+  if (snap) {
+    plan.isGrandfathered = snap.isGrandfathered;
+    plan.acaApplies = snap.acaApplies;
+    plan.acaAppliesAtZeroCost = snap.acaAppliesAtZeroCost;
+    plan.isHdhp = snap.isHdhp;
+    plan.hdhpNotes = snap.hdhpNotes;
+    plan.governedByErisa = snap.governedByErisa;
+  }
+  pdParamEditingIds.value = pdParamEditingIds.value.filter(id => id !== plan.id);
+};
+
+const pdSaveEditParameters = (plan: { id: number }) => {
+  pdParamEditingIds.value = pdParamEditingIds.value.filter(id => id !== plan.id);
 };
 
 // ─── Timeline helpers ─────────────────────────────────────────────────────────
@@ -6893,8 +7212,20 @@ watch(selectedAccount, (newVal) => {
   background-color: $color-neutral-white;
 }
 
+.pd-plans-section {
+  margin-bottom: $spacing-medium;
+}
+
 .pd-section {
-  padding: $spacing-large 0;
+  background-color: $color-neutral-white;
+  border: 1px solid $color-border;
+  border-radius: 8px;
+  padding: $spacing-medium;
+  margin-top: $spacing-medium;
+
+  &:first-child {
+    margin-top: 0;
+  }
 }
 
 .pd-empty-cta {
@@ -6908,70 +7239,11 @@ watch(selectedAccount, (newVal) => {
   margin-bottom: $spacing-medium;
 }
 
-.pd-section-divider {
-  border: none;
-  border-top: 1px solid $color-border;
-  margin: 0;
-}
-
-.ap-field-row--five .ap-field {
-  flex: 1;
-}
-
 .ap-field-sub {
   font-family: $font-family-base;
   font-size: $font-size-small;
   color: $color-text-secondary;
   margin-top: 2px;
-}
-
-.pd-param-add-card {
-  display: flex;
-  align-items: center;
-  gap: $spacing-medium;
-  padding: $spacing-medium;
-  border: 1px solid $color-border;
-  border-radius: 8px;
-  cursor: pointer;
-  max-width: 400px;
-  transition: border-color 0.15s ease, background-color 0.15s ease;
-
-  &:hover {
-    border-color: $color-primary;
-    background-color: rgba($color-primary, 0.03);
-  }
-}
-
-.pd-param-add-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  border: 1px solid $color-border;
-  color: $color-primary;
-  flex-shrink: 0;
-}
-
-.pd-param-add-text {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.pd-param-add-title {
-  font-family: $font-family-base;
-  font-size: $font-size-body;
-  font-weight: $font-weight-semibold;
-  color: $color-text-primary;
-}
-
-.pd-param-add-subtitle {
-  font-family: $font-family-base;
-  font-size: $font-size-small;
-  color: $color-text-secondary;
-  line-height: 1.4;
 }
 
 .pd-toggle-row {
@@ -7102,6 +7374,10 @@ watch(selectedAccount, (newVal) => {
     font-weight: $font-weight-bold;
     color: $color-text-primary;
     margin-bottom: $spacing-small;
+  }
+
+  &.pd-param-question {
+    margin-bottom: $spacing-large;
   }
 }
 

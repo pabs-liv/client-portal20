@@ -413,6 +413,12 @@ const filteredItems = computed(() => {
   }
   return currentItems;
 });
+
+watch(filteredItems, () => {
+  if (selected.value.length > 0) {
+    selected.value = [] as any[];
+  }
+});
 </script>
 
 <style lang="scss" scoped>
