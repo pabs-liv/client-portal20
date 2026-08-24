@@ -582,7 +582,7 @@
                   <div class="caa-form-grid__span2">
                     <Autocomplete
                       label="States"
-                      :items="states"
+                      :items="caaDrugCostStates"
                       multiple
                       :model-value="editableCaaData.states"
                       @update:model-value="updateCaaField('states', $event)"
@@ -1833,6 +1833,23 @@ const states = ref([
   'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ',
   'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC',
   'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY',
+]);
+
+// Mirrors the old portal's CAA Drug Cost Reporting state/territory picker (DataQ.States table,
+// CaaReportingController.GetStateAbbreviationList). Only includes territory codes we could verify
+// against CMS RxDC guidance; several codes present in the old DB list (KR, JA, JI, CZ, BI, BC)
+// couldn't be confirmed and are intentionally left out pending verification.
+const caaDrugCostStates = ref([
+  'National (all states, excluding territories)',
+  { header: 'States' },
+  'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
+  'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD',
+  'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ',
+  'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC',
+  'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY',
+  'DC',
+  { header: 'Territories' },
+  'PR', 'GU', 'VI', 'MP', 'MH', 'PW', 'FM', 'UM',
 ]);
 
 // Aligned to Master (Alex's build) 2026-08-07 — was ['SF Small Employer Plans', 'SF Large Employer Plans']

@@ -20,7 +20,8 @@
       </v-chip>
     </template>
     <template #item="{ item, props }">
-      <v-list-item v-bind="props" :title="item.title">
+      <v-list-subheader v-if="item.raw?.header">{{ item.raw.header }}</v-list-subheader>
+      <v-list-item v-else v-bind="props" :title="item.title">
         <template v-if="multiple" #prepend>
           <div class="ac-check-box" :class="{ 'ac-check-box--checked': Array.isArray(modelValue) && modelValue.includes(item.value) }">
             <Check v-if="Array.isArray(modelValue) && modelValue.includes(item.value)" :size="12" :stroke-width="2.5" />
