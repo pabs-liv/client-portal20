@@ -55,6 +55,9 @@ function handleCancel() {
         <component :is="icon" v-if="icon" :size="24" class="mr-2 text-primary" :style="{ color: iconColor }" />
         <span class="text-h3 text-primary">{{ heading }}</span>
       </v-card-title>
+      <p class="filters-instructions">
+        Select one or more filter options below to refine the results. Click Apply Filters to update the table.
+      </p>
       <v-card-text class="dialog-text">
         <template v-for="filter in filters" :key="filter.type">
           <slot :name="`filter-${filter.type}`" :filter="filter">
@@ -108,6 +111,13 @@ function handleCancel() {
 
 <style lang="scss" scoped>
 @import '@/style.scss';
+
+.filters-instructions {
+  padding: 0 $spacing-large $spacing-small;
+  margin: 0;
+  color: $color-text-secondary;
+  font-size: $font-size-body;
+}
 
 .dialog-card {
   border: 1px solid $color-border;

@@ -16,7 +16,6 @@
           class="filter-pills"
         />
       </div>
-      <Tabs :tabs="reportTabs" @tab-selected="handleTabSelected" />
       <ReportDataTable
         :headers="reportHeaders"
         :items="filteredReportData"
@@ -97,6 +96,52 @@
           </div>
         </div>
       </template>
+      <template #filter-reportType="{ filter }">
+        <p class="filter-section-label">{{ filter.label }}</p>
+        <div v-if="dialogReportTypes.length > 0" class="selected-chips">
+          <v-chip
+            v-for="type in dialogReportTypes"
+            :key="type"
+            variant="flat"
+            color="primary"
+            class="autocomplete-chip"
+          >
+            {{ type }}
+            <span class="chip-close" @click.stop="dialogReportTypes = dialogReportTypes.filter(t => t !== type)">
+              <X :size="8" :stroke-width="3" />
+            </span>
+          </v-chip>
+        </div>
+        <div class="account-picker-wrap">
+          <div class="account-search-field" :class="{ 'account-search-field--active': showReportTypeList }">
+            <input
+              v-model="reportTypeSearch"
+              type="text"
+              class="account-search-input"
+              placeholder="Search report types"
+              @mousedown="showReportTypeList = true"
+              @blur="handleReportTypePickerBlur"
+            />
+          </div>
+          <div v-if="showReportTypeList" class="account-dropdown">
+            <div
+              v-for="type in filteredReportTypeOptions"
+              :key="type"
+              class="account-option"
+              @mousedown.prevent
+              @click="toggleReportType(type)"
+            >
+              <div class="acct-checkbox" :class="{ active: dialogReportTypes.includes(type) }">
+                <Check v-if="dialogReportTypes.includes(type)" :size="12" :stroke-width="3" />
+              </div>
+              <span>{{ type }}</span>
+            </div>
+            <div v-if="filteredReportTypeOptions.length === 0" class="no-acct-results">
+              No report types found
+            </div>
+          </div>
+        </div>
+      </template>
       <template #filter-dateRange>
         <p class="filter-section-label">Date Range</p>
         <div class="date-range-row">
@@ -117,7 +162,6 @@ import { ref, reactive, computed } from 'vue';
 import { SlidersHorizontal, CloudDownload, Check, X } from 'lucide-vue-next';
 import PageCard from '@/components/common/PageCard.vue';
 import ReportDataTable from '@/components/common/ReportDataTable.vue';
-import Tabs from '@/components/common/Tabs.vue';
 import AdvancedFiltersButton from '@/components/ui/AdvancedFiltersButton.vue';
 import AdvancedFiltersDialog from '@/components/common/AdvancedFiltersDialog.vue';
 import FilteringPillsGroup from '@/components/ui/FilteringPillsGroup.vue';
@@ -125,33 +169,24 @@ import DatePicker from '@/components/ui/DatePicker.vue';
 import type { FilterGroup } from '@/types/filters';
 import type { FilterPill } from '@/components/ui/FilteringPill.vue';
 
-const reportTabs = [
-  { label: 'All',              key: 'all' },
-  { label: 'Quarterly',        key: 'Quarterly' },
-  { label: 'Monthly Value',    key: 'Monthly Value' },
-  { label: 'Rebate Summary',   key: 'Rebate Summary' },
-  { label: 'Rebate Payments',  key: 'Rebate Payments' },
-  { label: 'MAC Pricing',      key: 'MAC Pricing' },
-  { label: 'RxCompass',        key: 'RxCompass' },
-  { label: 'RxCompass Lite',   key: 'RxCompass Lite' },
-  { label: 'Variable Copay',   key: 'Variable Copay' },
-];
-
-const selectedTab = ref('all');
 const isAdvancedFiltersOpen = ref(false);
 
 // Applied state — what the table actually uses
 const appliedAccounts = ref<string[]>([]);
+const appliedReportTypes = ref<string[]>([]);
 const appliedDateFrom = ref('');
 const appliedDateTo = ref('');
 
 // Dialog draft state — only committed when Apply is clicked
 const dialogAccounts = ref<string[]>([]);
+const dialogReportTypes = ref<string[]>([]);
 const dialogDateFrom = ref('');
 const dialogDateTo = ref('');
 
 const accountSearch = ref('');
 const showAccountList = ref(false);
+const reportTypeSearch = ref('');
+const showReportTypeList = ref(false);
 
 const reportData = ref([
   { id: 1,  accountName: 'Company A', type: 'Quarterly',       startDate: '1/1/2025',  endDate: '3/31/2025' },
@@ -172,9 +207,18 @@ const accountOptions = computed(() =>
   [...new Set(reportData.value.map(item => item.accountName))].sort()
 );
 
+const reportTypeOptions = computed(() =>
+  [...new Set(reportData.value.map(item => item.type))].sort()
+);
+
 const filteredAccountOptions = computed(() => {
   const q = accountSearch.value?.toLowerCase() ?? '';
   return accountOptions.value.filter(a => a.toLowerCase().includes(q));
+});
+
+const filteredReportTypeOptions = computed(() => {
+  const q = reportTypeSearch.value?.toLowerCase() ?? '';
+  return reportTypeOptions.value.filter(t => t.toLowerCase().includes(q));
 });
 
 const toggleAccount = (account: string) => {
@@ -185,21 +229,37 @@ const toggleAccount = (account: string) => {
   }
 };
 
+const toggleReportType = (type: string) => {
+  if (dialogReportTypes.value.includes(type)) {
+    dialogReportTypes.value = dialogReportTypes.value.filter(t => t !== type);
+  } else {
+    dialogReportTypes.value = [...dialogReportTypes.value, type];
+  }
+};
+
 const handleAccountPickerBlur = () => {
   setTimeout(() => { showAccountList.value = false; }, 150);
 };
 
+const handleReportTypePickerBlur = () => {
+  setTimeout(() => { showReportTypeList.value = false; }, 150);
+};
+
 const openFilters = () => {
   dialogAccounts.value = [...appliedAccounts.value];
+  dialogReportTypes.value = [...appliedReportTypes.value];
   dialogDateFrom.value = appliedDateFrom.value;
   dialogDateTo.value = appliedDateTo.value;
   accountSearch.value = '';
+  reportTypeSearch.value = '';
   showAccountList.value = false;
+  showReportTypeList.value = false;
   isAdvancedFiltersOpen.value = true;
 };
 
 const applyFilters = () => {
   appliedAccounts.value = [...dialogAccounts.value];
+  appliedReportTypes.value = [...dialogReportTypes.value];
   appliedDateFrom.value = dialogDateFrom.value;
   appliedDateTo.value = dialogDateTo.value;
   isAdvancedFiltersOpen.value = false;
@@ -209,12 +269,9 @@ const cancelFilters = () => {
   isAdvancedFiltersOpen.value = false;
 };
 
-const handleTabSelected = (key: string) => {
-  selectedTab.value = key;
-};
-
 const reportFilters = reactive<FilterGroup[]>([
   { type: 'account',        label: 'Account',          multiselect: true,  options: [], modelValue: null },
+  { type: 'reportType',     label: 'Report Type',      multiselect: true,  options: [], modelValue: null },
   { type: 'dateRange',      label: 'Date Range',       multiselect: false, options: [], modelValue: null },
 ]);
 
@@ -234,6 +291,9 @@ const activeFilterPills = computed<FilterPill[]>(() => {
   appliedAccounts.value.forEach(acct => {
     pills.push({ type: 'account', value: acct, label: acct, isActive: true });
   });
+  appliedReportTypes.value.forEach(type => {
+    pills.push({ type: 'reportType', value: type, label: type, isActive: true });
+  });
   if (appliedDateFrom.value || appliedDateTo.value) {
     const parts = [appliedDateFrom.value, appliedDateTo.value]
       .filter(Boolean)
@@ -246,6 +306,8 @@ const activeFilterPills = computed<FilterPill[]>(() => {
 const handleFilterPillClose = (pill: FilterPill) => {
   if (pill.type === 'account') {
     appliedAccounts.value = appliedAccounts.value.filter(v => v !== pill.value);
+  } else if (pill.type === 'reportType') {
+    appliedReportTypes.value = appliedReportTypes.value.filter(v => v !== pill.value);
   } else if (pill.type === 'dateRange') {
     appliedDateFrom.value = '';
     appliedDateTo.value = '';
@@ -254,11 +316,11 @@ const handleFilterPillClose = (pill: FilterPill) => {
 
 const filteredReportData = computed(() => {
   let items = reportData.value;
-  if (selectedTab.value !== 'all') {
-    items = items.filter(item => item.type === selectedTab.value);
-  }
   if (appliedAccounts.value.length > 0) {
     items = items.filter(item => appliedAccounts.value.includes(item.accountName));
+  }
+  if (appliedReportTypes.value.length > 0) {
+    items = items.filter(item => appliedReportTypes.value.includes(item.type));
   }
   if (appliedDateFrom.value || appliedDateTo.value) {
     const fromTs = appliedDateFrom.value ? parseMDYYYY(appliedDateFrom.value) : 0;
