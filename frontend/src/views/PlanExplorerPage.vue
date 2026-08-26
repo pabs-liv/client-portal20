@@ -1,4 +1,4 @@
-
+﻿
 <template>
   <div>
     <AccountSelector
@@ -22,13 +22,13 @@
       <!-- Wayne Enterprises: Active/fully-implemented view -->
       <div v-if="isWayneEnterprises" class="gap-view">
         <p class="text-body gap-dev-note">
-          <strong>Design Note for Dev/QA:</strong> This section is an exact replication of Solo2 &rarr; Member InSites &rarr; Member Search &rarr; GAP tab. Do not use this mockup as the visual source of truth — reference the live GAP tab in Solo2 directly for exact fields, order, and behavior (including live search-highlighting and conditional field visibility).
+          <strong>Design Note for Dev/QA:</strong> This section is an exact replication of Solo2 &rarr; Member InSites &rarr; Member Search &rarr; GAP tab. Do not use this mockup as the visual source of truth â€” reference the live GAP tab in Solo2 directly for exact fields, order, and behavior (including live search-highlighting and conditional field visibility).
         </p>
 
         <div class="gap-meta">
           <Building2 :size="14" :stroke-width="1.5" class="gap-meta-icon" />
-          <span>Wayne Enterprises – 11250</span>
-          <span class="gap-meta-dot">•</span>
+          <span>Wayne Enterprises â€“ 11250</span>
+          <span class="gap-meta-dot">â€¢</span>
           <span>Effective: 01/01/2026</span>
         </div>
 
@@ -124,25 +124,25 @@
                         <div class="ap-field-row ap-field-row--multi ap-field-row--thirds">
                           <div class="ap-field">
                             <span class="ap-field-label">Account name</span>
-                            <span class="ap-field-value">{{ accountProfile.accountName || '—' }}</span>
+                            <span class="ap-field-value">{{ accountProfile.accountName || 'â€”' }}</span>
                           </div>
                           <div class="ap-field">
                             <span class="ap-field-label">Legal Name</span>
-                            <span class="ap-field-value">{{ accountProfile.legalName || '—' }}</span>
+                            <span class="ap-field-value">{{ accountProfile.legalName || 'â€”' }}</span>
                           </div>
                           <div class="ap-field">
                             <span class="ap-field-label">DBA</span>
-                            <span class="ap-field-value">{{ accountProfile.dba || '—' }}</span>
+                            <span class="ap-field-value">{{ accountProfile.dba || 'â€”' }}</span>
                           </div>
                         </div>
                         <div class="ap-field-row ap-field-row--multi">
                           <div class="ap-field">
                             <span class="ap-field-label">Effective start date</span>
-                            <span class="ap-field-value">{{ accountProfile.effectiveStartDate || '—' }}</span>
+                            <span class="ap-field-value">{{ accountProfile.effectiveStartDate || 'â€”' }}</span>
                           </div>
                           <div class="ap-field">
                             <span class="ap-field-label">Effective end date</span>
-                            <span class="ap-field-value">{{ accountProfile.effectiveEndDate || '—' }}</span>
+                            <span class="ap-field-value">{{ accountProfile.effectiveEndDate || 'â€”' }}</span>
                           </div>
                         </div>
                       </template>
@@ -178,73 +178,73 @@
                         <div class="ap-field-row">
                           <div class="ap-field">
                             <span class="ap-field-label">SIC Code</span>
-                            <span class="ap-field-value">{{ companyInfo.sicCode || '—' }}</span>
+                            <span class="ap-field-value">{{ companyInfo.sicCode || 'â€”' }}</span>
                           </div>
                         </div>
                         <h5 class="ap-subsection-heading">Physical Address</h5>
                         <div class="ap-field-row">
                           <div class="ap-field">
                             <span class="ap-field-label">Address 1</span>
-                            <span class="ap-field-value">{{ companyInfo.physicalAddress1 || '—' }}</span>
+                            <span class="ap-field-value">{{ companyInfo.physicalAddress1 || 'â€”' }}</span>
                           </div>
                         </div>
                         <div class="ap-field-row">
                           <div class="ap-field">
                             <span class="ap-field-label">Address 2</span>
-                            <span class="ap-field-value">{{ companyInfo.physicalAddress2 || '—' }}</span>
+                            <span class="ap-field-value">{{ companyInfo.physicalAddress2 || 'â€”' }}</span>
                           </div>
                         </div>
                         <div class="ap-field-row ap-field-row--multi ap-field-row--thirds">
                           <div class="ap-field">
                             <span class="ap-field-label">City</span>
-                            <span class="ap-field-value">{{ companyInfo.physicalCity || '—' }}</span>
+                            <span class="ap-field-value">{{ companyInfo.physicalCity || 'â€”' }}</span>
                           </div>
                           <div class="ap-field">
                             <span class="ap-field-label">State</span>
-                            <span class="ap-field-value">{{ companyInfo.physicalState || '—' }}</span>
+                            <span class="ap-field-value">{{ companyInfo.physicalState || 'â€”' }}</span>
                           </div>
                           <div class="ap-field">
                             <span class="ap-field-label">ZIP</span>
-                            <span class="ap-field-value">{{ companyInfo.physicalZip || '—' }}</span>
+                            <span class="ap-field-value">{{ companyInfo.physicalZip || 'â€”' }}</span>
                           </div>
                         </div>
                         <div class="ap-field-row">
                           <div class="ap-field">
                             <span class="ap-field-label">Country</span>
-                            <span class="ap-field-value">{{ companyInfo.physicalCountry || '—' }}</span>
+                            <span class="ap-field-value">{{ companyInfo.physicalCountry || 'â€”' }}</span>
                           </div>
                         </div>
                         <h5 class="ap-subsection-heading">Mailing Address</h5>
                         <div class="ap-field-row">
                           <div class="ap-field">
                             <span class="ap-field-label">Address 1</span>
-                            <span class="ap-field-value">{{ companyInfo.mailingAddress1 || '—' }}</span>
+                            <span class="ap-field-value">{{ companyInfo.mailingAddress1 || 'â€”' }}</span>
                           </div>
                         </div>
                         <div class="ap-field-row">
                           <div class="ap-field">
                             <span class="ap-field-label">Address 2</span>
-                            <span class="ap-field-value">{{ companyInfo.mailingAddress2 || '—' }}</span>
+                            <span class="ap-field-value">{{ companyInfo.mailingAddress2 || 'â€”' }}</span>
                           </div>
                         </div>
                         <div class="ap-field-row ap-field-row--multi ap-field-row--thirds">
                           <div class="ap-field">
                             <span class="ap-field-label">City</span>
-                            <span class="ap-field-value">{{ companyInfo.mailingCity || '—' }}</span>
+                            <span class="ap-field-value">{{ companyInfo.mailingCity || 'â€”' }}</span>
                           </div>
                           <div class="ap-field">
                             <span class="ap-field-label">State</span>
-                            <span class="ap-field-value">{{ companyInfo.mailingState || '—' }}</span>
+                            <span class="ap-field-value">{{ companyInfo.mailingState || 'â€”' }}</span>
                           </div>
                           <div class="ap-field">
                             <span class="ap-field-label">ZIP</span>
-                            <span class="ap-field-value">{{ companyInfo.mailingZip || '—' }}</span>
+                            <span class="ap-field-value">{{ companyInfo.mailingZip || 'â€”' }}</span>
                           </div>
                         </div>
                         <div class="ap-field-row">
                           <div class="ap-field">
                             <span class="ap-field-label">Country</span>
-                            <span class="ap-field-value">{{ companyInfo.mailingCountry || '—' }}</span>
+                            <span class="ap-field-value">{{ companyInfo.mailingCountry || 'â€”' }}</span>
                           </div>
                         </div>
                       </template>
@@ -381,7 +381,7 @@
                       <v-col cols="12"><TextField v-model="apContactForm.phone" label="Phone" /></v-col>
                     </v-row>
                     <v-checkbox v-model="apContactForm.allowPhi" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox" label="Allow access to PHI" />
-                    <p class="text-small ap-role-note">Allows this contact to receive PHI in any communication — email, phone, or mail — not just within the Client Portal.</p>
+                    <p class="text-small ap-role-note">Allows this contact to receive PHI in any communication â€” email, phone, or mail â€” not just within the Client Portal.</p>
 
                     <v-divider class="my-4" />
                     <h5 class="ap-subsection-heading">Client Portal Access</h5>
@@ -432,7 +432,7 @@
                       <v-col cols="12"><TextField v-model="apEditContactForm.phone" label="Phone" /></v-col>
                     </v-row>
                     <v-checkbox v-model="apEditContactForm.allowPhi" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox" label="Allow access to PHI" />
-                    <p class="text-small ap-role-note">Allows this contact to receive PHI in any communication — email, phone, or mail — not just within the Client Portal.</p>
+                    <p class="text-small ap-role-note">Allows this contact to receive PHI in any communication â€” email, phone, or mail â€” not just within the Client Portal.</p>
 
                     <v-divider class="my-4" />
                     <h5 class="ap-subsection-heading">Client Portal Access</h5>
@@ -515,7 +515,7 @@
                                     </div>
                                   </div>
                                   <p class="prog-detail-label">Permissions</p>
-                                  <p class="prog-detail-value">{{ item.portalAccess ? apPermissionsSummary(item.role, item.permissions) : 'N/A — no Client Portal access' }}</p>
+                                  <p class="prog-detail-value">{{ item.portalAccess ? apPermissionsSummary(item.role, item.permissions) : 'N/A â€” no Client Portal access' }}</p>
                                 </div>
                               </td>
                             </tr>
@@ -556,7 +556,7 @@
                         <v-col cols="12" sm="6"><Select v-model="apVendorRoleSelection" :items="apVendorRoleOptions" label="Business Role" /></v-col>
                       </v-row>
                       <v-checkbox v-model="apVendorAllowPhi" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox" label="Allow access to PHI" />
-                      <p class="text-small ap-role-note">Allows this contact to receive PHI in any communication — email, phone, or mail — not just within the Client Portal.</p>
+                      <p class="text-small ap-role-note">Allows this contact to receive PHI in any communication â€” email, phone, or mail â€” not just within the Client Portal.</p>
 
                       <h6 class="ap-subsection-heading">Contact Designations</h6>
                       <v-checkbox
@@ -599,7 +599,7 @@
                   <!-- Edit Vendor Contact Dialog -->
                   <Dialog
                     v-model="apShowEditVendorContactDialog"
-                    :heading="`Edit Vendor Contact — ${apEditingVendorContactName}`"
+                    :heading="`Edit Vendor Contact â€” ${apEditingVendorContactName}`"
                     :show-secondary-button="true"
                     :actions="apEditVendorContactDialogActions"
                   >
@@ -613,7 +613,7 @@
                       <v-col cols="12" sm="6"><Select v-model="apEditVendorContactForm.role" :items="apVendorRoleOptions" label="Business Role" /></v-col>
                     </v-row>
                     <v-checkbox v-model="apEditVendorContactForm.allowPhi" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox" label="Allow access to PHI" />
-                    <p class="text-small ap-role-note">Allows this contact to receive PHI in any communication — email, phone, or mail — not just within the Client Portal.</p>
+                    <p class="text-small ap-role-note">Allows this contact to receive PHI in any communication â€” email, phone, or mail â€” not just within the Client Portal.</p>
 
                     <h6 class="ap-subsection-heading">Contact Designations</h6>
                     <v-checkbox
@@ -720,11 +720,11 @@
                       >
                         <template #item.noBillNoPay="{ item }">
                           <Check v-if="item.noBillNoPay" :size="16" :stroke-width="2" class="ua-table-check" />
-                          <span v-else>—</span>
+                          <span v-else>â€”</span>
                         </template>
                         <template #item.displayInPortals="{ item }">
                           <Check v-if="item.displayInPortals" :size="16" :stroke-width="2" class="ua-table-check" />
-                          <span v-else>—</span>
+                          <span v-else>â€”</span>
                         </template>
                       </ReportDataTable>
                     </div>
@@ -739,8 +739,101 @@
 
                 </template>
 
-                <!-- Step 3: Plan Design -->
+                <!-- Step 3: Group Setup -->
                 <template v-else-if="currentWizardStep === 2">
+                  <div class="nc-section">
+                    <div class="nc-section-header">
+                      <h4 class="text-h4">Groups</h4>
+                      <button v-if="currentGroupSetupRows.length > 0" class="button button-primary" @click="openGroupSetupDialog('add')">+ Add Group</button>
+                    </div>
+                    <div v-if="currentGroupSetupRows.length > 0">
+                      <ReportDataTable
+                        :headers="groupSetupHeaders"
+                        :items="currentGroupSetupRows"
+                        :show-search-bar="false"
+                        :show-filter-pills="false"
+                        :show-selection-checkboxes="false"
+                        :show-row-actions="true"
+                        :row-action-items="groupSetupRowActions"
+                        :row-action-disabled="groupSetupRowActionDisabled"
+                        :row-action-disabled-reason="groupSetupRowActionDisabledReason"
+                        :show-table-footer="true"
+                        @row-action="handleGroupSetupRowAction"
+                      />
+                    </div>
+                    <div v-else class="nc-empty-state">
+                      <img :src="EmptyStateImg" alt="No data" class="nc-empty-icon" />
+                      <p class="nc-empty-title">Nothing to see here</p>
+                      <p class="nc-empty-subtitle">No groups have been configured yet.</p>
+                      <button class="button button-secondary" @click="openGroupSetupDialog('add')">+ Add Group</button>
+                    </div>
+                  </div>
+
+                  <Dialog
+                    v-model="showGroupSetupDialog"
+                    :heading="groupSetupDialogMode === 'edit' ? 'Edit Group' : 'Add Group'"
+                    :show-secondary-button="true"
+                    :actions="groupSetupDialogActions"
+                  >
+                    <v-row class="mt-1">
+                      <v-col cols="12" md="6">
+                        <TextField v-model="groupSetupForm.groupName" label="Group Name" />
+                      </v-col>
+                      <v-col cols="12" md="6">
+                        <TextField
+                          v-model="groupSetupForm.groupId"
+                          label="Group ID *"
+                          :error-messages="groupSetupTouched && !groupSetupForm.groupId.trim() ? ['Required'] : []"
+                        />
+                      </v-col>
+                    </v-row>
+                    <v-row>
+                      <v-col cols="12" md="6">
+                        <Select
+                          v-model="groupSetupForm.bin"
+                          :items="groupSetupBinOptions"
+                          label="Bin"
+                          @update:model-value="onGroupSetupBinChange"
+                        />
+                      </v-col>
+                      <v-col cols="12" md="6">
+                        <TextField v-model="groupSetupForm.pcn" label="PCN" />
+                      </v-col>
+                    </v-row>
+                    <v-row v-if="groupSetupForm.bin === GROUP_SETUP_CHANGE_BIN">
+                      <v-col cols="12" md="6">
+                        <Select
+                          v-model="groupSetupForm.claimSourceId"
+                          :items="groupSetupProcessorOptions"
+                          label="Processor *"
+                          :error-messages="groupSetupTouched && groupSetupForm.claimSourceId === null ? ['Required'] : []"
+                        />
+                      </v-col>
+                    </v-row>
+                    <div class="nl-date-row nl-date-row--grid">
+                      <DatePicker
+                        v-model="groupSetupForm.startDate"
+                        label="Start Date *"
+                        variant="underlined"
+                        :error="groupSetupTouched && !groupSetupForm.startDate"
+                        :error-messages="groupSetupTouched && !groupSetupForm.startDate ? ['Required'] : []"
+                      />
+                      <DatePicker
+                        v-model="groupSetupForm.endDate"
+                        label="End Date"
+                        variant="underlined"
+                        :min="groupSetupForm.startDate"
+                        :error="endDateBeforeStartError(groupSetupForm.startDate, groupSetupForm.endDate)"
+                        :error-messages="endDateBeforeStartError(groupSetupForm.startDate, groupSetupForm.endDate) ? ['Must be after start date'] : []"
+                      />
+                      <span></span>
+                      <p class="nl-date-hint">Optional - Leave blank to keep active</p>
+                    </div>
+                  </Dialog>
+                </template>
+
+                <!-- Step 4: Plan Design -->
+                <template v-else-if="currentWizardStep === 3">
                   <div class="pd-plans-section">
                     <div class="ap-section-header ap-section-header--space-between">
                       <h4 class="text-h4">All Plans</h4>
@@ -783,6 +876,126 @@
                     </div>
                   </Dialog>
 
+                  <Dialog
+                    v-model="showBpgDialog"
+                    heading="Add Group to Plan"
+                    :show-secondary-button="true"
+                    :actions="bpgDialogActions"
+                  >
+                    <v-row class="mt-1">
+                      <v-col cols="12">
+                        <Select
+                          v-model="bpgSelectedGroupId"
+                          :items="bpgDialogGroupOptions"
+                          label="Select Group *"
+                          :error-messages="bpgTouched && !bpgSelectedGroupId ? ['Required'] : []"
+                        />
+                        <p v-if="bpgDialogGroupOptions.length === 0" class="nl-date-hint mt-2">
+                          All of this account's groups are already linked to this plan, or no groups have been set up yet in Group Setup.
+                        </p>
+                      </v-col>
+                    </v-row>
+                  </Dialog>
+
+                  <Dialog
+                    v-model="showCodeDialog"
+                    :heading="codeDialogHeading"
+                    :show-secondary-button="true"
+                    :actions="codeDialogActions"
+                  >
+                    <v-row class="mt-1">
+                      <v-col cols="12">
+                        <TextField
+                          v-model="codeForm.code"
+                          :label="`${codeFieldLabel} *`"
+                          :error-messages="codeTouched && !codeForm.code.trim() ? ['Required'] : []"
+                        />
+                      </v-col>
+                    </v-row>
+                    <div class="nl-date-row nl-date-row--grid">
+                      <DatePicker
+                        v-model="codeForm.startDate"
+                        label="Start Date *"
+                        variant="underlined"
+                        :error="codeTouched && !codeForm.startDate"
+                        :error-messages="codeTouched && !codeForm.startDate ? ['Required'] : []"
+                      />
+                      <DatePicker
+                        v-model="codeForm.endDate"
+                        label="End Date"
+                        variant="underlined"
+                        :min="codeForm.startDate"
+                        :error="endDateBeforeStartError(codeForm.startDate, codeForm.endDate)"
+                        :error-messages="endDateBeforeStartError(codeForm.startDate, codeForm.endDate) ? ['Must be after start date'] : []"
+                      />
+                      <span></span>
+                      <p class="nl-date-hint">Optional - Leave blank to keep active</p>
+                    </div>
+                  </Dialog>
+
+                  <Dialog
+                    v-model="showAccumulatorAssociateDialog"
+                    heading="Associate Accumulator"
+                    :show-secondary-button="true"
+                    :actions="accumulatorAssociateDialogActions"
+                  >
+                    <v-row class="mt-1">
+                      <v-col cols="12">
+                        <Select
+                          v-model="accumulatorAssociateForm.accumulatorId"
+                          :items="accumulatorAssociateOptions"
+                          label="Accumulator *"
+                          :error-messages="accumulatorAssociateTouched && !accumulatorAssociateForm.accumulatorId ? ['Required'] : []"
+                        />
+                        <p v-if="accumulatorAssociateOptions.length === 0" class="nl-date-hint mt-2">
+                          All configured accumulators for this account are already associated to this plan.
+                        </p>
+                      </v-col>
+                    </v-row>
+                    <div class="nl-date-row nl-date-row--grid">
+                      <DatePicker
+                        v-model="accumulatorAssociateForm.startDate"
+                        label="Start Date *"
+                        variant="underlined"
+                        :error="accumulatorAssociateTouched && !accumulatorAssociateForm.startDate"
+                        :error-messages="accumulatorAssociateTouched && !accumulatorAssociateForm.startDate ? ['Required'] : []"
+                      />
+                      <DatePicker
+                        v-model="accumulatorAssociateForm.endDate"
+                        label="End Date *"
+                        variant="underlined"
+                        :min="accumulatorAssociateForm.startDate"
+                        :error="(accumulatorAssociateTouched && !accumulatorAssociateForm.endDate) || endDateBeforeStartError(accumulatorAssociateForm.startDate, accumulatorAssociateForm.endDate)"
+                        :error-messages="accumulatorAssociateTouched && !accumulatorAssociateForm.endDate ? ['Required'] : endDateBeforeStartError(accumulatorAssociateForm.startDate, accumulatorAssociateForm.endDate) ? ['Must be after start date'] : []"
+                      />
+                    </div>
+                  </Dialog>
+
+                  <Dialog
+                    v-model="showAccumulatorEditDatesDialog"
+                    heading="Edit Accumulator Dates"
+                    :show-secondary-button="true"
+                    :actions="accumulatorEditDatesDialogActions"
+                  >
+                    <div class="nl-date-row nl-date-row--grid mt-1">
+                      <DatePicker
+                        v-model="accumulatorEditDatesForm.startDate"
+                        label="Start Date *"
+                        variant="underlined"
+                        :error="accumulatorEditDatesTouched && !accumulatorEditDatesForm.startDate"
+                        :error-messages="accumulatorEditDatesTouched && !accumulatorEditDatesForm.startDate ? ['Required'] : []"
+                      />
+                      <DatePicker
+                        v-model="accumulatorEditDatesForm.endDate"
+                        label="End Date *"
+                        variant="underlined"
+                        :min="accumulatorEditDatesForm.startDate"
+                        :error="(accumulatorEditDatesTouched && !accumulatorEditDatesForm.endDate) || endDateBeforeStartError(accumulatorEditDatesForm.startDate, accumulatorEditDatesForm.endDate)"
+                        :error-messages="accumulatorEditDatesTouched && !accumulatorEditDatesForm.endDate ? ['Required'] : endDateBeforeStartError(accumulatorEditDatesForm.startDate, accumulatorEditDatesForm.endDate) ? ['Must be after start date'] : []"
+                      />
+                    </div>
+                  </Dialog>
+
                   <div class="pd-accordion-list">
                     <div
                       v-for="plan in planDesignPlans"
@@ -819,15 +1032,15 @@
                             </div>
                             <div class="ap-field">
                               <span class="ap-field-label">Eff. start date</span>
-                              <span class="ap-field-value">{{ plan.effStartDate || '—' }}</span>
+                              <span class="ap-field-value">{{ plan.effStartDate || 'â€”' }}</span>
                             </div>
                             <div class="ap-field">
                               <span class="ap-field-label">Eff. end date</span>
-                              <span class="ap-field-value">{{ plan.effEndDate || '—' }}</span>
+                              <span class="ap-field-value">{{ plan.effEndDate || 'â€”' }}</span>
                             </div>
                             <div class="ap-field">
                               <span class="ap-field-label">Benefit reset to $0</span>
-                              <span class="ap-field-value">{{ plan.benefitReset || '—' }}</span>
+                              <span class="ap-field-value">{{ plan.benefitReset || 'â€”' }}</span>
                             </div>
                             <div class="ap-field">
                               <span class="ap-field-label">Situs State</span>
@@ -960,19 +1173,211 @@
                         <div class="pd-section">
                           <div class="pd-section-header">
                             <h4 class="text-h4">Plan Max Spend Parameters</h4>
+                            <button v-if="!pdIsEditingMaxSpend(plan.id)" class="button button-thirtiary" @click="pdStartEditMaxSpend(plan)">
+                              <Pencil :size="14" :stroke-width="1.5" /> Edit
+                            </button>
                           </div>
-                          <div class="pd-toggle-row">
-                            <div class="pd-toggle-text">
-                              <p class="pd-toggle-description">Enables additional configuration to set the maximum amount of money that a plan will spend on covered medications within a specific...</p>
-                              <button class="pd-show-more">Show More</button>
+                          <div v-if="!pdIsEditingMaxSpend(plan.id)" class="ap-field-row">
+                            <div class="ap-field">
+                              <span class="ap-field-label">Enable plan spend max configuration?</span>
+                              <span class="ap-field-value">{{ plan.maxSpendEnabled ? 'Yes' : 'No' }}</span>
                             </div>
-                            <v-switch
-                              v-model="plan.maxSpendEnabled"
-                              density="compact"
-                              hide-details
-                              color="primary"
-                              class="pd-toggle-switch"
-                            />
+                          </div>
+                          <template v-if="!pdIsEditingMaxSpend(plan.id) && plan.maxSpendEnabled">
+                            <div class="ap-field-row ap-field-row--multi ap-field-row--wrap mt-2">
+                              <div class="ap-field">
+                                <span class="ap-field-label">Enable plan spend max at NDC level?</span>
+                                <span class="ap-field-value">{{ plan.maxSpend.ndcLevel ? 'Yes' : 'No' }}</span>
+                              </div>
+                              <div class="ap-field">
+                                <span class="ap-field-label">Fill first NDC with no copay?</span>
+                                <span class="ap-field-value">{{ plan.maxSpend.firstNdcNoCopay ? 'Yes' : 'No' }}</span>
+                              </div>
+                              <div class="ap-field">
+                                <span class="ap-field-label">Reject when plan max met?</span>
+                                <span class="ap-field-value">{{ plan.maxSpend.rejectWhenMet ? 'Yes' : 'No' }}</span>
+                              </div>
+                              <div v-if="plan.maxSpend.rejectWhenMet" class="ap-field">
+                                <span class="ap-field-label">Plan Max Rejection Message</span>
+                                <span class="ap-field-value">{{ plan.maxSpend.rejectionMessage || '—' }}</span>
+                              </div>
+                              <div v-if="plan.maxSpend.rejectWhenMet" class="ap-field">
+                                <span class="ap-field-label">NCPDP Reject Code</span>
+                                <span class="ap-field-value">{{ ncpdpRejectCodeLabel(plan.maxSpend.ncpdpRejectCode) }}</span>
+                              </div>
+                            </div>
+                          </template>
+                          <template v-if="pdIsEditingMaxSpend(plan.id)">
+                            <div class="toc-question pd-param-question">
+                              <p class="toc-question-label">Enable plan spend max configuration?</p>
+                              <p class="text-body mb-3">This sets the maximum amount a plan will spend on covered medications within a specific timeframe, to help control costs and keep expenses within budget.</p>
+                              <div class="toc-toggle-group">
+                                <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': plan.maxSpendEnabled === false }]" @click="plan.maxSpendEnabled = false">No</button>
+                                <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': plan.maxSpendEnabled === true }]" @click="plan.maxSpendEnabled = true">Yes</button>
+                              </div>
+                            </div>
+
+                            <template v-if="plan.maxSpendEnabled">
+                              <div class="ap-checkbox-row mt-3" style="cursor:pointer" @click="plan.maxSpend.ndcLevel = !plan.maxSpend.ndcLevel">
+                                <CheckSquare v-if="plan.maxSpend.ndcLevel" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                                <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                                <span class="ap-field-value">Enable plan spend max at NDC level</span>
+                              </div>
+                              <div class="ap-checkbox-row mt-2" style="cursor:pointer" @click="plan.maxSpend.firstNdcNoCopay = !plan.maxSpend.firstNdcNoCopay">
+                                <CheckSquare v-if="plan.maxSpend.firstNdcNoCopay" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                                <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                                <span class="ap-field-value">Fill first NDC with no copay</span>
+                              </div>
+                              <div class="ap-checkbox-row mt-2" style="cursor:pointer" @click="plan.maxSpend.rejectWhenMet = !plan.maxSpend.rejectWhenMet">
+                                <CheckSquare v-if="plan.maxSpend.rejectWhenMet" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                                <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                                <span class="ap-field-value">Reject when plan max met</span>
+                              </div>
+                              <v-row v-if="plan.maxSpend.rejectWhenMet" class="mt-2">
+                                <v-col cols="12" md="8">
+                                  <TextField v-model="plan.maxSpend.rejectionMessage" label="Plan Max Rejection Message" :maxlength="200" counter />
+                                </v-col>
+                                <v-col cols="12" md="4">
+                                  <Select v-model="plan.maxSpend.ncpdpRejectCode" :items="ncpdpRejectCodeOptions" label="NCPDP Reject Code" />
+                                </v-col>
+                              </v-row>
+                            </template>
+                          </template>
+
+                          <template v-if="plan.maxSpendEnabled">
+                            <h5 class="ap-subsection-heading mt-6">Max Annual/Month Spend</h5>
+                            <template v-if="!pdIsEditingMaxSpend(plan.id)">
+                              <div class="ap-field-row ap-field-row--multi ap-field-row--wrap">
+                                <div class="ap-field">
+                                  <span class="ap-field-label">Spend Max Annual</span>
+                                  <span class="ap-field-value">{{ plan.maxSpend.annualAmount || '—' }}</span>
+                                </div>
+                                <div class="ap-field">
+                                  <span class="ap-field-label">Spend Max Per Month</span>
+                                  <span class="ap-field-value">{{ plan.maxSpend.perMonthAmount || '—' }}</span>
+                                </div>
+                                <div class="ap-field">
+                                  <span class="ap-field-label">Spend Max Per Fill</span>
+                                  <span class="ap-field-value">{{ plan.maxSpend.perFillAmount || '—' }}</span>
+                                </div>
+                              </div>
+                              <div class="ap-field-row mt-1">
+                                <div class="ap-field">
+                                  <span class="ap-field-label">Cover ingredient cost only?</span>
+                                  <span class="ap-field-value">{{ plan.maxSpend.ingredientCostOnly ? 'Yes' : 'No' }}</span>
+                                </div>
+                              </div>
+                            </template>
+                            <template v-else>
+                              <v-row class="mb-0">
+                                <v-col cols="12" sm="4">
+                                  <TextField v-model="plan.maxSpend.annualAmount" label="Spend Max Annual" prefix="$" />
+                                </v-col>
+                                <v-col cols="12" sm="4">
+                                  <TextField v-model="plan.maxSpend.perMonthAmount" label="Spend Max Per Month" prefix="$" />
+                                </v-col>
+                                <v-col cols="12" sm="4">
+                                  <TextField v-model="plan.maxSpend.perFillAmount" label="Spend Max Per Fill" prefix="$" />
+                                </v-col>
+                              </v-row>
+                              <div class="ap-checkbox-row mt-n2" style="cursor:pointer" @click="plan.maxSpend.ingredientCostOnly = !plan.maxSpend.ingredientCostOnly">
+                                <CheckSquare v-if="plan.maxSpend.ingredientCostOnly" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                                <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                                <span class="ap-field-value">Cover ingredient cost only</span>
+                              </div>
+                            </template>
+
+                            <h5 class="ap-subsection-heading">Max WAC + % Spend</h5>
+                            <div v-if="!pdIsEditingMaxSpend(plan.id)" class="ap-field-row">
+                              <div class="ap-field">
+                                <span class="ap-field-label">Max Per Fill WAC + %</span>
+                                <span class="ap-field-value">{{ plan.maxSpend.wacPercent || '—' }}</span>
+                              </div>
+                            </div>
+                            <v-row v-else>
+                              <v-col cols="12" sm="4">
+                                <TextField v-model="plan.maxSpend.wacPercent" label="Max Per Fill WAC + %" />
+                              </v-col>
+                            </v-row>
+
+                            <h5 class="ap-subsection-heading">Max Per Day Supply</h5>
+                            <template v-if="!pdIsEditingMaxSpend(plan.id)">
+                              <template v-if="plan.maxSpend.perDaySupplyRows.length">
+                                <div v-for="(row, idx) in plan.maxSpend.perDaySupplyRows" :key="idx" class="ap-field-row ap-field-row--multi ap-field-row--wrap mt-2">
+                                  <div class="ap-field">
+                                    <span class="ap-field-label">{{ plan.maxSpend.perDaySupplyRows.length > 1 ? `Range ${idx + 1} Days Supply` : 'Days Supply' }}</span>
+                                    <span class="ap-field-value">{{ row.dayStart || '—' }}–{{ row.dayEnd || '—' }}</span>
+                                  </div>
+                                  <div class="ap-field">
+                                    <span class="ap-field-label">{{ plan.maxSpend.perDaySupplyRows.length > 1 ? `Range ${idx + 1} Spend Per Fill` : 'Spend Per Fill' }}</span>
+                                    <span class="ap-field-value">{{ formatDollar(row.amount) }}</span>
+                                  </div>
+                                </div>
+                              </template>
+                              <div v-else class="ap-field-row">
+                                <div class="ap-field"><span class="ap-field-value">—</span></div>
+                              </div>
+                            </template>
+                            <template v-else>
+                              <div v-for="(row, idx) in plan.maxSpend.perDaySupplyRows" :key="idx" class="nl-repeatable-row mt-3">
+                                <div class="nl-repeatable-row-header">
+                                  <span class="nl-repeatable-row-label">Range {{ idx + 1 }}</span>
+                                  <button class="nl-remove-row-btn" title="Remove this row" @click="removeMaxSpendDayRow(plan, row)">
+                                    <Trash2 :size="16" :stroke-width="1.75" />
+                                  </button>
+                                </div>
+                                <div class="nl-date-row">
+                                  <TextField v-model="row.dayStart" label="Day Supply Start" />
+                                  <TextField v-model="row.dayEnd" label="Day Supply End" />
+                                  <TextField v-model="row.amount" label="Spend Per Fill" prefix="$" />
+                                </div>
+                              </div>
+                              <button class="button button-secondary mt-3" @click="addMaxSpendDayRow(plan)">
+                                <Plus :size="14" :stroke-width="1.5" /> Add Day Supply Range
+                              </button>
+                            </template>
+
+                            <h5 class="ap-subsection-heading">Max Per Quantity</h5>
+                            <template v-if="!pdIsEditingMaxSpend(plan.id)">
+                              <template v-if="plan.maxSpend.perQuantityRows.length">
+                                <div v-for="(row, idx) in plan.maxSpend.perQuantityRows" :key="idx" class="ap-field-row ap-field-row--multi ap-field-row--wrap mt-2">
+                                  <div class="ap-field">
+                                    <span class="ap-field-label">{{ plan.maxSpend.perQuantityRows.length > 1 ? `Range ${idx + 1} Quantity` : 'Quantity' }}</span>
+                                    <span class="ap-field-value">{{ row.minQuantity || '—' }}–{{ row.maxQuantity || '—' }}</span>
+                                  </div>
+                                  <div class="ap-field">
+                                    <span class="ap-field-label">{{ plan.maxSpend.perQuantityRows.length > 1 ? `Range ${idx + 1} Spend Max Per Fill` : 'Spend Max Per Fill' }}</span>
+                                    <span class="ap-field-value">{{ formatDollar(row.amount) }}</span>
+                                  </div>
+                                </div>
+                              </template>
+                              <div v-else class="ap-field-row">
+                                <div class="ap-field"><span class="ap-field-value">—</span></div>
+                              </div>
+                            </template>
+                            <template v-else>
+                              <div v-for="(row, idx) in plan.maxSpend.perQuantityRows" :key="idx" class="nl-repeatable-row mt-3">
+                                <div class="nl-repeatable-row-header">
+                                  <span class="nl-repeatable-row-label">Range {{ idx + 1 }}</span>
+                                  <button class="nl-remove-row-btn" title="Remove this row" @click="removeMaxSpendQtyRow(plan, row)">
+                                    <Trash2 :size="16" :stroke-width="1.75" />
+                                  </button>
+                                </div>
+                                <div class="nl-date-row">
+                                  <TextField v-model="row.minQuantity" label="Min Quantity" />
+                                  <TextField v-model="row.maxQuantity" label="Max Quantity" />
+                                  <TextField v-model="row.amount" label="Spend Max Per Fill" prefix="$" />
+                                </div>
+                              </div>
+                              <button class="button button-secondary mt-3" @click="addMaxSpendQtyRow(plan)">
+                                <Plus :size="14" :stroke-width="1.5" /> Add Quantity Range
+                              </button>
+                            </template>
+                          </template>
+
+                          <div v-if="pdIsEditingMaxSpend(plan.id)" class="ap-section-footer mt-4">
+                            <button class="button button-primary" @click="pdSaveEditMaxSpend(plan)">Save Changes</button>
+                            <button class="button button-secondary" @click="pdCancelEditMaxSpend(plan)">Cancel</button>
                           </div>
                         </div>
 
@@ -991,11 +1396,11 @@
                             </div>
                             <div v-if="plan.allowSecondaryPayer" class="ap-field">
                               <span class="ap-field-label">COB Configuration</span>
-                              <span class="ap-field-value">{{ plan.cobConfigOptions.length ? plan.cobConfigOptions.join(', ') : '—' }}</span>
+                              <span class="ap-field-value">{{ plan.cobConfigOptions.length ? plan.cobConfigOptions.join(', ') : 'â€”' }}</span>
                             </div>
                             <div class="ap-field">
                               <span class="ap-field-label">OCC (Other Coverage Code)</span>
-                              <span class="ap-field-value">{{ plan.occCodes.length ? plan.occCodes.join(', ') : '—' }}</span>
+                              <span class="ap-field-value">{{ plan.occCodes.length ? plan.occCodes.join(', ') : 'â€”' }}</span>
                             </div>
                           </div>
                           <template v-else>
@@ -1025,31 +1430,91 @@
                         <div class="pd-section">
                           <div class="pd-section-header">
                             <h4 class="text-h4">Applicable Benefit Period</h4>
-                            <button class="button button-thirtiary">
+                            <button v-if="!pdIsEditingBenefit(plan.id)" class="button button-thirtiary" @click="pdStartEditBenefit(plan)">
                               <Pencil :size="14" :stroke-width="1.5" /> Edit
                             </button>
                           </div>
-                          <div class="ap-field-row">
-                            <div class="ap-field">
-                              <span class="ap-field-label">Benefit period</span>
+
+                          <template v-if="!pdIsEditingBenefit(plan.id)">
+                            <div class="ap-field-row ap-field-row--multi ap-field-row--wrap">
+                              <div class="ap-field">
+                                <span class="ap-field-label">Benefit Period</span>
+                                <span class="ap-field-value">{{ benefitPeriodTypeLabel(plan.benefitPeriodType) }}</span>
+                              </div>
+                              <div v-for="(range, idx) in plan.benefitPeriodRanges" :key="idx" class="ap-field">
+                                <span class="ap-field-label">{{ plan.benefitPeriodRanges.length > 1 ? `Period ${idx + 1}` : 'Date Range' }}</span>
+                                <span class="ap-field-value">{{ range.startDate }} â€“ {{ range.endDate }}</span>
+                              </div>
+                              <div v-if="!plan.benefitPeriodRanges.length" class="ap-field">
+                                <span class="ap-field-label">Date Range</span>
+                                <span class="ap-field-value">â€”</span>
+                              </div>
+                              <div class="ap-field" style="grid-column: 1 / -1;">
+                                <span class="ap-field-label">Determine benefit stage by flag in eligibility file, not by accumulator data</span>
+                                <span class="ap-field-value">{{ plan.benefitByFlag ? 'Yes' : 'No' }}</span>
+                              </div>
                             </div>
-                          </div>
-                          <div class="ap-field-row">
-                            <div class="ap-checkbox-row">
-                              <CheckSquare v-if="plan.benefitByFlag" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" @click="plan.benefitByFlag = !plan.benefitByFlag" style="cursor:pointer" />
-                              <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" @click="plan.benefitByFlag = !plan.benefitByFlag" style="cursor:pointer" />
-                              <span class="ap-field-value">Determine benefit stage by flag in eligibility file, not by accumulator data</span>
+                          </template>
+
+                          <template v-else>
+                            <div class="ap-field-row ap-field-row--multi">
+                              <div class="ap-field" style="max-width: 320px;">
+                                <Select
+                                  v-model="plan.benefitPeriodType"
+                                  :items="benefitPeriodTypeOptions"
+                                  label="Benefit Period"
+                                  @update:model-value="pdOnBenefitPeriodTypeChange(plan)"
+                                />
+                              </div>
                             </div>
-                          </div>
+
+                            <div v-if="plan.benefitPeriodType !== 'Custom'" class="ap-field-row ap-field-row--multi ap-field-row--wrap mt-3">
+                              <div v-for="(range, idx) in plan.benefitPeriodRanges" :key="idx" class="ap-field">
+                                <span class="ap-field-label">{{ plan.benefitPeriodRanges.length > 1 ? `Period ${idx + 1}` : 'Date Range' }}</span>
+                                <span class="ap-field-value">{{ range.startDate }} â€“ {{ range.endDate }}</span>
+                              </div>
+                            </div>
+
+                            <template v-else>
+                              <div v-for="(range, idx) in plan.benefitPeriodRanges" :key="idx" class="nl-repeatable-row mt-3">
+                                <div v-if="plan.benefitPeriodRanges.length > 1" class="nl-repeatable-row-header">
+                                  <span class="nl-repeatable-row-label">Period {{ idx + 1 }}</span>
+                                  <button class="nl-remove-row-btn" title="Remove this benefit period" @click="plan.benefitPeriodRanges.splice(idx, 1)">
+                                    <Trash2 :size="16" :stroke-width="1.75" />
+                                  </button>
+                                </div>
+                                <div class="nl-date-row">
+                                  <DatePicker v-model="range.startDate" label="Start Date" variant="underlined" />
+                                  <DatePicker v-model="range.endDate" label="End Date" variant="underlined" />
+                                </div>
+                              </div>
+                              <div class="ap-field-row mt-3">
+                                <button class="button button-secondary" @click="plan.benefitPeriodRanges.push({ startDate: '', endDate: '' })">
+                                  <Plus :size="14" :stroke-width="1.5" /> Add Benefit Period
+                                </button>
+                              </div>
+                            </template>
+
+                            <div class="ap-field-row mt-4">
+                              <div class="ap-checkbox-row" style="cursor:pointer" @click="plan.benefitByFlag = !plan.benefitByFlag">
+                                <CheckSquare v-if="plan.benefitByFlag" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                                <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                                <span class="ap-field-value">Determine benefit stage by flag in eligibility file, not by accumulator data</span>
+                              </div>
+                            </div>
+
+                            <div class="ap-section-footer">
+                              <button class="button button-primary" @click="pdSaveEditBenefit(plan)">Save Changes</button>
+                              <button class="button button-secondary" @click="pdCancelEditBenefit(plan)">Cancel</button>
+                            </div>
+                          </template>
                         </div>
 
                         <!-- BPG Configuration -->
                         <div class="pd-section">
-                          <div class="pd-section-header">
+                          <div class="pd-section-header pd-section-header--table">
                             <h4 class="text-h4">BPG Configuration</h4>
-                            <button class="button button-thirtiary">
-                              <Pencil :size="14" :stroke-width="1.5" /> Edit
-                            </button>
+                            <button v-if="plan.bpgRows.length > 0" class="button button-primary" @click="openBpgDialog(plan)">+ Add Group</button>
                           </div>
                           <ReportDataTable
                             :headers="bpgHeaders"
@@ -1058,17 +1523,25 @@
                             :show-filter-pills="false"
                             :show-selection-checkboxes="false"
                             :show-row-actions="false"
+                            :show-action-icons="true"
+                            :action-icons="bpgActionIcons(plan)"
                             :show-table-footer="false"
-                          />
+                          >
+                            <template #empty-state>
+                              <div class="nc-empty-state">
+                                <img :src="EmptyStateImg" alt="No data" class="nc-empty-icon" />
+                                <p class="nc-empty-title">Nothing configured yet</p>
+                                <button class="button button-secondary pd-empty-cta" @click="openBpgDialog(plan)">+ Add Group</button>
+                              </div>
+                            </template>
+                          </ReportDataTable>
                         </div>
 
                         <!-- Associated Plan Codes -->
                         <div class="pd-section">
-                          <div class="pd-section-header">
+                          <div class="pd-section-header pd-section-header--table">
                             <h4 class="text-h4">Associated Plan Codes</h4>
-                            <button class="button button-thirtiary">
-                              <Pencil :size="14" :stroke-width="1.5" /> Edit
-                            </button>
+                            <button v-if="plan.planCodes.length > 0" class="button button-primary" @click="openCodeDialog('planCode', plan)">+ Add Plan Code</button>
                           </div>
                           <ReportDataTable
                             :headers="planCodesHeaders"
@@ -1076,22 +1549,26 @@
                             :show-search-bar="false"
                             :show-filter-pills="false"
                             :show-selection-checkboxes="false"
-                            :show-row-actions="false"
+                            :show-row-actions="true"
+                            :row-action-items="codeRowActions"
                             :show-table-footer="false"
+                            @row-action="(payload) => handleCodeRowAction('planCode', plan, payload)"
                           >
-                            <template #status="{ item }">
-                              <span :class="['pd-status-badge', `pd-status-badge--${item.status.toLowerCase()}`]">{{ item.status }}</span>
+                            <template #empty-state>
+                              <div class="nc-empty-state">
+                                <img :src="EmptyStateImg" alt="No data" class="nc-empty-icon" />
+                                <p class="nc-empty-title">Nothing configured yet</p>
+                                <button class="button button-secondary pd-empty-cta" @click="openCodeDialog('planCode', plan)">+ Add Plan Code</button>
+                              </div>
                             </template>
                           </ReportDataTable>
                         </div>
 
                         <!-- Associated Benefit Codes -->
                         <div class="pd-section">
-                          <div class="pd-section-header">
+                          <div class="pd-section-header pd-section-header--table">
                             <h4 class="text-h4">Associated Benefit Codes</h4>
-                            <button class="button button-thirtiary">
-                              <Pencil :size="14" :stroke-width="1.5" /> Edit
-                            </button>
+                            <button v-if="plan.benefitCodes.length > 0" class="button button-primary" @click="openCodeDialog('benefitCode', plan)">+ Add Benefit Code</button>
                           </div>
                           <ReportDataTable
                             :headers="benefitCodesHeaders"
@@ -1099,14 +1576,16 @@
                             :show-search-bar="false"
                             :show-filter-pills="false"
                             :show-selection-checkboxes="false"
-                            :show-row-actions="false"
+                            :show-row-actions="true"
+                            :row-action-items="codeRowActions"
                             :show-table-footer="false"
+                            @row-action="(payload) => handleCodeRowAction('benefitCode', plan, payload)"
                           >
                             <template #empty-state>
                               <div class="nc-empty-state">
                                 <img :src="EmptyStateImg" alt="No data" class="nc-empty-icon" />
                                 <p class="nc-empty-title">Nothing configured yet</p>
-                                <button class="button button-secondary pd-empty-cta">Configure Benefit Codes</button>
+                                <button class="button button-secondary pd-empty-cta" @click="openCodeDialog('benefitCode', plan)">+ Add Benefit Code</button>
                               </div>
                             </template>
                           </ReportDataTable>
@@ -1114,58 +1593,370 @@
 
                         <!-- Associated Accumulators -->
                         <div class="pd-section">
-                          <div class="pd-section-header">
+                          <div class="pd-section-header pd-section-header--table">
                             <h4 class="text-h4">Associated Accumulators</h4>
-                            <button class="button button-thirtiary">
-                              <Pencil :size="14" :stroke-width="1.5" /> Edit
-                            </button>
+                            <button v-if="plan.accumulators.length > 0" class="button button-primary" @click="openAccumulatorAssociateDialog(plan)">Associate Accumulator</button>
                           </div>
                           <ReportDataTable
+                            item-value="id"
                             :headers="accumulatorsHeaders"
                             :items="plan.accumulators"
                             :show-search-bar="false"
                             :show-filter-pills="false"
                             :show-selection-checkboxes="false"
-                            :show-row-actions="false"
+                            :show-row-actions="true"
+                            :row-action-items="accumulatorRowActions"
                             :show-table-footer="false"
-                          />
+                            :show-expand="true"
+                            @row-action="(payload) => handleAccumulatorRowAction(plan, payload)"
+                          >
+                            <template #empty-state>
+                              <div class="nc-empty-state">
+                                <img :src="EmptyStateImg" alt="No data" class="nc-empty-icon" />
+                                <p class="nc-empty-title">Nothing configured yet</p>
+                                <button class="button button-secondary pd-empty-cta" @click="openAccumulatorAssociateDialog(plan)">Associate Accumulator</button>
+                              </div>
+                            </template>
+                            <template #expanded-row="{ item, columns }">
+                              <tr>
+                                <td :colspan="columns.length" class="pd-accum-detail-td">
+                                  <div class="ap-field-row ap-field-row--multi ap-field-row--wrap">
+                                    <div class="ap-field">
+                                      <span class="ap-field-label">Deductible Amount</span>
+                                      <span class="ap-field-value">{{ item.deductibleAmount ?? '—' }}</span>
+                                    </div>
+                                    <div class="ap-field">
+                                      <span class="ap-field-label">Deductible Family Amount</span>
+                                      <span class="ap-field-value">{{ item.deductibleFamilyAmount ?? '—' }}</span>
+                                    </div>
+                                    <div class="ap-field">
+                                      <span class="ap-field-label">OOP Amount</span>
+                                      <span class="ap-field-value">{{ item.oopAmount ?? '—' }}</span>
+                                    </div>
+                                    <div class="ap-field">
+                                      <span class="ap-field-label">OOP Family Amount</span>
+                                      <span class="ap-field-value">{{ item.oopFamilyAmount ?? '—' }}</span>
+                                    </div>
+                                    <div class="ap-field">
+                                      <span class="ap-field-label">Benefit Max Amount</span>
+                                      <span class="ap-field-value">{{ item.benefitMaxAmount ?? '—' }}</span>
+                                    </div>
+                                  </div>
+                                </td>
+                              </tr>
+                            </template>
+                          </ReportDataTable>
                         </div>
 
                         <!-- Copay Structure card -->
                         <div class="cs-card">
                           <div class="cs-card-header">
                             <h4 class="text-h4">Copay Structure</h4>
-                            <div class="cs-card-actions">
-                              <button class="button button-secondary">+ Add Source</button>
-                              <button class="button button-secondary">Notes</button>
-                            </div>
+                            <button v-if="!isEditingCopay(plan.id)" class="button button-thirtiary" @click="startEditCopay(plan)">
+                              <Pencil :size="14" :stroke-width="1.5" /> Edit
+                            </button>
                           </div>
 
                           <div class="nc-tabs">
                             <button
                               v-for="tab in copayTabs"
-                              :key="tab"
-                              :class="['nc-tab', { 'nc-tab--active': activeCopayTab === tab }]"
-                              @click="activeCopayTab = tab"
-                            >{{ tab }}</button>
+                              :key="tab.key"
+                              :class="['nc-tab', { 'nc-tab--active': activeCopayTab === tab.key }]"
+                              @click="activeCopayTab = tab.key"
+                            >{{ tab.label }}</button>
                           </div>
 
-                          <div class="cs-network-header">
-                            <span class="cs-network-title">{{ activeCopayTab }} Pharmacy Network</span>
-                            <button class="button button-thirtiary">
-                              <Pencil :size="14" :stroke-width="1.5" /> Edit
+                          <!-- Pharmacy Network tab -->
+                          <template v-if="activeCopayTab === 'pharmacyNetwork'">
+                            <Autocomplete
+                              v-if="isEditingCopay(plan.id)"
+                              v-model="plan.copayNetworkIds"
+                              :items="copayNetworkOptions"
+                              :multiple="true"
+                              label="Pharmacy Networks"
+                              style="max-width: 480px;"
+                              class="mb-3"
+                            />
+                            <div v-if="plan.copayNetworkIds.length === 0" class="text-body cs-hint">
+                              Select one or more pharmacy networks to configure their copay tiers.
+                            </div>
+                            <div v-for="networkId in plan.copayNetworkIds" :key="networkId" class="cs-network-block">
+                              <div class="cs-network-header">
+                                <span class="cs-network-title">{{ networkId }}</span>
+                              </div>
+                              <template v-for="tier in getCopayTiers(plan, `network:${networkId}`)" :key="tier.id">
+                                <div class="cs-tier-header">
+                                  <template v-if="isEditingCopay(plan.id)">
+                                    <div class="cs-tier-toolbar">
+                                      <span class="cs-tier-label">Tier</span>
+                                      <button class="button button-danger" @click="removeCopayTier(plan, `network:${networkId}`, tier.id)">
+                                        <Trash2 :size="14" :stroke-width="1.5" /> Remove Tier
+                                      </button>
+                                    </div>
+                                    <div class="cs-tier-dates">
+                                      <TextField
+                                        :model-value="tier.daysSupplyMin === null ? '' : String(tier.daysSupplyMin)"
+                                        label="Days Supply Min"
+                                        type="number"
+                                        min="0"
+                                        style="max-width: 160px;"
+                                        @update:model-value="(v) => (tier.daysSupplyMin = toNonNegativeIntOrNull(v))"
+                                      />
+                                      <TextField
+                                        :model-value="tier.daysSupply === null ? '' : String(tier.daysSupply)"
+                                        label="Days Supply Max"
+                                        type="number"
+                                        min="0"
+                                        style="max-width: 160px;"
+                                        @update:model-value="(v) => (tier.daysSupply = toNonNegativeIntOrNull(v))"
+                                      />
+                                    </div>
+                                  </template>
+                                  <span v-else class="cs-tier-title">Days Supply {{ tier.daysSupplyMin ?? '—' }}–{{ tier.daysSupply ?? '—' }}</span>
+                                </div>
+                                <p v-if="isEditingCopay(plan.id) && isCopayTierRangeOverlapping(plan, `network:${networkId}`, tier)" class="cs-tier-error">
+                                  This day-supply range overlaps another tier.
+                                </p>
+                                <ReportDataTable
+                                  :headers="copayMatrixHeaders"
+                                  :items="copayProductTypes.map(pt => ({ productType: pt, tier }))"
+                                  :show-search-bar="false"
+                                  :show-filter-pills="false"
+                                  :show-selection-checkboxes="false"
+                                  :show-row-actions="false"
+                                  :show-table-footer="false"
+                                  class="cs-matrix-table mb-4"
+                                >
+                                  <template #item.formula="{ item }">
+                                    <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).formula ?? '—' }}</span>
+                                    <Select v-else v-model="copayCellFor(item.tier, item.productType).formula" :items="copayFormulaOptions" density="compact" />
+                                  </template>
+                                  <template #item.copay="{ item }">
+                                    <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).copay ?? '—' }}</span>
+                                    <TextField v-else v-model="copayCellFor(item.tier, item.productType).copay" density="compact" />
+                                  </template>
+                                  <template #item.coinsurance="{ item }">
+                                    <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).coinsurance ?? '—' }}</span>
+                                    <TextField v-else v-model="copayCellFor(item.tier, item.productType).coinsurance" density="compact" />
+                                  </template>
+                                  <template #item.coinsMin="{ item }">
+                                    <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).coinsMin ?? '—' }}</span>
+                                    <TextField v-else v-model="copayCellFor(item.tier, item.productType).coinsMin" density="compact" />
+                                  </template>
+                                  <template #item.coinsMax="{ item }">
+                                    <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).coinsMax ?? '—' }}</span>
+                                    <TextField v-else v-model="copayCellFor(item.tier, item.productType).coinsMax" density="compact" />
+                                  </template>
+                                  <template #item.incentiveMin="{ item }">
+                                    <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).incentiveMin ?? '—' }}</span>
+                                    <TextField v-else v-model="copayCellFor(item.tier, item.productType).incentiveMin" density="compact" />
+                                  </template>
+                                  <template #item.incentiveMax="{ item }">
+                                    <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).incentiveMax ?? '—' }}</span>
+                                    <TextField v-else v-model="copayCellFor(item.tier, item.productType).incentiveMax" density="compact" />
+                                  </template>
+                                  <template #item.patientPayMax="{ item }">
+                                    <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).patientPayMax ?? '—' }}</span>
+                                    <TextField v-else v-model="copayCellFor(item.tier, item.productType).patientPayMax" density="compact" />
+                                  </template>
+                                  <template #item.dedWaived="{ item }">
+                                    <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).dedWaived ? 'Yes' : 'No' }}</span>
+                                    <v-checkbox v-else v-model="copayCellFor(item.tier, item.productType).dedWaived" hide-details density="compact" />
+                                  </template>
+                                  <template #item.oopWaived="{ item }">
+                                    <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).oopWaived ? 'Yes' : 'No' }}</span>
+                                    <v-checkbox v-else v-model="copayCellFor(item.tier, item.productType).oopWaived" hide-details density="compact" />
+                                  </template>
+                                </ReportDataTable>
+                              </template>
+                              <button v-if="isEditingCopay(plan.id)" class="button button-secondary mb-4" @click="addCopayTier(plan, `network:${networkId}`)">
+                                <Plus :size="14" :stroke-width="1.5" /> Add Tier
+                              </button>
+                            </div>
+                          </template>
+
+                          <!-- Mail Order Pharmacy tab -->
+                          <template v-else-if="activeCopayTab === 'mailOrder'">
+                            <template v-for="tier in getCopayTiers(plan, 'mailOrder')" :key="tier.id">
+                              <div class="cs-tier-header">
+                                <template v-if="isEditingCopay(plan.id)">
+                                  <div class="cs-tier-toolbar">
+                                    <span class="cs-tier-label">Tier</span>
+                                    <button class="button button-danger" @click="removeCopayTier(plan, 'mailOrder', tier.id)">
+                                      <Trash2 :size="14" :stroke-width="1.5" /> Remove Tier
+                                    </button>
+                                  </div>
+                                  <div class="cs-tier-dates">
+                                    <TextField
+                                      :model-value="tier.daysSupplyMin === null ? '' : String(tier.daysSupplyMin)"
+                                      label="Days Supply Min"
+                                      type="number"
+                                      min="0"
+                                      style="max-width: 160px;"
+                                      @update:model-value="(v) => (tier.daysSupplyMin = toNonNegativeIntOrNull(v))"
+                                    />
+                                    <TextField
+                                      :model-value="tier.daysSupply === null ? '' : String(tier.daysSupply)"
+                                      label="Days Supply Max"
+                                      type="number"
+                                      min="0"
+                                      style="max-width: 160px;"
+                                      @update:model-value="(v) => (tier.daysSupply = toNonNegativeIntOrNull(v))"
+                                    />
+                                  </div>
+                                </template>
+                                <span v-else class="cs-tier-title">Days Supply {{ tier.daysSupplyMin ?? '—' }}–{{ tier.daysSupply ?? '—' }}</span>
+                              </div>
+                              <ReportDataTable
+                                :headers="copayMatrixHeaders"
+                                :items="copayProductTypes.map(pt => ({ productType: pt, tier }))"
+                                :show-search-bar="false"
+                                :show-filter-pills="false"
+                                :show-selection-checkboxes="false"
+                                :show-row-actions="false"
+                                :show-table-footer="false"
+                                class="cs-matrix-table mb-4"
+                              >
+                                <template #item.formula="{ item }">
+                                  <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).formula ?? '—' }}</span>
+                                  <Select v-else v-model="copayCellFor(item.tier, item.productType).formula" :items="copayFormulaOptions" density="compact" />
+                                </template>
+                                <template #item.copay="{ item }">
+                                  <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).copay ?? '—' }}</span>
+                                  <TextField v-else v-model="copayCellFor(item.tier, item.productType).copay" density="compact" />
+                                </template>
+                                <template #item.coinsurance="{ item }">
+                                  <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).coinsurance ?? '—' }}</span>
+                                  <TextField v-else v-model="copayCellFor(item.tier, item.productType).coinsurance" density="compact" />
+                                </template>
+                                <template #item.coinsMin="{ item }">
+                                  <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).coinsMin ?? '—' }}</span>
+                                  <TextField v-else v-model="copayCellFor(item.tier, item.productType).coinsMin" density="compact" />
+                                </template>
+                                <template #item.coinsMax="{ item }">
+                                  <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).coinsMax ?? '—' }}</span>
+                                  <TextField v-else v-model="copayCellFor(item.tier, item.productType).coinsMax" density="compact" />
+                                </template>
+                                <template #item.incentiveMin="{ item }">
+                                  <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).incentiveMin ?? '—' }}</span>
+                                  <TextField v-else v-model="copayCellFor(item.tier, item.productType).incentiveMin" density="compact" />
+                                </template>
+                                <template #item.incentiveMax="{ item }">
+                                  <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).incentiveMax ?? '—' }}</span>
+                                  <TextField v-else v-model="copayCellFor(item.tier, item.productType).incentiveMax" density="compact" />
+                                </template>
+                                <template #item.patientPayMax="{ item }">
+                                  <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).patientPayMax ?? '—' }}</span>
+                                  <TextField v-else v-model="copayCellFor(item.tier, item.productType).patientPayMax" density="compact" />
+                                </template>
+                                <template #item.dedWaived="{ item }">
+                                  <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).dedWaived ? 'Yes' : 'No' }}</span>
+                                  <v-checkbox v-else v-model="copayCellFor(item.tier, item.productType).dedWaived" hide-details density="compact" />
+                                </template>
+                                <template #item.oopWaived="{ item }">
+                                  <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).oopWaived ? 'Yes' : 'No' }}</span>
+                                  <v-checkbox v-else v-model="copayCellFor(item.tier, item.productType).oopWaived" hide-details density="compact" />
+                                </template>
+                              </ReportDataTable>
+                            </template>
+                            <button v-if="isEditingCopay(plan.id)" class="button button-secondary mb-4" @click="addCopayTier(plan, 'mailOrder')">
+                              <Plus :size="14" :stroke-width="1.5" /> Add Tier
                             </button>
-                          </div>
+                          </template>
 
-                          <ReportDataTable
-                            :headers="copayStructureHeaders"
-                            :items="copayStructureRows"
-                            :show-search-bar="false"
-                            :show-filter-pills="false"
-                            :show-selection-checkboxes="false"
-                            :show-row-actions="false"
-                            :show-table-footer="false"
-                          />
+                          <!-- In-House Pharmacy tab -->
+                          <template v-else-if="activeCopayTab === 'inHouse'">
+                            <template v-for="tier in getCopayTiers(plan, 'inHouse')" :key="tier.id">
+                              <div class="cs-tier-header">
+                                <template v-if="isEditingCopay(plan.id)">
+                                  <div class="cs-tier-toolbar">
+                                    <span class="cs-tier-label">Tier</span>
+                                    <button class="button button-danger" @click="removeCopayTier(plan, 'inHouse', tier.id)">
+                                      <Trash2 :size="14" :stroke-width="1.5" /> Remove Tier
+                                    </button>
+                                  </div>
+                                  <div class="cs-tier-dates">
+                                    <TextField
+                                      :model-value="tier.daysSupplyMin === null ? '' : String(tier.daysSupplyMin)"
+                                      label="Days Supply Min"
+                                      type="number"
+                                      min="0"
+                                      style="max-width: 160px;"
+                                      @update:model-value="(v) => (tier.daysSupplyMin = toNonNegativeIntOrNull(v))"
+                                    />
+                                    <TextField
+                                      :model-value="tier.daysSupply === null ? '' : String(tier.daysSupply)"
+                                      label="Days Supply Max"
+                                      type="number"
+                                      min="0"
+                                      style="max-width: 160px;"
+                                      @update:model-value="(v) => (tier.daysSupply = toNonNegativeIntOrNull(v))"
+                                    />
+                                  </div>
+                                </template>
+                                <span v-else class="cs-tier-title">Days Supply {{ tier.daysSupplyMin ?? '—' }}–{{ tier.daysSupply ?? '—' }}</span>
+                              </div>
+                              <ReportDataTable
+                                :headers="copayMatrixHeaders"
+                                :items="copayProductTypes.map(pt => ({ productType: pt, tier }))"
+                                :show-search-bar="false"
+                                :show-filter-pills="false"
+                                :show-selection-checkboxes="false"
+                                :show-row-actions="false"
+                                :show-table-footer="false"
+                                class="cs-matrix-table mb-4"
+                              >
+                                <template #item.formula="{ item }">
+                                  <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).formula ?? '—' }}</span>
+                                  <Select v-else v-model="copayCellFor(item.tier, item.productType).formula" :items="copayFormulaOptions" density="compact" />
+                                </template>
+                                <template #item.copay="{ item }">
+                                  <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).copay ?? '—' }}</span>
+                                  <TextField v-else v-model="copayCellFor(item.tier, item.productType).copay" density="compact" />
+                                </template>
+                                <template #item.coinsurance="{ item }">
+                                  <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).coinsurance ?? '—' }}</span>
+                                  <TextField v-else v-model="copayCellFor(item.tier, item.productType).coinsurance" density="compact" />
+                                </template>
+                                <template #item.coinsMin="{ item }">
+                                  <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).coinsMin ?? '—' }}</span>
+                                  <TextField v-else v-model="copayCellFor(item.tier, item.productType).coinsMin" density="compact" />
+                                </template>
+                                <template #item.coinsMax="{ item }">
+                                  <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).coinsMax ?? '—' }}</span>
+                                  <TextField v-else v-model="copayCellFor(item.tier, item.productType).coinsMax" density="compact" />
+                                </template>
+                                <template #item.incentiveMin="{ item }">
+                                  <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).incentiveMin ?? '—' }}</span>
+                                  <TextField v-else v-model="copayCellFor(item.tier, item.productType).incentiveMin" density="compact" />
+                                </template>
+                                <template #item.incentiveMax="{ item }">
+                                  <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).incentiveMax ?? '—' }}</span>
+                                  <TextField v-else v-model="copayCellFor(item.tier, item.productType).incentiveMax" density="compact" />
+                                </template>
+                                <template #item.patientPayMax="{ item }">
+                                  <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).patientPayMax ?? '—' }}</span>
+                                  <TextField v-else v-model="copayCellFor(item.tier, item.productType).patientPayMax" density="compact" />
+                                </template>
+                                <template #item.dedWaived="{ item }">
+                                  <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).dedWaived ? 'Yes' : 'No' }}</span>
+                                  <v-checkbox v-else v-model="copayCellFor(item.tier, item.productType).dedWaived" hide-details density="compact" />
+                                </template>
+                                <template #item.oopWaived="{ item }">
+                                  <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).oopWaived ? 'Yes' : 'No' }}</span>
+                                  <v-checkbox v-else v-model="copayCellFor(item.tier, item.productType).oopWaived" hide-details density="compact" />
+                                </template>
+                              </ReportDataTable>
+                            </template>
+                            <button v-if="isEditingCopay(plan.id)" class="button button-secondary mb-4" @click="addCopayTier(plan, 'inHouse')">
+                              <Plus :size="14" :stroke-width="1.5" /> Add Tier
+                            </button>
+                          </template>
+
+                          <div v-if="isEditingCopay(plan.id)" class="ap-section-footer">
+                            <button class="button button-primary" @click="saveEditCopay(plan)">Save Changes</button>
+                            <button class="button button-secondary" @click="cancelEditCopay(plan)">Cancel</button>
+                          </div>
                         </div>
 
                       </div>
@@ -1174,8 +1965,8 @@
                   </div>
                 </template>
 
-                <!-- Step 4: Transition of Care -->
-                <template v-else-if="currentWizardStep === 3">
+                <!-- Step 5: Transition of Care -->
+                <template v-else-if="currentWizardStep === 4">
 
                   <!-- Card 1: Transition of Care Setup (Historical Claims + Prior Authorization File) -->
                   <div class="ap-section">
@@ -1204,7 +1995,7 @@
                           </div>
                           <div class="ap-field">
                             <span class="ap-field-label">Historical Claims File Submitted?</span>
-                            <span class="ap-field-value">{{ hcfPending ? `Yes — Ticket #${hcfTicketNumber}` : 'No' }}</span>
+                            <span class="ap-field-value">{{ hcfPending ? `Yes â€” Ticket #${hcfTicketNumber}` : 'No' }}</span>
                           </div>
                         </div>
 
@@ -1221,7 +2012,7 @@
                         <div v-if="tocPriorAuth === true" class="ap-field-row">
                           <div class="ap-field">
                             <span class="ap-field-label">Prior Authorization File Submitted?</span>
-                            <span class="ap-field-value">{{ paPending ? `Yes — Ticket #${paTicketNumber}` : 'No' }}</span>
+                            <span class="ap-field-value">{{ paPending ? `Yes â€” Ticket #${paTicketNumber}` : 'No' }}</span>
                           </div>
                         </div>
                       </template>
@@ -1234,7 +2025,7 @@
                         <!-- Historical Claims sub-section -->
                         <template v-if="hcfPending">
                           <p class="lc-hcn-label">Historical Claims File</p>
-                          <p class="text-body bl-note">Submitted — Ticket #: <strong>{{ hcfTicketNumber }}</strong></p>
+                          <p class="text-body bl-note">Submitted â€” Ticket #: <strong>{{ hcfTicketNumber }}</strong></p>
                         </template>
                         <template v-else>
                           <div class="toc-question">
@@ -1277,7 +2068,7 @@
                         <!-- Prior Authorization File sub-section -->
                         <template v-if="paPending">
                           <p class="lc-hcn-label">Prior Authorization File</p>
-                          <p class="text-body bl-note">Submitted — Ticket #: <strong>{{ paTicketNumber }}</strong></p>
+                          <p class="text-body bl-note">Submitted â€” Ticket #: <strong>{{ paTicketNumber }}</strong></p>
                         </template>
                         <template v-else>
                           <div class="toc-question">
@@ -1334,7 +2125,7 @@
                         </div>
                       </template>
                       <template v-else>
-                        <p class="text-body bl-note mb-3">This option only applies to mail order pharmacies. It involves the client's existing mail order pharmacy sending a one-time snapshot, taken at go-live, of prescriptions with open refills to the mail order pharmacy or pharmacies selected under Liviniti's plans — sometimes affecting as few as one or two members. Implementation must coordinate directly with both the outgoing and incoming mail order pharmacies to arrange this, and it adds limited value for most clients, so it is not generally recommended.</p>
+                        <p class="text-body bl-note mb-3">This option only applies to mail order pharmacies. It involves the client's existing mail order pharmacy sending a one-time snapshot, taken at go-live, of prescriptions with open refills to the mail order pharmacy or pharmacies selected under Liviniti's plans â€” sometimes affecting as few as one or two members. Implementation must coordinate directly with both the outgoing and incoming mail order pharmacies to arrange this, and it adds limited value for most clients, so it is not generally recommended.</p>
                         <div class="toc-toggle-group">
                           <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocOpenRefillTransfer === false }]" @click="tocOpenRefillTransfer = false">No</button>
                           <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocOpenRefillTransfer === true }]" @click="tocOpenRefillTransfer = true">Yes</button>
@@ -1399,8 +2190,8 @@
                   </v-dialog>
                 </template>
 
-                <!-- Step 5: Programs -->
-                <template v-else-if="currentWizardStep === 4">
+                <!-- Step 6: Programs -->
+                <template v-else-if="currentWizardStep === 5">
                   <div class="prog-step">
 
                     <!-- Widget 1: Programs to Configure -->
@@ -1597,7 +2388,7 @@
                           <v-divider class="mb-4" />
                           <div class="nl-alert mb-4">
                             <div class="nl-alert-badge"><TriangleAlert :size="20" :stroke-width="2" /></div>
-                            <span>Not all plans are eligible to elect the RxCompass program. RxCompass is not recommended for clients with domestic/in-house pharmacy. <strong>Anti-Steerage States: FL, GA, OK, TN, and WV</strong> — cannot be set up with RxCompass per anti-steerage laws of those states.</span>
+                            <span>Not all plans are eligible to elect the RxCompass program. RxCompass is not recommended for clients with domestic/in-house pharmacy. <strong>Anti-Steerage States: FL, GA, OK, TN, and WV</strong> â€” cannot be set up with RxCompass per anti-steerage laws of those states.</span>
                           </div>
                           <v-row>
                             <v-col cols="12">
@@ -1679,7 +2470,7 @@
                               <v-col cols="12" md="6">
                                 <div class="ap-field">
                                   <span class="ap-field-label">Client State</span>
-                                  <span class="ap-field-value">{{ editableCompanyInfo.physicalState || '—' }}</span>
+                                  <span class="ap-field-value">{{ editableCompanyInfo.physicalState || 'â€”' }}</span>
                                 </div>
                                 <p class="nl-npi-hint mb-0">Pulled from Account Profile.</p>
                               </v-col>
@@ -1778,7 +2569,7 @@
                               <p class="prog-confirm-name">RxCompass</p>
                               <ul class="prog-confirm-details">
                                 <li>Type: {{ rxCompassTypeLabel }}</li>
-                                <li>{{ rxCompassIsReconsider ? 'Follow-Up Date' : 'Effective Date' }}: {{ rxCompassForm.effectiveDate || '—' }}</li>
+                                <li>{{ rxCompassIsReconsider ? 'Follow-Up Date' : 'Effective Date' }}: {{ rxCompassForm.effectiveDate || 'â€”' }}</li>
                                 <li v-if="rxCompassForm.merpVendor">MERP Administrator Name: {{ rxCompassForm.merpVendor }}</li>
                                 <li v-if="rxCompassForm.notes">Notes: {{ rxCompassForm.notes }}</li>
                               </ul>
@@ -1788,9 +2579,9 @@
                               <ul class="prog-confirm-details">
                                 <li>Election: {{ vcpElectionLabel }}</li>
                                 <template v-if="vcpForm.election !== 'OptOut'">
-                                  <li>Effective Date: {{ vcpForm.effectiveDate || '—' }}</li>
-                                  <li>Client State: {{ editableCompanyInfo.physicalState || '—' }}</li>
-                                  <li v-if="vcpForm.planIds.length">Plans: {{ vcpForm.planIds.map(pid => `${planNameById(pid)} (${vcpForm.designations[pid] || '—'})`).join(', ') }}</li>
+                                  <li>Effective Date: {{ vcpForm.effectiveDate || 'â€”' }}</li>
+                                  <li>Client State: {{ editableCompanyInfo.physicalState || 'â€”' }}</li>
+                                  <li v-if="vcpForm.planIds.length">Plans: {{ vcpForm.planIds.map(pid => `${planNameById(pid)} (${vcpForm.designations[pid] || 'â€”'})`).join(', ') }}</li>
                                   <li v-if="vcpForm.offsitePharmacies.length">Offsite Pharmacies: {{ vcpForm.offsitePharmacies.map(c => c.name).join(', ') }}</li>
                                 </template>
                                 <template v-else>
@@ -1818,7 +2609,7 @@
                     <v-dialog v-model="showProgDetailsModal" max-width="480">
                       <v-card class="prog-modal-card">
                         <v-card-title class="prog-modal-title">
-                          {{ progDetailsTarget === 'rxcompass' ? 'RxCompass' : 'Variable Copay Program' }} — Submitted Request
+                          {{ progDetailsTarget === 'rxcompass' ? 'RxCompass' : 'Variable Copay Program' }} â€” Submitted Request
                         </v-card-title>
                         <v-card-text>
                           <v-divider class="mb-4" />
@@ -1830,7 +2621,7 @@
                           <!-- RxCompass details -->
                           <ul v-if="progDetailsTarget === 'rxcompass'" class="prog-confirm-details prog-confirm-details--readonly">
                             <li>Type: {{ rxCompassTypeLabel }}</li>
-                            <li>{{ rxCompassIsReconsider ? 'Follow-Up Date' : 'Effective Date' }}: {{ rxCompassForm.effectiveDate || '—' }}</li>
+                            <li>{{ rxCompassIsReconsider ? 'Follow-Up Date' : 'Effective Date' }}: {{ rxCompassForm.effectiveDate || 'â€”' }}</li>
                             <li v-if="rxCompassForm.merpVendor">MERP Administrator Name: {{ rxCompassForm.merpVendor }}</li>
                             <li v-if="rxCompassForm.notes">Notes: {{ rxCompassForm.notes }}</li>
                           </ul>
@@ -1839,9 +2630,9 @@
                           <ul v-if="progDetailsTarget === 'vcp'" class="prog-confirm-details prog-confirm-details--readonly">
                             <li>Election: {{ vcpElectionLabel }}</li>
                             <template v-if="vcpForm.election !== 'OptOut'">
-                              <li>Effective Date: {{ vcpForm.effectiveDate || '—' }}</li>
-                              <li>Client State: {{ editableCompanyInfo.physicalState || '—' }}</li>
-                              <li v-if="vcpForm.planIds.length">Plans: {{ vcpForm.planIds.map(pid => `${planNameById(pid)} (${vcpForm.designations[pid] || '—'})`).join(', ') }}</li>
+                              <li>Effective Date: {{ vcpForm.effectiveDate || 'â€”' }}</li>
+                              <li>Client State: {{ editableCompanyInfo.physicalState || 'â€”' }}</li>
+                              <li v-if="vcpForm.planIds.length">Plans: {{ vcpForm.planIds.map(pid => `${planNameById(pid)} (${vcpForm.designations[pid] || 'â€”'})`).join(', ') }}</li>
                               <li v-if="vcpForm.offsitePharmacies.length">Offsite Pharmacies: {{ vcpForm.offsitePharmacies.map(c => c.name).join(', ') }}</li>
                             </template>
                             <template v-else>
@@ -1867,8 +2658,8 @@
                   </div>
                 </template>
 
-                <!-- Step 6: Limits & Controls -->
-                <template v-else-if="currentWizardStep === 5">
+                <!-- Step 7: Limits & Controls -->
+                <template v-else-if="currentWizardStep === 6">
 
                   <!-- Card 1: Standard Dispensing Limitations -->
                   <div class="ap-section">
@@ -1915,7 +2706,7 @@
                           </div>
                           <div class="ap-field">
                             <span class="ap-field-label">Notification Recipients</span>
-                            <span class="ap-field-value">{{ lcRecipients.length ? lcRecipients.join(', ') : '—' }}</span>
+                            <span class="ap-field-value">{{ lcRecipients.length ? lcRecipients.join(', ') : 'â€”' }}</span>
                           </div>
                         </div>
                       </template>
@@ -1968,7 +2759,7 @@
                         <div v-for="daw in lcDawPenalties" :key="daw.key" class="ap-field-row">
                           <div class="ap-field">
                             <span class="ap-field-label">{{ daw.label }}</span>
-                            <span class="ap-field-value">{{ daw.value || '—' }}</span>
+                            <span class="ap-field-value">{{ daw.value || 'â€”' }}</span>
                           </div>
                         </div>
                         <div v-if="lcDawNotes" class="ap-field-row">
@@ -2011,7 +2802,7 @@
                         <div class="ap-field-row">
                           <div class="ap-field">
                             <span class="ap-field-label">Reimbursement Type</span>
-                            <span class="ap-field-value">{{ lcManualReimbursement || '—' }}</span>
+                            <span class="ap-field-value">{{ lcManualReimbursement || 'â€”' }}</span>
                           </div>
                         </div>
                         <div v-if="lcManualNotes" class="ap-field-row">
@@ -2042,8 +2833,8 @@
 
                 </template>
 
-                <!-- Step 7: Billing -->
-                <template v-else-if="currentWizardStep === 6">
+                <!-- Step 8: Billing -->
+                <template v-else-if="currentWizardStep === 7">
 
                   <!-- Card 1: Billing Setup -->
                   <div class="ap-section">
@@ -2058,7 +2849,7 @@
                         <div class="ap-field-row ap-field-row--multi">
                           <div class="ap-field">
                             <span class="ap-field-label">EIN Number</span>
-                            <span class="ap-field-value">{{ blEinNumber || '—' }}</span>
+                            <span class="ap-field-value">{{ blEinNumber || 'â€”' }}</span>
                           </div>
                           <div class="ap-field">
                             <span class="ap-field-label">Billing managed by a third party</span>
@@ -2066,13 +2857,13 @@
                           </div>
                           <div v-if="blExistingParty === 'yes'" class="ap-field">
                             <span class="ap-field-label">Billing Party</span>
-                            <span class="ap-field-value">{{ blSelectedCarrier || '—' }}</span>
+                            <span class="ap-field-value">{{ blSelectedCarrier || 'â€”' }}</span>
                           </div>
                         </div>
                         <div class="ap-field-row">
                           <div class="ap-field">
                             <span class="ap-field-label">Responsible Party</span>
-                            <span class="ap-field-value">{{ blResponsibleContacts.length ? blResponsibleContacts.join(', ') : '—' }}</span>
+                            <span class="ap-field-value">{{ blResponsibleContacts.length ? blResponsibleContacts.join(', ') : 'â€”' }}</span>
                           </div>
                         </div>
                       </template>
@@ -2129,15 +2920,15 @@
                           <div class="ap-field-row ap-field-row--multi">
                             <div class="ap-field">
                               <span class="ap-field-label">Payment Method</span>
-                              <span class="ap-field-value">{{ blPaymentMethod || '—' }}</span>
+                              <span class="ap-field-value">{{ blPaymentMethod || 'â€”' }}</span>
                             </div>
                             <div v-if="blPaymentMethod === 'ACH'" class="ap-field">
                               <span class="ap-field-label">ACH Method</span>
-                              <span class="ap-field-value">{{ blAchMethod === 'send' ? 'Send to Liviniti' : blAchMethod === 'debit' ? 'Debited by Liviniti' : '—' }}</span>
+                              <span class="ap-field-value">{{ blAchMethod === 'send' ? 'Send to Liviniti' : blAchMethod === 'debit' ? 'Debited by Liviniti' : 'â€”' }}</span>
                             </div>
                             <div v-if="blAchMethod === 'debit' && blExistingParty !== 'yes'" class="ap-field">
                               <span class="ap-field-label">Debit Pull Timing</span>
-                              <span class="ap-field-value">{{ blDebitTiming || '—' }}</span>
+                              <span class="ap-field-value">{{ blDebitTiming || 'â€”' }}</span>
                             </div>
                           </div>
                           <div v-if="blAchMethod === 'debit'" class="ap-field-row ap-field-row--multi">
@@ -2157,7 +2948,7 @@
                           <div class="ap-checkbox-row mb-3" @click="blSkipAchSetup = !blSkipAchSetup" style="cursor:pointer">
                             <CheckSquare v-if="blSkipAchSetup" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
                             <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
-                            <span class="ap-field-value">Skip ACH setup — Carrier has an existing billing agreement with Liviniti.</span>
+                            <span class="ap-field-value">Skip ACH setup â€” Carrier has an existing billing agreement with Liviniti.</span>
                           </div>
                         </div>
                         <div v-if="!blSkipAchSetup" class="bl-section">
@@ -2185,7 +2976,7 @@
                             </div>
                             <div v-else-if="blAchMethod === 'debit'" class="bl-subsection">
                               <p v-if="blExistingParty !== 'yes'" class="text-body bl-note">W-9 and ACH authorization forms are required for Billing to complete account setup. Download, complete, and upload the signed forms.</p>
-                              <p v-else class="text-body bl-note">Up-to-date W-9 and ACH authorization forms are required for Billing to complete account setup. If this billing party is already established with Liviniti, forms may already be on file — please confirm they are current. Upload updated forms below if needed.</p>
+                              <p v-else class="text-body bl-note">Up-to-date W-9 and ACH authorization forms are required for Billing to complete account setup. If this billing party is already established with Liviniti, forms may already be on file â€” please confirm they are current. Upload updated forms below if needed.</p>
                               <div class="bl-download-group">
                                 <button class="button bl-download-btn" @click.prevent="handleFormDownload('Blank W-9')">
                                   <CloudDownload :size="16" :stroke-width="2" />Download Blank W-9
@@ -2219,7 +3010,7 @@
                             </div>
                             <div v-if="blAchMethod === 'debit' && blExistingParty !== 'yes'" class="bl-subsection">
                               <p class="lc-hcn-label">Debit Pull Timing</p>
-                              <p class="text-body bl-note">For informational purposes only. Records the client's preferred debit schedule for Accounting's reference — does not automate or trigger debit pulls.</p>
+                              <p class="text-body bl-note">For informational purposes only. Records the client's preferred debit schedule for Accounting's reference â€” does not automate or trigger debit pulls.</p>
                               <div class="bl-field-narrow">
                                 <Select v-model="blDebitTiming" :items="blDebitTimingOptions" label="Select timing" />
                               </div>
@@ -2261,27 +3052,27 @@
                         <div class="ap-field-row ap-field-row--multi">
                           <div class="ap-field">
                             <span class="ap-field-label">Billing Cycle</span>
-                            <span class="ap-field-value">{{ blBillingCycle || '—' }}</span>
+                            <span class="ap-field-value">{{ blBillingCycle || 'â€”' }}</span>
                           </div>
                           <div class="ap-field">
                             <span class="ap-field-label">Separate Invoices</span>
-                            <span class="ap-field-value">{{ blSeparateInvoices === 'yes' ? `Yes — ${blSeparateInvoicesSplit || 'split not set'}` : 'No' }}</span>
+                            <span class="ap-field-value">{{ blSeparateInvoices === 'yes' ? `Yes â€” ${blSeparateInvoicesSplit || 'split not set'}` : 'No' }}</span>
                           </div>
                           <div class="ap-field">
                             <span class="ap-field-label">Invoice Breakout</span>
-                            <span class="ap-field-value">{{ blInvoiceBreakout === 'yes' ? `Yes — ${blInvoiceBreakoutSelection || 'type not set'}` : 'No' }}</span>
+                            <span class="ap-field-value">{{ blInvoiceBreakout === 'yes' ? `Yes â€” ${blInvoiceBreakoutSelection || 'type not set'}` : 'No' }}</span>
                           </div>
                         </div>
                         <div v-if="blBillingCycle === 'Custom'" class="ap-field-row">
                           <div class="ap-field">
                             <span class="ap-field-label">Billing Schedule Note</span>
-                            <span class="ap-field-value">{{ blCustomCycleNote || '—' }}</span>
+                            <span class="ap-field-value">{{ blCustomCycleNote || 'â€”' }}</span>
                           </div>
                         </div>
                         <div v-if="blInvoiceBreakoutSelection === 'Custom'" class="ap-field-row">
                           <div class="ap-field">
                             <span class="ap-field-label">Custom Breakout Note</span>
-                            <span class="ap-field-value">{{ blInvoiceBreakoutNote || '—' }}</span>
+                            <span class="ap-field-value">{{ blInvoiceBreakoutNote || 'â€”' }}</span>
                           </div>
                         </div>
                       </template>
@@ -2355,7 +3146,7 @@
                         <div v-if="blReportingBreakouts === 'yes'" class="ap-field-row">
                           <div class="ap-field">
                             <span class="ap-field-label">Breakout Types</span>
-                            <span class="ap-field-value">{{ blReportingBreakoutSelections.length ? blReportingBreakoutSelections.join(', ') : '—' }}</span>
+                            <span class="ap-field-value">{{ blReportingBreakoutSelections.length ? blReportingBreakoutSelections.join(', ') : 'â€”' }}</span>
                           </div>
                         </div>
                       </template>
@@ -2400,7 +3191,7 @@
                         <div class="ap-field-row">
                           <div class="ap-field">
                             <span class="ap-field-label">Rebate Notification Contacts</span>
-                            <span class="ap-field-value">{{ blRebateContacts.length ? blRebateContacts.join(', ') : '—' }}</span>
+                            <span class="ap-field-value">{{ blRebateContacts.length ? blRebateContacts.join(', ') : 'â€”' }}</span>
                           </div>
                         </div>
                         <div class="ap-field-row ap-field-row--multi">
@@ -2476,7 +3267,7 @@
                       <template v-if="!blEditingNotes">
                         <div class="ap-field-row">
                           <div class="ap-field">
-                            <span class="ap-field-value">{{ blNotes || '—' }}</span>
+                            <span class="ap-field-value">{{ blNotes || 'â€”' }}</span>
                           </div>
                         </div>
                       </template>
@@ -2494,8 +3285,8 @@
 
                 </template>
 
-                <!-- Step 8: ID Cards -->
-                <template v-else-if="currentWizardStep === 7">
+                <!-- Step 9: ID Cards -->
+                <template v-else-if="currentWizardStep === 8">
 
                   <!-- Card 1: Vendor -->
                   <div class="ap-section">
@@ -2563,7 +3354,7 @@
                             </div>
                             <div class="ap-field">
                               <span class="ap-field-label">Person code characters</span>
-                              <span class="ap-field-value">{{ idPersonCodeChars || '—' }}</span>
+                              <span class="ap-field-value">{{ idPersonCodeChars || 'â€”' }}</span>
                             </div>
                             <div v-if="idVendorType === 'Liviniti'" class="ap-field">
                               <span class="ap-field-label">Combine Rx and Medical information</span>
@@ -2634,33 +3425,33 @@
                             </div>
                             <div v-if="idSendCards" class="ap-field">
                               <span class="ap-field-label">Days to send cards before</span>
-                              <span class="ap-field-value">{{ idDaysToSend || '—' }}</span>
+                              <span class="ap-field-value">{{ idDaysToSend || 'â€”' }}</span>
                             </div>
                           </div>
                           <div class="ap-field-row ap-field-row--multi">
                             <div class="ap-field">
                               <span class="ap-field-label">Initial mailing preference</span>
-                              <span class="ap-field-value">{{ idInitialMailing || '—' }}</span>
+                              <span class="ap-field-value">{{ idInitialMailing || 'â€”' }}</span>
                             </div>
                             <div class="ap-field">
                               <span class="ap-field-label">Additional/new card</span>
-                              <span class="ap-field-value">{{ idAdditionalCard || '—' }}</span>
+                              <span class="ap-field-value">{{ idAdditionalCard || 'â€”' }}</span>
                             </div>
                           </div>
                           <div class="ap-field-row ap-field-row--multi">
                             <div class="ap-field">
                               <span class="ap-field-label">Attention</span>
-                              <span class="ap-field-value">{{ idAttention || '—' }}</span>
+                              <span class="ap-field-value">{{ idAttention || 'â€”' }}</span>
                             </div>
                             <div class="ap-field">
                               <span class="ap-field-label">Mailing address</span>
-                              <span class="ap-field-value">{{ idMailingAddress || '—' }}</span>
+                              <span class="ap-field-value">{{ idMailingAddress || 'â€”' }}</span>
                             </div>
                           </div>
                           <div class="ap-field-row">
                             <div class="ap-field">
                               <span class="ap-field-label">Notes/Special instructions</span>
-                              <span class="ap-field-value">{{ idNotes || '—' }}</span>
+                              <span class="ap-field-value">{{ idNotes || 'â€”' }}</span>
                             </div>
                           </div>
                           <div class="ap-field-row">
@@ -2799,11 +3590,11 @@
                           <div class="ap-field-row ap-field-row--multi">
                             <div class="ap-field">
                               <span class="ap-field-label">Effective start date</span>
-                              <span class="ap-field-value">{{ idEffectiveStart || '—' }}</span>
+                              <span class="ap-field-value">{{ idEffectiveStart || 'â€”' }}</span>
                             </div>
                             <div class="ap-field">
                               <span class="ap-field-label">Effective end date</span>
-                              <span class="ap-field-value">{{ idEffectiveEnd || '—' }}</span>
+                              <span class="ap-field-value">{{ idEffectiveEnd || 'â€”' }}</span>
                             </div>
                           </div>
                         </template>
@@ -2823,7 +3614,7 @@
                       </div>
                     </div>
 
-                    <!-- Card 5: Card Assets & Information (Carrier only — read-only reference) -->
+                    <!-- Card 5: Card Assets & Information (Carrier only â€” read-only reference) -->
                     <div v-if="idVendorType === 'Carrier'" class="ap-section">
                       <div class="ap-section-header">
                         <h4 class="text-h4">Card Assets & Information</h4>
@@ -2898,14 +3689,14 @@
 
                 </template>
 
-                <!-- Step 9: Verification & Summary -->
-                <template v-else-if="currentWizardStep === 8">
+                <!-- Step 10: Verification & Summary -->
+                <template v-else-if="currentWizardStep === 9">
                   <p class="vs-completion" :class="{ 'vs-completion--done': wizardCompletionPercent === 100 }">
                     {{ wizardCompletionPercent }}% Complete
                   </p>
                   <div class="vs-step-list">
                     <div
-                      v-for="(step, index) in wizardSteps.slice(0, 8)"
+                      v-for="(step, index) in wizardSteps.slice(0, 9)"
                       :key="index"
                       class="vs-step-row"
                       :class="`vs-step-row--${step.status}`"
@@ -2944,7 +3735,7 @@
                         </div>
                       </template>
                       <template v-else>
-                        <p class="text-small bl-note mb-2">Required to generate the GPS below. Upload Clinical's completed Inclusion/Exclusion PDF — its pages will be included automatically.</p>
+                        <p class="text-small bl-note mb-2">Required to generate the GPS below. Upload Clinical's completed Inclusion/Exclusion PDF â€” its pages will be included automatically.</p>
                         <div class="bl-upload-item">
                           <template v-if="gpsIeFile && !gpsPendingIeRemoval">
                             <v-chip color="primary" variant="flat" class="bl-file-chip">
@@ -3135,7 +3926,7 @@
 
   </div>
 
-  <!-- ── Network Linking Dialog ──────────────────────────────────────────── -->
+  <!-- â”€â”€ Network Linking Dialog â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
   <v-dialog v-model="showNetworkLinkDialog" :max-width="networkLinkMode === 'edit' ? '800' : '620'" persistent>
     <v-card class="nl-dialog-card">
       <v-card-title class="nl-dialog-header">
@@ -3272,7 +4063,7 @@
     </v-card>
   </v-dialog>
 
-  <!-- ── Pharmacy Dialog (all 4 types, add + edit mode) ─────────────────── -->
+  <!-- â”€â”€ Pharmacy Dialog (all 4 types, add + edit mode) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
   <v-dialog v-model="showPharmacyDialog" max-width="560" persistent>
     <v-card class="nl-dialog-card">
       <v-card-title class="nl-dialog-header">
@@ -3285,14 +4076,14 @@
 
       <v-card-text class="nl-dialog-body">
 
-        <!-- ── EDIT MODE ──────────────────────────────────────────────────── -->
+        <!-- â”€â”€ EDIT MODE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
         <template v-if="pharmacyDialogMode === 'edit'">
 
           <!-- Mail Order edit -->
           <template v-if="pharmacyDialogTab === 'Mail Order'">
             <div class="nl-edit-field-row">
               <span class="nl-edit-field-label">Vendor Name</span>
-              <span class="nl-edit-field-value">{{ editingPharmacyItem?.vendor || '—' }}</span>
+              <span class="nl-edit-field-value">{{ editingPharmacyItem?.vendor || 'â€”' }}</span>
             </div>
             <label class="nl-checkbox">
               <input type="checkbox" v-model="mailOrderEditForm.noBillNoPay" class="nl-checkbox-input" />
@@ -3329,11 +4120,11 @@
           <template v-else>
             <div class="nl-edit-field-row">
               <span class="nl-edit-field-label">NPI</span>
-              <span class="nl-edit-field-value">{{ editingPharmacyItem?.ncpdp || editingPharmacyItem?.npis || '—' }}</span>
+              <span class="nl-edit-field-value">{{ editingPharmacyItem?.ncpdp || editingPharmacyItem?.npis || 'â€”' }}</span>
             </div>
             <div class="nl-edit-field-row">
               <span class="nl-edit-field-label">Pharmacy name</span>
-              <span class="nl-edit-field-value">{{ editingPharmacyItem?.pharmacyName || '—' }}</span>
+              <span class="nl-edit-field-value">{{ editingPharmacyItem?.pharmacyName || 'â€”' }}</span>
             </div>
             <label class="nl-checkbox">
               <input type="checkbox" v-model="inhouseEditForm.noBillNoPay" class="nl-checkbox-input" />
@@ -3361,7 +4152,7 @@
 
         </template>
 
-        <!-- ── ADD MODE ───────────────────────────────────────────────────── -->
+        <!-- â”€â”€ ADD MODE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
         <template v-else>
 
           <!-- In-House -->
@@ -3622,7 +4413,7 @@
     </v-card>
   </v-dialog>
 
-  <!-- ── TOAST NOTIFICATIONS ───────────────────────────────────────────── -->
+  <!-- â”€â”€ TOAST NOTIFICATIONS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
   <v-snackbar
     v-model="toast.show"
     :color="toast.color"
@@ -3653,7 +4444,7 @@ import {
   Hourglass, CircleCheckBig, XCircle,
   Save as SaveIcon, LayoutList as LayoutListIcon, CircleCheck as CircleCheckIcon,
   ArrowRight as ArrowRightIcon, Pencil, CheckSquare, Square, ChevronDown, X, Check, CloudDownload, TriangleAlert,
-  Building2, Shield, Link2, Users, FileText, Search, Globe, Trash2, Paperclip, Info,
+  Building2, Shield, Link2, Users, FileText, Search, Globe, Trash2, Paperclip, Info, Plus,
 } from 'lucide-vue-next';
 import EmptyStateImg from '@/assets/EmptyState.svg';
 import { useDocumentsStore } from '@/stores/documents';
@@ -3684,11 +4475,11 @@ const documentsStore = useDocumentsStore();
 const tocDayOptions = ['30 days', '60 days', '90 days'];
 
 // Card edit-mode flags (read-only by default, matching the Billing card pattern)
-const tocEditingFiles = ref(false); // Historical Claims + Prior Authorization File + RxWatchtower — shared widget
+const tocEditingFiles = ref(false); // Historical Claims + Prior Authorization File + RxWatchtower â€” shared widget
 const tocEditingOrtf = ref(false);
 const tocEditingNotes = ref(false);
 
-// Historical Claims (HCF) — required; drives the TOC override.
+// Historical Claims (HCF) â€” required; drives the TOC override.
 // Override Period is shared with RxWatchtower (Solo2 stores both in the same AccountGapOption.TOC column),
 // so there is a single editable value even though HCF can be No while RxWatchtower stays always-on.
 const tocHistoricalClaims = ref(false);
@@ -3698,19 +4489,19 @@ const tocPendingHcfRemoval = ref(false);
 const hcfPending = ref(false);
 const hcfTicketNumber = ref('');
 
-// Prior Authorization File (PA) — recommended, independent of HCF
+// Prior Authorization File (PA) â€” recommended, independent of HCF
 const tocPriorAuth = ref(false);
 const tocPriorAuthFile = ref('');
 const tocPendingPaRemoval = ref(false);
 const paPending = ref(false);
 const paTicketNumber = ref('');
 
-// Open Refill Transfer File (ORTF) — uncommon, mail order only, no upload/ticket
+// Open Refill Transfer File (ORTF) â€” uncommon, mail order only, no upload/ticket
 const tocOpenRefillTransfer = ref(false);
 
 const tocNotes = ref('');
 
-// Ticket submission — one item at a time, triggered only from inside edit mode.
+// Ticket submission â€” one item at a time, triggered only from inside edit mode.
 // Save never touches this; submitting is a separate, deliberate action you can
 // come back and do later, independent of when the answer/file was saved.
 const showTocSubmitModal = ref(false);
@@ -3756,7 +4547,7 @@ function confirmTocSubmit() {
 }
 
 // Snapshots capture each widget's values the moment Edit is clicked, so Cancel can restore
-// every field to exactly what it was before this edit session — not just pending file removals.
+// every field to exactly what it was before this edit session â€” not just pending file removals.
 let tocFilesSnapshot = { historicalClaims: false, overrideDays: '', historicalClaimsFile: '', priorAuth: false, priorAuthFile: '' };
 
 function startEditFilesCard() {
@@ -3817,7 +4608,7 @@ function cancelNotesCard() {
   tocEditingNotes.value = false;
 }
 
-// ─── Step 5: Programs ─────────────────────────────────────────────────────────
+// â”€â”€â”€ Step 5: Programs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 // Details modal for pending tiles
 const showProgDetailsModal = ref(false);
@@ -3827,11 +4618,11 @@ function openProgDetails(prog: 'rxcompass' | 'vcp') {
   showProgDetailsModal.value = true;
 }
 
-// Enrollment state — true once program appears in Solo2 AccountPrograms
+// Enrollment state â€” true once program appears in Solo2 AccountPrograms
 const rxCompassEnrolled = ref(false);
 const vcpEnrolled = ref(false);
 
-// Pending state — true after ticket submitted, until Solo1 finishes setup
+// Pending state â€” true after ticket submitted, until Solo1 finishes setup
 const rxCompassPending = ref(false);
 const vcpPending = ref(false);
 const rxCompassTicketNumber = ref('');
@@ -3847,7 +4638,7 @@ const showProgSuccessSnackbar = ref(false);
 // RxCompass form
 const rxCompassForm = ref({ type: '', effectiveDate: '', merpVendor: '', notes: '' });
 
-// VCP form — election type applies account-wide (single-select, like Opt Out); only the
+// VCP form â€” election type applies account-wide (single-select, like Opt Out); only the
 // Maximizer/Accumulator designation varies per plan. Confirmed with Implementation 2026-08-03.
 interface VcpFormShape {
   election: string;
@@ -3886,7 +4677,7 @@ const vcpElectionDescriptions: Record<string, string> = {
 };
 
 function planNameById(id: number) {
-  return planDesignPlans.value.find(p => p.id === id)?.name ?? '—';
+  return planDesignPlans.value.find(p => p.id === id)?.name ?? 'â€”';
 }
 
 function vcpPlanItems() {
@@ -3912,7 +4703,7 @@ function selectVcpElection(value: string) {
 }
 
 const vcpElectionLabel = computed(() =>
-  vcpElectionOptions.find(o => o.value === vcpForm.value.election)?.label ?? '—'
+  vcpElectionOptions.find(o => o.value === vcpForm.value.election)?.label ?? 'â€”'
 );
 
 const rxCompassTypeItems = [
@@ -3931,7 +4722,7 @@ const rxCompassInCart = computed(() => progCart.value.includes('rxcompass'));
 const vcpInCart       = computed(() => progCart.value.includes('vcp'));
 
 const rxCompassTypeLabel = computed(() =>
-  rxCompassTypeItems.find(i => i.value === rxCompassForm.value.type)?.title ?? '—'
+  rxCompassTypeItems.find(i => i.value === rxCompassForm.value.type)?.title ?? 'â€”'
 );
 
 const rxCompassIsReconsider = computed(() =>
@@ -4111,7 +4902,7 @@ const progRatesHeaders = [
   { title: 'Eff. End Date',   key: 'effEndDate' },
 ];
 
-// ─── Step 6: Limits & Controls ────────────────────────────────────────────────
+// â”€â”€â”€ Step 6: Limits & Controls â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const lcEditingLimits = ref(false);
 let lcFieldsSnapshot: { key: string; label: string; value: string }[] = [];
@@ -4151,8 +4942,8 @@ const lcHcnContactOptions = computed(() => {
 });
 
 const lcEditingDaw = ref(false);
-const lcDaw1Options = ['No (Recommended)', 'Yes – Brand Copay', 'Yes – Generic Copay'];
-const lcDaw2Options = ['Yes – Brand Copay (Recommended)', 'No', 'Yes – Generic Copay'];
+const lcDaw1Options = ['No (Recommended)', 'Yes â€“ Brand Copay', 'Yes â€“ Generic Copay'];
+const lcDaw2Options = ['Yes â€“ Brand Copay (Recommended)', 'No', 'Yes â€“ Generic Copay'];
 const lcDawNotes = ref('');
 const lcDawPenalties = ref([
   {
@@ -4166,7 +4957,7 @@ const lcDawPenalties = ref([
     key: 'daw2',
     label: 'DAW Penalty 2',
     description: 'When a member refuses a generic equivalent when both the physician allows it and one exists, if marked Yes, the below selected copay plus the difference between the generic and brand name medication will be charged. This penalty will not be applied to either deductible or OOP (out-of-pocket) expense. If marked No, members will not be charged a penalty, and the applicable brand name co-pay will apply.',
-    value: 'Yes – Brand Copay (Recommended)',
+    value: 'Yes â€“ Brand Copay (Recommended)',
     options: lcDaw2Options,
   },
 ]);
@@ -4211,7 +5002,7 @@ function lcManualCancelEdit() {
   lcEditingManual.value = false;
 }
 
-// ─── Step 7: Billing ─────────────────────────────────────────────────────────
+// â”€â”€â”€ Step 7: Billing â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const blEinNumber = ref('');
 const formatEin = (val: string) => {
@@ -4228,7 +5019,7 @@ const blSelectedCarrier = ref('');
 const blPaymentMethod = ref('ACH');
 const blAchMethod = ref('debit');
 
-// Skip ACH setup — Carrier already has an existing billing agreement with Liviniti
+// Skip ACH setup â€” Carrier already has an existing billing agreement with Liviniti
 const blSkipAchSetup = ref(false);
 let suppressPaymentFieldsReset = false;
 const resetPaymentFields = () => {
@@ -4249,7 +5040,7 @@ watch(blSkipAchSetup, (val) => {
 
 // B-04: Debit pull timing
 const blDebitTiming = ref('');
-const blDebitTimingOptions = ['3–5 business days after billing complete', '10 business days', 'Prior approval required', 'Custom'];
+const blDebitTimingOptions = ['3â€“5 business days after billing complete', '10 business days', 'Prior approval required', 'Custom'];
 const blDebitApprovalEmail = ref('');
 const blDebitTimingNote = ref('');
 
@@ -4334,7 +5125,7 @@ const blEditingReport = ref(false);
 const blEditingRebate = ref(false);
 const blEditingNotes = ref(false);
 
-// Card 1: Billing Setup — snapshot/restore so Cancel undoes every field, not just uploads
+// Card 1: Billing Setup â€” snapshot/restore so Cancel undoes every field, not just uploads
 let blSetupSnapshot = { einNumber: '', existingParty: 'no', selectedCarrier: '', responsibleContacts: [] as string[] };
 const blSetupStartEdit = () => {
   blSetupSnapshot = {
@@ -4358,7 +5149,7 @@ const blSetupCancelEdit = () => {
   nextTick(() => { suppressResponsibleContactsReset = false; });
 };
 
-// ACH upload state — Payment Method card
+// ACH upload state â€” Payment Method card
 const blW9File = ref<string | null>(null);
 const blAchAuthFile = ref<string | null>(null);
 const blPendingW9Removal = ref(false);
@@ -4457,7 +5248,7 @@ const blReportCancelEdit = () => {
   blEditingReport.value = false;
 };
 
-// ACH upload state — Rebate Setup card
+// ACH upload state â€” Rebate Setup card
 const blRebateW9File = ref<string | null>(null);
 const blRebateAchAuthFile = ref<string | null>(null);
 const blPendingRebateW9Removal = ref(false);
@@ -4506,9 +5297,9 @@ const blNotesCancelEdit = () => {
   blEditingNotes.value = false;
 };
 
-// ─── Step 8: ID Cards ─────────────────────────────────────────────────────────
+// â”€â”€â”€ Step 8: ID Cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-// Card 1: Vendor — committed refs drive Cards 2-5 visibility; Draft refs are what
+// Card 1: Vendor â€” committed refs drive Cards 2-5 visibility; Draft refs are what
 // the Select/Autocomplete/TextField bind to while editing, so changing Vendor Type
 // does not cascade to the other cards until Save is clicked.
 const idEditingVendor = ref(false);
@@ -4520,7 +5311,7 @@ const idCarrierVendorNameDraft = ref('');
 const idCarrierVendorOptions = ['Acclaim Benefits', 'Benefit Advantage'];
 
 const idVendorNameDisplay = computed(() => {
-  if (idVendorType.value === 'Carrier') return idCarrierVendorName.value || '—';
+  if (idVendorType.value === 'Carrier') return idCarrierVendorName.value || 'â€”';
   return null;
 });
 
@@ -4653,7 +5444,7 @@ const idDatesCancelEdit = () => {
   idEditingDates.value = false;
 };
 
-// Card 5: Card Assets & Information (Carrier only — read-only reference, no edit state)
+// Card 5: Card Assets & Information (Carrier only â€” read-only reference, no edit state)
 const downloadLivinitiLogo = () => {
   console.log('Download Liviniti logo');
   // Production: trigger static asset download
@@ -4665,7 +5456,7 @@ const handleFormDownload = (formName: string) => {
   showToast(`${formName} downloaded successfully!`, 'success');
 };
 
-// Step 9: Verification & Summary — GPS document generation, I/E merge, signed upload
+// Step 9: Verification & Summary â€” GPS document generation, I/E merge, signed upload
 const gpsIeFile = ref('');
 const gpsPendingIeRemoval = ref(false);
 const gpsSignedFile = ref('');
@@ -4674,7 +5465,7 @@ const gpsPendingSignedRemoval = ref(false);
 const gpsAccountName = () => accountOptions.value.find(acc => acc.id === selectedAccount.value)?.name ?? 'Account';
 
 const generateGpsDocument = () => {
-  showToast('GPS document generated successfully — Inclusion/Exclusion pages included!', 'success');
+  showToast('GPS document generated successfully â€” Inclusion/Exclusion pages included!', 'success');
 };
 
 // Step 1 widget: Upload Inclusion/Exclusion Document
@@ -4735,13 +5526,13 @@ const lcOverrides = [
 ];
 
 const lcFields = ref([
-  { key: 'refillRetail',    label: 'Refill Too Soon – Retail',     value: '75%' },
-  { key: 'refillMail',      label: 'Refill Too Soon – Mail',       value: '80%' },
+  { key: 'refillRetail',    label: 'Refill Too Soon â€“ Retail',     value: '75%' },
+  { key: 'refillMail',      label: 'Refill Too Soon â€“ Mail',       value: '80%' },
   { key: 'maxClaimDays',    label: 'Max Claim Days',               value: '99' },
   { key: 'maxDaySupply',    label: 'Max Day Supply',               value: '90' },
-  { key: 'maxDollarRetail', label: 'Max Dollar – Retail',          value: '$1,500' },
+  { key: 'maxDollarRetail', label: 'Max Dollar â€“ Retail',          value: '$1,500' },
   { key: 'maxDollarCmpd',   label: 'Max Dollar Per Compound',      value: '$200' },
-  { key: 'maxDollarMail',   label: 'Max Dollar – Mail',            value: '$1,500' },
+  { key: 'maxDollarMail',   label: 'Max Dollar â€“ Mail',            value: '$1,500' },
 ]);
 
 const isStarkIndustries = computed(() => selectedAccount.value === STARK_INDUSTRIES_ID);
@@ -4773,6 +5564,7 @@ const selectedAccountDescription = computed(() =>
 const wizardSteps = ref([
   { name: 'Account Profile',        required: true,  status: 'not-started',  description: 'Confirm account details, set effective dates, and review or update account contacts.' },
   { name: 'Network Configuration',  required: true,  status: 'not-started',  description: 'Define the pharmacy network and coverage settings for this account.' },
+  { name: 'Group Setup',            required: true,  status: 'not-started',  description: 'Define the groups for this account.' },
   { name: 'Plan Design',            required: true,  status: 'not-started',  description: 'Configure the benefit structure, cost-sharing rules, and coverage tiers.' },
   { name: 'Transition of Care',     required: false, status: 'not-started',  description: 'Set up transition of care rules for members moving from another plan.' },
   { name: 'Programs',               required: false, status: 'not-started',  description: 'Select and configure clinical and specialty programs for this account.' },
@@ -4783,7 +5575,7 @@ const wizardSteps = ref([
 ]);
 
 const wizardCompletionPercent = computed(() => {
-  const trackedSteps = wizardSteps.value.slice(0, 8);
+  const trackedSteps = wizardSteps.value.slice(0, 9);
   const completed = trackedSteps.filter(s => s.status === 'complete').length;
   return Math.round((completed / trackedSteps.length) * 100);
 });
@@ -4879,7 +5671,7 @@ const nextWizardStep = () => {
 };
 
 // Marks the current wizard step In Progress the moment any widget inside it is saved,
-// rather than waiting for the user to click Next — a step can be saved-into without ever
+// rather than waiting for the user to click Next â€” a step can be saved-into without ever
 // being navigated away from (e.g. the user saves one card then closes the tab).
 // Uses event delegation on the step body so every current and future "Save"-style button
 // is covered without having to instrument each individual save handler.
@@ -4921,11 +5713,11 @@ const finishPlanSetup = () => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
-// ─── Step 1 data ──────────────────────────────────────────────────────────────
+// â”€â”€â”€ Step 1 data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const statusOptions = ['Implementation', 'Active', 'Inactive', 'Pending'];
 
-// ── Account Profile — Client Portal role/permission taxonomy (shared) ────────
+// â”€â”€ Account Profile â€” Client Portal role/permission taxonomy (shared) â”€â”€â”€â”€â”€â”€â”€â”€
 // Taxonomy validated against both the old Client Portal (Ehn.Web.Pbm.Customers
 // AccountPermissions) and Solo2's GPS report "Client Portal Access" template.
 const apPermissionOptions = [
@@ -4964,7 +5756,7 @@ const apPermissionsSummary = (role: string, permissions: Record<string, boolean>
   return selected.length ? selected.join(', ') : 'None';
 };
 // Old portal enforces exactly one Main Point of Contact for the entire account, spanning
-// Client Contacts AND Vendor Contacts together — confirmed via Ehn.Web.Pbm.Customers'
+// Client Contacts AND Vendor Contacts together â€” confirmed via Ehn.Web.Pbm.Customers'
 // SetPrimaryContact JS, which unchecks every "PrimaryContact" checkbox on the page
 // regardless of which section (Client or Third Party) it lives in. Not scoped per list.
 type ApMainPocRef = { list: 'client' | 'vendor'; index: number };
@@ -4973,7 +5765,7 @@ const apEnforceSingleMainPoc = (current: ApMainPocRef) => {
   apVendorContacts.value.forEach((c, i) => { if (!(current.list === 'vendor' && i === current.index)) c.mainPointOfContact = false; });
 };
 // Returns the name of whichever contact currently holds Main Point of Contact, excluding
-// the one being edited — checked across both lists since it's a single global designation.
+// the one being edited â€” checked across both lists since it's a single global designation.
 const apOtherContactIsMainPoc = (current: ApMainPocRef): string => {
   const clientMatch = apClientContacts.value.find((c, i) => !(current.list === 'client' && i === current.index) && c.mainPointOfContact);
   if (clientMatch) return clientMatch.name;
@@ -4981,7 +5773,7 @@ const apOtherContactIsMainPoc = (current: ApMainPocRef): string => {
   return vendorMatch?.name ?? '';
 };
 
-// ── Account Profile — Client Contacts ─────────────────────────────────────────
+// â”€â”€ Account Profile â€” Client Contacts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const apClientContactHeaders = [
   { title: 'Name', key: 'name' },
   { title: 'Email', key: 'email' },
@@ -5153,7 +5945,7 @@ const apContactDialogActions = computed(() => [
   { text: 'Add Contact', styleType: 'primary' as const, onClick: apSaveContact, disabled: apContactSaveDisabled(apContactForm.value) },
 ]);
 
-// ── Account Profile — Vendor Contacts ─────────────────────────────────────────
+// â”€â”€ Account Profile â€” Vendor Contacts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const apVendorContactHeaders = [
   { title: 'Name', key: 'name' },
   { title: 'Vendor', key: 'vendor' },
@@ -5185,7 +5977,7 @@ const apVendorMainPointOfContact = ref(false);
 const apVendorSurveyContact = ref(false);
 const apVendorAckConfirmed = ref(false);
 const apVendorAccessFormConfirmed = ref(false);
-// Contacts are not always individuals — a vendor "contact" can be a shared/group inbox with
+// Contacts are not always individuals â€” a vendor "contact" can be a shared/group inbox with
 // multiple emails or phone numbers on file, so the assignment picks which one applies here
 // (mirrors SoloRx's per-contact EmailAddress/PhoneNumber collections).
 const apVendorContactData = [
@@ -5273,7 +6065,7 @@ const apVendorContactDialogActions = computed(() => [
   { text: 'Add Contact', styleType: 'primary' as const, onClick: apSaveVendorContacts, disabled: apVendorAddDisabled.value },
 ]);
 
-// Edit Vendor Contact (role/PHI only — identity fields come from the vendor's own contact record)
+// Edit Vendor Contact (role/PHI only â€” identity fields come from the vendor's own contact record)
 const apShowEditVendorContactDialog = ref(false);
 const apEditingVendorContactIndex = ref(-1);
 const apEditingVendorContactName = ref('');
@@ -5404,7 +6196,7 @@ const startEditCompanyInfo = () => {
 const saveCompanyInfo = () => { companyInfo.value = { ...editableCompanyInfo.value }; editingCompanyInfo.value = false; };
 const cancelEditCompanyInfo = () => { editingCompanyInfo.value = false; sameAsPhysical.value = false; };
 
-// ─── Step 2: Network Configuration ───────────────────────────────────────────
+// â”€â”€â”€ Step 2: Network Configuration â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const networkHeaders = [
   { title: 'Network Name', key: 'networkName' },
@@ -5426,9 +6218,9 @@ const networkFilterPills = [
 
 const networkRowsByAccount = ref<Record<number, any[]>>({
   1: [
-    { networkName: 'First Choice Broad',  status: 'Scheduled', linkingLevel: 'Account', linkedGroups: 'All', linkedPlans: 'All', bin: '—', effStartDate: '09/01/2026', endDate: '—' },
-    { networkName: 'Mail Order - Network', status: 'Scheduled', linkingLevel: 'Account', linkedGroups: 'All', linkedPlans: 'All', bin: '—', effStartDate: '09/01/2026', endDate: '—' },
-    { networkName: 'Compliance',          status: 'Scheduled', linkingLevel: 'Account', linkedGroups: 'All', linkedPlans: 'All', bin: '—', effStartDate: '09/01/2026', endDate: '—' },
+    { networkName: 'First Choice Broad',  status: 'Scheduled', linkingLevel: 'Account', linkedGroups: 'All', linkedPlans: 'All', bin: 'â€”', effStartDate: '09/01/2026', endDate: 'â€”' },
+    { networkName: 'Mail Order - Network', status: 'Scheduled', linkingLevel: 'Account', linkedGroups: 'All', linkedPlans: 'All', bin: 'â€”', effStartDate: '09/01/2026', endDate: 'â€”' },
+    { networkName: 'Compliance',          status: 'Scheduled', linkingLevel: 'Account', linkedGroups: 'All', linkedPlans: 'All', bin: 'â€”', effStartDate: '09/01/2026', endDate: 'â€”' },
   ],
   2: [],
   3: [],
@@ -5443,18 +6235,171 @@ const currentNetworkRows = computed(() =>
 const pharmacyTabs = ['In-House', 'Specialty', 'Mail Order', 'Custom'];
 const activePharmacyTab = ref('In-House');
 
-// ─── Step 2: Network Linking dialog ───────────────────────────────────────────
+// â”€â”€â”€ Step 3: Group Setup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Mirrors master's Group Setup step (account-level groups used to source BPG Configuration's linked-group dropdown).
+const GROUP_SETUP_LIVINITI_BIN = '025945';
+const GROUP_SETUP_CHANGE_BIN = '015433';
+const groupSetupBinOptions = [
+  { title: '025945 - Liviniti (default)', value: GROUP_SETUP_LIVINITI_BIN },
+  { title: '015433 - Change', value: GROUP_SETUP_CHANGE_BIN },
+];
+const groupSetupProcessorOptions = [
+  { title: 'Cervey', value: 1 },
+  { title: 'SoloRx', value: 2 },
+];
+
+const groupSetupHeaders = [
+  { title: 'Group Name', key: 'groupName' },
+  { title: 'Group ID',   key: 'groupId' },
+  { title: 'Bin',        key: 'binLabel' },
+  { title: 'Start Date', key: 'startDate' },
+  { title: 'End Date',   key: 'endDate' },
+  { title: '',           key: 'actions', sortable: false },
+];
+
+const groupSetupRowActions = [
+  { label: 'Edit',   action: 'edit'   },
+  { label: 'Remove', action: 'remove' },
+];
+
+// A group referenced elsewhere in the wizard (BPG Configuration or a group-level Network Link)
+// can't be removed from Group Setup â€” doing so would orphan that reference. Unlink it from the
+// referencing section first, then the group can be removed.
+function isGroupLinkedToBpg(groupId: string): boolean {
+  return planDesignPlans.value.some(plan => plan.bpgRows.some((row: any) => row.groupId === groupId));
+}
+
+function isGroupLinkedToNetwork(groupId: string): boolean {
+  if (!selectedAccount.value) return false;
+  const rows = networkRowsByAccount.value[selectedAccount.value] ?? [];
+  return rows.some(r =>
+    r.linkingLevel === 'Group' &&
+    r.linkedGroups &&
+    r.linkedGroups.split(',').map((g: string) => g.trim()).includes(groupId)
+  );
+}
+
+const groupSetupRowActionDisabled = (item: GroupSetupRow, actionItem: { action: string }) => {
+  if (actionItem.action !== 'remove') return false;
+  return isGroupLinkedToBpg(item.groupId) || isGroupLinkedToNetwork(item.groupId);
+};
+
+const groupSetupRowActionDisabledReason = (item: GroupSetupRow, actionItem: { action: string }) => {
+  if (actionItem.action !== 'remove') return undefined;
+  const linkedToBpg = isGroupLinkedToBpg(item.groupId);
+  const linkedToNetwork = isGroupLinkedToNetwork(item.groupId);
+  if (linkedToBpg && linkedToNetwork) return 'This group has active BPG Configuration and Network links. Remove those first.';
+  if (linkedToBpg) return 'This group has active BPG Configuration. Remove it from BPG Configuration first.';
+  if (linkedToNetwork) return 'This group is linked to a Preferred Network. Remove that link first.';
+  return undefined;
+};
+
+type GroupSetupRow = {
+  groupName: string; groupId: string; bin: string; pcn: string;
+  claimSourceId: number | null; startDate: string; endDate: string;
+};
+
+function groupSetupBinLabel(bin: string): string {
+  return groupSetupBinOptions.find(o => o.value === bin)?.title.replace(' (default)', '') ?? bin;
+}
+
+const groupSetupRowsByAccount = ref<Record<number, GroupSetupRow[]>>({
+  1: [
+    { groupName: 'Allied Finishing, Inc', groupId: '1275', bin: GROUP_SETUP_LIVINITI_BIN, pcn: 'SSN', claimSourceId: null, startDate: '03/01/2026', endDate: 'â€”' },
+  ],
+  2: [],
+  3: [],
+  4: [
+    { groupName: '', groupId: 'BG3HW', bin: GROUP_SETUP_CHANGE_BIN, pcn: 'SSN', claimSourceId: 1, startDate: '01/01/2026', endDate: 'â€”' },
+  ],
+  5: [],
+});
+
+const currentGroupSetupRows = computed(() => {
+  const rows = selectedAccount.value ? (groupSetupRowsByAccount.value[selectedAccount.value] ?? []) : [];
+  return rows.map(r => ({ ...r, binLabel: groupSetupBinLabel(r.bin) }));
+});
+
+const showGroupSetupDialog = ref(false);
+const groupSetupDialogMode = ref<'add' | 'edit'>('add');
+const editingGroupSetupIndex = ref(-1);
+const groupSetupTouched = ref(false);
+
+function newGroupSetupForm(): GroupSetupRow {
+  return { groupName: '', groupId: '', bin: GROUP_SETUP_LIVINITI_BIN, pcn: 'SSN', claimSourceId: null, startDate: '', endDate: '' };
+}
+const groupSetupForm = ref<GroupSetupRow>(newGroupSetupForm());
+
+function onGroupSetupBinChange(value: unknown) {
+  groupSetupForm.value.bin = value as string;
+  if (groupSetupForm.value.bin !== GROUP_SETUP_CHANGE_BIN) {
+    groupSetupForm.value.claimSourceId = null;
+  }
+}
+
+const isGroupSetupFormValid = computed(() => {
+  const f = groupSetupForm.value;
+  if (!f.groupId.trim() || !f.startDate) return false;
+  if (endDateBeforeStartError(f.startDate, f.endDate)) return false;
+  if (f.bin === GROUP_SETUP_CHANGE_BIN && f.claimSourceId === null) return false;
+  return true;
+});
+
+const openGroupSetupDialog = (mode: 'add' | 'edit') => {
+  groupSetupDialogMode.value = mode;
+  groupSetupTouched.value = false;
+  if (mode === 'add') {
+    editingGroupSetupIndex.value = -1;
+    groupSetupForm.value = newGroupSetupForm();
+  }
+  showGroupSetupDialog.value = true;
+};
+
+const handleGroupSetupRowAction = ({ action, item }: { action: string; item: GroupSetupRow }) => {
+  if (!selectedAccount.value) return;
+  const arr = groupSetupRowsByAccount.value[selectedAccount.value];
+  if (!arr) return;
+  if (action === 'remove') {
+    const idx = arr.findIndex(r => r.groupId === item.groupId);
+    if (idx !== -1) arr.splice(idx, 1);
+    return;
+  }
+  if (action === 'edit') {
+    editingGroupSetupIndex.value = arr.findIndex(r => r.groupId === item.groupId);
+    groupSetupForm.value = { groupName: item.groupName, groupId: item.groupId, bin: item.bin, pcn: item.pcn, claimSourceId: item.claimSourceId, startDate: item.startDate, endDate: item.endDate === 'â€”' ? '' : item.endDate };
+    openGroupSetupDialog('edit');
+  }
+};
+
+const saveGroupSetupEntry = () => {
+  groupSetupTouched.value = true;
+  if (!isGroupSetupFormValid.value || !selectedAccount.value) return;
+  const arr = groupSetupRowsByAccount.value[selectedAccount.value] ?? (groupSetupRowsByAccount.value[selectedAccount.value] = []);
+  const entry = { ...groupSetupForm.value, endDate: groupSetupForm.value.endDate || 'â€”' };
+  if (groupSetupDialogMode.value === 'edit' && editingGroupSetupIndex.value !== -1) {
+    arr[editingGroupSetupIndex.value] = entry;
+  } else {
+    arr.push(entry);
+  }
+  showGroupSetupDialog.value = false;
+};
+
+const groupSetupDialogActions = computed(() => [
+  { text: 'Cancel', styleType: 'secondary' as const, onClick: () => { showGroupSetupDialog.value = false; } },
+  { text: groupSetupDialogMode.value === 'edit' ? 'Save Changes' : 'Add Group', styleType: 'primary' as const, onClick: saveGroupSetupEntry },
+]);
+
+// â”€â”€â”€ Step 2: Network Linking dialog â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const showNetworkLinkDialog = ref(false);
 const networkLinkStep = ref(1);
 const networkLinkMode = ref<'add' | 'edit'>('add');
 const editingNetworkItem = ref<any>(null);
 const editingNetworkIndex = ref(-1);
-const networkBpgOptionsByAccount: Record<number, Array<{id: string, bin: string, pcn: string, groupNumber: string}>> = {
-  1: [{ id: 'g1', bin: '025945', pcn: 'SSN', groupNumber: '1275' }],
-  4: [{ id: 'g1', bin: '015433', pcn: 'SSN', groupNumber: 'BG3HW' }],
-};
-const currentNetworkBpgOptions = computed(() => networkBpgOptionsByAccount[selectedAccount.value] ?? []);
+// Group-level Network Linking selects from the account's Group Setup groups â€” same source BPG Configuration uses.
+const currentNetworkBpgOptions = computed(() =>
+  currentGroupSetupRows.value.map(g => ({ id: g.groupId, bin: g.bin, pcn: g.pcn, groupNumber: g.groupId }))
+);
 const networkEditStartDateReadOnly = computed(() => {
   if (networkLinkMode.value !== 'edit' || !networkLinkForm.value.startDate) return false;
   return new Date(networkLinkForm.value.startDate) < new Date();
@@ -5480,7 +6425,7 @@ const deriveStatus = (startDate: string, endDate: string): string => {
   const [sm, sd, sy] = startDate.split('/').map(Number);
   const start = new Date(sy, sm - 1, sd);
   if (start > today) return 'Scheduled';
-  if (endDate && endDate !== '—') {
+  if (endDate && endDate !== 'â€”') {
     const [em, ed, ey] = endDate.split('/').map(Number);
     if (new Date(ey, em - 1, ed) < today) return 'Terminated';
   }
@@ -5531,9 +6476,9 @@ const saveNetworkLink = () => {
         : currentNetworkBpgOptions.value
             .filter(r => networkLinkForm.value.selectedGroupIds.includes(r.id))
             .map(r => r.groupNumber)
-            .join(', ') || '—',
+            .join(', ') || 'â€”',
       effStartDate: networkLinkForm.value.startDate,
-      endDate: networkLinkForm.value.endDate || '—',
+      endDate: networkLinkForm.value.endDate || 'â€”',
     };
   } else {
     if (!networkLinkForm.value.selectedNetwork) return;
@@ -5546,11 +6491,11 @@ const saveNetworkLink = () => {
         : currentNetworkBpgOptions.value
             .filter(r => networkLinkForm.value.selectedGroupIds.includes(r.id))
             .map(r => r.groupNumber)
-            .join(', ') || '—',
-      linkedPlans: networkLinkForm.value.linkingLevel === 'Account Level' ? 'All' : '—',
-      bin: '—',
+            .join(', ') || 'â€”',
+      linkedPlans: networkLinkForm.value.linkingLevel === 'Account Level' ? 'All' : 'â€”',
+      bin: 'â€”',
       effStartDate: networkLinkForm.value.startDate,
-      endDate: networkLinkForm.value.endDate || '—',
+      endDate: networkLinkForm.value.endDate || 'â€”',
     });
   }
   const wasEdit = networkLinkMode.value === 'edit';
@@ -5558,37 +6503,37 @@ const saveNetworkLink = () => {
   showToast(wasEdit ? 'Pharmacy Network Updated Successfully' : 'Pharmacy Network Linking Successful', 'success');
 };
 
-// ─── Step 2: Preferred Pharmacy dialogs ──────────────────────────────────────
+// â”€â”€â”€ Step 2: Preferred Pharmacy dialogs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const pharmacyDataByAccount = ref<Record<number, Record<string, any[]>>>({
   1: {
-    // Stark Industries — in implementation, all Scheduled with future dates
+    // Stark Industries â€” in implementation, all Scheduled with future dates
     'In-House': [
-      { ncpdp: '1234567', pharmacyName: 'CVS Pharmacy #4821', status: 'Scheduled', noBillNoPay: false, startDate: '09/01/2026', endDate: '—' },
-      { ncpdp: '7654321', pharmacyName: 'Walgreens #1093',    status: 'Scheduled', noBillNoPay: true,  startDate: '09/01/2026', endDate: '—' },
+      { ncpdp: '1234567', pharmacyName: 'CVS Pharmacy #4821', status: 'Scheduled', noBillNoPay: false, startDate: '09/01/2026', endDate: 'â€”' },
+      { ncpdp: '7654321', pharmacyName: 'Walgreens #1093',    status: 'Scheduled', noBillNoPay: true,  startDate: '09/01/2026', endDate: 'â€”' },
     ],
     'Specialty': [
-      { pharmacyType: 'Specific Pharmacies', pharmacyName: 'Accredo Health Group', npis: '1562047839', noBillNoPay: false, status: 'Scheduled', startDate: '09/01/2026', endDate: '—' },
+      { pharmacyType: 'Specific Pharmacies', pharmacyName: 'Accredo Health Group', npis: '1562047839', noBillNoPay: false, status: 'Scheduled', startDate: '09/01/2026', endDate: 'â€”' },
     ],
     'Mail Order': [
-      { vendor: 'PILLPACK, LLC', status: 'Scheduled', noBillNoPay: false, displayInPortals: true, startDate: '09/01/2026', endDate: '—' },
+      { vendor: 'PILLPACK, LLC', status: 'Scheduled', noBillNoPay: false, displayInPortals: true, startDate: '09/01/2026', endDate: 'â€”' },
     ],
     'Custom': [],
   },
   2: { 'In-House': [], 'Specialty': [], 'Mail Order': [], 'Custom': [] },
   3: { 'In-House': [], 'Specialty': [], 'Mail Order': [], 'Custom': [] },
   4: {
-    // Oscorp — in implementation, all Scheduled with future dates
+    // Oscorp â€” in implementation, all Scheduled with future dates
     'In-House': [
-      { ncpdp: '1122334', pharmacyName: 'Rite Aid #5247',       status: 'Scheduled', noBillNoPay: false, startDate: '10/01/2026', endDate: '—' },
-      { ncpdp: '9988776', pharmacyName: 'Costco Pharmacy #1190', status: 'Scheduled', noBillNoPay: false, startDate: '10/01/2026', endDate: '—' },
+      { ncpdp: '1122334', pharmacyName: 'Rite Aid #5247',       status: 'Scheduled', noBillNoPay: false, startDate: '10/01/2026', endDate: 'â€”' },
+      { ncpdp: '9988776', pharmacyName: 'Costco Pharmacy #1190', status: 'Scheduled', noBillNoPay: false, startDate: '10/01/2026', endDate: 'â€”' },
     ],
     'Specialty': [
-      { pharmacyType: 'Specific Pharmacies', pharmacyName: 'Walgreens Specialty', npis: '1487263940', noBillNoPay: false, status: 'Scheduled', startDate: '10/01/2026', endDate: '—' },
-      { pharmacyType: 'Specific Pharmacies', pharmacyName: 'CVS Specialty',       npis: '0934718265', noBillNoPay: false, status: 'Scheduled', startDate: '10/01/2026', endDate: '—' },
+      { pharmacyType: 'Specific Pharmacies', pharmacyName: 'Walgreens Specialty', npis: '1487263940', noBillNoPay: false, status: 'Scheduled', startDate: '10/01/2026', endDate: 'â€”' },
+      { pharmacyType: 'Specific Pharmacies', pharmacyName: 'CVS Specialty',       npis: '0934718265', noBillNoPay: false, status: 'Scheduled', startDate: '10/01/2026', endDate: 'â€”' },
     ],
     'Mail Order': [
-      { vendor: 'POSTAL PRESCRIPTION SERVICES', status: 'Scheduled', noBillNoPay: false, displayInPortals: false, startDate: '10/01/2026', endDate: '—' },
+      { vendor: 'POSTAL PRESCRIPTION SERVICES', status: 'Scheduled', noBillNoPay: false, displayInPortals: false, startDate: '10/01/2026', endDate: 'â€”' },
     ],
     'Custom': [],
   },
@@ -5775,14 +6720,14 @@ const handlePharmacyRowAction = ({ action, item }: { action: string; item: any }
       mailOrderEditForm.value = {
         noBillNoPay: !!item.noBillNoPay,
         displayInPortals: !!item.displayInPortals,
-        startDate: item.startDate === '—' ? '' : item.startDate,
-        endDate: item.endDate === '—' ? '' : item.endDate,
+        startDate: item.startDate === 'â€”' ? '' : item.startDate,
+        endDate: item.endDate === 'â€”' ? '' : item.endDate,
       };
     } else {
       inhouseEditForm.value = {
         noBillNoPay: !!item.noBillNoPay,
-        startDate: item.startDate === '—' ? '' : item.startDate,
-        endDate: item.endDate === '—' ? '' : item.endDate,
+        startDate: item.startDate === 'â€”' ? '' : item.startDate,
+        endDate: item.endDate === 'â€”' ? '' : item.endDate,
       };
     }
     inhouseEditTouched.value = false;
@@ -5805,16 +6750,16 @@ const handleNetworkRowAction = ({ action, item }: { action: string; item: any })
     editingNetworkItem.value = item;
     editingNetworkIndex.value = arr.indexOf(item);
     networkLinkMode.value = 'edit';
-    const linkedGroupNumbers = item.linkingLevel === 'Group' && item.linkedGroups && item.linkedGroups !== 'All' && item.linkedGroups !== '—'
+    const linkedGroupNumbers = item.linkingLevel === 'Group' && item.linkedGroups && item.linkedGroups !== 'All' && item.linkedGroups !== 'â€”'
       ? item.linkedGroups.split(',').map((g: string) => g.trim())
       : [];
     networkLinkForm.value = {
       linkingLevel: item.linkingLevel === 'Account' ? 'Account Level' : 'Group Level',
-      selectedGroupIds: (networkBpgOptionsByAccount[selectedAccount.value] ?? [])
+      selectedGroupIds: currentNetworkBpgOptions.value
         .filter(r => linkedGroupNumbers.includes(r.groupNumber))
         .map(r => r.id),
-      startDate: item.effStartDate === '—' ? '' : item.effStartDate,
-      endDate: item.endDate === '—' ? '' : item.endDate,
+      startDate: item.effStartDate === 'â€”' ? '' : item.effStartDate,
+      endDate: item.endDate === 'â€”' ? '' : item.endDate,
       selectedNetwork: item.networkName,
     };
     networkLinkStep.value = 1;
@@ -5833,8 +6778,8 @@ const savePharmacyEdit = () => {
       ...editingPharmacyItem.value,
       noBillNoPay: mailOrderEditForm.value.noBillNoPay,
       displayInPortals: mailOrderEditForm.value.displayInPortals,
-      startDate: mailOrderEditForm.value.startDate || '—',
-      endDate: mailOrderEditForm.value.endDate || '—',
+      startDate: mailOrderEditForm.value.startDate || 'â€”',
+      endDate: mailOrderEditForm.value.endDate || 'â€”',
     };
   } else {
     if (!inhouseEditForm.value.startDate) { inhouseEditTouched.value = true; return; }
@@ -5842,8 +6787,8 @@ const savePharmacyEdit = () => {
     arr[editingPharmacyIndex.value] = {
       ...editingPharmacyItem.value,
       noBillNoPay: inhouseEditForm.value.noBillNoPay,
-      startDate: inhouseEditForm.value.startDate || '—',
-      endDate: inhouseEditForm.value.endDate || '—',
+      startDate: inhouseEditForm.value.startDate || 'â€”',
+      endDate: inhouseEditForm.value.endDate || 'â€”',
     };
   }
   showPharmacyDialog.value = false;
@@ -5864,11 +6809,11 @@ const savePharmacy = () => {
     inhouseCustomForms.value.forEach(f => {
       accountData[tab].push({
         ncpdp: f.ncpdp,
-        pharmacyName: f.npiChips[0]?.name || '—',
+        pharmacyName: f.npiChips[0]?.name || 'â€”',
         status: deriveStatus(f.startDate, f.endDate),
         noBillNoPay: f.noBillNoPay,
         startDate: f.startDate,
-        endDate: f.endDate || '—',
+        endDate: f.endDate || 'â€”',
       });
     });
   } else if (tab === 'Specialty') {
@@ -5890,7 +6835,7 @@ const savePharmacy = () => {
             noBillNoPay: f.noBillNoPay,
             status: deriveStatus(f.startDate, f.endDate),
             startDate: f.startDate,
-            endDate: f.endDate || '—',
+            endDate: f.endDate || 'â€”',
           });
         });
       } else {
@@ -5901,7 +6846,7 @@ const savePharmacy = () => {
           noBillNoPay: f.noBillNoPay,
           status: deriveStatus(f.startDate, f.endDate),
           startDate: f.startDate,
-          endDate: f.endDate || '—',
+          endDate: f.endDate || 'â€”',
         });
       }
     });
@@ -5920,7 +6865,7 @@ const savePharmacy = () => {
           noBillNoPay: f.noBillNoPay,
           displayInPortals: f.displayInPortals,
           startDate: f.startDate,
-          endDate: f.endDate || '—',
+          endDate: f.endDate || 'â€”',
         });
       });
     });
@@ -5929,7 +6874,7 @@ const savePharmacy = () => {
   showToast('Pharmacy Added Successfully', 'success');
 };
 
-// ─── Step 3: Plan Design ──────────────────────────────────────────────────────
+// â”€â”€â”€ Step 3: Plan Design â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const planDesignPlans = ref([
   {
@@ -5948,17 +6893,33 @@ const planDesignPlans = ref([
     governedByErisa: true,
     occCodes: ['1 - No other coverage'] as string[],
     maxSpendEnabled: false,
+    maxSpend: newPlanMaxSpend(),
     allowSecondaryPayer: true,
     cobConfigOptions: ['Secondary Payer Only'] as string[],
+    benefitPeriodType: 'CalendarYear' as string,
+    benefitPeriodRanges: [{ startDate: '01/01/2026', endDate: '12/31/2026' }] as { startDate: string; endDate: string }[],
     benefitByFlag: false,
     bpgRows: [
-      { bin: '025945', pcn: 'SSN', groupId: '1275', groupName: 'Allied Finishing, Inc', effStartDate: '03/01/2026', effEndDate: '' },
+      { bin: '025945', pcn: 'SSN', groupId: '1275', groupName: 'Allied Finishing, Inc', effStartDate: '03/01/2026', effEndDate: '—' },
     ],
     planCodes: [
-      { planCode: '1423T', status: 'Active', effStartDate: '03/05/2026', effEndDate: '' },
+      { planCode: '1423T', effStartDate: '03/05/2026', effEndDate: '—' },
     ],
-    benefitCodes: [] as { benefitCode: string; description: string; effStartDate: string; effEndDate: string }[],
-    accumulators: [] as { accumulatorName: string; status: string; effStartDate: string; effEndDate: string }[],
+    benefitCodes: [] as { benefitCode: string; effStartDate: string; effEndDate: string }[],
+    accumulators: [
+      { id: '70953-acc-1', accumulatorId: 'acc-1', accumulatorName: 'Standard Deductible/OOP', type: 'Standard Accumulation', effStartDate: '03/06/2026', effEndDate: '—', deductibleAmount: '$500', deductibleFamilyAmount: '$1,500', oopAmount: '$3,000', oopFamilyAmount: '$6,000', benefitMaxAmount: '—' },
+    ] as PlanAccumulatorRow[],
+    copayNetworkIds: ['First Choice Broad'] as string[],
+    copayTiers: {
+      'network:First Choice Broad': [
+        {
+          id: 0, daysSupplyMin: 1, daysSupply: 30,
+          cells: {
+            Generic: { formula: 'Copay', copay: '$1.00', coinsurance: '2%', coinsMin: '$1.00', coinsMax: '$3.00', incentiveMin: '$2.00', incentiveMax: '$5.00', patientPayMax: '$6.00', dedWaived: false, oopWaived: false },
+          },
+        },
+      ],
+    } as CopayTiersByContext,
   },
   {
     id: 70954,
@@ -5976,80 +6937,428 @@ const planDesignPlans = ref([
     governedByErisa: false,
     occCodes: [] as string[],
     maxSpendEnabled: false,
+    maxSpend: newPlanMaxSpend(),
     allowSecondaryPayer: false,
     cobConfigOptions: [] as string[],
+    benefitPeriodType: 'PlanYear' as string,
+    benefitPeriodRanges: [{ startDate: '03/06/2026', endDate: '03/05/2027' }] as { startDate: string; endDate: string }[],
     benefitByFlag: false,
     bpgRows: [
-      { bin: '025945', pcn: 'SSN', groupId: '1275', groupName: 'Allied Finishing, Inc', effStartDate: '03/01/2026', effEndDate: '' },
+      { bin: '025945', pcn: 'SSN', groupId: '1275', groupName: 'Allied Finishing, Inc', effStartDate: '03/01/2026', effEndDate: '—' },
     ],
     planCodes: [
-      { planCode: '1423T', status: 'Active', effStartDate: '03/05/2026', effEndDate: '' },
+      { planCode: '1423T', effStartDate: '03/05/2026', effEndDate: '—' },
     ],
-    benefitCodes: [] as { benefitCode: string; description: string; effStartDate: string; effEndDate: string }[],
-    accumulators: [] as { accumulatorName: string; status: string; effStartDate: string; effEndDate: string }[],
+    benefitCodes: [] as { benefitCode: string; effStartDate: string; effEndDate: string }[],
+    accumulators: [] as PlanAccumulatorRow[],
+    copayNetworkIds: [] as string[],
+    copayTiers: {} as CopayTiersByContext,
   },
 ]);
 
 const expandedPlans = ref<number[]>([]);
 
 const bpgHeaders = [
-  { title: 'BIN',            key: 'bin' },
-  { title: 'PCN',            key: 'pcn' },
-  { title: 'Group ID',       key: 'groupId' },
-  { title: 'Group Name',     key: 'groupName' },
-  { title: 'Eff. Start Date', key: 'effStartDate' },
-  { title: 'Eff. End Date',  key: 'effEndDate' },
+  { title: 'Group Name', key: 'groupName' },
+  { title: 'Group ID',   key: 'groupId' },
+  { title: 'Bin',        key: 'bin' },
+  { title: 'Start Date', key: 'effStartDate' },
+  { title: 'End Date',   key: 'effEndDate' },
+  { title: '',           key: 'actions', sortable: false },
 ];
 
+// The "Select Group" dropdown offers this plan's account groups (from Group Setup) not yet linked to this plan.
+function bpgAvailableGroupOptions(plan: { bpgRows: { groupId: string }[] }) {
+  const linkedIds = new Set(plan.bpgRows.map(r => r.groupId));
+  return currentGroupSetupRows.value
+    .filter(g => !linkedIds.has(g.groupId))
+    .map(g => ({ title: g.groupName ? `${g.groupId} - ${g.groupName}` : g.groupId, value: g.groupId }));
+}
+
+const showBpgDialog = ref(false);
+const bpgDialogPlanId = ref<number | null>(null);
+const bpgSelectedGroupId = ref<string | null>(null);
+const bpgTouched = ref(false);
+
+const bpgDialogPlan = computed(() => planDesignPlans.value.find(p => p.id === bpgDialogPlanId.value));
+const bpgDialogGroupOptions = computed(() => bpgDialogPlan.value ? bpgAvailableGroupOptions(bpgDialogPlan.value) : []);
+
+const openBpgDialog = (plan: { id: number }) => {
+  bpgDialogPlanId.value = plan.id;
+  bpgSelectedGroupId.value = null;
+  bpgTouched.value = false;
+  showBpgDialog.value = true;
+};
+
+const saveBpgEntry = () => {
+  bpgTouched.value = true;
+  if (!bpgSelectedGroupId.value || !bpgDialogPlan.value) return;
+  const group = currentGroupSetupRows.value.find(g => g.groupId === bpgSelectedGroupId.value);
+  if (!group) return;
+  bpgDialogPlan.value.bpgRows.push({
+    bin: group.bin,
+    pcn: group.pcn,
+    groupId: group.groupId,
+    groupName: group.groupName,
+    effStartDate: group.startDate,
+    effEndDate: group.endDate,
+  });
+  showBpgDialog.value = false;
+};
+
+const bpgDialogActions = computed(() => [
+  { text: 'Cancel', styleType: 'secondary' as const, onClick: () => { showBpgDialog.value = false; } },
+  { text: 'Add Group', styleType: 'primary' as const, onClick: saveBpgEntry },
+]);
+
+function bpgActionIcons(plan: { bpgRows: { groupId: string }[] }) {
+  return [
+    {
+      icon: Trash2,
+      tooltip: 'Remove',
+      size: 18,
+      onClick: (item: { groupId: string }) => {
+        const idx = plan.bpgRows.findIndex(r => r.groupId === item.groupId);
+        if (idx !== -1) plan.bpgRows.splice(idx, 1);
+      },
+    },
+  ];
+}
+
 const planCodesHeaders = [
-  { title: 'Plan Code',       key: 'planCode' },
-  { title: 'Status',          key: 'status' },
-  { title: 'Eff. Start Date', key: 'effStartDate' },
-  { title: 'Eff. End Date',   key: 'effEndDate' },
+  { title: 'Plan Code', key: 'planCode' },
+  { title: 'Start Date', key: 'effStartDate' },
+  { title: 'End Date',   key: 'effEndDate' },
+  { title: '',           key: 'actions', sortable: false },
 ];
 
 const benefitCodesHeaders = [
-  { title: 'Benefit Code',    key: 'benefitCode' },
-  { title: 'Description',     key: 'description' },
-  { title: 'Eff. Start Date', key: 'effStartDate' },
-  { title: 'Eff. End Date',   key: 'effEndDate' },
+  { title: 'Benefit Code', key: 'benefitCode' },
+  { title: 'Start Date',   key: 'effStartDate' },
+  { title: 'End Date',     key: 'effEndDate' },
+  { title: '',             key: 'actions', sortable: false },
 ];
+
+const codeRowActions = [
+  { label: 'Edit',   action: 'edit'   },
+  { label: 'Remove', action: 'remove' },
+];
+
+type CodeKind = 'planCode' | 'benefitCode';
+type CodeRow = { planCode?: string; benefitCode?: string; effStartDate: string; effEndDate: string };
+
+const codeFieldKey: Record<CodeKind, 'planCode' | 'benefitCode'> = { planCode: 'planCode', benefitCode: 'benefitCode' };
+const codeFieldLabelMap: Record<CodeKind, string> = { planCode: 'Plan Code', benefitCode: 'Benefit Code' };
+
+const showCodeDialog = ref(false);
+const codeDialogKind = ref<CodeKind>('planCode');
+const codeDialogPlanId = ref<number | null>(null);
+const codeDialogMode = ref<'add' | 'edit'>('add');
+const codeEditingIndex = ref(-1);
+const codeTouched = ref(false);
+const codeForm = ref({ code: '', startDate: '', endDate: '' });
+
+const codeFieldLabel = computed(() => codeFieldLabelMap[codeDialogKind.value]);
+const codeDialogHeading = computed(() =>
+  `${codeDialogMode.value === 'edit' ? 'Edit' : 'Add'} ${codeFieldLabel.value}`
+);
+const codeDialogPlan = computed(() => planDesignPlans.value.find(p => p.id === codeDialogPlanId.value));
+
+const openCodeDialog = (kind: CodeKind, plan: { id: number }) => {
+  codeDialogKind.value = kind;
+  codeDialogPlanId.value = plan.id;
+  codeDialogMode.value = 'add';
+  codeEditingIndex.value = -1;
+  codeTouched.value = false;
+  codeForm.value = { code: '', startDate: '', endDate: '' };
+  showCodeDialog.value = true;
+};
+
+const handleCodeRowAction = (kind: CodeKind, plan: { id: number; planCodes: CodeRow[]; benefitCodes: CodeRow[] }, { action, item }: { action: string; item: CodeRow }) => {
+  const arr = kind === 'planCode' ? plan.planCodes : plan.benefitCodes;
+  if (action === 'remove') {
+    const idx = arr.indexOf(item);
+    if (idx !== -1) arr.splice(idx, 1);
+    return;
+  }
+  if (action === 'edit') {
+    codeDialogKind.value = kind;
+    codeDialogPlanId.value = plan.id;
+    codeDialogMode.value = 'edit';
+    codeEditingIndex.value = arr.indexOf(item);
+    codeTouched.value = false;
+    codeForm.value = {
+      code: (item[codeFieldKey[kind]] as string) ?? '',
+      startDate: item.effStartDate === '—' ? '' : item.effStartDate,
+      endDate: item.effEndDate === '—' ? '' : item.effEndDate,
+    };
+    showCodeDialog.value = true;
+  }
+};
+
+const saveCodeEntry = () => {
+  codeTouched.value = true;
+  const plan = codeDialogPlan.value;
+  if (!plan || !codeForm.value.code.trim() || !codeForm.value.startDate) return;
+  if (endDateBeforeStartError(codeForm.value.startDate, codeForm.value.endDate)) return;
+
+  const kind = codeDialogKind.value;
+  const arr = kind === 'planCode' ? plan.planCodes : plan.benefitCodes;
+  const entry: CodeRow = {
+    [codeFieldKey[kind]]: codeForm.value.code.trim(),
+    effStartDate: codeForm.value.startDate,
+    effEndDate: codeForm.value.endDate || '—',
+  } as CodeRow;
+
+  if (codeDialogMode.value === 'edit' && codeEditingIndex.value !== -1) {
+    arr[codeEditingIndex.value] = entry;
+  } else {
+    arr.push(entry);
+  }
+  showCodeDialog.value = false;
+};
+
+const codeDialogActions = computed(() => [
+  { text: 'Cancel', styleType: 'secondary' as const, onClick: () => { showCodeDialog.value = false; } },
+  { text: codeDialogMode.value === 'edit' ? 'Save Changes' : `Add ${codeFieldLabel.value}`, styleType: 'primary' as const, onClick: saveCodeEntry },
+]);
 
 const accumulatorsHeaders = [
   { title: 'Accumulator Name', key: 'accumulatorName' },
-  { title: 'Status',           key: 'status' },
-  { title: 'Eff. Start Date',  key: 'effStartDate' },
-  { title: 'Eff. End Date',    key: 'effEndDate' },
+  { title: 'Type',             key: 'type' },
+  { title: 'Start Date',       key: 'effStartDate' },
+  { title: 'End Date',         key: 'effEndDate' },
+  { title: '',                 key: 'actions', sortable: false },
 ];
 
-// ─── Copay Structure ──────────────────────────────────────────────────────────
-
-const copayTabs = ['First Choice Broad', 'Standard', 'Mail Order'];
-const activeCopayTab = ref('First Choice Broad');
-
-const copayStructureHeaders = [
-  { title: '1 - 30 Day Supply',  key: 'tierName' },
-  { title: 'Formula',            key: 'formula' },
-  { title: 'Copay',              key: 'copay' },
-  { title: 'Coinsurance',        key: 'coinsurance' },
-  { title: 'Coins. Min',         key: 'coinsMin' },
-  { title: 'Coins. Max',         key: 'coinsMax' },
-  { title: 'Incentive Min',      key: 'incentiveMin' },
-  { title: 'Incentive Max',      key: 'incentiveMax' },
-  { title: 'Patient Pay Max',    key: 'patientPayMax' },
-  { title: 'Ded. Waived',        key: 'dedWaived' },
-  { title: 'OOP Waived',         key: 'oopWaived' },
+const accumulatorRowActions = [
+  { label: 'Edit',   action: 'edit'   },
+  { label: 'Remove', action: 'remove' },
 ];
 
-const copayStructureRows = [
-  { tierName: 'Generic',               formula: 'Copay', copay: '$1.00', coinsurance: '2%',  coinsMin: '$1.00', coinsMax: '$3.00', incentiveMin: '$2.00', incentiveMax: '$5.00', patientPayMax: '$6.00', dedWaived: 'No',  oopWaived: 'No' },
-  { tierName: 'Brand-Preferred',       formula: '',      copay: '-',     coinsurance: '-',    coinsMin: '-',     coinsMax: '-',     incentiveMin: '-',     incentiveMax: '-',     patientPayMax: '-',     dedWaived: '',    oopWaived: '' },
-  { tierName: 'Brand-NonPreferred',    formula: '',      copay: '-',     coinsurance: '-',    coinsMin: '-',     coinsMax: '-',     incentiveMin: '-',     incentiveMax: '-',     patientPayMax: '-',     dedWaived: '',    oopWaived: '' },
-  { tierName: 'Specialty-Generic',     formula: '',      copay: '-',     coinsurance: '-',    coinsMin: '-',     coinsMax: '-',     incentiveMin: '-',     incentiveMax: '-',     patientPayMax: '-',     dedWaived: '',    oopWaived: '' },
-  { tierName: 'Specialty-Preferred',   formula: '',      copay: '-',     coinsurance: '-',    coinsMin: '-',     coinsMax: '-',     incentiveMin: '-',     incentiveMax: '-',     patientPayMax: '-',     dedWaived: '',    oopWaived: '' },
-  { tierName: 'Specialty-NonPreferred',formula: '',      copay: '-',     coinsurance: '-',    coinsMin: '-',     coinsMax: '-',     incentiveMin: '-',     incentiveMax: '-',     patientPayMax: '-',     dedWaived: '',    oopWaived: '' },
-  { tierName: 'Compound',              formula: '',      copay: '-',     coinsurance: '-',    coinsMin: '-',     coinsMax: '-',     incentiveMin: '-',     incentiveMax: '-',     patientPayMax: '-',     dedWaived: '',    oopWaived: '' },
+// The account's library of already-configured accumulators (built in Solo2, not in Client Portal —
+// this portal only associates an existing accumulator to a plan, it never builds/configures one).
+type AccumulatorLibraryEntry = {
+  id: string; name: string; type: string;
+  deductibleAmount: string; deductibleFamilyAmount: string; oopAmount: string; oopFamilyAmount: string; benefitMaxAmount: string;
+};
+const accumulatorLibraryByAccount: Record<number, AccumulatorLibraryEntry[]> = {
+  1: [
+    { id: 'acc-1', name: 'Standard Deductible/OOP', type: 'Standard Accumulation', deductibleAmount: '$500', deductibleFamilyAmount: '$1,500', oopAmount: '$3,000', oopFamilyAmount: '$6,000', benefitMaxAmount: '—' },
+    { id: 'acc-2', name: 'Specialty Benefit Max', type: 'Benefit Max', deductibleAmount: '—', deductibleFamilyAmount: '—', oopAmount: '—', oopFamilyAmount: '—', benefitMaxAmount: '$10,000' },
+  ],
+};
+const currentAccumulatorLibrary = computed(() => selectedAccount.value ? (accumulatorLibraryByAccount[selectedAccount.value] ?? []) : []);
+
+type PlanAccumulatorRow = {
+  id: string; accumulatorId: string; accumulatorName: string; type: string; effStartDate: string; effEndDate: string;
+  deductibleAmount: string; deductibleFamilyAmount: string; oopAmount: string; oopFamilyAmount: string; benefitMaxAmount: string;
+};
+
+function accumulatorAvailableOptions(plan: { accumulators: PlanAccumulatorRow[] }) {
+  const linkedIds = new Set(plan.accumulators.map(a => a.accumulatorId));
+  return currentAccumulatorLibrary.value
+    .filter(a => !linkedIds.has(a.id))
+    .map(a => ({ title: a.name, value: a.id }));
+}
+
+const showAccumulatorAssociateDialog = ref(false);
+const accumulatorAssociatePlanId = ref<number | null>(null);
+const accumulatorAssociateTouched = ref(false);
+const accumulatorAssociateForm = ref({ accumulatorId: null as string | null, startDate: '', endDate: '' });
+
+const accumulatorAssociatePlan = computed(() => planDesignPlans.value.find(p => p.id === accumulatorAssociatePlanId.value));
+const accumulatorAssociateOptions = computed(() => accumulatorAssociatePlan.value ? accumulatorAvailableOptions(accumulatorAssociatePlan.value) : []);
+
+const openAccumulatorAssociateDialog = (plan: { id: number; effStartDate: string; effEndDate: string }) => {
+  accumulatorAssociatePlanId.value = plan.id;
+  accumulatorAssociateTouched.value = false;
+  // Default to the plan's own dates, matching master — the common case is associating an
+  // accumulator for the plan's full duration; the user can still override either date.
+  accumulatorAssociateForm.value = {
+    accumulatorId: null,
+    startDate: plan.effStartDate && plan.effStartDate !== '—' ? plan.effStartDate : '',
+    endDate: plan.effEndDate && plan.effEndDate !== '—' ? plan.effEndDate : '',
+  };
+  showAccumulatorAssociateDialog.value = true;
+};
+
+const saveAccumulatorAssociation = () => {
+  accumulatorAssociateTouched.value = true;
+  const plan = accumulatorAssociatePlan.value;
+  const f = accumulatorAssociateForm.value;
+  if (!plan || !f.accumulatorId || !f.startDate || !f.endDate) return;
+  if (endDateBeforeStartError(f.startDate, f.endDate)) return;
+  const source = currentAccumulatorLibrary.value.find(a => a.id === f.accumulatorId);
+  if (!source) return;
+  plan.accumulators.push({
+    id: `${plan.id}-${source.id}`,
+    accumulatorId: source.id,
+    accumulatorName: source.name,
+    type: source.type,
+    effStartDate: f.startDate,
+    effEndDate: f.endDate,
+    deductibleAmount: source.deductibleAmount,
+    deductibleFamilyAmount: source.deductibleFamilyAmount,
+    oopAmount: source.oopAmount,
+    oopFamilyAmount: source.oopFamilyAmount,
+    benefitMaxAmount: source.benefitMaxAmount,
+  });
+  showAccumulatorAssociateDialog.value = false;
+};
+
+const accumulatorAssociateDialogActions = computed(() => [
+  { text: 'Cancel', styleType: 'secondary' as const, onClick: () => { showAccumulatorAssociateDialog.value = false; } },
+  { text: 'Associate Accumulator', styleType: 'primary' as const, onClick: saveAccumulatorAssociation },
+]);
+
+const showAccumulatorEditDatesDialog = ref(false);
+const accumulatorEditDatesPlanId = ref<number | null>(null);
+const accumulatorEditDatesRowId = ref<string | null>(null);
+const accumulatorEditDatesTouched = ref(false);
+const accumulatorEditDatesForm = ref({ startDate: '', endDate: '' });
+
+const handleAccumulatorRowAction = (plan: { id: number; accumulators: PlanAccumulatorRow[] }, { action, item }: { action: string; item: PlanAccumulatorRow }) => {
+  if (action === 'remove') {
+    const idx = plan.accumulators.findIndex(a => a.id === item.id);
+    if (idx !== -1) plan.accumulators.splice(idx, 1);
+    return;
+  }
+  if (action === 'edit') {
+    accumulatorEditDatesPlanId.value = plan.id;
+    accumulatorEditDatesRowId.value = item.id;
+    accumulatorEditDatesTouched.value = false;
+    accumulatorEditDatesForm.value = { startDate: item.effStartDate, endDate: item.effEndDate === '—' ? '' : item.effEndDate };
+    showAccumulatorEditDatesDialog.value = true;
+  }
+};
+
+const saveAccumulatorEditDates = () => {
+  accumulatorEditDatesTouched.value = true;
+  const f = accumulatorEditDatesForm.value;
+  const plan = planDesignPlans.value.find(p => p.id === accumulatorEditDatesPlanId.value);
+  if (!plan || !f.startDate || !f.endDate) return;
+  if (endDateBeforeStartError(f.startDate, f.endDate)) return;
+  const row = plan.accumulators.find((a: PlanAccumulatorRow) => a.id === accumulatorEditDatesRowId.value);
+  if (!row) return;
+  row.effStartDate = f.startDate;
+  row.effEndDate = f.endDate;
+  showAccumulatorEditDatesDialog.value = false;
+};
+
+const accumulatorEditDatesDialogActions = computed(() => [
+  { text: 'Cancel', styleType: 'secondary' as const, onClick: () => { showAccumulatorEditDatesDialog.value = false; } },
+  { text: 'Save Changes', styleType: 'primary' as const, onClick: saveAccumulatorEditDates },
+]);
+
+// â”€â”€â”€ Copay Structure â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+const copayTabs = [
+  { key: 'pharmacyNetwork', label: 'Pharmacy Network' },
+  { key: 'mailOrder',       label: 'Mail Order - Pharmacy' },
+  { key: 'inHouse',         label: 'In-House Pharmacy' },
 ];
+const activeCopayTab = ref('pharmacyNetwork');
+
+const copayNetworkOptions = computed(() => currentNetworkRows.value.map(r => r.networkName));
+
+const copayProductTypes = [
+  'Generic', 'Brand-Preferred', 'Brand-NonPreferred',
+  'Specialty-Generic', 'Specialty-Preferred', 'Specialty-NonPreferred', 'Compound',
+];
+
+const copayFormulaOptions = ['Copay', 'Coinsurance', 'Copay + Coinsurance', 'Greater of Copay/Coinsurance'].map(f => ({ title: f, value: f }));
+
+const copayMatrixHeaders = [
+  { title: 'Product Type',    key: 'productType' },
+  { title: 'Formula',         key: 'formula' },
+  { title: 'Copay',           key: 'copay' },
+  { title: 'Coinsurance',     key: 'coinsurance' },
+  { title: 'Coins Min',       key: 'coinsMin' },
+  { title: 'Coins Max',       key: 'coinsMax' },
+  { title: 'Incentive Min',   key: 'incentiveMin' },
+  { title: 'Incentive Max',   key: 'incentiveMax' },
+  { title: 'Patient Pay Max', key: 'patientPayMax' },
+  { title: 'Ded Waived',      key: 'dedWaived' },
+  { title: 'OOP Waived',      key: 'oopWaived' },
+];
+
+type CopayCell = {
+  formula: string | null; copay: string | null; coinsurance: string | null;
+  coinsMin: string | null; coinsMax: string | null; incentiveMin: string | null;
+  incentiveMax: string | null; patientPayMax: string | null; dedWaived: boolean; oopWaived: boolean;
+};
+type CopayTier = { id: number; daysSupplyMin: number | null; daysSupply: number | null; cells: Record<string, CopayCell> };
+type CopayTiersByContext = Record<string, CopayTier[]>;
+
+function toNonNegativeIntOrNull(value: string | number | null): number | null {
+  if (value === null || value === '') return null;
+  const parsed = Number(value);
+  if (Number.isNaN(parsed)) return null;
+  return Math.max(0, Math.trunc(parsed));
+}
+
+function copayCellFor(tier: CopayTier, productType: string): CopayCell {
+  if (!tier.cells[productType]) {
+    tier.cells[productType] = {
+      formula: null, copay: null, coinsurance: null, coinsMin: null, coinsMax: null,
+      incentiveMin: null, incentiveMax: null, patientPayMax: null, dedWaived: false, oopWaived: false,
+    };
+  }
+  return tier.cells[productType];
+}
+
+function getCopayTiers(plan: { copayTiers: CopayTiersByContext }, contextKey: string): CopayTier[] {
+  if (!plan.copayTiers[contextKey]) plan.copayTiers[contextKey] = [];
+  return plan.copayTiers[contextKey];
+}
+
+let nextCopayTierId = 1;
+function addCopayTier(plan: { copayTiers: CopayTiersByContext }, contextKey: string) {
+  getCopayTiers(plan, contextKey).push({ id: nextCopayTierId++, daysSupplyMin: null, daysSupply: null, cells: {} });
+}
+
+function removeCopayTier(plan: { copayTiers: CopayTiersByContext }, contextKey: string, tierId: number) {
+  const tiers = getCopayTiers(plan, contextKey);
+  const idx = tiers.findIndex(t => t.id === tierId);
+  if (idx !== -1) tiers.splice(idx, 1);
+}
+
+function isCopayTierRangeOverlapping(plan: { copayTiers: CopayTiersByContext }, contextKey: string, tier: CopayTier): boolean {
+  if (tier.daysSupplyMin === null || tier.daysSupply === null) return false;
+  return getCopayTiers(plan, contextKey).some(other =>
+    other.id !== tier.id && other.daysSupplyMin !== null && other.daysSupply !== null &&
+    tier.daysSupplyMin! <= other.daysSupply! && other.daysSupplyMin! <= tier.daysSupply!
+  );
+}
+
+type PlanCopayFields = { id: number; copayNetworkIds: string[]; copayTiers: CopayTiersByContext };
+
+const copayEditingIds = ref<number[]>([]);
+const copaySnapshots: Record<number, { copayNetworkIds: string[]; copayTiers: CopayTiersByContext }> = {};
+
+const isEditingCopay = (id: number) => copayEditingIds.value.includes(id);
+
+const startEditCopay = (plan: PlanCopayFields) => {
+  copaySnapshots[plan.id] = {
+    copayNetworkIds: [...plan.copayNetworkIds],
+    copayTiers: JSON.parse(JSON.stringify(plan.copayTiers)),
+  };
+  copayEditingIds.value.push(plan.id);
+};
+
+const cancelEditCopay = (plan: PlanCopayFields) => {
+  const snap = copaySnapshots[plan.id];
+  if (snap) {
+    plan.copayNetworkIds = [...snap.copayNetworkIds];
+    plan.copayTiers = JSON.parse(JSON.stringify(snap.copayTiers));
+  }
+  copayEditingIds.value = copayEditingIds.value.filter(id => id !== plan.id);
+};
+
+const saveEditCopay = (plan: { id: number }) => {
+  copayEditingIds.value = copayEditingIds.value.filter(id => id !== plan.id);
+};
 
 const togglePlan = (id: number) => {
   const idx = expandedPlans.value.indexOf(id);
@@ -6060,7 +7369,7 @@ const togglePlan = (id: number) => {
   }
 };
 
-// ─── Plan Design — Create New Plan ────────────────────────────────────────────
+// â”€â”€â”€ Plan Design â€” Create New Plan â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const pdShowCreateDialog = ref(false);
 const pdNewCreateForm = () => ({ planName: '', startDate: '', endDate: '' });
 const pdCreateForm = ref(pdNewCreateForm());
@@ -6097,13 +7406,18 @@ const pdSaveNewPlan = () => {
     governedByErisa: false,
     occCodes: [] as string[],
     maxSpendEnabled: false,
+    maxSpend: newPlanMaxSpend(),
     allowSecondaryPayer: false,
     cobConfigOptions: [] as string[],
+    benefitPeriodType: 'Custom' as string,
+    benefitPeriodRanges: [] as { startDate: string; endDate: string }[],
     benefitByFlag: false,
     bpgRows: [],
     planCodes: [],
     benefitCodes: [],
     accumulators: [],
+    copayNetworkIds: [],
+    copayTiers: {},
   });
   expandedPlans.value.push(newId);
   pdShowCreateDialog.value = false;
@@ -6115,7 +7429,7 @@ const pdCreateDialogActions = computed(() => [
   { text: 'Create Plan', styleType: 'primary' as const, onClick: pdSaveNewPlan },
 ]);
 
-// ─── Plan Design — Plan Overview edit ─────────────────────────────────────────
+// â”€â”€â”€ Plan Design â€” Plan Overview edit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const pdBenefitResetOptions = [
   'January 1: Calendar Year', 'February 1', 'March 1', 'March 31', 'April 1', 'May 1',
   'June 1', 'July 1', 'August 1', 'September 1', 'October 1', 'November 1', 'December 1',
@@ -6129,7 +7443,7 @@ let pdOverviewSnapshots: Record<number, { name: string; effStartDate: string; ef
 
 const pdIsEditingOverview = (id: number) => pdOverviewEditingIds.value.includes(id);
 
-const situsStateLabel = (value: string) => states.find(s => s.value === value)?.title || '—';
+const situsStateLabel = (value: string) => states.find(s => s.value === value)?.title || 'â€”';
 
 const pdStartEditOverview = (plan: PdOverviewFields) => {
   pdOverviewSnapshots[plan.id] = { name: plan.name, effStartDate: plan.effStartDate, effEndDate: plan.effEndDate, benefitReset: plan.benefitReset, situsState: plan.situsState };
@@ -6156,16 +7470,16 @@ const pdSaveEditOverview = (plan: PdOverviewFields) => {
   pdOverviewTouched.value = pdOverviewTouched.value.filter(id => id !== plan.id);
 };
 
-// ─── Plan Design — Plan Parameters edit ───────────────────────────────────────
+// â”€â”€â”€ Plan Design â€” Plan Parameters edit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 type PdParameterFields = { id: number; isGrandfathered: boolean; acaApplies: boolean; acaAppliesAtZeroCost: boolean; isHdhp: boolean; hdhpNotes: string; governedByErisa: boolean };
 
 const pdOccCodeOptions = [
   '0 - Not specified by patient',
   '1 - No other coverage',
-  '2 - Other coverage exists – payment collected',
-  '3 - Other coverage billed – claim not covered',
-  '4 - Other coverage exists – payment not collected',
-  '6 - Other Coverage Denied — Not a Participating Provider.',
+  '2 - Other coverage exists â€“ payment collected',
+  '3 - Other coverage billed â€“ claim not covered',
+  '4 - Other coverage exists â€“ payment not collected',
+  '6 - Other Coverage Denied â€” Not a Participating Provider.',
   '8 - Claim is billing for patient financial responsibility only',
 ];
 
@@ -6205,6 +7519,130 @@ const pdSaveEditCob = (plan: { id: number }) => {
   pdCobEditingIds.value = pdCobEditingIds.value.filter(id => id !== plan.id);
 };
 
+// Applicable Benefit Period â€” mirrors Solo2's LedgerPeriod / PlanDesignBenefitPeriod
+type PdBenefitRange = { startDate: string; endDate: string };
+type PdBenefitFields = { id: number; effStartDate: string; benefitPeriodType: string; benefitPeriodRanges: PdBenefitRange[]; benefitByFlag: boolean };
+
+const benefitPeriodTypeOptions = [
+  { title: 'Calendar Quarterly', value: 'CalendarQuarterly' },
+  { title: 'Calendar Year', value: 'CalendarYear' },
+  { title: 'Custom', value: 'Custom' },
+  { title: 'Lifetime', value: 'Lifetime' },
+  { title: 'Monthly', value: 'Monthly' },
+  { title: 'Plan Quarterly', value: 'PlanQuarterly' },
+  { title: 'Plan Year', value: 'PlanYear' },
+];
+
+function benefitPeriodTypeLabel(value: string) {
+  return benefitPeriodTypeOptions.find(o => o.value === value)?.title ?? 'â€”';
+}
+
+function parseMDY(value: string): Date | null {
+  if (!value) return null;
+  const [m, d, y] = value.split('/').map(Number);
+  if (!m || !d || !y) return null;
+  return new Date(y, m - 1, d);
+}
+
+function formatMDY(date: Date): string {
+  return `${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}/${date.getFullYear()}`;
+}
+
+function addDays(date: Date, days: number): Date {
+  const result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
+}
+
+function addMonths(date: Date, months: number): Date {
+  const result = new Date(date);
+  result.setMonth(result.getMonth() + months);
+  return result;
+}
+
+function endOfMonth(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth() + 1, 0);
+}
+
+function computeBenefitPeriodRanges(type: string, effStartDate: string): PdBenefitRange[] {
+  const start = parseMDY(effStartDate);
+  if (!start || type === 'Custom') return type === 'Custom' ? [] : [];
+
+  if (type === 'Lifetime') {
+    return [{ startDate: formatMDY(start), endDate: '12/31/2099' }];
+  }
+  if (type === 'CalendarYear') {
+    const year = start.getFullYear();
+    return [{ startDate: `01/01/${year}`, endDate: `12/31/${year}` }];
+  }
+  if (type === 'PlanYear') {
+    return [{ startDate: formatMDY(start), endDate: formatMDY(addDays(addMonths(start, 12), -1)) }];
+  }
+  if (type === 'Monthly') {
+    const ranges: PdBenefitRange[] = [];
+    for (let i = 0; i < 12; i++) {
+      const periodStart = i === 0 ? start : new Date(start.getFullYear(), start.getMonth() + i, 1);
+      ranges.push({ startDate: formatMDY(periodStart), endDate: formatMDY(endOfMonth(periodStart)) });
+    }
+    return ranges;
+  }
+  if (type === 'CalendarQuarterly') {
+    const year = start.getFullYear();
+    const ranges: PdBenefitRange[] = [];
+    for (let q = 0; q < 4; q++) {
+      const qStart = new Date(year, q * 3, 1);
+      const qEnd = new Date(year, q * 3 + 3, 0);
+      ranges.push({ startDate: formatMDY(qStart), endDate: formatMDY(qEnd) });
+    }
+    return ranges;
+  }
+  if (type === 'PlanQuarterly') {
+    const ranges: PdBenefitRange[] = [];
+    let periodStart = start;
+    for (let q = 0; q < 4; q++) {
+      const periodEnd = addDays(addMonths(periodStart, 3), -1);
+      ranges.push({ startDate: formatMDY(periodStart), endDate: formatMDY(periodEnd) });
+      periodStart = addDays(periodEnd, 1);
+    }
+    return ranges;
+  }
+  return [];
+}
+
+const pdBenefitEditingIds = ref<number[]>([]);
+let pdBenefitSnapshots: Record<number, Omit<PdBenefitFields, 'id' | 'effStartDate'>> = {};
+
+const pdIsEditingBenefit = (id: number) => pdBenefitEditingIds.value.includes(id);
+
+const pdStartEditBenefit = (plan: PdBenefitFields) => {
+  pdBenefitSnapshots[plan.id] = {
+    benefitPeriodType: plan.benefitPeriodType,
+    benefitPeriodRanges: plan.benefitPeriodRanges.map(r => ({ ...r })),
+    benefitByFlag: plan.benefitByFlag,
+  };
+  pdBenefitEditingIds.value.push(plan.id);
+};
+
+const pdOnBenefitPeriodTypeChange = (plan: PdBenefitFields) => {
+  plan.benefitPeriodRanges = plan.benefitPeriodType === 'Custom'
+    ? [{ startDate: '', endDate: '' }]
+    : computeBenefitPeriodRanges(plan.benefitPeriodType, plan.effStartDate);
+};
+
+const pdCancelEditBenefit = (plan: PdBenefitFields) => {
+  const snap = pdBenefitSnapshots[plan.id];
+  if (snap) {
+    plan.benefitPeriodType = snap.benefitPeriodType;
+    plan.benefitPeriodRanges = snap.benefitPeriodRanges.map(r => ({ ...r }));
+    plan.benefitByFlag = snap.benefitByFlag;
+  }
+  pdBenefitEditingIds.value = pdBenefitEditingIds.value.filter(id => id !== plan.id);
+};
+
+const pdSaveEditBenefit = (plan: { id: number }) => {
+  pdBenefitEditingIds.value = pdBenefitEditingIds.value.filter(id => id !== plan.id);
+};
+
 const pdParamEditingIds = ref<number[]>([]);
 let pdParamSnapshots: Record<number, Omit<PdParameterFields, 'id'>> = {};
 
@@ -6239,7 +7677,92 @@ const pdSaveEditParameters = (plan: { id: number }) => {
   pdParamEditingIds.value = pdParamEditingIds.value.filter(id => id !== plan.id);
 };
 
-// ─── Timeline helpers ─────────────────────────────────────────────────────────
+// Plan Max Spend Parameters — matches Solo2's PlanMaxSpendSection.vue (master has nothing built yet).
+type MaxSpendDayRow = { dayStart: string; dayEnd: string; amount: string };
+type MaxSpendQtyRow = { minQuantity: string; maxQuantity: string; amount: string };
+type PlanMaxSpend = {
+  ndcLevel: boolean;
+  firstNdcNoCopay: boolean;
+  rejectWhenMet: boolean;
+  rejectionMessage: string;
+  ncpdpRejectCode: string | null;
+  annualAmount: string;
+  perMonthAmount: string;
+  perFillAmount: string;
+  ingredientCostOnly: boolean;
+  wacPercent: string;
+  perDaySupplyRows: MaxSpendDayRow[];
+  perQuantityRows: MaxSpendQtyRow[];
+};
+
+function newPlanMaxSpend(): PlanMaxSpend {
+  return {
+    ndcLevel: false, firstNdcNoCopay: false, rejectWhenMet: false,
+    rejectionMessage: '', ncpdpRejectCode: null,
+    annualAmount: '', perMonthAmount: '', perFillAmount: '', ingredientCostOnly: false,
+    wacPercent: '',
+    perDaySupplyRows: [], perQuantityRows: [],
+  };
+}
+
+const ncpdpRejectCodeOptions = [
+  { title: '65 - Patient Is Not Covered', value: '65' },
+  { title: '70 - Product/Service Not Covered', value: '70' },
+  { title: '75 - Prior Authorization Required', value: '75' },
+  { title: '76 - Plan Limitations Exceeded', value: '76' },
+];
+
+function formatDollar(value: string): string {
+  if (!value) return '—';
+  return value.trim().startsWith('$') ? value : `$${value}`;
+}
+
+function ncpdpRejectCodeLabel(code: string | null): string {
+  return ncpdpRejectCodeOptions.find(o => o.value === code)?.title ?? '—';
+}
+
+function addMaxSpendDayRow(plan: { maxSpend: PlanMaxSpend }) {
+  plan.maxSpend.perDaySupplyRows.push({ dayStart: '', dayEnd: '', amount: '' });
+}
+function removeMaxSpendDayRow(plan: { maxSpend: PlanMaxSpend }, row: MaxSpendDayRow) {
+  const idx = plan.maxSpend.perDaySupplyRows.indexOf(row);
+  if (idx !== -1) plan.maxSpend.perDaySupplyRows.splice(idx, 1);
+}
+function addMaxSpendQtyRow(plan: { maxSpend: PlanMaxSpend }) {
+  plan.maxSpend.perQuantityRows.push({ minQuantity: '', maxQuantity: '', amount: '' });
+}
+function removeMaxSpendQtyRow(plan: { maxSpend: PlanMaxSpend }, row: MaxSpendQtyRow) {
+  const idx = plan.maxSpend.perQuantityRows.indexOf(row);
+  if (idx !== -1) plan.maxSpend.perQuantityRows.splice(idx, 1);
+}
+
+const pdMaxSpendEditingIds = ref<number[]>([]);
+const pdMaxSpendSnapshots: Record<number, { maxSpendEnabled: boolean; maxSpend: PlanMaxSpend }> = {};
+
+const pdIsEditingMaxSpend = (id: number) => pdMaxSpendEditingIds.value.includes(id);
+
+const pdStartEditMaxSpend = (plan: { id: number; maxSpendEnabled: boolean; maxSpend: PlanMaxSpend }) => {
+  pdMaxSpendSnapshots[plan.id] = {
+    maxSpendEnabled: plan.maxSpendEnabled,
+    maxSpend: JSON.parse(JSON.stringify(plan.maxSpend)),
+  };
+  pdMaxSpendEditingIds.value.push(plan.id);
+};
+
+const pdCancelEditMaxSpend = (plan: { id: number; maxSpendEnabled: boolean; maxSpend: PlanMaxSpend }) => {
+  const snap = pdMaxSpendSnapshots[plan.id];
+  if (snap) {
+    plan.maxSpendEnabled = snap.maxSpendEnabled;
+    plan.maxSpend = JSON.parse(JSON.stringify(snap.maxSpend));
+  }
+  pdMaxSpendEditingIds.value = pdMaxSpendEditingIds.value.filter(id => id !== plan.id);
+};
+
+const pdSaveEditMaxSpend = (plan: { id: number }) => {
+  pdMaxSpendEditingIds.value = pdMaxSpendEditingIds.value.filter(id => id !== plan.id);
+};
+
+// â”€â”€â”€ Timeline helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const activeTimelineProgress = computed(() => {
   if (!activeTimelineItem.value) return 0;
@@ -6302,7 +7825,7 @@ watch(selectedAccount, (newVal) => {
 <style lang="scss" scoped>
 @import '@/style.scss';
 
-// ─── Layout ───────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Layout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 .plan-explorer-content {
   padding: $spacing-medium;
@@ -6316,7 +7839,7 @@ watch(selectedAccount, (newVal) => {
   color: $color-primary;
 }
 
-// ─── Timeline sticky wrapper ──────────────────────────────────────────────────
+// â”€â”€â”€ Timeline sticky wrapper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 .plan-timeline-wrapper {
   // default: no special behavior
@@ -6350,7 +7873,7 @@ watch(selectedAccount, (newVal) => {
   }
 }
 
-// ─── Timeline (left column) ───────────────────────────────────────────────────
+// â”€â”€â”€ Timeline (left column) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 .plan-timeline {
   // The .plan-timeline class is on the v-timeline root element (which IS the CSS grid).
@@ -6402,7 +7925,7 @@ watch(selectedAccount, (newVal) => {
   }
 }
 
-// ─── Wizard sub-steps (nested below Plan Setup card) ─────────────────────────
+// â”€â”€â”€ Wizard sub-steps (nested below Plan Setup card) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 .wizard-sub-steps {
   margin-top: $spacing-xsmall;
@@ -6480,7 +8003,7 @@ watch(selectedAccount, (newVal) => {
   line-height: 1.3;
 }
 
-// ─── Standard timeline detail panel ──────────────────────────────────────────
+// â”€â”€â”€ Standard timeline detail panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 .timeline-details-card {
   border: 1px solid $color-border;
@@ -6492,7 +8015,7 @@ watch(selectedAccount, (newVal) => {
 .progress-chip-container { gap: $spacing-xsmall; }
 .timeline-text-content-gap { gap: $spacing-medium; }
 
-// ─── Wizard overview card ─────────────────────────────────────────────────────
+// â”€â”€â”€ Wizard overview card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 .wizard-overview {
   border: 1px solid $color-border;
@@ -6627,7 +8150,7 @@ watch(selectedAccount, (newVal) => {
   .button { display: inline-flex; align-items: center; gap: 6px; }
 }
 
-// ─── Wizard step content (right column) ──────────────────────────────────────
+// â”€â”€â”€ Wizard step content (right column) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 .wizard-step-header {
   margin-bottom: $spacing-large;
@@ -6684,7 +8207,7 @@ watch(selectedAccount, (newVal) => {
   gap: $spacing-small;
 }
 
-// ─── Step 1: Account Profile sections ────────────────────────────────────────
+// â”€â”€â”€ Step 1: Account Profile sections â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 .ap-section {
   border: 1px solid $color-border;
@@ -6803,7 +8326,7 @@ watch(selectedAccount, (newVal) => {
   }
 }
 
-// Native v-checkbox used in Client/Vendor Contact modals — true-icon/false-icon props
+// Native v-checkbox used in Client/Vendor Contact modals â€” true-icon/false-icon props
 // point at Lucide icons (project has no MDI icon font loaded), styled to match the
 // look of the .ap-checkbox-toggle divs used elsewhere on this page.
 .ap-vcheckbox {
@@ -6886,7 +8409,7 @@ watch(selectedAccount, (newVal) => {
   margin-top: $spacing-medium;
 }
 
-// ─── Shared buttons ───────────────────────────────────────────────────────────
+// â”€â”€â”€ Shared buttons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 .button {
   display: inline-flex;
@@ -6934,7 +8457,7 @@ watch(selectedAccount, (newVal) => {
   gap: $spacing-nano;
 }
 
-// ─── Step 2: Network Configuration ───────────────────────────────────────────
+// â”€â”€â”€ Step 2: Network Configuration â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 .nc-section {
   border: 1px solid $color-border;
@@ -7117,7 +8640,7 @@ watch(selectedAccount, (newVal) => {
   }
 }
 
-// ─── Step 3: Plan Design ──────────────────────────────────────────────────────
+// â”€â”€â”€ Step 3: Plan Design â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 .pd-header {
   display: flex;
@@ -7237,6 +8760,10 @@ watch(selectedAccount, (newVal) => {
   align-items: center;
   gap: $spacing-small;
   margin-bottom: $spacing-medium;
+
+  &--table {
+    justify-content: space-between;
+  }
 }
 
 .ap-field-sub {
@@ -7245,49 +8772,6 @@ watch(selectedAccount, (newVal) => {
   color: $color-text-secondary;
   margin-top: 2px;
 }
-
-.pd-toggle-row {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: $spacing-medium;
-}
-
-.pd-toggle-text {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  flex: 1;
-}
-
-.pd-toggle-description {
-  font-family: $font-family-base;
-  font-size: $font-size-small;
-  color: $color-text-secondary;
-  margin: 0;
-  line-height: 1.5;
-}
-
-.pd-show-more {
-  background: none;
-  border: none;
-  padding: 0;
-  font-family: $font-family-base;
-  font-size: $font-size-small;
-  color: $color-link;
-  cursor: pointer;
-  text-align: left;
-
-  &:hover {
-    text-decoration: underline;
-  }
-}
-
-.pd-toggle-switch {
-  flex-shrink: 0;
-  margin-top: -4px;
-}
-
 
 // Empty states
 .nc-empty-state {
@@ -7324,7 +8808,7 @@ watch(selectedAccount, (newVal) => {
   margin: 0 0 $spacing-small;
 }
 
-// ─── Copay Structure card ─────────────────────────────────────────────────────
+// â”€â”€â”€ Copay Structure card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 .cs-card {
   background-color: $color-neutral-white;
@@ -7337,7 +8821,7 @@ watch(selectedAccount, (newVal) => {
 .cs-card-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: $spacing-small;
   margin-bottom: $spacing-medium;
 }
 
@@ -7359,7 +8843,83 @@ watch(selectedAccount, (newVal) => {
   }
 }
 
-// ─── Step 4: Transition of Care ───────────────────────────────────────────────
+.cs-hint {
+  color: $color-text-secondary;
+  margin-bottom: $spacing-medium;
+}
+
+.cs-network-block {
+  margin-bottom: $spacing-large;
+  padding-bottom: $spacing-medium;
+  border-bottom: 1px solid $color-border;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.cs-tier-header {
+  margin-bottom: $spacing-small;
+}
+
+.cs-tier-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-small;
+}
+
+.cs-tier-label {
+  font-size: $font-size-small;
+  font-weight: $font-weight-semibold;
+  color: $color-text-secondary;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.cs-tier-dates {
+  display: flex;
+  align-items: center;
+  gap: $spacing-medium;
+}
+
+.cs-tier-title {
+  font-size: $font-size-body;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.cs-tier-error {
+  color: $color-error;
+  font-size: $font-size-small;
+  margin: -#{$spacing-xsmall} 0 $spacing-small;
+}
+
+// This table has 11 columns of inputs — letting it shrink to fit the container squeezes every
+// cell down to unusable widths. Force it to size to content and scroll horizontally instead.
+.cs-matrix-table {
+  :deep(table) {
+    width: max-content;
+    min-width: 100%;
+  }
+
+  :deep(th),
+  :deep(td) {
+    min-width: 130px;
+  }
+
+  :deep(th:first-child),
+  :deep(td:first-child) {
+    min-width: 160px;
+  }
+
+  :deep(th:nth-child(2)),
+  :deep(td:nth-child(2)) {
+    min-width: 170px;
+  }
+}
+
+// â”€â”€â”€ Step 4: Transition of Care â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 .toc-intro {
   color: $color-text-secondary;
@@ -7428,7 +8988,7 @@ watch(selectedAccount, (newVal) => {
   }
 }
 
-// ─── Step 5: Programs ─────────────────────────────────────────────────────────
+// â”€â”€â”€ Step 5: Programs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 .prog-title {
   margin-bottom: $spacing-medium;
@@ -7442,6 +9002,11 @@ watch(selectedAccount, (newVal) => {
 
 .prog-detail-td {
   padding: 0 !important;
+}
+
+.pd-accum-detail-td {
+  padding: $spacing-medium $spacing-large !important;
+  background-color: #f5f5f5;
 }
 
 .prog-detail {
@@ -7850,7 +9415,7 @@ watch(selectedAccount, (newVal) => {
   color: $color-text-secondary;
 }
 
-// ─── Step 6: Limits & Controls ────────────────────────────────────────────────
+// â”€â”€â”€ Step 6: Limits & Controls â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 .lc-overrides-list {
   margin: 0;
@@ -7921,7 +9486,7 @@ watch(selectedAccount, (newVal) => {
   }
 }
 
-// ─── Step 7: Billing ─────────────────────────────────────────────────────────
+// â”€â”€â”€ Step 7: Billing â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 .bl-section {
   margin-bottom: $spacing-large;
@@ -8089,7 +9654,7 @@ watch(selectedAccount, (newVal) => {
   }
 }
 
-// ─── Step 8: ID Cards ─────────────────────────────────────────────────────────
+// â”€â”€â”€ Step 8: ID Cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 .id-two-col-row {
   display: flex;
@@ -8238,7 +9803,7 @@ watch(selectedAccount, (newVal) => {
   }
 }
 
-// ─── Step 9: Verification & Summary ───────────────────────────────────────────
+// â”€â”€â”€ Step 9: Verification & Summary â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 .vs-completion {
   font-size: $font-size-h3;
@@ -8348,7 +9913,7 @@ watch(selectedAccount, (newVal) => {
   }
 }
 
-// ─── Wayne Enterprises: Group Account Profile (GAP) view ──────────────────────
+// â”€â”€â”€ Wayne Enterprises: Group Account Profile (GAP) view â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 .gap-view {
   padding: $spacing-small 0;
@@ -8449,7 +10014,7 @@ watch(selectedAccount, (newVal) => {
   flex-shrink: 0;
 }
 
-// ─── Network Link + Pharmacy Dialogs ─────────────────────────────────────────
+// â”€â”€â”€ Network Link + Pharmacy Dialogs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 .nl-dialog-card {
   border: 1px solid $color-border;
@@ -8897,7 +10462,7 @@ watch(selectedAccount, (newVal) => {
   color: $color-text-primary;
 }
 
-// ─── Mail Order vendor picker ──────────────────────────────────────────────────
+// â”€â”€â”€ Mail Order vendor picker â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 .nl-vendor-chips {
   display: flex;
@@ -9081,10 +10646,10 @@ watch(selectedAccount, (newVal) => {
 }
 </style>
 
-<!-- Non-scoped dark mode overrides — bypasses Vue scoping to apply correctly -->
+<!-- Non-scoped dark mode overrides â€” bypasses Vue scoping to apply correctly -->
 <style lang="scss">
 html.dark {
-  // ── Timeline cards ──────────────────────────────────────────────────────────
+  // â”€â”€ Timeline cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   .timeline-card {
     background-color: var(--color-card-bg) !important;
     border-color: var(--color-border) !important;
@@ -9096,36 +10661,36 @@ html.dark {
 
   .active-card { border-color: #7BA7E0 !important; }
 
-  // ── Timeline detail panel ───────────────────────────────────────────────────
+  // â”€â”€ Timeline detail panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   .timeline-details-card {
     background-color: var(--color-card-bg);
     border-color: var(--color-border);
     color: var(--color-text-primary);
   }
 
-  // ── Wizard sub-steps ────────────────────────────────────────────────────────
+  // â”€â”€ Wizard sub-steps â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   .wizard-sub-step-name { color: var(--color-text-primary); }
   .wizard-sub-step-number {
     border-color: var(--color-border);
     color: var(--color-text-secondary);
   }
 
-  // Active step: #0F285B (navy) on dark bg is ~2.6:1 — swap to light blue (6.9:1) ✓
+  // Active step: #0F285B (navy) on dark bg is ~2.6:1 â€” swap to light blue (6.9:1) âœ“
   .wizard-sub-step-item--active {
     background-color: rgba(123, 167, 224, 0.12);
 
     .wizard-sub-step-number {
       background-color: #7BA7E0;
       border-color: #7BA7E0;
-      color: #0F1117; // dark text on light blue — contrast ~8:1 ✓
+      color: #0F1117; // dark text on light blue â€” contrast ~8:1 âœ“
     }
 
     .wizard-sub-step-name {
-      color: #7BA7E0 !important; // 6.9:1 on dark bg ✓
+      color: #7BA7E0 !important; // 6.9:1 on dark bg âœ“
     }
   }
 
-  // ── Wizard overview (intro card) ─────────────────────────────────────────────
+  // â”€â”€ Wizard overview (intro card) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   .wizard-overview {
     border-color: var(--color-border);
   }
@@ -9162,12 +10727,12 @@ html.dark {
 
   .wizard-info-icon { color: var(--color-text-secondary); }
 
-  // ── Wizard step content ──────────────────────────────────────────────────────
+  // â”€â”€ Wizard step content â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   .wizard-step-counter { color: var(--color-text-secondary); }
   .wizard-step-title   { color: var(--color-text-primary) !important; }
   .wizard-step-description { color: var(--color-text-secondary); }
 
-  // ── Account profile fields ───────────────────────────────────────────────────
+  // â”€â”€ Account profile fields â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   .ap-section {
     border-color: var(--color-border);
     background-color: var(--color-card-bg);
@@ -9180,7 +10745,7 @@ html.dark {
 
   .ap-fields-divider { border-color: var(--color-border); }
 
-  // ── Inputs and form elements ─────────────────────────────────────────────────
+  // â”€â”€ Inputs and form elements â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   .ap-input, .ap-select, .ap-textarea {
     background-color: var(--color-input-bg) !important;
     border-color: var(--color-input-border) !important;
@@ -9190,24 +10755,24 @@ html.dark {
     &:focus { border-color: #7BA7E0 !important; }
   }
 
-  // ── Checkboxes / radio-style elements ───────────────────────────────────────
+  // â”€â”€ Checkboxes / radio-style elements â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   .ap-checkbox-label, .ap-radio-label { color: var(--color-text-primary); }
 
-  // ── Step section headers ─────────────────────────────────────────────────────
+  // â”€â”€ Step section headers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   .step-section-title,
   .ap-subsection-title,
   .step-heading { color: var(--color-text-primary) !important; }
 
   .step-section-divider { border-color: var(--color-border); }
 
-  // ── Review / summary panels ──────────────────────────────────────────────────
+  // â”€â”€ Review / summary panels â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   .review-panel, .summary-panel, .completion-panel {
     background-color: var(--color-card-bg);
     border-color: var(--color-border);
     color: var(--color-text-primary);
   }
 
-  // ── Navigation buttons ───────────────────────────────────────────────────────
+  // â”€â”€ Navigation buttons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   .button-thirtiary {
     color: var(--color-text-secondary) !important;
     border-color: var(--color-border) !important;
@@ -9216,7 +10781,7 @@ html.dark {
     &:hover { background-color: rgba(255, 255, 255, 0.05) !important; }
   }
 
-  // ── GAP view (Wayne Enterprises active view) ─────────────────────────────────
+  // â”€â”€ GAP view (Wayne Enterprises active view) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   .gap-view { color: var(--color-text-primary); }
   .gap-meta  { color: var(--color-text-secondary); }
 
@@ -9235,7 +10800,7 @@ html.dark {
   .gap-accordion-label { color: var(--color-text-primary); }
   .gap-accordion-chevron { color: var(--color-text-secondary); }
 
-  // ── General text inside plan explorer ────────────────────────────────────────
+  // â”€â”€ General text inside plan explorer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   .plan-explorer-content h1,
   .plan-explorer-content h2,
   .plan-explorer-content h3,

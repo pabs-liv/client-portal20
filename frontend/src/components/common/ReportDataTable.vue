@@ -100,14 +100,28 @@
           </template>
           <v-list>
             <template v-if="rowActionItems.length > 0">
-              <v-list-item
-                v-for="actionItem in rowActionItems"
-                :key="actionItem.action"
-                :disabled="rowActionDisabled(item, actionItem)"
-                @click="emit('row-action', { action: actionItem.action, item })"
-              >
-                <v-list-item-title>{{ actionItem.label }}</v-list-item-title>
-              </v-list-item>
+              <template v-for="actionItem in rowActionItems" :key="actionItem.action">
+                <v-tooltip
+                  v-if="rowActionDisabled(item, actionItem) && rowActionDisabledReason(item, actionItem)"
+                  :text="rowActionDisabledReason(item, actionItem)"
+                  location="start"
+                >
+                  <template v-slot:activator="{ props: tooltipProps }">
+                    <div v-bind="tooltipProps">
+                      <v-list-item disabled>
+                        <v-list-item-title>{{ actionItem.label }}</v-list-item-title>
+                      </v-list-item>
+                    </div>
+                  </template>
+                </v-tooltip>
+                <v-list-item
+                  v-else
+                  :disabled="rowActionDisabled(item, actionItem)"
+                  @click="emit('row-action', { action: actionItem.action, item })"
+                >
+                  <v-list-item-title>{{ actionItem.label }}</v-list-item-title>
+                </v-list-item>
+              </template>
             </template>
             <template v-else>
               <v-list-item @click="console.log('View item:', item)">
@@ -186,6 +200,7 @@ interface Props {
   showRowActions?: boolean;
   rowActionItems?: RowActionItem[];
   rowActionDisabled?: (item: any, actionItem: RowActionItem) => boolean;
+  rowActionDisabledReason?: (item: any, actionItem: RowActionItem) => string | undefined;
   showBulkApprove?: boolean;
   showBulkReject?: boolean;
   showBulkDownload?: boolean;
@@ -231,6 +246,7 @@ const props = withDefaults(defineProps<Props>(), {
   showRowActions: true,
   rowActionItems: () => [],
   rowActionDisabled: () => false,
+  rowActionDisabledReason: () => undefined,
   showBulkApprove: false,
   showBulkReject: false,
   showBulkDownload: true,
