@@ -41,7 +41,7 @@
     >
       <Banner
         variant="warning"
-        message="Please acknowledge high-cost claims within 24 hours. If a claim is not acknowledged within 24 hours, it will automatically be processed to be filled in order to avoid member disruption and a delay in treatment with the approved therapy. If you have questions about a claim, select Request Clinical Assistance from the row's menu, or use bulk selection to request assistance for more than one claim."
+        message="Please acknowledge high-cost claims within 24 hours. If a claim is not acknowledged within 24 hours, it will automatically be processed to be filled in order to avoid member disruption and a delay in treatment with the approved therapy. If you have questions about a claim, select Request Clinical Assistance from the row's menu."
       />
       <p v-if="isExternal" class="text-small disclaimer-text mt-small mb-large">
         Disclaimer: Cost represents estimated total cost of the medication, not inclusive of tax, member cost share, applicable program savings, etc.
@@ -64,26 +64,17 @@
         class="filter-pills"
       />
       <ReportDataTable
-        ref="claimsTable"
         :headers="claimsHeaders"
         :items="tableItems"
         :show-search-bar="false"
         :show-filter-button="false"
         :show-filter-pills="false"
-        :show-selection-checkboxes="isExternal"
+        :show-selection-checkboxes="false"
         :show-row-actions="isExternal"
         :row-action-items="rowActionItems"
         :row-action-disabled="rowActionDisabled"
         @row-action="handleRowAction"
-        :show-bulk-approve="isExternal"
-        bulk-approve-label="Acknowledge Selected"
-        :bulk-action-available="isBulkAcknowledgeAvailable"
-        :show-bulk-download="false"
-        @bulk-approve="handleBulkAcknowledgeClick"
       >
-        <template #bulk-actions-extra="{ selected: bulkSelected }">
-          <button class="bulk-action-btn" @click="openAssistanceDialog(bulkSelected)">Request Clinical Assistance</button>
-        </template>
         <template #item.status="{ item }">
           <v-chip :color="(item as any).status === 'Acknowledged' ? 'success' : 'warning'" variant="tonal" size="small">
             {{ (item as any).status }}
@@ -289,8 +280,6 @@ import type { FilterPill } from '@/components/ui/FilteringPill.vue';
 
 const { isExternal } = useUserType();
 
-const claimsTable = ref<InstanceType<typeof ReportDataTable> | null>(null);
-
 const claimsHeaders = computed(() => {
   const headers: any[] = [
     { title: 'Account Name', key: 'accountName' },
@@ -322,16 +311,10 @@ const claimsData = ref([
   { id: 153219641, eocId: 'EOC30079', accountName: 'Company E', drugName: 'Drug E', ndc: '00173-0879-00', claimDate: '2025-07-11', quantity: 3, daysSupply: 84, cost: '$61,200.00', status: 'Pending', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null },
 ]);
 
-// The checkbox itself only grays out once a claim is fully wrapped up —
-// Acknowledged AND already has an assistance request. Otherwise there's
-// still something to bulk-act on (e.g. an Acknowledged claim can still be
-// selected to bulk-request assistance). The kebab's Acknowledge item is
-// available any time a claim is still Pending — Pending means only "not
-// yet acknowledged by the client," nothing more.
-// Every claim row stays selectable regardless of status or prior assistance
-// requests — Request Clinical Assistance is always available (even after
-// Acknowledge, and even if a request is already open), so a claim never
-// reaches a state with nothing left to do.
+// The kebab's Acknowledge item is available any time a claim is still
+// Pending — Pending means only "not yet acknowledged by the client,"
+// nothing more. Request Clinical Assistance is always available (even
+// after Acknowledge, and even if a request is already open).
 const tableItems = computed(() =>
   filteredClaimsData.value.map(claim => {
     const assistanceRequested = !!claim.notes;
@@ -363,7 +346,7 @@ const averageClaimCost = computed(() => {
   return `${(total / claimsData.value.length).toFixed(2)}`;
 });
 
-// === ACKNOWLEDGE (single or bulk, always via checkbox selection) === //
+// === ACKNOWLEDGE (single row only) === //
 
 const showAcknowledgeDialog = ref(false);
 const pendingAcknowledgeItems = ref<any[]>([]);
@@ -372,15 +355,7 @@ const acknowledgeDialogHeading = computed(() =>
   pendingAcknowledgeItems.value.length > 1 ? 'Acknowledge High-Cost Claims' : 'Acknowledge High-Cost Claim'
 );
 
-// "Acknowledge Selected" hides entirely when none of the selected claims are
-// still eligible (mirrors Test Results' isBulkActionAvailable pattern) —
-// Request Clinical Assistance has no such gate since it's always available.
-const isBulkAcknowledgeAvailable = (items: any[]) => items.some(item => item.canAcknowledge);
-
-const handleBulkAcknowledgeClick = (items: any[]) => {
-  // Claims already Acknowledged are excluded from the dialog list and from
-  // the snackbar's count — only claims actually being acknowledged by this
-  // action are shown/counted (Story #34913).
+const handleAcknowledgeClick = (items: any[]) => {
   pendingAcknowledgeItems.value = items.filter(item => item.canAcknowledge);
   showAcknowledgeDialog.value = true;
 };
@@ -398,7 +373,6 @@ const confirmAcknowledge = () => {
   });
   const count = pendingAcknowledgeItems.value.length;
   showAcknowledgeDialog.value = false;
-  claimsTable.value?.clearSelection();
   successSnackbarText.value = `${count} claim${count > 1 ? 's' : ''} acknowledged successfully`;
   showSuccessSnackbar.value = true;
   pendingAcknowledgeItems.value = [];
@@ -409,7 +383,7 @@ const acknowledgeDialogActions = [
   { text: 'Acknowledge', onClick: confirmAcknowledge, color: 'primary', variant: 'flat' as const },
 ];
 
-// === REQUEST CLINICAL ASSISTANCE (single row icon, or bulk) === //
+// === REQUEST CLINICAL ASSISTANCE (single row only) === //
 
 const showAssistanceDialog = ref(false);
 const pendingAssistanceItems = ref<any[]>([]);
@@ -436,7 +410,6 @@ const confirmAssistanceRequest = () => {
   });
   const count = pendingAssistanceItems.value.length;
   showAssistanceDialog.value = false;
-  claimsTable.value?.clearSelection();
   successSnackbarText.value = `Clinical assistance request sent for ${count} claim${count > 1 ? 's' : ''}`;
   showSuccessSnackbar.value = true;
   pendingAssistanceItems.value = [];
@@ -468,7 +441,7 @@ const rowActionDisabled = (item: any, actionItem: { action: string }) => {
 };
 
 const handleRowAction = ({ action, item }: { action: string; item: any }) => {
-  if (action === 'acknowledge') handleBulkAcknowledgeClick([item]);
+  if (action === 'acknowledge') handleAcknowledgeClick([item]);
   else if (action === 'assistance') openAssistanceDialog([item]);
 };
 
