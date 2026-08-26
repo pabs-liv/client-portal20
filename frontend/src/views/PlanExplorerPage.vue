@@ -114,7 +114,7 @@
                   <div class="ap-section">
                     <div class="ap-section-header">
                       <h4 class="text-h4">Account Profile</h4>
-                      <button v-if="!editingAccountProfile" class="button button-thirtiary" @click="startEditAccountProfile">
+                      <button v-if="(!editingAccountProfile) && !planSetupComplete" class="button button-thirtiary" @click="startEditAccountProfile">
                         <Pencil :size="14" :stroke-width="1.5" />Edit
                       </button>
                     </div>
@@ -168,7 +168,7 @@
                   <div class="ap-section">
                     <div class="ap-section-header">
                       <h4 class="text-h4">About This Company</h4>
-                      <button v-if="!editingCompanyInfo" class="button button-thirtiary" @click="startEditCompanyInfo">
+                      <button v-if="(!editingCompanyInfo) && !planSetupComplete" class="button button-thirtiary" @click="startEditCompanyInfo">
                         <Pencil :size="14" :stroke-width="1.5" />Edit
                       </button>
                     </div>
@@ -1020,7 +1020,7 @@
                         <div class="pd-section">
                           <div class="pd-section-header">
                             <h4 class="text-h4">Plan Overview</h4>
-                            <button v-if="!pdIsEditingOverview(plan.id)" class="button button-thirtiary" @click="pdStartEditOverview(plan)">
+                            <button v-if="(!pdIsEditingOverview(plan.id)) && !planSetupComplete" class="button button-thirtiary" @click="pdStartEditOverview(plan)">
                               <Pencil :size="14" :stroke-width="1.5" /> Edit
                             </button>
                           </div>
@@ -1095,7 +1095,7 @@
                         <div class="pd-section">
                           <div class="pd-section-header">
                             <h4 class="text-h4">Plan Parameters</h4>
-                            <button v-if="!pdIsEditingParameters(plan.id)" class="button button-thirtiary" @click="pdStartEditParameters(plan)">
+                            <button v-if="(!pdIsEditingParameters(plan.id)) && !planSetupComplete" class="button button-thirtiary" @click="pdStartEditParameters(plan)">
                               <Pencil :size="14" :stroke-width="1.5" /> Edit
                             </button>
                           </div>
@@ -1173,7 +1173,7 @@
                         <div class="pd-section">
                           <div class="pd-section-header">
                             <h4 class="text-h4">Plan Max Spend Parameters</h4>
-                            <button v-if="!pdIsEditingMaxSpend(plan.id)" class="button button-thirtiary" @click="pdStartEditMaxSpend(plan)">
+                            <button v-if="(!pdIsEditingMaxSpend(plan.id)) && !planSetupComplete" class="button button-thirtiary" @click="pdStartEditMaxSpend(plan)">
                               <Pencil :size="14" :stroke-width="1.5" /> Edit
                             </button>
                           </div>
@@ -1385,7 +1385,7 @@
                         <div class="pd-section">
                           <div class="pd-section-header">
                             <h4 class="text-h4">Coordination of Benefits</h4>
-                            <button v-if="!pdIsEditingCob(plan.id)" class="button button-thirtiary" @click="pdStartEditCob(plan)">
+                            <button v-if="(!pdIsEditingCob(plan.id)) && !planSetupComplete" class="button button-thirtiary" @click="pdStartEditCob(plan)">
                               <Pencil :size="14" :stroke-width="1.5" /> Edit
                             </button>
                           </div>
@@ -1430,7 +1430,7 @@
                         <div class="pd-section">
                           <div class="pd-section-header">
                             <h4 class="text-h4">Applicable Benefit Period</h4>
-                            <button v-if="!pdIsEditingBenefit(plan.id)" class="button button-thirtiary" @click="pdStartEditBenefit(plan)">
+                            <button v-if="(!pdIsEditingBenefit(plan.id)) && !planSetupComplete" class="button button-thirtiary" @click="pdStartEditBenefit(plan)">
                               <Pencil :size="14" :stroke-width="1.5" /> Edit
                             </button>
                           </div>
@@ -1652,7 +1652,7 @@
                         <div class="cs-card">
                           <div class="cs-card-header">
                             <h4 class="text-h4">Copay Structure</h4>
-                            <button v-if="!isEditingCopay(plan.id)" class="button button-thirtiary" @click="startEditCopay(plan)">
+                            <button v-if="(!isEditingCopay(plan.id)) && !planSetupComplete" class="button button-thirtiary" @click="startEditCopay(plan)">
                               <Pencil :size="14" :stroke-width="1.5" /> Edit
                             </button>
                           </div>
@@ -1972,7 +1972,7 @@
                   <div class="ap-section">
                     <div class="ap-section-header">
                       <h4 class="text-h4">Transition of Care Setup</h4>
-                      <button v-if="!tocEditingFiles && !(hcfPending && paPending)" class="button button-thirtiary" @click="startEditFilesCard">
+                      <button v-if="(!tocEditingFiles && !(hcfPending && paPending)) && !planSetupComplete" class="button button-thirtiary" @click="startEditFilesCard">
                         <Pencil :size="14" :stroke-width="1.5" />Edit
                       </button>
                     </div>
@@ -2111,7 +2111,7 @@
                   <div class="ap-section">
                     <div class="ap-section-header">
                       <h4 class="text-h4">Open Refill Transfer File (ORTF) <span class="toc-recommended">Rarely Used</span></h4>
-                      <button v-if="!tocEditingOrtf" class="button button-thirtiary" @click="startEditOrtfCard">
+                      <button v-if="(!tocEditingOrtf) && !planSetupComplete" class="button button-thirtiary" @click="startEditOrtfCard">
                         <Pencil :size="14" :stroke-width="1.5" />Edit
                       </button>
                     </div>
@@ -2142,7 +2142,7 @@
                   <div class="ap-section">
                     <div class="ap-section-header">
                       <h4 class="text-h4">Transition of Care / File Notes</h4>
-                      <button v-if="!tocEditingNotes" class="button button-thirtiary" @click="startEditNotesCard">
+                      <button v-if="(!tocEditingNotes) && !planSetupComplete" class="button button-thirtiary" @click="startEditNotesCard">
                         <Pencil :size="14" :stroke-width="1.5" />Edit
                       </button>
                     </div>
@@ -2665,7 +2665,7 @@
                   <div class="ap-section">
                     <div class="ap-section-header">
                       <h4 class="text-h4">Standard Dispensing Limitations</h4>
-                      <button v-if="!lcEditingLimits" class="button button-thirtiary" @click="lcStartEdit">
+                      <button v-if="(!lcEditingLimits) && !planSetupComplete" class="button button-thirtiary" @click="lcStartEdit">
                         <Pencil :size="14" :stroke-width="1.5" />Edit
                       </button>
                     </div>
@@ -2693,7 +2693,7 @@
                   <div class="ap-section">
                     <div class="ap-section-header">
                       <h4 class="text-h4">High Cost Notifications</h4>
-                      <button v-if="!lcEditingHcn" class="button button-thirtiary" @click="lcHcnStartEdit">
+                      <button v-if="(!lcEditingHcn) && !planSetupComplete" class="button button-thirtiary" @click="lcHcnStartEdit">
                         <Pencil :size="14" :stroke-width="1.5" />Edit
                       </button>
                     </div>
@@ -2750,7 +2750,7 @@
                   <div class="ap-section">
                     <div class="ap-section-header">
                       <h4 class="text-h4">Dispense as Written (DAW)</h4>
-                      <button v-if="!lcEditingDaw" class="button button-thirtiary" @click="lcDawStartEdit">
+                      <button v-if="(!lcEditingDaw) && !planSetupComplete" class="button button-thirtiary" @click="lcDawStartEdit">
                         <Pencil :size="14" :stroke-width="1.5" />Edit
                       </button>
                     </div>
@@ -2793,7 +2793,7 @@
                   <div class="ap-section">
                     <div class="ap-section-header">
                       <h4 class="text-h4">Manual Claims</h4>
-                      <button v-if="!lcEditingManual" class="button button-thirtiary" @click="lcManualStartEdit">
+                      <button v-if="(!lcEditingManual) && !planSetupComplete" class="button button-thirtiary" @click="lcManualStartEdit">
                         <Pencil :size="14" :stroke-width="1.5" />Edit
                       </button>
                     </div>
@@ -2840,7 +2840,7 @@
                   <div class="ap-section">
                     <div class="ap-section-header">
                       <h4 class="text-h4">Billing Setup</h4>
-                      <button v-if="!blEditingSetup" class="button button-thirtiary" @click="blSetupStartEdit">
+                      <button v-if="(!blEditingSetup) && !planSetupComplete" class="button button-thirtiary" @click="blSetupStartEdit">
                         <Pencil :size="14" :stroke-width="1.5" />Edit
                       </button>
                     </div>
@@ -2903,7 +2903,7 @@
                   <div class="ap-section">
                     <div class="ap-section-header">
                       <h4 class="text-h4">Payment Method</h4>
-                      <button v-if="!blEditingPayment" class="button button-thirtiary" @click="blPaymentStartEdit">
+                      <button v-if="(!blEditingPayment) && !planSetupComplete" class="button button-thirtiary" @click="blPaymentStartEdit">
                         <Pencil :size="14" :stroke-width="1.5" />Edit
                       </button>
                     </div>
@@ -3043,7 +3043,7 @@
                   <div class="ap-section">
                     <div class="ap-section-header">
                       <h4 class="text-h4">Invoice Configuration</h4>
-                      <button v-if="!blEditingInvoice" class="button button-thirtiary" @click="blInvoiceStartEdit">
+                      <button v-if="(!blEditingInvoice) && !planSetupComplete" class="button button-thirtiary" @click="blInvoiceStartEdit">
                         <Pencil :size="14" :stroke-width="1.5" />Edit
                       </button>
                     </div>
@@ -3127,7 +3127,7 @@
                   <div class="ap-section">
                     <div class="ap-section-header">
                       <h4 class="text-h4">Report Configuration</h4>
-                      <button v-if="!blEditingReport" class="button button-thirtiary" @click="blReportStartEdit">
+                      <button v-if="(!blEditingReport) && !planSetupComplete" class="button button-thirtiary" @click="blReportStartEdit">
                         <Pencil :size="14" :stroke-width="1.5" />Edit
                       </button>
                     </div>
@@ -3182,7 +3182,7 @@
                   <div class="ap-section">
                     <div class="ap-section-header">
                       <h4 class="text-h4">Rebate Setup</h4>
-                      <button v-if="!blEditingRebate" class="button button-thirtiary" @click="blRebateStartEdit">
+                      <button v-if="(!blEditingRebate) && !planSetupComplete" class="button button-thirtiary" @click="blRebateStartEdit">
                         <Pencil :size="14" :stroke-width="1.5" />Edit
                       </button>
                     </div>
@@ -3259,7 +3259,7 @@
                   <div class="ap-section">
                     <div class="ap-section-header">
                       <h4 class="text-h4">Billing Notes</h4>
-                      <button v-if="!blEditingNotes" class="button button-thirtiary" @click="blNotesStartEdit">
+                      <button v-if="(!blEditingNotes) && !planSetupComplete" class="button button-thirtiary" @click="blNotesStartEdit">
                         <Pencil :size="14" :stroke-width="1.5" />Edit
                       </button>
                     </div>
@@ -3292,7 +3292,7 @@
                   <div class="ap-section">
                     <div class="ap-section-header">
                       <h4 class="text-h4">Vendor</h4>
-                      <button v-if="!idEditingVendor" class="button button-thirtiary" @click="idVendorStartEdit">
+                      <button v-if="(!idEditingVendor) && !planSetupComplete" class="button button-thirtiary" @click="idVendorStartEdit">
                         <Pencil :size="14" :stroke-width="1.5" />Edit
                       </button>
                     </div>
@@ -3341,7 +3341,7 @@
                     <div class="ap-section">
                       <div class="ap-section-header">
                         <h4 class="text-h4">Card Details</h4>
-                        <button v-if="!idEditingDetails" class="button button-thirtiary" @click="idDetailsStartEdit">
+                        <button v-if="(!idEditingDetails) && !planSetupComplete" class="button button-thirtiary" @click="idDetailsStartEdit">
                           <Pencil :size="14" :stroke-width="1.5" />Edit
                         </button>
                       </div>
@@ -3412,7 +3412,7 @@
                     <div v-if="idVendorType === 'Liviniti'" class="ap-section">
                       <div class="ap-section-header">
                         <h4 class="text-h4">Mailing Preferences</h4>
-                        <button v-if="!idEditingMailing" class="button button-thirtiary" @click="idMailingStartEdit">
+                        <button v-if="(!idEditingMailing) && !planSetupComplete" class="button button-thirtiary" @click="idMailingStartEdit">
                           <Pencil :size="14" :stroke-width="1.5" />Edit
                         </button>
                       </div>
@@ -3581,7 +3581,7 @@
                     <div class="ap-section">
                       <div class="ap-section-header">
                         <h4 class="text-h4">Effective Dates</h4>
-                        <button v-if="!idEditingDates" class="button button-thirtiary" @click="idDatesStartEdit">
+                        <button v-if="(!idEditingDates) && !planSetupComplete" class="button button-thirtiary" @click="idDatesStartEdit">
                           <Pencil :size="14" :stroke-width="1.5" />Edit
                         </button>
                       </div>
@@ -3708,9 +3708,17 @@
                           {{ step.status === 'complete' ? 'Complete' : step.status === 'in-progress' ? 'In Progress' : 'Not Started' }}
                         </span>
                         <button
-                          class="button vs-edit-btn"
+                          v-if="step.status !== 'complete' && !planSetupComplete"
+                          class="button button-thirtiary"
                           @click="currentWizardStep = index"
-                        >{{ step.status === 'complete' ? 'Review' : 'Edit' }}</button>
+                        >
+                          <Pencil :size="14" :stroke-width="1.5" />Edit
+                        </button>
+                        <button
+                          v-else-if="!planSetupComplete"
+                          class="button button-thirtiary"
+                          @click="markStepIncomplete(index)"
+                        >Mark Incomplete</button>
                       </div>
                     </div>
                   </div>
@@ -3722,7 +3730,7 @@
                     <div class="ap-section">
                       <div class="ap-section-header">
                         <h4 class="text-h4">Upload Inclusion/Exclusion Document</h4>
-                        <button v-if="!gpsEditingIe" class="button button-thirtiary" @click="gpsIeStartEdit">
+                        <button v-if="(!gpsEditingIe) && !planSetupComplete" class="button button-thirtiary" @click="gpsIeStartEdit">
                           <Pencil :size="14" :stroke-width="1.5" />Edit
                         </button>
                       </div>
@@ -3773,7 +3781,7 @@
                     <div class="ap-section">
                       <div class="ap-section-header">
                         <h4 class="text-h4">Upload Signed GPS <span class="bl-required" aria-label="required">*</span></h4>
-                        <button v-if="!gpsEditingSigned && !gpsSignedFile" class="button button-thirtiary" @click="gpsSignedStartEdit">
+                        <button v-if="(!gpsEditingSigned && !gpsSignedFile) && !planSetupComplete" class="button button-thirtiary" @click="gpsSignedStartEdit">
                           <Pencil :size="14" :stroke-width="1.5" />Edit
                         </button>
                       </div>
@@ -3822,12 +3830,12 @@
                 <span v-else></span>
                 <div class="wizard-footer-actions">
                   <button
-                    v-if="wizardSteps[currentWizardStep].status !== 'complete'"
+                    v-if="wizardSteps[currentWizardStep].status !== 'complete' && !planSetupComplete"
                     class="button button-secondary"
                     @click="markCurrentStepComplete"
                   >Mark as Complete</button>
                   <button
-                    v-else
+                    v-else-if="!planSetupComplete"
                     class="button button-secondary"
                     @click="markCurrentStepIncomplete"
                   >Mark as Incomplete</button>
@@ -4466,6 +4474,9 @@ const accountOptions = ref([
 
 const selectedAccount = ref<number | null>(null);
 const wizardActive = ref(false);
+// Once Plan Setup is finished, every widget's Edit action and the Mark Complete/Incomplete
+// controls lock — matching master's isComplete gating (PlanDesignStep.vue).
+const planSetupComplete = ref(false);
 
 
 const currentWizardStep = ref(0);
@@ -5706,8 +5717,13 @@ const markCurrentStepIncomplete = () => {
   wizardSteps.value[currentWizardStep.value].status = 'not-started';
 };
 
+const markStepIncomplete = (index: number) => {
+  wizardSteps.value[index].status = 'not-started';
+};
+
 const finishPlanSetup = () => {
   wizardActive.value = false;
+  planSetupComplete.value = true;
   const contractStatus = implementationSteps.value.find(s => s.title === 'Contract Status');
   if (contractStatus) selectTimelineItem(contractStatus);
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -9897,20 +9913,6 @@ watch(selectedAccount, (newVal) => {
 .vs-gps-generate-btn {
   gap: $spacing-xsmall;
   align-self: flex-start;
-}
-
-.vs-edit-btn {
-  border: 1px solid $color-primary;
-  border-radius: 100px;
-  background: transparent;
-  color: $color-primary;
-  padding: $spacing-nano $spacing-medium;
-  font-size: $font-size-body;
-  cursor: pointer;
-
-  &:hover {
-    background-color: rgba($color-primary, 0.05);
-  }
 }
 
 // ─── Wayne Enterprises: Group Account Profile (GAP) view ──────────────────────
