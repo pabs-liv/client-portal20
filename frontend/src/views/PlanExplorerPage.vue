@@ -22,13 +22,13 @@
       <!-- Wayne Enterprises: Active/fully-implemented view -->
       <div v-if="isWayneEnterprises" class="gap-view">
         <p class="text-body gap-dev-note">
-          <strong>Design Note for Dev/QA:</strong> This section is an exact replication of Solo2 &rarr; Member InSites &rarr; Member Search &rarr; GAP tab. Do not use this mockup as the visual source of truth â€” reference the live GAP tab in Solo2 directly for exact fields, order, and behavior (including live search-highlighting and conditional field visibility).
+          <strong>Design Note for Dev/QA:</strong> This section is an exact replication of Solo2 &rarr; Member InSites &rarr; Member Search &rarr; GAP tab. Do not use this mockup as the visual source of truth — reference the live GAP tab in Solo2 directly for exact fields, order, and behavior (including live search-highlighting and conditional field visibility).
         </p>
 
         <div class="gap-meta">
           <Building2 :size="14" :stroke-width="1.5" class="gap-meta-icon" />
-          <span>Wayne Enterprises â€“ 11250</span>
-          <span class="gap-meta-dot">â€¢</span>
+          <span>Wayne Enterprises – 11250</span>
+          <span class="gap-meta-dot">•</span>
           <span>Effective: 01/01/2026</span>
         </div>
 
@@ -124,25 +124,25 @@
                         <div class="ap-field-row ap-field-row--multi ap-field-row--thirds">
                           <div class="ap-field">
                             <span class="ap-field-label">Account name</span>
-                            <span class="ap-field-value">{{ accountProfile.accountName || 'â€”' }}</span>
+                            <span class="ap-field-value">{{ accountProfile.accountName || '—' }}</span>
                           </div>
                           <div class="ap-field">
                             <span class="ap-field-label">Legal Name</span>
-                            <span class="ap-field-value">{{ accountProfile.legalName || 'â€”' }}</span>
+                            <span class="ap-field-value">{{ accountProfile.legalName || '—' }}</span>
                           </div>
                           <div class="ap-field">
                             <span class="ap-field-label">DBA</span>
-                            <span class="ap-field-value">{{ accountProfile.dba || 'â€”' }}</span>
+                            <span class="ap-field-value">{{ accountProfile.dba || '—' }}</span>
                           </div>
                         </div>
                         <div class="ap-field-row ap-field-row--multi">
                           <div class="ap-field">
                             <span class="ap-field-label">Effective start date</span>
-                            <span class="ap-field-value">{{ accountProfile.effectiveStartDate || 'â€”' }}</span>
+                            <span class="ap-field-value">{{ accountProfile.effectiveStartDate || '—' }}</span>
                           </div>
                           <div class="ap-field">
                             <span class="ap-field-label">Effective end date</span>
-                            <span class="ap-field-value">{{ accountProfile.effectiveEndDate || 'â€”' }}</span>
+                            <span class="ap-field-value">{{ accountProfile.effectiveEndDate || '—' }}</span>
                           </div>
                         </div>
                       </template>
@@ -178,73 +178,73 @@
                         <div class="ap-field-row">
                           <div class="ap-field">
                             <span class="ap-field-label">SIC Code</span>
-                            <span class="ap-field-value">{{ companyInfo.sicCode || 'â€”' }}</span>
+                            <span class="ap-field-value">{{ companyInfo.sicCode || '—' }}</span>
                           </div>
                         </div>
                         <h5 class="ap-subsection-heading">Physical Address</h5>
                         <div class="ap-field-row">
                           <div class="ap-field">
                             <span class="ap-field-label">Address 1</span>
-                            <span class="ap-field-value">{{ companyInfo.physicalAddress1 || 'â€”' }}</span>
+                            <span class="ap-field-value">{{ companyInfo.physicalAddress1 || '—' }}</span>
                           </div>
                         </div>
                         <div class="ap-field-row">
                           <div class="ap-field">
                             <span class="ap-field-label">Address 2</span>
-                            <span class="ap-field-value">{{ companyInfo.physicalAddress2 || 'â€”' }}</span>
+                            <span class="ap-field-value">{{ companyInfo.physicalAddress2 || '—' }}</span>
                           </div>
                         </div>
                         <div class="ap-field-row ap-field-row--multi ap-field-row--thirds">
                           <div class="ap-field">
                             <span class="ap-field-label">City</span>
-                            <span class="ap-field-value">{{ companyInfo.physicalCity || 'â€”' }}</span>
+                            <span class="ap-field-value">{{ companyInfo.physicalCity || '—' }}</span>
                           </div>
                           <div class="ap-field">
                             <span class="ap-field-label">State</span>
-                            <span class="ap-field-value">{{ companyInfo.physicalState || 'â€”' }}</span>
+                            <span class="ap-field-value">{{ companyInfo.physicalState || '—' }}</span>
                           </div>
                           <div class="ap-field">
                             <span class="ap-field-label">ZIP</span>
-                            <span class="ap-field-value">{{ companyInfo.physicalZip || 'â€”' }}</span>
+                            <span class="ap-field-value">{{ companyInfo.physicalZip || '—' }}</span>
                           </div>
                         </div>
                         <div class="ap-field-row">
                           <div class="ap-field">
                             <span class="ap-field-label">Country</span>
-                            <span class="ap-field-value">{{ companyInfo.physicalCountry || 'â€”' }}</span>
+                            <span class="ap-field-value">{{ companyInfo.physicalCountry || '—' }}</span>
                           </div>
                         </div>
                         <h5 class="ap-subsection-heading">Mailing Address</h5>
                         <div class="ap-field-row">
                           <div class="ap-field">
                             <span class="ap-field-label">Address 1</span>
-                            <span class="ap-field-value">{{ companyInfo.mailingAddress1 || 'â€”' }}</span>
+                            <span class="ap-field-value">{{ companyInfo.mailingAddress1 || '—' }}</span>
                           </div>
                         </div>
                         <div class="ap-field-row">
                           <div class="ap-field">
                             <span class="ap-field-label">Address 2</span>
-                            <span class="ap-field-value">{{ companyInfo.mailingAddress2 || 'â€”' }}</span>
+                            <span class="ap-field-value">{{ companyInfo.mailingAddress2 || '—' }}</span>
                           </div>
                         </div>
                         <div class="ap-field-row ap-field-row--multi ap-field-row--thirds">
                           <div class="ap-field">
                             <span class="ap-field-label">City</span>
-                            <span class="ap-field-value">{{ companyInfo.mailingCity || 'â€”' }}</span>
+                            <span class="ap-field-value">{{ companyInfo.mailingCity || '—' }}</span>
                           </div>
                           <div class="ap-field">
                             <span class="ap-field-label">State</span>
-                            <span class="ap-field-value">{{ companyInfo.mailingState || 'â€”' }}</span>
+                            <span class="ap-field-value">{{ companyInfo.mailingState || '—' }}</span>
                           </div>
                           <div class="ap-field">
                             <span class="ap-field-label">ZIP</span>
-                            <span class="ap-field-value">{{ companyInfo.mailingZip || 'â€”' }}</span>
+                            <span class="ap-field-value">{{ companyInfo.mailingZip || '—' }}</span>
                           </div>
                         </div>
                         <div class="ap-field-row">
                           <div class="ap-field">
                             <span class="ap-field-label">Country</span>
-                            <span class="ap-field-value">{{ companyInfo.mailingCountry || 'â€”' }}</span>
+                            <span class="ap-field-value">{{ companyInfo.mailingCountry || '—' }}</span>
                           </div>
                         </div>
                       </template>
@@ -381,7 +381,7 @@
                       <v-col cols="12"><TextField v-model="apContactForm.phone" label="Phone" /></v-col>
                     </v-row>
                     <v-checkbox v-model="apContactForm.allowPhi" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox" label="Allow access to PHI" />
-                    <p class="text-small ap-role-note">Allows this contact to receive PHI in any communication â€” email, phone, or mail â€” not just within the Client Portal.</p>
+                    <p class="text-small ap-role-note">Allows this contact to receive PHI in any communication — email, phone, or mail — not just within the Client Portal.</p>
 
                     <v-divider class="my-4" />
                     <h5 class="ap-subsection-heading">Client Portal Access</h5>
@@ -432,7 +432,7 @@
                       <v-col cols="12"><TextField v-model="apEditContactForm.phone" label="Phone" /></v-col>
                     </v-row>
                     <v-checkbox v-model="apEditContactForm.allowPhi" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox" label="Allow access to PHI" />
-                    <p class="text-small ap-role-note">Allows this contact to receive PHI in any communication â€” email, phone, or mail â€” not just within the Client Portal.</p>
+                    <p class="text-small ap-role-note">Allows this contact to receive PHI in any communication — email, phone, or mail — not just within the Client Portal.</p>
 
                     <v-divider class="my-4" />
                     <h5 class="ap-subsection-heading">Client Portal Access</h5>
@@ -515,7 +515,7 @@
                                     </div>
                                   </div>
                                   <p class="prog-detail-label">Permissions</p>
-                                  <p class="prog-detail-value">{{ item.portalAccess ? apPermissionsSummary(item.role, item.permissions) : 'N/A â€” no Client Portal access' }}</p>
+                                  <p class="prog-detail-value">{{ item.portalAccess ? apPermissionsSummary(item.role, item.permissions) : 'N/A — no Client Portal access' }}</p>
                                 </div>
                               </td>
                             </tr>
@@ -556,7 +556,7 @@
                         <v-col cols="12" sm="6"><Select v-model="apVendorRoleSelection" :items="apVendorRoleOptions" label="Business Role" /></v-col>
                       </v-row>
                       <v-checkbox v-model="apVendorAllowPhi" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox" label="Allow access to PHI" />
-                      <p class="text-small ap-role-note">Allows this contact to receive PHI in any communication â€” email, phone, or mail â€” not just within the Client Portal.</p>
+                      <p class="text-small ap-role-note">Allows this contact to receive PHI in any communication — email, phone, or mail — not just within the Client Portal.</p>
 
                       <h6 class="ap-subsection-heading">Contact Designations</h6>
                       <v-checkbox
@@ -599,7 +599,7 @@
                   <!-- Edit Vendor Contact Dialog -->
                   <Dialog
                     v-model="apShowEditVendorContactDialog"
-                    :heading="`Edit Vendor Contact â€” ${apEditingVendorContactName}`"
+                    :heading="`Edit Vendor Contact — ${apEditingVendorContactName}`"
                     :show-secondary-button="true"
                     :actions="apEditVendorContactDialogActions"
                   >
@@ -613,7 +613,7 @@
                       <v-col cols="12" sm="6"><Select v-model="apEditVendorContactForm.role" :items="apVendorRoleOptions" label="Business Role" /></v-col>
                     </v-row>
                     <v-checkbox v-model="apEditVendorContactForm.allowPhi" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox" label="Allow access to PHI" />
-                    <p class="text-small ap-role-note">Allows this contact to receive PHI in any communication â€” email, phone, or mail â€” not just within the Client Portal.</p>
+                    <p class="text-small ap-role-note">Allows this contact to receive PHI in any communication — email, phone, or mail — not just within the Client Portal.</p>
 
                     <h6 class="ap-subsection-heading">Contact Designations</h6>
                     <v-checkbox
@@ -720,11 +720,11 @@
                       >
                         <template #item.noBillNoPay="{ item }">
                           <Check v-if="item.noBillNoPay" :size="16" :stroke-width="2" class="ua-table-check" />
-                          <span v-else>â€”</span>
+                          <span v-else>—</span>
                         </template>
                         <template #item.displayInPortals="{ item }">
                           <Check v-if="item.displayInPortals" :size="16" :stroke-width="2" class="ua-table-check" />
-                          <span v-else>â€”</span>
+                          <span v-else>—</span>
                         </template>
                       </ReportDataTable>
                     </div>
@@ -1032,15 +1032,15 @@
                             </div>
                             <div class="ap-field">
                               <span class="ap-field-label">Eff. start date</span>
-                              <span class="ap-field-value">{{ plan.effStartDate || 'â€”' }}</span>
+                              <span class="ap-field-value">{{ plan.effStartDate || '—' }}</span>
                             </div>
                             <div class="ap-field">
                               <span class="ap-field-label">Eff. end date</span>
-                              <span class="ap-field-value">{{ plan.effEndDate || 'â€”' }}</span>
+                              <span class="ap-field-value">{{ plan.effEndDate || '—' }}</span>
                             </div>
                             <div class="ap-field">
                               <span class="ap-field-label">Benefit reset to $0</span>
-                              <span class="ap-field-value">{{ plan.benefitReset || 'â€”' }}</span>
+                              <span class="ap-field-value">{{ plan.benefitReset || '—' }}</span>
                             </div>
                             <div class="ap-field">
                               <span class="ap-field-label">Situs State</span>
@@ -1396,11 +1396,11 @@
                             </div>
                             <div v-if="plan.allowSecondaryPayer" class="ap-field">
                               <span class="ap-field-label">COB Configuration</span>
-                              <span class="ap-field-value">{{ plan.cobConfigOptions.length ? plan.cobConfigOptions.join(', ') : 'â€”' }}</span>
+                              <span class="ap-field-value">{{ plan.cobConfigOptions.length ? plan.cobConfigOptions.join(', ') : '—' }}</span>
                             </div>
                             <div class="ap-field">
                               <span class="ap-field-label">OCC (Other Coverage Code)</span>
-                              <span class="ap-field-value">{{ plan.occCodes.length ? plan.occCodes.join(', ') : 'â€”' }}</span>
+                              <span class="ap-field-value">{{ plan.occCodes.length ? plan.occCodes.join(', ') : '—' }}</span>
                             </div>
                           </div>
                           <template v-else>
@@ -1443,11 +1443,11 @@
                               </div>
                               <div v-for="(range, idx) in plan.benefitPeriodRanges" :key="idx" class="ap-field">
                                 <span class="ap-field-label">{{ plan.benefitPeriodRanges.length > 1 ? `Period ${idx + 1}` : 'Date Range' }}</span>
-                                <span class="ap-field-value">{{ range.startDate }} â€“ {{ range.endDate }}</span>
+                                <span class="ap-field-value">{{ range.startDate }} – {{ range.endDate }}</span>
                               </div>
                               <div v-if="!plan.benefitPeriodRanges.length" class="ap-field">
                                 <span class="ap-field-label">Date Range</span>
-                                <span class="ap-field-value">â€”</span>
+                                <span class="ap-field-value">—</span>
                               </div>
                               <div class="ap-field" style="grid-column: 1 / -1;">
                                 <span class="ap-field-label">Determine benefit stage by flag in eligibility file, not by accumulator data</span>
@@ -1471,7 +1471,7 @@
                             <div v-if="plan.benefitPeriodType !== 'Custom'" class="ap-field-row ap-field-row--multi ap-field-row--wrap mt-3">
                               <div v-for="(range, idx) in plan.benefitPeriodRanges" :key="idx" class="ap-field">
                                 <span class="ap-field-label">{{ plan.benefitPeriodRanges.length > 1 ? `Period ${idx + 1}` : 'Date Range' }}</span>
-                                <span class="ap-field-value">{{ range.startDate }} â€“ {{ range.endDate }}</span>
+                                <span class="ap-field-value">{{ range.startDate }} – {{ range.endDate }}</span>
                               </div>
                             </div>
 
@@ -1995,7 +1995,7 @@
                           </div>
                           <div class="ap-field">
                             <span class="ap-field-label">Historical Claims File Submitted?</span>
-                            <span class="ap-field-value">{{ hcfPending ? `Yes â€” Ticket #${hcfTicketNumber}` : 'No' }}</span>
+                            <span class="ap-field-value">{{ hcfPending ? `Yes — Ticket #${hcfTicketNumber}` : 'No' }}</span>
                           </div>
                         </div>
 
@@ -2012,7 +2012,7 @@
                         <div v-if="tocPriorAuth === true" class="ap-field-row">
                           <div class="ap-field">
                             <span class="ap-field-label">Prior Authorization File Submitted?</span>
-                            <span class="ap-field-value">{{ paPending ? `Yes â€” Ticket #${paTicketNumber}` : 'No' }}</span>
+                            <span class="ap-field-value">{{ paPending ? `Yes — Ticket #${paTicketNumber}` : 'No' }}</span>
                           </div>
                         </div>
                       </template>
@@ -2025,7 +2025,7 @@
                         <!-- Historical Claims sub-section -->
                         <template v-if="hcfPending">
                           <p class="lc-hcn-label">Historical Claims File</p>
-                          <p class="text-body bl-note">Submitted â€” Ticket #: <strong>{{ hcfTicketNumber }}</strong></p>
+                          <p class="text-body bl-note">Submitted — Ticket #: <strong>{{ hcfTicketNumber }}</strong></p>
                         </template>
                         <template v-else>
                           <div class="toc-question">
@@ -2068,7 +2068,7 @@
                         <!-- Prior Authorization File sub-section -->
                         <template v-if="paPending">
                           <p class="lc-hcn-label">Prior Authorization File</p>
-                          <p class="text-body bl-note">Submitted â€” Ticket #: <strong>{{ paTicketNumber }}</strong></p>
+                          <p class="text-body bl-note">Submitted — Ticket #: <strong>{{ paTicketNumber }}</strong></p>
                         </template>
                         <template v-else>
                           <div class="toc-question">
@@ -2125,7 +2125,7 @@
                         </div>
                       </template>
                       <template v-else>
-                        <p class="text-body bl-note mb-3">This option only applies to mail order pharmacies. It involves the client's existing mail order pharmacy sending a one-time snapshot, taken at go-live, of prescriptions with open refills to the mail order pharmacy or pharmacies selected under Liviniti's plans â€” sometimes affecting as few as one or two members. Implementation must coordinate directly with both the outgoing and incoming mail order pharmacies to arrange this, and it adds limited value for most clients, so it is not generally recommended.</p>
+                        <p class="text-body bl-note mb-3">This option only applies to mail order pharmacies. It involves the client's existing mail order pharmacy sending a one-time snapshot, taken at go-live, of prescriptions with open refills to the mail order pharmacy or pharmacies selected under Liviniti's plans — sometimes affecting as few as one or two members. Implementation must coordinate directly with both the outgoing and incoming mail order pharmacies to arrange this, and it adds limited value for most clients, so it is not generally recommended.</p>
                         <div class="toc-toggle-group">
                           <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocOpenRefillTransfer === false }]" @click="tocOpenRefillTransfer = false">No</button>
                           <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': tocOpenRefillTransfer === true }]" @click="tocOpenRefillTransfer = true">Yes</button>
@@ -2388,7 +2388,7 @@
                           <v-divider class="mb-4" />
                           <div class="nl-alert mb-4">
                             <div class="nl-alert-badge"><TriangleAlert :size="20" :stroke-width="2" /></div>
-                            <span>Not all plans are eligible to elect the RxCompass program. RxCompass is not recommended for clients with domestic/in-house pharmacy. <strong>Anti-Steerage States: FL, GA, OK, TN, and WV</strong> â€” cannot be set up with RxCompass per anti-steerage laws of those states.</span>
+                            <span>Not all plans are eligible to elect the RxCompass program. RxCompass is not recommended for clients with domestic/in-house pharmacy. <strong>Anti-Steerage States: FL, GA, OK, TN, and WV</strong> — cannot be set up with RxCompass per anti-steerage laws of those states.</span>
                           </div>
                           <v-row>
                             <v-col cols="12">
@@ -2470,7 +2470,7 @@
                               <v-col cols="12" md="6">
                                 <div class="ap-field">
                                   <span class="ap-field-label">Client State</span>
-                                  <span class="ap-field-value">{{ editableCompanyInfo.physicalState || 'â€”' }}</span>
+                                  <span class="ap-field-value">{{ editableCompanyInfo.physicalState || '—' }}</span>
                                 </div>
                                 <p class="nl-npi-hint mb-0">Pulled from Account Profile.</p>
                               </v-col>
@@ -2569,7 +2569,7 @@
                               <p class="prog-confirm-name">RxCompass</p>
                               <ul class="prog-confirm-details">
                                 <li>Type: {{ rxCompassTypeLabel }}</li>
-                                <li>{{ rxCompassIsReconsider ? 'Follow-Up Date' : 'Effective Date' }}: {{ rxCompassForm.effectiveDate || 'â€”' }}</li>
+                                <li>{{ rxCompassIsReconsider ? 'Follow-Up Date' : 'Effective Date' }}: {{ rxCompassForm.effectiveDate || '—' }}</li>
                                 <li v-if="rxCompassForm.merpVendor">MERP Administrator Name: {{ rxCompassForm.merpVendor }}</li>
                                 <li v-if="rxCompassForm.notes">Notes: {{ rxCompassForm.notes }}</li>
                               </ul>
@@ -2579,9 +2579,9 @@
                               <ul class="prog-confirm-details">
                                 <li>Election: {{ vcpElectionLabel }}</li>
                                 <template v-if="vcpForm.election !== 'OptOut'">
-                                  <li>Effective Date: {{ vcpForm.effectiveDate || 'â€”' }}</li>
-                                  <li>Client State: {{ editableCompanyInfo.physicalState || 'â€”' }}</li>
-                                  <li v-if="vcpForm.planIds.length">Plans: {{ vcpForm.planIds.map(pid => `${planNameById(pid)} (${vcpForm.designations[pid] || 'â€”'})`).join(', ') }}</li>
+                                  <li>Effective Date: {{ vcpForm.effectiveDate || '—' }}</li>
+                                  <li>Client State: {{ editableCompanyInfo.physicalState || '—' }}</li>
+                                  <li v-if="vcpForm.planIds.length">Plans: {{ vcpForm.planIds.map(pid => `${planNameById(pid)} (${vcpForm.designations[pid] || '—'})`).join(', ') }}</li>
                                   <li v-if="vcpForm.offsitePharmacies.length">Offsite Pharmacies: {{ vcpForm.offsitePharmacies.map(c => c.name).join(', ') }}</li>
                                 </template>
                                 <template v-else>
@@ -2609,7 +2609,7 @@
                     <v-dialog v-model="showProgDetailsModal" max-width="480">
                       <v-card class="prog-modal-card">
                         <v-card-title class="prog-modal-title">
-                          {{ progDetailsTarget === 'rxcompass' ? 'RxCompass' : 'Variable Copay Program' }} â€” Submitted Request
+                          {{ progDetailsTarget === 'rxcompass' ? 'RxCompass' : 'Variable Copay Program' }} — Submitted Request
                         </v-card-title>
                         <v-card-text>
                           <v-divider class="mb-4" />
@@ -2621,7 +2621,7 @@
                           <!-- RxCompass details -->
                           <ul v-if="progDetailsTarget === 'rxcompass'" class="prog-confirm-details prog-confirm-details--readonly">
                             <li>Type: {{ rxCompassTypeLabel }}</li>
-                            <li>{{ rxCompassIsReconsider ? 'Follow-Up Date' : 'Effective Date' }}: {{ rxCompassForm.effectiveDate || 'â€”' }}</li>
+                            <li>{{ rxCompassIsReconsider ? 'Follow-Up Date' : 'Effective Date' }}: {{ rxCompassForm.effectiveDate || '—' }}</li>
                             <li v-if="rxCompassForm.merpVendor">MERP Administrator Name: {{ rxCompassForm.merpVendor }}</li>
                             <li v-if="rxCompassForm.notes">Notes: {{ rxCompassForm.notes }}</li>
                           </ul>
@@ -2630,9 +2630,9 @@
                           <ul v-if="progDetailsTarget === 'vcp'" class="prog-confirm-details prog-confirm-details--readonly">
                             <li>Election: {{ vcpElectionLabel }}</li>
                             <template v-if="vcpForm.election !== 'OptOut'">
-                              <li>Effective Date: {{ vcpForm.effectiveDate || 'â€”' }}</li>
-                              <li>Client State: {{ editableCompanyInfo.physicalState || 'â€”' }}</li>
-                              <li v-if="vcpForm.planIds.length">Plans: {{ vcpForm.planIds.map(pid => `${planNameById(pid)} (${vcpForm.designations[pid] || 'â€”'})`).join(', ') }}</li>
+                              <li>Effective Date: {{ vcpForm.effectiveDate || '—' }}</li>
+                              <li>Client State: {{ editableCompanyInfo.physicalState || '—' }}</li>
+                              <li v-if="vcpForm.planIds.length">Plans: {{ vcpForm.planIds.map(pid => `${planNameById(pid)} (${vcpForm.designations[pid] || '—'})`).join(', ') }}</li>
                               <li v-if="vcpForm.offsitePharmacies.length">Offsite Pharmacies: {{ vcpForm.offsitePharmacies.map(c => c.name).join(', ') }}</li>
                             </template>
                             <template v-else>
@@ -2706,7 +2706,7 @@
                           </div>
                           <div class="ap-field">
                             <span class="ap-field-label">Notification Recipients</span>
-                            <span class="ap-field-value">{{ lcRecipients.length ? lcRecipients.join(', ') : 'â€”' }}</span>
+                            <span class="ap-field-value">{{ lcRecipients.length ? lcRecipients.join(', ') : '—' }}</span>
                           </div>
                         </div>
                       </template>
@@ -2759,7 +2759,7 @@
                         <div v-for="daw in lcDawPenalties" :key="daw.key" class="ap-field-row">
                           <div class="ap-field">
                             <span class="ap-field-label">{{ daw.label }}</span>
-                            <span class="ap-field-value">{{ daw.value || 'â€”' }}</span>
+                            <span class="ap-field-value">{{ daw.value || '—' }}</span>
                           </div>
                         </div>
                         <div v-if="lcDawNotes" class="ap-field-row">
@@ -2802,7 +2802,7 @@
                         <div class="ap-field-row">
                           <div class="ap-field">
                             <span class="ap-field-label">Reimbursement Type</span>
-                            <span class="ap-field-value">{{ lcManualReimbursement || 'â€”' }}</span>
+                            <span class="ap-field-value">{{ lcManualReimbursement || '—' }}</span>
                           </div>
                         </div>
                         <div v-if="lcManualNotes" class="ap-field-row">
@@ -2849,7 +2849,7 @@
                         <div class="ap-field-row ap-field-row--multi">
                           <div class="ap-field">
                             <span class="ap-field-label">EIN Number</span>
-                            <span class="ap-field-value">{{ blEinNumber || 'â€”' }}</span>
+                            <span class="ap-field-value">{{ blEinNumber || '—' }}</span>
                           </div>
                           <div class="ap-field">
                             <span class="ap-field-label">Billing managed by a third party</span>
@@ -2857,13 +2857,13 @@
                           </div>
                           <div v-if="blExistingParty === 'yes'" class="ap-field">
                             <span class="ap-field-label">Billing Party</span>
-                            <span class="ap-field-value">{{ blSelectedCarrier || 'â€”' }}</span>
+                            <span class="ap-field-value">{{ blSelectedCarrier || '—' }}</span>
                           </div>
                         </div>
                         <div class="ap-field-row">
                           <div class="ap-field">
                             <span class="ap-field-label">Responsible Party</span>
-                            <span class="ap-field-value">{{ blResponsibleContacts.length ? blResponsibleContacts.join(', ') : 'â€”' }}</span>
+                            <span class="ap-field-value">{{ blResponsibleContacts.length ? blResponsibleContacts.join(', ') : '—' }}</span>
                           </div>
                         </div>
                       </template>
@@ -2920,15 +2920,15 @@
                           <div class="ap-field-row ap-field-row--multi">
                             <div class="ap-field">
                               <span class="ap-field-label">Payment Method</span>
-                              <span class="ap-field-value">{{ blPaymentMethod || 'â€”' }}</span>
+                              <span class="ap-field-value">{{ blPaymentMethod || '—' }}</span>
                             </div>
                             <div v-if="blPaymentMethod === 'ACH'" class="ap-field">
                               <span class="ap-field-label">ACH Method</span>
-                              <span class="ap-field-value">{{ blAchMethod === 'send' ? 'Send to Liviniti' : blAchMethod === 'debit' ? 'Debited by Liviniti' : 'â€”' }}</span>
+                              <span class="ap-field-value">{{ blAchMethod === 'send' ? 'Send to Liviniti' : blAchMethod === 'debit' ? 'Debited by Liviniti' : '—' }}</span>
                             </div>
                             <div v-if="blAchMethod === 'debit' && blExistingParty !== 'yes'" class="ap-field">
                               <span class="ap-field-label">Debit Pull Timing</span>
-                              <span class="ap-field-value">{{ blDebitTiming || 'â€”' }}</span>
+                              <span class="ap-field-value">{{ blDebitTiming || '—' }}</span>
                             </div>
                           </div>
                           <div v-if="blAchMethod === 'debit'" class="ap-field-row ap-field-row--multi">
@@ -2948,7 +2948,7 @@
                           <div class="ap-checkbox-row mb-3" @click="blSkipAchSetup = !blSkipAchSetup" style="cursor:pointer">
                             <CheckSquare v-if="blSkipAchSetup" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
                             <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
-                            <span class="ap-field-value">Skip ACH setup â€” Carrier has an existing billing agreement with Liviniti.</span>
+                            <span class="ap-field-value">Skip ACH setup — Carrier has an existing billing agreement with Liviniti.</span>
                           </div>
                         </div>
                         <div v-if="!blSkipAchSetup" class="bl-section">
@@ -2976,7 +2976,7 @@
                             </div>
                             <div v-else-if="blAchMethod === 'debit'" class="bl-subsection">
                               <p v-if="blExistingParty !== 'yes'" class="text-body bl-note">W-9 and ACH authorization forms are required for Billing to complete account setup. Download, complete, and upload the signed forms.</p>
-                              <p v-else class="text-body bl-note">Up-to-date W-9 and ACH authorization forms are required for Billing to complete account setup. If this billing party is already established with Liviniti, forms may already be on file â€” please confirm they are current. Upload updated forms below if needed.</p>
+                              <p v-else class="text-body bl-note">Up-to-date W-9 and ACH authorization forms are required for Billing to complete account setup. If this billing party is already established with Liviniti, forms may already be on file — please confirm they are current. Upload updated forms below if needed.</p>
                               <div class="bl-download-group">
                                 <button class="button bl-download-btn" @click.prevent="handleFormDownload('Blank W-9')">
                                   <CloudDownload :size="16" :stroke-width="2" />Download Blank W-9
@@ -3010,7 +3010,7 @@
                             </div>
                             <div v-if="blAchMethod === 'debit' && blExistingParty !== 'yes'" class="bl-subsection">
                               <p class="lc-hcn-label">Debit Pull Timing</p>
-                              <p class="text-body bl-note">For informational purposes only. Records the client's preferred debit schedule for Accounting's reference â€” does not automate or trigger debit pulls.</p>
+                              <p class="text-body bl-note">For informational purposes only. Records the client's preferred debit schedule for Accounting's reference — does not automate or trigger debit pulls.</p>
                               <div class="bl-field-narrow">
                                 <Select v-model="blDebitTiming" :items="blDebitTimingOptions" label="Select timing" />
                               </div>
@@ -3052,27 +3052,27 @@
                         <div class="ap-field-row ap-field-row--multi">
                           <div class="ap-field">
                             <span class="ap-field-label">Billing Cycle</span>
-                            <span class="ap-field-value">{{ blBillingCycle || 'â€”' }}</span>
+                            <span class="ap-field-value">{{ blBillingCycle || '—' }}</span>
                           </div>
                           <div class="ap-field">
                             <span class="ap-field-label">Separate Invoices</span>
-                            <span class="ap-field-value">{{ blSeparateInvoices === 'yes' ? `Yes â€” ${blSeparateInvoicesSplit || 'split not set'}` : 'No' }}</span>
+                            <span class="ap-field-value">{{ blSeparateInvoices === 'yes' ? `Yes — ${blSeparateInvoicesSplit || 'split not set'}` : 'No' }}</span>
                           </div>
                           <div class="ap-field">
                             <span class="ap-field-label">Invoice Breakout</span>
-                            <span class="ap-field-value">{{ blInvoiceBreakout === 'yes' ? `Yes â€” ${blInvoiceBreakoutSelection || 'type not set'}` : 'No' }}</span>
+                            <span class="ap-field-value">{{ blInvoiceBreakout === 'yes' ? `Yes — ${blInvoiceBreakoutSelection || 'type not set'}` : 'No' }}</span>
                           </div>
                         </div>
                         <div v-if="blBillingCycle === 'Custom'" class="ap-field-row">
                           <div class="ap-field">
                             <span class="ap-field-label">Billing Schedule Note</span>
-                            <span class="ap-field-value">{{ blCustomCycleNote || 'â€”' }}</span>
+                            <span class="ap-field-value">{{ blCustomCycleNote || '—' }}</span>
                           </div>
                         </div>
                         <div v-if="blInvoiceBreakoutSelection === 'Custom'" class="ap-field-row">
                           <div class="ap-field">
                             <span class="ap-field-label">Custom Breakout Note</span>
-                            <span class="ap-field-value">{{ blInvoiceBreakoutNote || 'â€”' }}</span>
+                            <span class="ap-field-value">{{ blInvoiceBreakoutNote || '—' }}</span>
                           </div>
                         </div>
                       </template>
@@ -3146,7 +3146,7 @@
                         <div v-if="blReportingBreakouts === 'yes'" class="ap-field-row">
                           <div class="ap-field">
                             <span class="ap-field-label">Breakout Types</span>
-                            <span class="ap-field-value">{{ blReportingBreakoutSelections.length ? blReportingBreakoutSelections.join(', ') : 'â€”' }}</span>
+                            <span class="ap-field-value">{{ blReportingBreakoutSelections.length ? blReportingBreakoutSelections.join(', ') : '—' }}</span>
                           </div>
                         </div>
                       </template>
@@ -3191,7 +3191,7 @@
                         <div class="ap-field-row">
                           <div class="ap-field">
                             <span class="ap-field-label">Rebate Notification Contacts</span>
-                            <span class="ap-field-value">{{ blRebateContacts.length ? blRebateContacts.join(', ') : 'â€”' }}</span>
+                            <span class="ap-field-value">{{ blRebateContacts.length ? blRebateContacts.join(', ') : '—' }}</span>
                           </div>
                         </div>
                         <div class="ap-field-row ap-field-row--multi">
@@ -3267,7 +3267,7 @@
                       <template v-if="!blEditingNotes">
                         <div class="ap-field-row">
                           <div class="ap-field">
-                            <span class="ap-field-value">{{ blNotes || 'â€”' }}</span>
+                            <span class="ap-field-value">{{ blNotes || '—' }}</span>
                           </div>
                         </div>
                       </template>
@@ -3354,7 +3354,7 @@
                             </div>
                             <div class="ap-field">
                               <span class="ap-field-label">Person code characters</span>
-                              <span class="ap-field-value">{{ idPersonCodeChars || 'â€”' }}</span>
+                              <span class="ap-field-value">{{ idPersonCodeChars || '—' }}</span>
                             </div>
                             <div v-if="idVendorType === 'Liviniti'" class="ap-field">
                               <span class="ap-field-label">Combine Rx and Medical information</span>
@@ -3425,33 +3425,33 @@
                             </div>
                             <div v-if="idSendCards" class="ap-field">
                               <span class="ap-field-label">Days to send cards before</span>
-                              <span class="ap-field-value">{{ idDaysToSend || 'â€”' }}</span>
+                              <span class="ap-field-value">{{ idDaysToSend || '—' }}</span>
                             </div>
                           </div>
                           <div class="ap-field-row ap-field-row--multi">
                             <div class="ap-field">
                               <span class="ap-field-label">Initial mailing preference</span>
-                              <span class="ap-field-value">{{ idInitialMailing || 'â€”' }}</span>
+                              <span class="ap-field-value">{{ idInitialMailing || '—' }}</span>
                             </div>
                             <div class="ap-field">
                               <span class="ap-field-label">Additional/new card</span>
-                              <span class="ap-field-value">{{ idAdditionalCard || 'â€”' }}</span>
+                              <span class="ap-field-value">{{ idAdditionalCard || '—' }}</span>
                             </div>
                           </div>
                           <div class="ap-field-row ap-field-row--multi">
                             <div class="ap-field">
                               <span class="ap-field-label">Attention</span>
-                              <span class="ap-field-value">{{ idAttention || 'â€”' }}</span>
+                              <span class="ap-field-value">{{ idAttention || '—' }}</span>
                             </div>
                             <div class="ap-field">
                               <span class="ap-field-label">Mailing address</span>
-                              <span class="ap-field-value">{{ idMailingAddress || 'â€”' }}</span>
+                              <span class="ap-field-value">{{ idMailingAddress || '—' }}</span>
                             </div>
                           </div>
                           <div class="ap-field-row">
                             <div class="ap-field">
                               <span class="ap-field-label">Notes/Special instructions</span>
-                              <span class="ap-field-value">{{ idNotes || 'â€”' }}</span>
+                              <span class="ap-field-value">{{ idNotes || '—' }}</span>
                             </div>
                           </div>
                           <div class="ap-field-row">
@@ -3590,11 +3590,11 @@
                           <div class="ap-field-row ap-field-row--multi">
                             <div class="ap-field">
                               <span class="ap-field-label">Effective start date</span>
-                              <span class="ap-field-value">{{ idEffectiveStart || 'â€”' }}</span>
+                              <span class="ap-field-value">{{ idEffectiveStart || '—' }}</span>
                             </div>
                             <div class="ap-field">
                               <span class="ap-field-label">Effective end date</span>
-                              <span class="ap-field-value">{{ idEffectiveEnd || 'â€”' }}</span>
+                              <span class="ap-field-value">{{ idEffectiveEnd || '—' }}</span>
                             </div>
                           </div>
                         </template>
@@ -3614,7 +3614,7 @@
                       </div>
                     </div>
 
-                    <!-- Card 5: Card Assets & Information (Carrier only â€” read-only reference) -->
+                    <!-- Card 5: Card Assets & Information (Carrier only — read-only reference) -->
                     <div v-if="idVendorType === 'Carrier'" class="ap-section">
                       <div class="ap-section-header">
                         <h4 class="text-h4">Card Assets & Information</h4>
@@ -3735,7 +3735,7 @@
                         </div>
                       </template>
                       <template v-else>
-                        <p class="text-small bl-note mb-2">Required to generate the GPS below. Upload Clinical's completed Inclusion/Exclusion PDF â€” its pages will be included automatically.</p>
+                        <p class="text-small bl-note mb-2">Required to generate the GPS below. Upload Clinical's completed Inclusion/Exclusion PDF — its pages will be included automatically.</p>
                         <div class="bl-upload-item">
                           <template v-if="gpsIeFile && !gpsPendingIeRemoval">
                             <v-chip color="primary" variant="flat" class="bl-file-chip">
@@ -3926,7 +3926,7 @@
 
   </div>
 
-  <!-- â”€â”€ Network Linking Dialog â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+  <!-- ── Network Linking Dialog ──────────────────────────────────────────── -->
   <v-dialog v-model="showNetworkLinkDialog" :max-width="networkLinkMode === 'edit' ? '800' : '620'" persistent>
     <v-card class="nl-dialog-card">
       <v-card-title class="nl-dialog-header">
@@ -4063,7 +4063,7 @@
     </v-card>
   </v-dialog>
 
-  <!-- â”€â”€ Pharmacy Dialog (all 4 types, add + edit mode) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+  <!-- ── Pharmacy Dialog (all 4 types, add + edit mode) ─────────────────── -->
   <v-dialog v-model="showPharmacyDialog" max-width="560" persistent>
     <v-card class="nl-dialog-card">
       <v-card-title class="nl-dialog-header">
@@ -4076,14 +4076,14 @@
 
       <v-card-text class="nl-dialog-body">
 
-        <!-- â”€â”€ EDIT MODE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+        <!-- ── EDIT MODE ──────────────────────────────────────────────────── -->
         <template v-if="pharmacyDialogMode === 'edit'">
 
           <!-- Mail Order edit -->
           <template v-if="pharmacyDialogTab === 'Mail Order'">
             <div class="nl-edit-field-row">
               <span class="nl-edit-field-label">Vendor Name</span>
-              <span class="nl-edit-field-value">{{ editingPharmacyItem?.vendor || 'â€”' }}</span>
+              <span class="nl-edit-field-value">{{ editingPharmacyItem?.vendor || '—' }}</span>
             </div>
             <label class="nl-checkbox">
               <input type="checkbox" v-model="mailOrderEditForm.noBillNoPay" class="nl-checkbox-input" />
@@ -4120,11 +4120,11 @@
           <template v-else>
             <div class="nl-edit-field-row">
               <span class="nl-edit-field-label">NPI</span>
-              <span class="nl-edit-field-value">{{ editingPharmacyItem?.ncpdp || editingPharmacyItem?.npis || 'â€”' }}</span>
+              <span class="nl-edit-field-value">{{ editingPharmacyItem?.ncpdp || editingPharmacyItem?.npis || '—' }}</span>
             </div>
             <div class="nl-edit-field-row">
               <span class="nl-edit-field-label">Pharmacy name</span>
-              <span class="nl-edit-field-value">{{ editingPharmacyItem?.pharmacyName || 'â€”' }}</span>
+              <span class="nl-edit-field-value">{{ editingPharmacyItem?.pharmacyName || '—' }}</span>
             </div>
             <label class="nl-checkbox">
               <input type="checkbox" v-model="inhouseEditForm.noBillNoPay" class="nl-checkbox-input" />
@@ -4152,7 +4152,7 @@
 
         </template>
 
-        <!-- â”€â”€ ADD MODE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+        <!-- ── ADD MODE ───────────────────────────────────────────────────── -->
         <template v-else>
 
           <!-- In-House -->
@@ -4413,7 +4413,7 @@
     </v-card>
   </v-dialog>
 
-  <!-- â”€â”€ TOAST NOTIFICATIONS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+  <!-- ── TOAST NOTIFICATIONS ───────────────────────────────────────────── -->
   <v-snackbar
     v-model="toast.show"
     :color="toast.color"
@@ -4475,11 +4475,11 @@ const documentsStore = useDocumentsStore();
 const tocDayOptions = ['30 days', '60 days', '90 days'];
 
 // Card edit-mode flags (read-only by default, matching the Billing card pattern)
-const tocEditingFiles = ref(false); // Historical Claims + Prior Authorization File + RxWatchtower â€” shared widget
+const tocEditingFiles = ref(false); // Historical Claims + Prior Authorization File + RxWatchtower — shared widget
 const tocEditingOrtf = ref(false);
 const tocEditingNotes = ref(false);
 
-// Historical Claims (HCF) â€” required; drives the TOC override.
+// Historical Claims (HCF) — required; drives the TOC override.
 // Override Period is shared with RxWatchtower (Solo2 stores both in the same AccountGapOption.TOC column),
 // so there is a single editable value even though HCF can be No while RxWatchtower stays always-on.
 const tocHistoricalClaims = ref(false);
@@ -4489,19 +4489,19 @@ const tocPendingHcfRemoval = ref(false);
 const hcfPending = ref(false);
 const hcfTicketNumber = ref('');
 
-// Prior Authorization File (PA) â€” recommended, independent of HCF
+// Prior Authorization File (PA) — recommended, independent of HCF
 const tocPriorAuth = ref(false);
 const tocPriorAuthFile = ref('');
 const tocPendingPaRemoval = ref(false);
 const paPending = ref(false);
 const paTicketNumber = ref('');
 
-// Open Refill Transfer File (ORTF) â€” uncommon, mail order only, no upload/ticket
+// Open Refill Transfer File (ORTF) — uncommon, mail order only, no upload/ticket
 const tocOpenRefillTransfer = ref(false);
 
 const tocNotes = ref('');
 
-// Ticket submission â€” one item at a time, triggered only from inside edit mode.
+// Ticket submission — one item at a time, triggered only from inside edit mode.
 // Save never touches this; submitting is a separate, deliberate action you can
 // come back and do later, independent of when the answer/file was saved.
 const showTocSubmitModal = ref(false);
@@ -4547,7 +4547,7 @@ function confirmTocSubmit() {
 }
 
 // Snapshots capture each widget's values the moment Edit is clicked, so Cancel can restore
-// every field to exactly what it was before this edit session â€” not just pending file removals.
+// every field to exactly what it was before this edit session — not just pending file removals.
 let tocFilesSnapshot = { historicalClaims: false, overrideDays: '', historicalClaimsFile: '', priorAuth: false, priorAuthFile: '' };
 
 function startEditFilesCard() {
@@ -4608,7 +4608,7 @@ function cancelNotesCard() {
   tocEditingNotes.value = false;
 }
 
-// â”€â”€â”€ Step 5: Programs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Step 5: Programs ─────────────────────────────────────────────────────────
 
 // Details modal for pending tiles
 const showProgDetailsModal = ref(false);
@@ -4618,11 +4618,11 @@ function openProgDetails(prog: 'rxcompass' | 'vcp') {
   showProgDetailsModal.value = true;
 }
 
-// Enrollment state â€” true once program appears in Solo2 AccountPrograms
+// Enrollment state — true once program appears in Solo2 AccountPrograms
 const rxCompassEnrolled = ref(false);
 const vcpEnrolled = ref(false);
 
-// Pending state â€” true after ticket submitted, until Solo1 finishes setup
+// Pending state — true after ticket submitted, until Solo1 finishes setup
 const rxCompassPending = ref(false);
 const vcpPending = ref(false);
 const rxCompassTicketNumber = ref('');
@@ -4638,7 +4638,7 @@ const showProgSuccessSnackbar = ref(false);
 // RxCompass form
 const rxCompassForm = ref({ type: '', effectiveDate: '', merpVendor: '', notes: '' });
 
-// VCP form â€” election type applies account-wide (single-select, like Opt Out); only the
+// VCP form — election type applies account-wide (single-select, like Opt Out); only the
 // Maximizer/Accumulator designation varies per plan. Confirmed with Implementation 2026-08-03.
 interface VcpFormShape {
   election: string;
@@ -4677,7 +4677,7 @@ const vcpElectionDescriptions: Record<string, string> = {
 };
 
 function planNameById(id: number) {
-  return planDesignPlans.value.find(p => p.id === id)?.name ?? 'â€”';
+  return planDesignPlans.value.find(p => p.id === id)?.name ?? '—';
 }
 
 function vcpPlanItems() {
@@ -4703,7 +4703,7 @@ function selectVcpElection(value: string) {
 }
 
 const vcpElectionLabel = computed(() =>
-  vcpElectionOptions.find(o => o.value === vcpForm.value.election)?.label ?? 'â€”'
+  vcpElectionOptions.find(o => o.value === vcpForm.value.election)?.label ?? '—'
 );
 
 const rxCompassTypeItems = [
@@ -4722,7 +4722,7 @@ const rxCompassInCart = computed(() => progCart.value.includes('rxcompass'));
 const vcpInCart       = computed(() => progCart.value.includes('vcp'));
 
 const rxCompassTypeLabel = computed(() =>
-  rxCompassTypeItems.find(i => i.value === rxCompassForm.value.type)?.title ?? 'â€”'
+  rxCompassTypeItems.find(i => i.value === rxCompassForm.value.type)?.title ?? '—'
 );
 
 const rxCompassIsReconsider = computed(() =>
@@ -4902,7 +4902,7 @@ const progRatesHeaders = [
   { title: 'Eff. End Date',   key: 'effEndDate' },
 ];
 
-// â”€â”€â”€ Step 6: Limits & Controls â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Step 6: Limits & Controls ────────────────────────────────────────────────
 
 const lcEditingLimits = ref(false);
 let lcFieldsSnapshot: { key: string; label: string; value: string }[] = [];
@@ -4942,8 +4942,8 @@ const lcHcnContactOptions = computed(() => {
 });
 
 const lcEditingDaw = ref(false);
-const lcDaw1Options = ['No (Recommended)', 'Yes â€“ Brand Copay', 'Yes â€“ Generic Copay'];
-const lcDaw2Options = ['Yes â€“ Brand Copay (Recommended)', 'No', 'Yes â€“ Generic Copay'];
+const lcDaw1Options = ['No (Recommended)', 'Yes – Brand Copay', 'Yes – Generic Copay'];
+const lcDaw2Options = ['Yes – Brand Copay (Recommended)', 'No', 'Yes – Generic Copay'];
 const lcDawNotes = ref('');
 const lcDawPenalties = ref([
   {
@@ -4957,7 +4957,7 @@ const lcDawPenalties = ref([
     key: 'daw2',
     label: 'DAW Penalty 2',
     description: 'When a member refuses a generic equivalent when both the physician allows it and one exists, if marked Yes, the below selected copay plus the difference between the generic and brand name medication will be charged. This penalty will not be applied to either deductible or OOP (out-of-pocket) expense. If marked No, members will not be charged a penalty, and the applicable brand name co-pay will apply.',
-    value: 'Yes â€“ Brand Copay (Recommended)',
+    value: 'Yes – Brand Copay (Recommended)',
     options: lcDaw2Options,
   },
 ]);
@@ -5002,7 +5002,7 @@ function lcManualCancelEdit() {
   lcEditingManual.value = false;
 }
 
-// â”€â”€â”€ Step 7: Billing â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Step 7: Billing ─────────────────────────────────────────────────────────
 
 const blEinNumber = ref('');
 const formatEin = (val: string) => {
@@ -5019,7 +5019,7 @@ const blSelectedCarrier = ref('');
 const blPaymentMethod = ref('ACH');
 const blAchMethod = ref('debit');
 
-// Skip ACH setup â€” Carrier already has an existing billing agreement with Liviniti
+// Skip ACH setup — Carrier already has an existing billing agreement with Liviniti
 const blSkipAchSetup = ref(false);
 let suppressPaymentFieldsReset = false;
 const resetPaymentFields = () => {
@@ -5040,7 +5040,7 @@ watch(blSkipAchSetup, (val) => {
 
 // B-04: Debit pull timing
 const blDebitTiming = ref('');
-const blDebitTimingOptions = ['3â€“5 business days after billing complete', '10 business days', 'Prior approval required', 'Custom'];
+const blDebitTimingOptions = ['3–5 business days after billing complete', '10 business days', 'Prior approval required', 'Custom'];
 const blDebitApprovalEmail = ref('');
 const blDebitTimingNote = ref('');
 
@@ -5125,7 +5125,7 @@ const blEditingReport = ref(false);
 const blEditingRebate = ref(false);
 const blEditingNotes = ref(false);
 
-// Card 1: Billing Setup â€” snapshot/restore so Cancel undoes every field, not just uploads
+// Card 1: Billing Setup — snapshot/restore so Cancel undoes every field, not just uploads
 let blSetupSnapshot = { einNumber: '', existingParty: 'no', selectedCarrier: '', responsibleContacts: [] as string[] };
 const blSetupStartEdit = () => {
   blSetupSnapshot = {
@@ -5149,7 +5149,7 @@ const blSetupCancelEdit = () => {
   nextTick(() => { suppressResponsibleContactsReset = false; });
 };
 
-// ACH upload state â€” Payment Method card
+// ACH upload state — Payment Method card
 const blW9File = ref<string | null>(null);
 const blAchAuthFile = ref<string | null>(null);
 const blPendingW9Removal = ref(false);
@@ -5248,7 +5248,7 @@ const blReportCancelEdit = () => {
   blEditingReport.value = false;
 };
 
-// ACH upload state â€” Rebate Setup card
+// ACH upload state — Rebate Setup card
 const blRebateW9File = ref<string | null>(null);
 const blRebateAchAuthFile = ref<string | null>(null);
 const blPendingRebateW9Removal = ref(false);
@@ -5297,9 +5297,9 @@ const blNotesCancelEdit = () => {
   blEditingNotes.value = false;
 };
 
-// â”€â”€â”€ Step 8: ID Cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Step 8: ID Cards ─────────────────────────────────────────────────────────
 
-// Card 1: Vendor â€” committed refs drive Cards 2-5 visibility; Draft refs are what
+// Card 1: Vendor — committed refs drive Cards 2-5 visibility; Draft refs are what
 // the Select/Autocomplete/TextField bind to while editing, so changing Vendor Type
 // does not cascade to the other cards until Save is clicked.
 const idEditingVendor = ref(false);
@@ -5311,7 +5311,7 @@ const idCarrierVendorNameDraft = ref('');
 const idCarrierVendorOptions = ['Acclaim Benefits', 'Benefit Advantage'];
 
 const idVendorNameDisplay = computed(() => {
-  if (idVendorType.value === 'Carrier') return idCarrierVendorName.value || 'â€”';
+  if (idVendorType.value === 'Carrier') return idCarrierVendorName.value || '—';
   return null;
 });
 
@@ -5444,7 +5444,7 @@ const idDatesCancelEdit = () => {
   idEditingDates.value = false;
 };
 
-// Card 5: Card Assets & Information (Carrier only â€” read-only reference, no edit state)
+// Card 5: Card Assets & Information (Carrier only — read-only reference, no edit state)
 const downloadLivinitiLogo = () => {
   console.log('Download Liviniti logo');
   // Production: trigger static asset download
@@ -5456,7 +5456,7 @@ const handleFormDownload = (formName: string) => {
   showToast(`${formName} downloaded successfully!`, 'success');
 };
 
-// Step 9: Verification & Summary â€” GPS document generation, I/E merge, signed upload
+// Step 9: Verification & Summary — GPS document generation, I/E merge, signed upload
 const gpsIeFile = ref('');
 const gpsPendingIeRemoval = ref(false);
 const gpsSignedFile = ref('');
@@ -5465,7 +5465,7 @@ const gpsPendingSignedRemoval = ref(false);
 const gpsAccountName = () => accountOptions.value.find(acc => acc.id === selectedAccount.value)?.name ?? 'Account';
 
 const generateGpsDocument = () => {
-  showToast('GPS document generated successfully â€” Inclusion/Exclusion pages included!', 'success');
+  showToast('GPS document generated successfully — Inclusion/Exclusion pages included!', 'success');
 };
 
 // Step 1 widget: Upload Inclusion/Exclusion Document
@@ -5526,13 +5526,13 @@ const lcOverrides = [
 ];
 
 const lcFields = ref([
-  { key: 'refillRetail',    label: 'Refill Too Soon â€“ Retail',     value: '75%' },
-  { key: 'refillMail',      label: 'Refill Too Soon â€“ Mail',       value: '80%' },
+  { key: 'refillRetail',    label: 'Refill Too Soon – Retail',     value: '75%' },
+  { key: 'refillMail',      label: 'Refill Too Soon – Mail',       value: '80%' },
   { key: 'maxClaimDays',    label: 'Max Claim Days',               value: '99' },
   { key: 'maxDaySupply',    label: 'Max Day Supply',               value: '90' },
-  { key: 'maxDollarRetail', label: 'Max Dollar â€“ Retail',          value: '$1,500' },
+  { key: 'maxDollarRetail', label: 'Max Dollar – Retail',          value: '$1,500' },
   { key: 'maxDollarCmpd',   label: 'Max Dollar Per Compound',      value: '$200' },
-  { key: 'maxDollarMail',   label: 'Max Dollar â€“ Mail',            value: '$1,500' },
+  { key: 'maxDollarMail',   label: 'Max Dollar – Mail',            value: '$1,500' },
 ]);
 
 const isStarkIndustries = computed(() => selectedAccount.value === STARK_INDUSTRIES_ID);
@@ -5671,7 +5671,7 @@ const nextWizardStep = () => {
 };
 
 // Marks the current wizard step In Progress the moment any widget inside it is saved,
-// rather than waiting for the user to click Next â€” a step can be saved-into without ever
+// rather than waiting for the user to click Next — a step can be saved-into without ever
 // being navigated away from (e.g. the user saves one card then closes the tab).
 // Uses event delegation on the step body so every current and future "Save"-style button
 // is covered without having to instrument each individual save handler.
@@ -5713,11 +5713,11 @@ const finishPlanSetup = () => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
-// â”€â”€â”€ Step 1 data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Step 1 data ──────────────────────────────────────────────────────────────
 
 const statusOptions = ['Implementation', 'Active', 'Inactive', 'Pending'];
 
-// â”€â”€ Account Profile â€” Client Portal role/permission taxonomy (shared) â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Account Profile — Client Portal role/permission taxonomy (shared) ────────
 // Taxonomy validated against both the old Client Portal (Ehn.Web.Pbm.Customers
 // AccountPermissions) and Solo2's GPS report "Client Portal Access" template.
 const apPermissionOptions = [
@@ -5756,7 +5756,7 @@ const apPermissionsSummary = (role: string, permissions: Record<string, boolean>
   return selected.length ? selected.join(', ') : 'None';
 };
 // Old portal enforces exactly one Main Point of Contact for the entire account, spanning
-// Client Contacts AND Vendor Contacts together â€” confirmed via Ehn.Web.Pbm.Customers'
+// Client Contacts AND Vendor Contacts together — confirmed via Ehn.Web.Pbm.Customers'
 // SetPrimaryContact JS, which unchecks every "PrimaryContact" checkbox on the page
 // regardless of which section (Client or Third Party) it lives in. Not scoped per list.
 type ApMainPocRef = { list: 'client' | 'vendor'; index: number };
@@ -5765,7 +5765,7 @@ const apEnforceSingleMainPoc = (current: ApMainPocRef) => {
   apVendorContacts.value.forEach((c, i) => { if (!(current.list === 'vendor' && i === current.index)) c.mainPointOfContact = false; });
 };
 // Returns the name of whichever contact currently holds Main Point of Contact, excluding
-// the one being edited â€” checked across both lists since it's a single global designation.
+// the one being edited — checked across both lists since it's a single global designation.
 const apOtherContactIsMainPoc = (current: ApMainPocRef): string => {
   const clientMatch = apClientContacts.value.find((c, i) => !(current.list === 'client' && i === current.index) && c.mainPointOfContact);
   if (clientMatch) return clientMatch.name;
@@ -5773,7 +5773,7 @@ const apOtherContactIsMainPoc = (current: ApMainPocRef): string => {
   return vendorMatch?.name ?? '';
 };
 
-// â”€â”€ Account Profile â€” Client Contacts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Account Profile — Client Contacts ─────────────────────────────────────────
 const apClientContactHeaders = [
   { title: 'Name', key: 'name' },
   { title: 'Email', key: 'email' },
@@ -5945,7 +5945,7 @@ const apContactDialogActions = computed(() => [
   { text: 'Add Contact', styleType: 'primary' as const, onClick: apSaveContact, disabled: apContactSaveDisabled(apContactForm.value) },
 ]);
 
-// â”€â”€ Account Profile â€” Vendor Contacts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Account Profile — Vendor Contacts ─────────────────────────────────────────
 const apVendorContactHeaders = [
   { title: 'Name', key: 'name' },
   { title: 'Vendor', key: 'vendor' },
@@ -5977,7 +5977,7 @@ const apVendorMainPointOfContact = ref(false);
 const apVendorSurveyContact = ref(false);
 const apVendorAckConfirmed = ref(false);
 const apVendorAccessFormConfirmed = ref(false);
-// Contacts are not always individuals â€” a vendor "contact" can be a shared/group inbox with
+// Contacts are not always individuals — a vendor "contact" can be a shared/group inbox with
 // multiple emails or phone numbers on file, so the assignment picks which one applies here
 // (mirrors SoloRx's per-contact EmailAddress/PhoneNumber collections).
 const apVendorContactData = [
@@ -6065,7 +6065,7 @@ const apVendorContactDialogActions = computed(() => [
   { text: 'Add Contact', styleType: 'primary' as const, onClick: apSaveVendorContacts, disabled: apVendorAddDisabled.value },
 ]);
 
-// Edit Vendor Contact (role/PHI only â€” identity fields come from the vendor's own contact record)
+// Edit Vendor Contact (role/PHI only — identity fields come from the vendor's own contact record)
 const apShowEditVendorContactDialog = ref(false);
 const apEditingVendorContactIndex = ref(-1);
 const apEditingVendorContactName = ref('');
@@ -6196,7 +6196,7 @@ const startEditCompanyInfo = () => {
 const saveCompanyInfo = () => { companyInfo.value = { ...editableCompanyInfo.value }; editingCompanyInfo.value = false; };
 const cancelEditCompanyInfo = () => { editingCompanyInfo.value = false; sameAsPhysical.value = false; };
 
-// â”€â”€â”€ Step 2: Network Configuration â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Step 2: Network Configuration ───────────────────────────────────────────
 
 const networkHeaders = [
   { title: 'Network Name', key: 'networkName' },
@@ -6218,9 +6218,9 @@ const networkFilterPills = [
 
 const networkRowsByAccount = ref<Record<number, any[]>>({
   1: [
-    { networkName: 'First Choice Broad',  status: 'Scheduled', linkingLevel: 'Account', linkedGroups: 'All', linkedPlans: 'All', bin: 'â€”', effStartDate: '09/01/2026', endDate: 'â€”' },
-    { networkName: 'Mail Order - Network', status: 'Scheduled', linkingLevel: 'Account', linkedGroups: 'All', linkedPlans: 'All', bin: 'â€”', effStartDate: '09/01/2026', endDate: 'â€”' },
-    { networkName: 'Compliance',          status: 'Scheduled', linkingLevel: 'Account', linkedGroups: 'All', linkedPlans: 'All', bin: 'â€”', effStartDate: '09/01/2026', endDate: 'â€”' },
+    { networkName: 'First Choice Broad',  status: 'Scheduled', linkingLevel: 'Account', linkedGroups: 'All', linkedPlans: 'All', bin: '—', effStartDate: '09/01/2026', endDate: '—' },
+    { networkName: 'Mail Order - Network', status: 'Scheduled', linkingLevel: 'Account', linkedGroups: 'All', linkedPlans: 'All', bin: '—', effStartDate: '09/01/2026', endDate: '—' },
+    { networkName: 'Compliance',          status: 'Scheduled', linkingLevel: 'Account', linkedGroups: 'All', linkedPlans: 'All', bin: '—', effStartDate: '09/01/2026', endDate: '—' },
   ],
   2: [],
   3: [],
@@ -6235,7 +6235,7 @@ const currentNetworkRows = computed(() =>
 const pharmacyTabs = ['In-House', 'Specialty', 'Mail Order', 'Custom'];
 const activePharmacyTab = ref('In-House');
 
-// â”€â”€â”€ Step 3: Group Setup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Step 3: Group Setup ──────────────────────────────────────────────────────
 // Mirrors master's Group Setup step (account-level groups used to source BPG Configuration's linked-group dropdown).
 const GROUP_SETUP_LIVINITI_BIN = '025945';
 const GROUP_SETUP_CHANGE_BIN = '015433';
@@ -6263,7 +6263,7 @@ const groupSetupRowActions = [
 ];
 
 // A group referenced elsewhere in the wizard (BPG Configuration or a group-level Network Link)
-// can't be removed from Group Setup â€” doing so would orphan that reference. Unlink it from the
+// can't be removed from Group Setup — doing so would orphan that reference. Unlink it from the
 // referencing section first, then the group can be removed.
 function isGroupLinkedToBpg(groupId: string): boolean {
   return planDesignPlans.value.some(plan => plan.bpgRows.some((row: any) => row.groupId === groupId));
@@ -6305,12 +6305,12 @@ function groupSetupBinLabel(bin: string): string {
 
 const groupSetupRowsByAccount = ref<Record<number, GroupSetupRow[]>>({
   1: [
-    { groupName: 'Allied Finishing, Inc', groupId: '1275', bin: GROUP_SETUP_LIVINITI_BIN, pcn: 'SSN', claimSourceId: null, startDate: '03/01/2026', endDate: 'â€”' },
+    { groupName: 'Allied Finishing, Inc', groupId: '1275', bin: GROUP_SETUP_LIVINITI_BIN, pcn: 'SSN', claimSourceId: null, startDate: '03/01/2026', endDate: '—' },
   ],
   2: [],
   3: [],
   4: [
-    { groupName: '', groupId: 'BG3HW', bin: GROUP_SETUP_CHANGE_BIN, pcn: 'SSN', claimSourceId: 1, startDate: '01/01/2026', endDate: 'â€”' },
+    { groupName: '', groupId: 'BG3HW', bin: GROUP_SETUP_CHANGE_BIN, pcn: 'SSN', claimSourceId: 1, startDate: '01/01/2026', endDate: '—' },
   ],
   5: [],
 });
@@ -6366,7 +6366,7 @@ const handleGroupSetupRowAction = ({ action, item }: { action: string; item: Gro
   }
   if (action === 'edit') {
     editingGroupSetupIndex.value = arr.findIndex(r => r.groupId === item.groupId);
-    groupSetupForm.value = { groupName: item.groupName, groupId: item.groupId, bin: item.bin, pcn: item.pcn, claimSourceId: item.claimSourceId, startDate: item.startDate, endDate: item.endDate === 'â€”' ? '' : item.endDate };
+    groupSetupForm.value = { groupName: item.groupName, groupId: item.groupId, bin: item.bin, pcn: item.pcn, claimSourceId: item.claimSourceId, startDate: item.startDate, endDate: item.endDate === '—' ? '' : item.endDate };
     openGroupSetupDialog('edit');
   }
 };
@@ -6375,7 +6375,7 @@ const saveGroupSetupEntry = () => {
   groupSetupTouched.value = true;
   if (!isGroupSetupFormValid.value || !selectedAccount.value) return;
   const arr = groupSetupRowsByAccount.value[selectedAccount.value] ?? (groupSetupRowsByAccount.value[selectedAccount.value] = []);
-  const entry = { ...groupSetupForm.value, endDate: groupSetupForm.value.endDate || 'â€”' };
+  const entry = { ...groupSetupForm.value, endDate: groupSetupForm.value.endDate || '—' };
   if (groupSetupDialogMode.value === 'edit' && editingGroupSetupIndex.value !== -1) {
     arr[editingGroupSetupIndex.value] = entry;
   } else {
@@ -6389,14 +6389,14 @@ const groupSetupDialogActions = computed(() => [
   { text: groupSetupDialogMode.value === 'edit' ? 'Save Changes' : 'Add Group', styleType: 'primary' as const, onClick: saveGroupSetupEntry },
 ]);
 
-// â”€â”€â”€ Step 2: Network Linking dialog â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Step 2: Network Linking dialog ───────────────────────────────────────────
 
 const showNetworkLinkDialog = ref(false);
 const networkLinkStep = ref(1);
 const networkLinkMode = ref<'add' | 'edit'>('add');
 const editingNetworkItem = ref<any>(null);
 const editingNetworkIndex = ref(-1);
-// Group-level Network Linking selects from the account's Group Setup groups â€” same source BPG Configuration uses.
+// Group-level Network Linking selects from the account's Group Setup groups — same source BPG Configuration uses.
 const currentNetworkBpgOptions = computed(() =>
   currentGroupSetupRows.value.map(g => ({ id: g.groupId, bin: g.bin, pcn: g.pcn, groupNumber: g.groupId }))
 );
@@ -6425,7 +6425,7 @@ const deriveStatus = (startDate: string, endDate: string): string => {
   const [sm, sd, sy] = startDate.split('/').map(Number);
   const start = new Date(sy, sm - 1, sd);
   if (start > today) return 'Scheduled';
-  if (endDate && endDate !== 'â€”') {
+  if (endDate && endDate !== '—') {
     const [em, ed, ey] = endDate.split('/').map(Number);
     if (new Date(ey, em - 1, ed) < today) return 'Terminated';
   }
@@ -6476,9 +6476,9 @@ const saveNetworkLink = () => {
         : currentNetworkBpgOptions.value
             .filter(r => networkLinkForm.value.selectedGroupIds.includes(r.id))
             .map(r => r.groupNumber)
-            .join(', ') || 'â€”',
+            .join(', ') || '—',
       effStartDate: networkLinkForm.value.startDate,
-      endDate: networkLinkForm.value.endDate || 'â€”',
+      endDate: networkLinkForm.value.endDate || '—',
     };
   } else {
     if (!networkLinkForm.value.selectedNetwork) return;
@@ -6491,11 +6491,11 @@ const saveNetworkLink = () => {
         : currentNetworkBpgOptions.value
             .filter(r => networkLinkForm.value.selectedGroupIds.includes(r.id))
             .map(r => r.groupNumber)
-            .join(', ') || 'â€”',
-      linkedPlans: networkLinkForm.value.linkingLevel === 'Account Level' ? 'All' : 'â€”',
-      bin: 'â€”',
+            .join(', ') || '—',
+      linkedPlans: networkLinkForm.value.linkingLevel === 'Account Level' ? 'All' : '—',
+      bin: '—',
       effStartDate: networkLinkForm.value.startDate,
-      endDate: networkLinkForm.value.endDate || 'â€”',
+      endDate: networkLinkForm.value.endDate || '—',
     });
   }
   const wasEdit = networkLinkMode.value === 'edit';
@@ -6503,37 +6503,37 @@ const saveNetworkLink = () => {
   showToast(wasEdit ? 'Pharmacy Network Updated Successfully' : 'Pharmacy Network Linking Successful', 'success');
 };
 
-// â”€â”€â”€ Step 2: Preferred Pharmacy dialogs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Step 2: Preferred Pharmacy dialogs ──────────────────────────────────────
 
 const pharmacyDataByAccount = ref<Record<number, Record<string, any[]>>>({
   1: {
-    // Stark Industries â€” in implementation, all Scheduled with future dates
+    // Stark Industries — in implementation, all Scheduled with future dates
     'In-House': [
-      { ncpdp: '1234567', pharmacyName: 'CVS Pharmacy #4821', status: 'Scheduled', noBillNoPay: false, startDate: '09/01/2026', endDate: 'â€”' },
-      { ncpdp: '7654321', pharmacyName: 'Walgreens #1093',    status: 'Scheduled', noBillNoPay: true,  startDate: '09/01/2026', endDate: 'â€”' },
+      { ncpdp: '1234567', pharmacyName: 'CVS Pharmacy #4821', status: 'Scheduled', noBillNoPay: false, startDate: '09/01/2026', endDate: '—' },
+      { ncpdp: '7654321', pharmacyName: 'Walgreens #1093',    status: 'Scheduled', noBillNoPay: true,  startDate: '09/01/2026', endDate: '—' },
     ],
     'Specialty': [
-      { pharmacyType: 'Specific Pharmacies', pharmacyName: 'Accredo Health Group', npis: '1562047839', noBillNoPay: false, status: 'Scheduled', startDate: '09/01/2026', endDate: 'â€”' },
+      { pharmacyType: 'Specific Pharmacies', pharmacyName: 'Accredo Health Group', npis: '1562047839', noBillNoPay: false, status: 'Scheduled', startDate: '09/01/2026', endDate: '—' },
     ],
     'Mail Order': [
-      { vendor: 'PILLPACK, LLC', status: 'Scheduled', noBillNoPay: false, displayInPortals: true, startDate: '09/01/2026', endDate: 'â€”' },
+      { vendor: 'PILLPACK, LLC', status: 'Scheduled', noBillNoPay: false, displayInPortals: true, startDate: '09/01/2026', endDate: '—' },
     ],
     'Custom': [],
   },
   2: { 'In-House': [], 'Specialty': [], 'Mail Order': [], 'Custom': [] },
   3: { 'In-House': [], 'Specialty': [], 'Mail Order': [], 'Custom': [] },
   4: {
-    // Oscorp â€” in implementation, all Scheduled with future dates
+    // Oscorp — in implementation, all Scheduled with future dates
     'In-House': [
-      { ncpdp: '1122334', pharmacyName: 'Rite Aid #5247',       status: 'Scheduled', noBillNoPay: false, startDate: '10/01/2026', endDate: 'â€”' },
-      { ncpdp: '9988776', pharmacyName: 'Costco Pharmacy #1190', status: 'Scheduled', noBillNoPay: false, startDate: '10/01/2026', endDate: 'â€”' },
+      { ncpdp: '1122334', pharmacyName: 'Rite Aid #5247',       status: 'Scheduled', noBillNoPay: false, startDate: '10/01/2026', endDate: '—' },
+      { ncpdp: '9988776', pharmacyName: 'Costco Pharmacy #1190', status: 'Scheduled', noBillNoPay: false, startDate: '10/01/2026', endDate: '—' },
     ],
     'Specialty': [
-      { pharmacyType: 'Specific Pharmacies', pharmacyName: 'Walgreens Specialty', npis: '1487263940', noBillNoPay: false, status: 'Scheduled', startDate: '10/01/2026', endDate: 'â€”' },
-      { pharmacyType: 'Specific Pharmacies', pharmacyName: 'CVS Specialty',       npis: '0934718265', noBillNoPay: false, status: 'Scheduled', startDate: '10/01/2026', endDate: 'â€”' },
+      { pharmacyType: 'Specific Pharmacies', pharmacyName: 'Walgreens Specialty', npis: '1487263940', noBillNoPay: false, status: 'Scheduled', startDate: '10/01/2026', endDate: '—' },
+      { pharmacyType: 'Specific Pharmacies', pharmacyName: 'CVS Specialty',       npis: '0934718265', noBillNoPay: false, status: 'Scheduled', startDate: '10/01/2026', endDate: '—' },
     ],
     'Mail Order': [
-      { vendor: 'POSTAL PRESCRIPTION SERVICES', status: 'Scheduled', noBillNoPay: false, displayInPortals: false, startDate: '10/01/2026', endDate: 'â€”' },
+      { vendor: 'POSTAL PRESCRIPTION SERVICES', status: 'Scheduled', noBillNoPay: false, displayInPortals: false, startDate: '10/01/2026', endDate: '—' },
     ],
     'Custom': [],
   },
@@ -6720,14 +6720,14 @@ const handlePharmacyRowAction = ({ action, item }: { action: string; item: any }
       mailOrderEditForm.value = {
         noBillNoPay: !!item.noBillNoPay,
         displayInPortals: !!item.displayInPortals,
-        startDate: item.startDate === 'â€”' ? '' : item.startDate,
-        endDate: item.endDate === 'â€”' ? '' : item.endDate,
+        startDate: item.startDate === '—' ? '' : item.startDate,
+        endDate: item.endDate === '—' ? '' : item.endDate,
       };
     } else {
       inhouseEditForm.value = {
         noBillNoPay: !!item.noBillNoPay,
-        startDate: item.startDate === 'â€”' ? '' : item.startDate,
-        endDate: item.endDate === 'â€”' ? '' : item.endDate,
+        startDate: item.startDate === '—' ? '' : item.startDate,
+        endDate: item.endDate === '—' ? '' : item.endDate,
       };
     }
     inhouseEditTouched.value = false;
@@ -6750,7 +6750,7 @@ const handleNetworkRowAction = ({ action, item }: { action: string; item: any })
     editingNetworkItem.value = item;
     editingNetworkIndex.value = arr.indexOf(item);
     networkLinkMode.value = 'edit';
-    const linkedGroupNumbers = item.linkingLevel === 'Group' && item.linkedGroups && item.linkedGroups !== 'All' && item.linkedGroups !== 'â€”'
+    const linkedGroupNumbers = item.linkingLevel === 'Group' && item.linkedGroups && item.linkedGroups !== 'All' && item.linkedGroups !== '—'
       ? item.linkedGroups.split(',').map((g: string) => g.trim())
       : [];
     networkLinkForm.value = {
@@ -6758,8 +6758,8 @@ const handleNetworkRowAction = ({ action, item }: { action: string; item: any })
       selectedGroupIds: currentNetworkBpgOptions.value
         .filter(r => linkedGroupNumbers.includes(r.groupNumber))
         .map(r => r.id),
-      startDate: item.effStartDate === 'â€”' ? '' : item.effStartDate,
-      endDate: item.endDate === 'â€”' ? '' : item.endDate,
+      startDate: item.effStartDate === '—' ? '' : item.effStartDate,
+      endDate: item.endDate === '—' ? '' : item.endDate,
       selectedNetwork: item.networkName,
     };
     networkLinkStep.value = 1;
@@ -6778,8 +6778,8 @@ const savePharmacyEdit = () => {
       ...editingPharmacyItem.value,
       noBillNoPay: mailOrderEditForm.value.noBillNoPay,
       displayInPortals: mailOrderEditForm.value.displayInPortals,
-      startDate: mailOrderEditForm.value.startDate || 'â€”',
-      endDate: mailOrderEditForm.value.endDate || 'â€”',
+      startDate: mailOrderEditForm.value.startDate || '—',
+      endDate: mailOrderEditForm.value.endDate || '—',
     };
   } else {
     if (!inhouseEditForm.value.startDate) { inhouseEditTouched.value = true; return; }
@@ -6787,8 +6787,8 @@ const savePharmacyEdit = () => {
     arr[editingPharmacyIndex.value] = {
       ...editingPharmacyItem.value,
       noBillNoPay: inhouseEditForm.value.noBillNoPay,
-      startDate: inhouseEditForm.value.startDate || 'â€”',
-      endDate: inhouseEditForm.value.endDate || 'â€”',
+      startDate: inhouseEditForm.value.startDate || '—',
+      endDate: inhouseEditForm.value.endDate || '—',
     };
   }
   showPharmacyDialog.value = false;
@@ -6809,11 +6809,11 @@ const savePharmacy = () => {
     inhouseCustomForms.value.forEach(f => {
       accountData[tab].push({
         ncpdp: f.ncpdp,
-        pharmacyName: f.npiChips[0]?.name || 'â€”',
+        pharmacyName: f.npiChips[0]?.name || '—',
         status: deriveStatus(f.startDate, f.endDate),
         noBillNoPay: f.noBillNoPay,
         startDate: f.startDate,
-        endDate: f.endDate || 'â€”',
+        endDate: f.endDate || '—',
       });
     });
   } else if (tab === 'Specialty') {
@@ -6835,7 +6835,7 @@ const savePharmacy = () => {
             noBillNoPay: f.noBillNoPay,
             status: deriveStatus(f.startDate, f.endDate),
             startDate: f.startDate,
-            endDate: f.endDate || 'â€”',
+            endDate: f.endDate || '—',
           });
         });
       } else {
@@ -6846,7 +6846,7 @@ const savePharmacy = () => {
           noBillNoPay: f.noBillNoPay,
           status: deriveStatus(f.startDate, f.endDate),
           startDate: f.startDate,
-          endDate: f.endDate || 'â€”',
+          endDate: f.endDate || '—',
         });
       }
     });
@@ -6865,7 +6865,7 @@ const savePharmacy = () => {
           noBillNoPay: f.noBillNoPay,
           displayInPortals: f.displayInPortals,
           startDate: f.startDate,
-          endDate: f.endDate || 'â€”',
+          endDate: f.endDate || '—',
         });
       });
     });
@@ -6874,7 +6874,7 @@ const savePharmacy = () => {
   showToast('Pharmacy Added Successfully', 'success');
 };
 
-// â”€â”€â”€ Step 3: Plan Design â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Step 3: Plan Design ──────────────────────────────────────────────────────
 
 const planDesignPlans = ref([
   {
@@ -7251,7 +7251,7 @@ const accumulatorEditDatesDialogActions = computed(() => [
   { text: 'Save Changes', styleType: 'primary' as const, onClick: saveAccumulatorEditDates },
 ]);
 
-// â”€â”€â”€ Copay Structure â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Copay Structure ──────────────────────────────────────────────────────────
 
 const copayTabs = [
   { key: 'pharmacyNetwork', label: 'Pharmacy Network' },
@@ -7369,7 +7369,7 @@ const togglePlan = (id: number) => {
   }
 };
 
-// â”€â”€â”€ Plan Design â€” Create New Plan â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Plan Design — Create New Plan ────────────────────────────────────────────
 const pdShowCreateDialog = ref(false);
 const pdNewCreateForm = () => ({ planName: '', startDate: '', endDate: '' });
 const pdCreateForm = ref(pdNewCreateForm());
@@ -7429,7 +7429,7 @@ const pdCreateDialogActions = computed(() => [
   { text: 'Create Plan', styleType: 'primary' as const, onClick: pdSaveNewPlan },
 ]);
 
-// â”€â”€â”€ Plan Design â€” Plan Overview edit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Plan Design — Plan Overview edit ─────────────────────────────────────────
 const pdBenefitResetOptions = [
   'January 1: Calendar Year', 'February 1', 'March 1', 'March 31', 'April 1', 'May 1',
   'June 1', 'July 1', 'August 1', 'September 1', 'October 1', 'November 1', 'December 1',
@@ -7443,7 +7443,7 @@ let pdOverviewSnapshots: Record<number, { name: string; effStartDate: string; ef
 
 const pdIsEditingOverview = (id: number) => pdOverviewEditingIds.value.includes(id);
 
-const situsStateLabel = (value: string) => states.find(s => s.value === value)?.title || 'â€”';
+const situsStateLabel = (value: string) => states.find(s => s.value === value)?.title || '—';
 
 const pdStartEditOverview = (plan: PdOverviewFields) => {
   pdOverviewSnapshots[plan.id] = { name: plan.name, effStartDate: plan.effStartDate, effEndDate: plan.effEndDate, benefitReset: plan.benefitReset, situsState: plan.situsState };
@@ -7470,16 +7470,16 @@ const pdSaveEditOverview = (plan: PdOverviewFields) => {
   pdOverviewTouched.value = pdOverviewTouched.value.filter(id => id !== plan.id);
 };
 
-// â”€â”€â”€ Plan Design â€” Plan Parameters edit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Plan Design — Plan Parameters edit ───────────────────────────────────────
 type PdParameterFields = { id: number; isGrandfathered: boolean; acaApplies: boolean; acaAppliesAtZeroCost: boolean; isHdhp: boolean; hdhpNotes: string; governedByErisa: boolean };
 
 const pdOccCodeOptions = [
   '0 - Not specified by patient',
   '1 - No other coverage',
-  '2 - Other coverage exists â€“ payment collected',
-  '3 - Other coverage billed â€“ claim not covered',
-  '4 - Other coverage exists â€“ payment not collected',
-  '6 - Other Coverage Denied â€” Not a Participating Provider.',
+  '2 - Other coverage exists – payment collected',
+  '3 - Other coverage billed – claim not covered',
+  '4 - Other coverage exists – payment not collected',
+  '6 - Other Coverage Denied — Not a Participating Provider.',
   '8 - Claim is billing for patient financial responsibility only',
 ];
 
@@ -7519,7 +7519,7 @@ const pdSaveEditCob = (plan: { id: number }) => {
   pdCobEditingIds.value = pdCobEditingIds.value.filter(id => id !== plan.id);
 };
 
-// Applicable Benefit Period â€” mirrors Solo2's LedgerPeriod / PlanDesignBenefitPeriod
+// Applicable Benefit Period — mirrors Solo2's LedgerPeriod / PlanDesignBenefitPeriod
 type PdBenefitRange = { startDate: string; endDate: string };
 type PdBenefitFields = { id: number; effStartDate: string; benefitPeriodType: string; benefitPeriodRanges: PdBenefitRange[]; benefitByFlag: boolean };
 
@@ -7534,7 +7534,7 @@ const benefitPeriodTypeOptions = [
 ];
 
 function benefitPeriodTypeLabel(value: string) {
-  return benefitPeriodTypeOptions.find(o => o.value === value)?.title ?? 'â€”';
+  return benefitPeriodTypeOptions.find(o => o.value === value)?.title ?? '—';
 }
 
 function parseMDY(value: string): Date | null {
@@ -7762,7 +7762,7 @@ const pdSaveEditMaxSpend = (plan: { id: number }) => {
   pdMaxSpendEditingIds.value = pdMaxSpendEditingIds.value.filter(id => id !== plan.id);
 };
 
-// â”€â”€â”€ Timeline helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Timeline helpers ─────────────────────────────────────────────────────────
 
 const activeTimelineProgress = computed(() => {
   if (!activeTimelineItem.value) return 0;
@@ -7825,7 +7825,7 @@ watch(selectedAccount, (newVal) => {
 <style lang="scss" scoped>
 @import '@/style.scss';
 
-// â”€â”€â”€ Layout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Layout ───────────────────────────────────────────────────────────────────
 
 .plan-explorer-content {
   padding: $spacing-medium;
@@ -7839,7 +7839,7 @@ watch(selectedAccount, (newVal) => {
   color: $color-primary;
 }
 
-// â”€â”€â”€ Timeline sticky wrapper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Timeline sticky wrapper ──────────────────────────────────────────────────
 
 .plan-timeline-wrapper {
   // default: no special behavior
@@ -7873,7 +7873,7 @@ watch(selectedAccount, (newVal) => {
   }
 }
 
-// â”€â”€â”€ Timeline (left column) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Timeline (left column) ───────────────────────────────────────────────────
 
 .plan-timeline {
   // The .plan-timeline class is on the v-timeline root element (which IS the CSS grid).
@@ -7925,7 +7925,7 @@ watch(selectedAccount, (newVal) => {
   }
 }
 
-// â”€â”€â”€ Wizard sub-steps (nested below Plan Setup card) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Wizard sub-steps (nested below Plan Setup card) ─────────────────────────
 
 .wizard-sub-steps {
   margin-top: $spacing-xsmall;
@@ -8003,7 +8003,7 @@ watch(selectedAccount, (newVal) => {
   line-height: 1.3;
 }
 
-// â”€â”€â”€ Standard timeline detail panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Standard timeline detail panel ──────────────────────────────────────────
 
 .timeline-details-card {
   border: 1px solid $color-border;
@@ -8015,7 +8015,7 @@ watch(selectedAccount, (newVal) => {
 .progress-chip-container { gap: $spacing-xsmall; }
 .timeline-text-content-gap { gap: $spacing-medium; }
 
-// â”€â”€â”€ Wizard overview card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Wizard overview card ─────────────────────────────────────────────────────
 
 .wizard-overview {
   border: 1px solid $color-border;
@@ -8150,7 +8150,7 @@ watch(selectedAccount, (newVal) => {
   .button { display: inline-flex; align-items: center; gap: 6px; }
 }
 
-// â”€â”€â”€ Wizard step content (right column) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Wizard step content (right column) ──────────────────────────────────────
 
 .wizard-step-header {
   margin-bottom: $spacing-large;
@@ -8207,7 +8207,7 @@ watch(selectedAccount, (newVal) => {
   gap: $spacing-small;
 }
 
-// â”€â”€â”€ Step 1: Account Profile sections â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Step 1: Account Profile sections ────────────────────────────────────────
 
 .ap-section {
   border: 1px solid $color-border;
@@ -8326,7 +8326,7 @@ watch(selectedAccount, (newVal) => {
   }
 }
 
-// Native v-checkbox used in Client/Vendor Contact modals â€” true-icon/false-icon props
+// Native v-checkbox used in Client/Vendor Contact modals — true-icon/false-icon props
 // point at Lucide icons (project has no MDI icon font loaded), styled to match the
 // look of the .ap-checkbox-toggle divs used elsewhere on this page.
 .ap-vcheckbox {
@@ -8409,7 +8409,7 @@ watch(selectedAccount, (newVal) => {
   margin-top: $spacing-medium;
 }
 
-// â”€â”€â”€ Shared buttons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Shared buttons ───────────────────────────────────────────────────────────
 
 .button {
   display: inline-flex;
@@ -8457,7 +8457,7 @@ watch(selectedAccount, (newVal) => {
   gap: $spacing-nano;
 }
 
-// â”€â”€â”€ Step 2: Network Configuration â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Step 2: Network Configuration ───────────────────────────────────────────
 
 .nc-section {
   border: 1px solid $color-border;
@@ -8640,7 +8640,7 @@ watch(selectedAccount, (newVal) => {
   }
 }
 
-// â”€â”€â”€ Step 3: Plan Design â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Step 3: Plan Design ──────────────────────────────────────────────────────
 
 .pd-header {
   display: flex;
@@ -8808,7 +8808,7 @@ watch(selectedAccount, (newVal) => {
   margin: 0 0 $spacing-small;
 }
 
-// â”€â”€â”€ Copay Structure card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Copay Structure card ─────────────────────────────────────────────────────
 
 .cs-card {
   background-color: $color-neutral-white;
@@ -8919,7 +8919,7 @@ watch(selectedAccount, (newVal) => {
   }
 }
 
-// â”€â”€â”€ Step 4: Transition of Care â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Step 4: Transition of Care ───────────────────────────────────────────────
 
 .toc-intro {
   color: $color-text-secondary;
@@ -8988,7 +8988,7 @@ watch(selectedAccount, (newVal) => {
   }
 }
 
-// â”€â”€â”€ Step 5: Programs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Step 5: Programs ─────────────────────────────────────────────────────────
 
 .prog-title {
   margin-bottom: $spacing-medium;
@@ -9415,7 +9415,7 @@ watch(selectedAccount, (newVal) => {
   color: $color-text-secondary;
 }
 
-// â”€â”€â”€ Step 6: Limits & Controls â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Step 6: Limits & Controls ────────────────────────────────────────────────
 
 .lc-overrides-list {
   margin: 0;
@@ -9486,7 +9486,7 @@ watch(selectedAccount, (newVal) => {
   }
 }
 
-// â”€â”€â”€ Step 7: Billing â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Step 7: Billing ─────────────────────────────────────────────────────────
 
 .bl-section {
   margin-bottom: $spacing-large;
@@ -9654,7 +9654,7 @@ watch(selectedAccount, (newVal) => {
   }
 }
 
-// â”€â”€â”€ Step 8: ID Cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Step 8: ID Cards ─────────────────────────────────────────────────────────
 
 .id-two-col-row {
   display: flex;
@@ -9803,7 +9803,7 @@ watch(selectedAccount, (newVal) => {
   }
 }
 
-// â”€â”€â”€ Step 9: Verification & Summary â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Step 9: Verification & Summary ───────────────────────────────────────────
 
 .vs-completion {
   font-size: $font-size-h3;
@@ -9913,7 +9913,7 @@ watch(selectedAccount, (newVal) => {
   }
 }
 
-// â”€â”€â”€ Wayne Enterprises: Group Account Profile (GAP) view â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Wayne Enterprises: Group Account Profile (GAP) view ──────────────────────
 
 .gap-view {
   padding: $spacing-small 0;
@@ -10014,7 +10014,7 @@ watch(selectedAccount, (newVal) => {
   flex-shrink: 0;
 }
 
-// â”€â”€â”€ Network Link + Pharmacy Dialogs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Network Link + Pharmacy Dialogs ─────────────────────────────────────────
 
 .nl-dialog-card {
   border: 1px solid $color-border;
@@ -10462,7 +10462,7 @@ watch(selectedAccount, (newVal) => {
   color: $color-text-primary;
 }
 
-// â”€â”€â”€ Mail Order vendor picker â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Mail Order vendor picker ──────────────────────────────────────────────────
 
 .nl-vendor-chips {
   display: flex;
@@ -10646,10 +10646,10 @@ watch(selectedAccount, (newVal) => {
 }
 </style>
 
-<!-- Non-scoped dark mode overrides â€” bypasses Vue scoping to apply correctly -->
+<!-- Non-scoped dark mode overrides — bypasses Vue scoping to apply correctly -->
 <style lang="scss">
 html.dark {
-  // â”€â”€ Timeline cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Timeline cards ──────────────────────────────────────────────────────────
   .timeline-card {
     background-color: var(--color-card-bg) !important;
     border-color: var(--color-border) !important;
@@ -10661,36 +10661,36 @@ html.dark {
 
   .active-card { border-color: #7BA7E0 !important; }
 
-  // â”€â”€ Timeline detail panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Timeline detail panel ───────────────────────────────────────────────────
   .timeline-details-card {
     background-color: var(--color-card-bg);
     border-color: var(--color-border);
     color: var(--color-text-primary);
   }
 
-  // â”€â”€ Wizard sub-steps â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Wizard sub-steps ────────────────────────────────────────────────────────
   .wizard-sub-step-name { color: var(--color-text-primary); }
   .wizard-sub-step-number {
     border-color: var(--color-border);
     color: var(--color-text-secondary);
   }
 
-  // Active step: #0F285B (navy) on dark bg is ~2.6:1 â€” swap to light blue (6.9:1) âœ“
+  // Active step: #0F285B (navy) on dark bg is ~2.6:1 — swap to light blue (6.9:1) ✓
   .wizard-sub-step-item--active {
     background-color: rgba(123, 167, 224, 0.12);
 
     .wizard-sub-step-number {
       background-color: #7BA7E0;
       border-color: #7BA7E0;
-      color: #0F1117; // dark text on light blue â€” contrast ~8:1 âœ“
+      color: #0F1117; // dark text on light blue — contrast ~8:1 ✓
     }
 
     .wizard-sub-step-name {
-      color: #7BA7E0 !important; // 6.9:1 on dark bg âœ“
+      color: #7BA7E0 !important; // 6.9:1 on dark bg ✓
     }
   }
 
-  // â”€â”€ Wizard overview (intro card) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Wizard overview (intro card) ─────────────────────────────────────────────
   .wizard-overview {
     border-color: var(--color-border);
   }
@@ -10727,12 +10727,12 @@ html.dark {
 
   .wizard-info-icon { color: var(--color-text-secondary); }
 
-  // â”€â”€ Wizard step content â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Wizard step content ──────────────────────────────────────────────────────
   .wizard-step-counter { color: var(--color-text-secondary); }
   .wizard-step-title   { color: var(--color-text-primary) !important; }
   .wizard-step-description { color: var(--color-text-secondary); }
 
-  // â”€â”€ Account profile fields â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Account profile fields ───────────────────────────────────────────────────
   .ap-section {
     border-color: var(--color-border);
     background-color: var(--color-card-bg);
@@ -10745,7 +10745,7 @@ html.dark {
 
   .ap-fields-divider { border-color: var(--color-border); }
 
-  // â”€â”€ Inputs and form elements â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Inputs and form elements ─────────────────────────────────────────────────
   .ap-input, .ap-select, .ap-textarea {
     background-color: var(--color-input-bg) !important;
     border-color: var(--color-input-border) !important;
@@ -10755,24 +10755,24 @@ html.dark {
     &:focus { border-color: #7BA7E0 !important; }
   }
 
-  // â”€â”€ Checkboxes / radio-style elements â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Checkboxes / radio-style elements ───────────────────────────────────────
   .ap-checkbox-label, .ap-radio-label { color: var(--color-text-primary); }
 
-  // â”€â”€ Step section headers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Step section headers ─────────────────────────────────────────────────────
   .step-section-title,
   .ap-subsection-title,
   .step-heading { color: var(--color-text-primary) !important; }
 
   .step-section-divider { border-color: var(--color-border); }
 
-  // â”€â”€ Review / summary panels â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Review / summary panels ──────────────────────────────────────────────────
   .review-panel, .summary-panel, .completion-panel {
     background-color: var(--color-card-bg);
     border-color: var(--color-border);
     color: var(--color-text-primary);
   }
 
-  // â”€â”€ Navigation buttons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Navigation buttons ───────────────────────────────────────────────────────
   .button-thirtiary {
     color: var(--color-text-secondary) !important;
     border-color: var(--color-border) !important;
@@ -10781,7 +10781,7 @@ html.dark {
     &:hover { background-color: rgba(255, 255, 255, 0.05) !important; }
   }
 
-  // â”€â”€ GAP view (Wayne Enterprises active view) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── GAP view (Wayne Enterprises active view) ─────────────────────────────────
   .gap-view { color: var(--color-text-primary); }
   .gap-meta  { color: var(--color-text-secondary); }
 
@@ -10800,7 +10800,7 @@ html.dark {
   .gap-accordion-label { color: var(--color-text-primary); }
   .gap-accordion-chevron { color: var(--color-text-secondary); }
 
-  // â”€â”€ General text inside plan explorer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── General text inside plan explorer ────────────────────────────────────────
   .plan-explorer-content h1,
   .plan-explorer-content h2,
   .plan-explorer-content h3,
