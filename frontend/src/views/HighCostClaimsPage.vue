@@ -190,12 +190,12 @@
       :model-value="showAcknowledgeDialog"
       @update:model-value="showAcknowledgeDialog = $event"
       :icon="CircleCheckBig"
-      :heading="acknowledgeDialogHeading"
+      heading="Acknowledge High-Cost Claim"
       :actions="acknowledgeDialogActions"
       :show-secondary-button="true"
     >
       <p class="text-body mb-small">
-        Are you sure you want to acknowledge the following high-cost claim{{ pendingAcknowledgeItems.length > 1 ? 's' : '' }}? This action cannot be undone.
+        Are you sure you want to acknowledge this high-cost claim? This action cannot be undone.
       </p>
       <table class="claim-summary-table">
         <thead>
@@ -351,10 +351,6 @@ const averageClaimCost = computed(() => {
 const showAcknowledgeDialog = ref(false);
 const pendingAcknowledgeItems = ref<any[]>([]);
 
-const acknowledgeDialogHeading = computed(() =>
-  pendingAcknowledgeItems.value.length > 1 ? 'Acknowledge High-Cost Claims' : 'Acknowledge High-Cost Claim'
-);
-
 const handleAcknowledgeClick = (items: any[]) => {
   pendingAcknowledgeItems.value = items.filter(item => item.canAcknowledge);
   showAcknowledgeDialog.value = true;
@@ -371,9 +367,8 @@ const confirmAcknowledge = () => {
       claim.status = 'Acknowledged';
     }
   });
-  const count = pendingAcknowledgeItems.value.length;
   showAcknowledgeDialog.value = false;
-  successSnackbarText.value = `${count} claim${count > 1 ? 's' : ''} acknowledged successfully`;
+  successSnackbarText.value = 'Claim acknowledged successfully';
   showSuccessSnackbar.value = true;
   pendingAcknowledgeItems.value = [];
 };
@@ -408,9 +403,8 @@ const confirmAssistanceRequest = () => {
       claim.requestedDate = requestedDate;
     }
   });
-  const count = pendingAssistanceItems.value.length;
   showAssistanceDialog.value = false;
-  successSnackbarText.value = `Clinical assistance request sent for ${count} claim${count > 1 ? 's' : ''}`;
+  successSnackbarText.value = 'Clinical assistance request sent';
   showSuccessSnackbar.value = true;
   pendingAssistanceItems.value = [];
 };
