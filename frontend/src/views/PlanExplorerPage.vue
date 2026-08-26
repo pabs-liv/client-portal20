@@ -2430,19 +2430,15 @@
                         <v-card-title class="prog-modal-title">Configure Variable Copay Program</v-card-title>
                         <v-card-text>
                           <v-divider class="mb-4" />
-                          <p class="prog-modal-label mb-2">VCP Election</p>
-                          <div class="toc-toggle-group nl-level-btn-group--wrap mb-5">
-                            <button
-                              v-for="opt in vcpElectionOptions"
-                              :key="opt.value"
-                              :class="['button', 'toc-toggle', 'nl-level-btn', { 'toc-toggle--selected': vcpForm.election === opt.value }]"
-                              :disabled="vcpInCart"
-                              @click="selectVcpElection(opt.value)"
-                            >
-                              <span>{{ opt.label }}</span>
-                              <Check v-if="vcpForm.election === opt.value" :size="13" :stroke-width="2.5" class="nl-level-check" />
-                            </button>
-                          </div>
+                          <Select
+                            :model-value="vcpForm.election"
+                            @update:model-value="selectVcpElection"
+                            :items="vcpElectionOptions"
+                            item-title="label"
+                            label="VCP Election"
+                            :disabled="vcpInCart"
+                            class="mb-5"
+                          />
 
                           <!-- Election description (non-Opt Out) -->
                           <div v-if="vcpForm.election && vcpForm.election !== 'OptOut'" class="prog-election-desc mb-4">
