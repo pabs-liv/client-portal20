@@ -6,16 +6,23 @@
       headerText="Report Explorer"
       descriptionText="Browse and download reports by type and reporting period."
     >
-      <div class="global-controls">
+      <div class="search-filter-row">
+        <div class="search-bar-wrapper">
+          <SearchBar
+            @update:searchTerm="reportSearchTerm = $event"
+            placeholder="Search by account name"
+            :showFilterButton="false"
+          />
+        </div>
         <AdvancedFiltersButton @click="openFilters" />
-        <FilteringPillsGroup
-          v-if="activeFilterPills.length"
-          :filters="activeFilterPills"
-          :closable="true"
-          @close:filter="handleFilterPillClose"
-          class="filter-pills"
-        />
       </div>
+      <FilteringPillsGroup
+        v-if="activeFilterPills.length"
+        :filters="activeFilterPills"
+        :closable="true"
+        @close:filter="handleFilterPillClose"
+        class="filter-pills"
+      />
       <ReportDataTable
         :headers="reportHeaders"
         :items="filteredReportData"
@@ -162,6 +169,7 @@ import { ref, reactive, computed } from 'vue';
 import { SlidersHorizontal, CloudDownload, Check, X } from 'lucide-vue-next';
 import PageCard from '@/components/common/PageCard.vue';
 import ReportDataTable from '@/components/common/ReportDataTable.vue';
+import SearchBar from '@/components/ui/SearchBar.vue';
 import AdvancedFiltersButton from '@/components/ui/AdvancedFiltersButton.vue';
 import AdvancedFiltersDialog from '@/components/common/AdvancedFiltersDialog.vue';
 import FilteringPillsGroup from '@/components/ui/FilteringPillsGroup.vue';
@@ -314,8 +322,14 @@ const handleFilterPillClose = (pill: FilterPill) => {
   }
 };
 
+const reportSearchTerm = ref('');
+
 const filteredReportData = computed(() => {
   let items = reportData.value;
+  if (reportSearchTerm.value) {
+    const q = reportSearchTerm.value.toLowerCase();
+    items = items.filter(item => item.accountName.toLowerCase().includes(q));
+  }
   if (appliedAccounts.value.length > 0) {
     items = items.filter(item => appliedAccounts.value.includes(item.accountName));
   }
@@ -379,8 +393,15 @@ const advancedFiltersDialogActions = [
 <style lang="scss" scoped>
 @import '@/style.scss';
 
-.global-controls {
-  margin-bottom: $spacing-medium;
+.search-filter-row {
+  display: flex;
+  align-items: center;
+  gap: $spacing-medium;
+  margin-bottom: $spacing-small;
+}
+
+.search-bar-wrapper {
+  flex: 1;
 }
 
 .reports-no-results {
