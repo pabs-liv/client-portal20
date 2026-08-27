@@ -55,43 +55,39 @@
         @close:filter="handleFilterPillClose"
         class="filter-pills"
       />
-      <ReportDataTable
-        ref="priorAuthTable"
-        :headers="priorAuthHeaders"
-        :items="tableItems"
-        item-value="eocId"
-        :show-search-bar="false"
-        :show-filter-button="false"
-        :show-filter-pills="false"
-        :show-selection-checkboxes="isExternal"
-        :show-action-icons="isExternal"
-        :action-icons="actionIcons"
-        :show-row-actions="false"
-        :show-bulk-approve="false"
-        :show-bulk-reject="false"
-        :show-bulk-download="false"
-      >
-        <template #bulk-actions-extra="{ selected: bulkSelected }">
-          <button class="bulk-action-btn" @click="openAssistanceDialog(bulkSelected)">Request Clinical Assistance</button>
-        </template>
-        <template #item.status="{ item }">
-          <StatusStepBar
-            :step="getStatusDisplay((item as any).rawStatus).step"
-            :category="getStatusDisplay((item as any).rawStatus).category"
-            :label="getStatusDisplay((item as any).rawStatus).label"
-          />
-        </template>
-        <template #item.assistanceRequested="{ item }">
-          <v-tooltip
-            v-if="(item as any).notes"
-            :text="`Assistance Requested by ${(item as any).requestedBy} on ${formatRequestedDate((item as any).requestedDate)}`"
-          >
-            <template #activator="{ props: tooltipProps }">
-              <CircleHelp v-bind="tooltipProps" :size="18" :stroke-width="1.5" class="assistance-requested-icon" />
-            </template>
-          </v-tooltip>
-        </template>
-      </ReportDataTable>
+      <div class="pa-table">
+        <ReportDataTable
+          :headers="priorAuthHeaders"
+          :items="tableItems"
+          item-value="eocId"
+          :show-search-bar="false"
+          :show-filter-button="false"
+          :show-filter-pills="false"
+          :show-selection-checkboxes="false"
+          :show-action-icons="isExternal"
+          :action-icons="actionIcons"
+          :show-row-actions="false"
+          :show-bulk-approve="false"
+          :show-bulk-reject="false"
+          :show-bulk-download="false"
+        >
+          <template #item.status="{ item }">
+            <v-chip :color="getStatusDisplay((item as any).rawStatus).color" variant="tonal" size="small">
+              {{ getStatusDisplay((item as any).rawStatus).label }}
+            </v-chip>
+          </template>
+          <template #item.assistanceRequested="{ item }">
+            <v-tooltip
+              v-if="(item as any).notes"
+              :text="`Assistance Requested by ${(item as any).requestedBy} on ${formatRequestedDate((item as any).requestedDate)}`"
+            >
+              <template #activator="{ props: tooltipProps }">
+                <CircleHelp v-bind="tooltipProps" :size="18" :stroke-width="1.5" class="assistance-requested-icon" />
+              </template>
+            </v-tooltip>
+          </template>
+        </ReportDataTable>
+      </div>
     </PageCard>
 
     <AdvancedFiltersDialog
@@ -218,7 +214,6 @@ import { ref, computed } from 'vue';
 import PageCard from '@/components/common/PageCard.vue';
 import ReportDataTable from '@/components/common/ReportDataTable.vue';
 import SummaryWidget from '@/components/common/SummaryWidget.vue';
-import StatusStepBar from '@/components/common/StatusStepBar.vue';
 import Dialog from '@/components/ui/Dialog.vue';
 import AdvancedFiltersButton from '@/components/ui/AdvancedFiltersButton.vue';
 import AdvancedFiltersDialog from '@/components/common/AdvancedFiltersDialog.vue';
@@ -230,9 +225,10 @@ import { Hourglass, CircleCheckBig, XCircle, Info, SlidersHorizontal, Check, X, 
 import type { FilterGroup } from '@/types/filters';
 import type { FilterPill } from '@/components/ui/FilteringPill.vue';
 
-// No fixed widths — mixing fixed and auto-sized columns causes the browser's
-// table-layout:auto algorithm to dump all leftover space into whichever
-// flexible column sits next to the fixed ones (same bug fixed on HCC).
+// Column widths are enforced via the .pa-table :deep() rules below, not the
+// header "width" property — Vuetify's v-data-table doesn't reliably apply
+// per-column width under its default table-layout:auto (same fix pattern as
+// Plan Explorer's cs-matrix-table).
 const priorAuthHeaders = computed(() => {
   const headers: any[] = [
     { title: 'Account Name', key: 'accountName' },
@@ -265,37 +261,33 @@ const priorAuthData = ref([
   { accountName: 'Company J', eocId: 'EOC10112', drugName: 'Drug J', rawStatus: 'Approved', submissionDate: '2025-07-08', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null },
 ]);
 
-type StatusDisplay = { step: 1 | 2 | 3; category: 'review' | 'approved' | 'denied'; label: string };
+// Six statuses only — every raw sub-status from the adjudication pipeline
+// collapses into one of these. Anything not explicitly mapped falls to
+// "In Review" rather than surfacing a raw/unknown value to the client.
+type StatusDisplay = { label: 'Approved' | 'Denied' | 'Awaiting Physician Response' | 'In Review' | 'Override Placement In Progress' | 'Status Unavailable'; color: 'success' | 'error' | 'warning' | 'default' };
 
-function getStatusDisplay(rawStatus: string): StatusDisplay {
+function getStatusDisplay(rawStatus: string | null | undefined): StatusDisplay {
   switch (rawStatus) {
-    case 'Rejected':
-      return { step: 3, category: 'denied', label: 'Denied' };
     case 'Approved':
-      return { step: 3, category: 'approved', label: 'Approved' };
+      return { label: 'Approved', color: 'success' };
+    case 'Rejected':
+      return { label: 'Denied', color: 'error' };
     case 'Show Review':
-      return { step: 2, category: 'review', label: 'NMI Outreach Queue – Awaiting Physician Response' };
-    case 'RPH Sign-Off':
-      return { step: 2, category: 'review', label: 'RPH Sign Off – In Review' };
-    case 'Expert Sign-Off':
-      return { step: 2, category: 'review', label: 'Expert Sign Off – In Review' };
-    case 'Client Sign-Off':
-      return { step: 2, category: 'review', label: 'Client Sign Off – In Review' };
-    case 'External Sign-Off':
-      return { step: 2, category: 'review', label: 'External Sign Off – In Review' };
-    case 'MD Sign-Off':
-      return { step: 2, category: 'review', label: 'MD Sign Off – In Review' };
+      return { label: 'Awaiting Physician Response', color: 'warning' };
     case 'Authorization':
-      return { step: 2, category: 'review', label: 'Override Placement In Progress' };
+      return { label: 'Override Placement In Progress', color: 'warning' };
+    case null:
+    case undefined:
+    case '':
+      return { label: 'Status Unavailable', color: 'default' };
     default:
-      return { step: 2, category: 'review', label: 'In-Progress Under Review' };
+      return { label: 'In Review', color: 'warning' };
   }
 }
 
-// Coarse filter/widget bucket — collapses Submitted and every granular
-// sign-off/queue sub-status into "Pending" (i.e. not yet Approved or Denied).
-// The StatusStepBar in the table still shows the granular sub-status; the
-// filter and widgets only need the 3-way resolution the client cares about.
+// Coarse widget bucket — collapses every non-Approved/Denied status into
+// "Pending" for the 3 summary cards. The table/filter use the full 6-status
+// getStatusDisplay resolution instead; only the widgets need this rollup.
 function getStatusBucket(rawStatus: string): 'Pending' | 'Approved' | 'Denied' {
   if (rawStatus === 'Approved') return 'Approved';
   if (rawStatus === 'Rejected') return 'Denied';
@@ -319,12 +311,10 @@ const deniedCount = computed(() => priorAuthData.value.filter(item => getStatusB
 
 const { isExternal } = useUserType();
 
-const priorAuthTable = ref<InstanceType<typeof ReportDataTable> | null>(null);
-
 const showSuccessSnackbar = ref(false);
 const successSnackbarText = ref('');
 
-// === REQUEST CLINICAL ASSISTANCE (external users, single or bulk) === //
+// === REQUEST CLINICAL ASSISTANCE (single row only, via row action icon) === //
 
 const showAssistanceDialog = ref(false);
 const pendingAssistanceItems = ref<any[]>([]);
@@ -353,10 +343,8 @@ const confirmAssistanceRequest = () => {
       auth.requestedDate = requestedDate;
     }
   });
-  const count = pendingAssistanceItems.value.length;
   showAssistanceDialog.value = false;
-  priorAuthTable.value?.clearSelection();
-  successSnackbarText.value = `Clinical assistance request sent for ${count} authorization${count > 1 ? 's' : ''}`;
+  successSnackbarText.value = 'Clinical assistance request sent';
   showSuccessSnackbar.value = true;
   pendingAssistanceItems.value = [];
 };
@@ -385,9 +373,12 @@ const formatRequestedDate = (dateString: string | null) => {
 // === FILTERS === //
 
 const priorAuthStatusOptions = [
-  { text: 'Pending', value: 'Pending', active: false },
   { text: 'Approved', value: 'Approved', active: false },
   { text: 'Denied', value: 'Denied', active: false },
+  { text: 'Awaiting Physician Response', value: 'Awaiting Physician Response', active: false },
+  { text: 'In Review', value: 'In Review', active: false },
+  { text: 'Override Placement In Progress', value: 'Override Placement In Progress', active: false },
+  { text: 'Status Unavailable', value: 'Status Unavailable', active: false },
 ];
 
 // Status is always last in the filter list, for consistency across pages.
@@ -506,7 +497,7 @@ const filteredPriorAuthData = computed(() => {
     if (appliedAccounts.value.length > 0 && !appliedAccounts.value.includes(item.accountName)) {
       return false;
     }
-    if (appliedStatuses.value.length > 0 && !appliedStatuses.value.includes(getStatusBucket(item.rawStatus))) {
+    if (appliedStatuses.value.length > 0 && !appliedStatuses.value.includes(getStatusDisplay(item.rawStatus).label)) {
       return false;
     }
     if (appliedDateFrom.value || appliedDateTo.value) {
@@ -540,6 +531,26 @@ const filteredPriorAuthData = computed(() => {
 
 .filter-pills {
   margin-bottom: $spacing-small;
+}
+
+// Vuetify's v-data-table doesn't reliably honor a per-column "width" header
+// property under its default table-layout:auto, so column sizing is forced
+// directly via nth-child (same fix pattern as Plan Explorer's cs-matrix-table).
+// Actions (external only) gets a small fixed width layered on top of the six
+// percentage widths below, which sum to 100% on their own for internal users.
+.pa-table {
+  :deep(table) {
+    table-layout: fixed;
+    width: 100%;
+  }
+
+  :deep(th:nth-child(1)), :deep(td:nth-child(1)) { width: 22%; }
+  :deep(th:nth-child(2)), :deep(td:nth-child(2)) { width: 13%; }
+  :deep(th:nth-child(3)), :deep(td:nth-child(3)) { width: 17%; }
+  :deep(th:nth-child(4)), :deep(td:nth-child(4)) { width: 15%; }
+  :deep(th:nth-child(5)), :deep(td:nth-child(5)) { width: 17%; }
+  :deep(th:nth-child(6)), :deep(td:nth-child(6)) { width: 16%; }
+  :deep(th:nth-child(7)), :deep(td:nth-child(7)) { width: 60px; }
 }
 
 .filter-section-label {
