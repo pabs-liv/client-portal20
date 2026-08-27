@@ -934,6 +934,25 @@
                   </Dialog>
 
                   <Dialog
+                    v-model="showAccumulatorAddChoiceDialog"
+                    heading="Add Accumulator"
+                    text="How would you like to add an accumulator to this plan?"
+                  >
+                    <div class="accum-choice-grid">
+                      <button type="button" class="accum-choice-card" @click="chooseAccumulatorAssociate">
+                        <Link2 :size="28" :stroke-width="1.5" class="accum-choice-icon" />
+                        <span class="accum-choice-title">Associate Existing Accumulator</span>
+                        <span class="accum-choice-desc">Link an accumulator already configured for this account.</span>
+                      </button>
+                      <button type="button" class="accum-choice-card" @click="chooseAccumulatorBuildNew">
+                        <Calculator :size="28" :stroke-width="1.5" class="accum-choice-icon" />
+                        <span class="accum-choice-title">Build New Accumulator</span>
+                        <span class="accum-choice-desc">Configure a new accumulator from scratch for this account.</span>
+                      </button>
+                    </div>
+                  </Dialog>
+
+                  <Dialog
                     v-model="showAccumulatorAssociateDialog"
                     heading="Associate Accumulator"
                     :show-secondary-button="true"
@@ -970,6 +989,304 @@
                       />
                     </div>
                   </Dialog>
+
+                  <!-- ── Build New Accumulator Wizard ────────────────────────────────── -->
+                  <v-dialog v-model="showAccumulatorBuildDialog" max-width="900" persistent>
+                    <v-card class="nl-dialog-card">
+                      <v-card-title class="nl-dialog-header">
+                        <Calculator :size="22" :stroke-width="1.5" class="nl-dialog-icon" />
+                        <span class="text-h3 text-primary">Build New Accumulator</span>
+                        <v-spacer />
+                        <v-btn icon variant="text" size="small" :disabled="accumulatorBuildSaving" @click="closeAccumulatorBuildDialog"><X :size="18" /></v-btn>
+                      </v-card-title>
+                      <v-divider />
+
+                      <div class="accum-wizard-steps">
+                        <template v-for="(s, idx) in accumulatorBuildStepItems" :key="s.value">
+                          <button
+                            type="button"
+                            class="accum-wizard-step"
+                            :aria-label="`Go to ${s.title}`"
+                            :aria-current="accumulatorBuildStep === s.value ? 'step' : undefined"
+                            @click="accumulatorBuildStep = s.value"
+                          >
+                            <span
+                              :class="['accum-wizard-step-circle', {
+                                'accum-wizard-step-circle--active': accumulatorBuildStep === s.value,
+                                'accum-wizard-step-circle--complete': isAccumulatorBuildStepComplete(s.value),
+                              }]"
+                            >
+                              <Check v-if="isAccumulatorBuildStepComplete(s.value)" :size="12" :stroke-width="2.5" />
+                              <template v-else>{{ idx + 1 }}</template>
+                            </span>
+                            <span class="accum-wizard-step-label" :class="{ 'accum-wizard-step-label--active': accumulatorBuildStep === s.value }">{{ s.title }}</span>
+                          </button>
+                          <span v-if="idx < accumulatorBuildStepItems.length - 1" class="accum-wizard-step-divider" aria-hidden="true"></span>
+                        </template>
+                      </div>
+
+                      <v-card-text class="nl-dialog-body">
+                        <!-- Step 1: Name & Type -->
+                        <div v-if="accumulatorBuildStep === 1">
+                          <TextField
+                            v-model="accumulatorBuildForm.name"
+                            label="Accumulator Name *"
+                            class="mb-4"
+                            :error-messages="accumulatorBuildTouched && !accumulatorBuildForm.name ? ['Required'] : []"
+                          />
+                          <p class="text-body font-weight-bold mb-2">Accumulator Type<span class="ap-required-asterisk">*</span></p>
+                          <p v-if="accumulatorBuildTouched && !accumulatorBuildForm.accumulatorType" class="accum-field-error">Required</p>
+                          <div class="accum-choice-grid">
+                            <button
+                              type="button"
+                              :class="['accum-choice-card', { 'accum-choice-card--selected': accumulatorBuildForm.accumulatorType === 'Standard' }]"
+                              @click="selectAccumulatorBuildType('Standard')"
+                            >
+                              <CheckCircle2 v-if="accumulatorBuildForm.accumulatorType === 'Standard'" :size="20" class="accum-choice-check" />
+                              <span class="accum-choice-title">Standard Accumulation</span>
+                              <span class="accum-choice-desc">Full Deductible / OOP / Incentive / Penalty / Benefit Max configuration.</span>
+                            </button>
+                            <button
+                              type="button"
+                              :class="['accum-choice-card', { 'accum-choice-card--selected': accumulatorBuildForm.accumulatorType === 'BenefitMax' }]"
+                              @click="selectAccumulatorBuildType('BenefitMax')"
+                            >
+                              <CheckCircle2 v-if="accumulatorBuildForm.accumulatorType === 'BenefitMax'" :size="20" class="accum-choice-check" />
+                              <span class="accum-choice-title">Benefit Max</span>
+                              <span class="accum-choice-desc">A narrower configuration used only to cap utilization of specific benefits.</span>
+                            </button>
+                          </div>
+                        </div>
+
+                        <!-- Step 2: Initial Config -->
+                        <div v-else-if="accumulatorBuildStep === 2">
+                          <div class="nl-alert">
+                            <div class="nl-alert-badge"><Info :size="20" :stroke-width="2" /></div>
+                            <span>This accumulator can be saved now and associated to a plan later — at least one plan should eventually be associated for accumulation to run.</span>
+                          </div>
+                          <v-row class="mt-1">
+                            <v-col cols="6">
+                              <Select
+                                v-model="accumulatorBuildForm.ledgerBucket"
+                                :items="accumulatorLedgerBucketOptions"
+                                label="Accumulation Type *"
+                                :error-messages="accumulatorBuildTouched && !accumulatorBuildForm.ledgerBucket ? ['Required'] : []"
+                              />
+                            </v-col>
+                            <v-col cols="6">
+                              <Select
+                                v-model="accumulatorBuildForm.ledgerPeriod"
+                                :items="accumulatorLedgerPeriodOptions"
+                                label="Period *"
+                                :error-messages="accumulatorBuildTouched && !accumulatorBuildForm.ledgerPeriod ? ['Required'] : []"
+                              />
+                            </v-col>
+                          </v-row>
+                          <v-checkbox v-model="accumulatorBuildForm.isAllPlanCodes" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox mb-2" label="All Plan Codes" />
+                          <Select
+                            v-if="!accumulatorBuildForm.isAllPlanCodes"
+                            v-model="accumulatorBuildForm.planCodeIds"
+                            :items="currentPlanCodeOptions"
+                            multiple chips closable-chips
+                            label="Plan Codes"
+                            class="mb-4"
+                          />
+                          <Select
+                            v-model="accumulatorBuildForm.coverageLevelCodeIds"
+                            :items="accumulatorCoverageLevelOptions"
+                            multiple chips closable-chips
+                            label="Coverage Level Codes"
+                          />
+                        </div>
+
+                        <!-- Step 3: Deductible -->
+                        <div v-else-if="accumulatorBuildStep === 3">
+                          <Select
+                            :model-value="accumulatorBuildForm.deductibleType"
+                            :items="accumulatorTypeIdOptions.map(o => ({ title: o.title, value: o.value }))"
+                            label="Deductible Type *"
+                            class="mb-4"
+                            style="max-width: 320px"
+                            :error-messages="accumulatorBuildTouched && !accumulatorBuildForm.deductibleType ? ['Required'] : []"
+                            @update:model-value="(v) => onAccumulatorTypeChange('deductible', v as any)"
+                          />
+                          <div class="d-flex ga-4 flex-wrap mb-4">
+                            <TextField
+                              v-if="accumulatorShowIndividualAmount(accumulatorBuildForm.deductibleType)"
+                              v-model.number="accumulatorBuildForm.deductibleAmount"
+                              label="Deductible Individual Amount *"
+                              type="number"
+                              prefix="$"
+                              min="0"
+                              step="100"
+                              style="max-width: 260px"
+                              :error-messages="accumulatorBuildTouched && accumulatorBuildForm.deductibleAmount === null ? ['Required'] : []"
+                            />
+                            <TextField
+                              v-if="accumulatorShowFamilyAmount(accumulatorBuildForm.deductibleType)"
+                              v-model.number="accumulatorBuildForm.deductibleFamilyAmount"
+                              label="Deductible Family Amount *"
+                              type="number"
+                              prefix="$"
+                              min="0"
+                              step="100"
+                              style="max-width: 260px"
+                              :error-messages="accumulatorBuildTouched && accumulatorBuildForm.deductibleFamilyAmount === null ? ['Required'] : []"
+                            />
+                          </div>
+                          <p class="text-body font-weight-bold mb-2">In-House Pharmacy</p>
+                          <div class="nl-toggle-group">
+                            <button type="button" :disabled="accumulatorBuildForm.deductibleType === 'NA'" :class="['toc-toggle', { 'toc-toggle--selected': accumulatorBuildForm.deductibleInhousePharmacy === true }]" @click="accumulatorBuildForm.deductibleInhousePharmacy = true">
+                              <span>In-house pharmacies only</span>
+                            </button>
+                            <button type="button" :disabled="accumulatorBuildForm.deductibleType === 'NA'" :class="['toc-toggle', { 'toc-toggle--selected': accumulatorBuildForm.deductibleInhousePharmacy === null }]" @click="accumulatorBuildForm.deductibleInhousePharmacy = null">
+                              <span>N/A</span>
+                            </button>
+                          </div>
+                        </div>
+
+                        <!-- Step 4: OOP -->
+                        <div v-else-if="accumulatorBuildStep === 4">
+                          <Select
+                            :model-value="accumulatorBuildForm.oopType"
+                            :items="accumulatorTypeIdOptions.map(o => ({ title: o.title, value: o.value }))"
+                            label="Out-of-Pocket Type *"
+                            class="mb-4"
+                            style="max-width: 320px"
+                            :error-messages="accumulatorBuildTouched && !accumulatorBuildForm.oopType ? ['Required'] : []"
+                            @update:model-value="(v) => onAccumulatorTypeChange('oop', v as any)"
+                          />
+                          <div class="d-flex ga-4 flex-wrap mb-4">
+                            <TextField
+                              v-if="accumulatorShowIndividualAmount(accumulatorBuildForm.oopType)"
+                              v-model.number="accumulatorBuildForm.oopAmount"
+                              label="Out-of-Pocket Individual Amount *"
+                              type="number"
+                              prefix="$"
+                              min="0"
+                              step="100"
+                              style="max-width: 260px"
+                              :error-messages="accumulatorBuildTouched && accumulatorBuildForm.oopAmount === null ? ['Required'] : []"
+                            />
+                            <TextField
+                              v-if="accumulatorShowFamilyAmount(accumulatorBuildForm.oopType)"
+                              v-model.number="accumulatorBuildForm.oopFamilyAmount"
+                              label="Out-of-Pocket Family Amount *"
+                              type="number"
+                              prefix="$"
+                              min="0"
+                              step="100"
+                              style="max-width: 260px"
+                              :error-messages="accumulatorBuildTouched && accumulatorBuildForm.oopFamilyAmount === null ? ['Required'] : []"
+                            />
+                          </div>
+                          <p class="text-body font-weight-bold mb-2">In-House Pharmacy</p>
+                          <div class="nl-toggle-group">
+                            <button type="button" :disabled="accumulatorBuildForm.oopType === 'NA'" :class="['toc-toggle', { 'toc-toggle--selected': accumulatorBuildForm.oopInhousePharmacy === true }]" @click="accumulatorBuildForm.oopInhousePharmacy = true">
+                              <span>In-house pharmacies only</span>
+                            </button>
+                            <button type="button" :disabled="accumulatorBuildForm.oopType === 'NA'" :class="['toc-toggle', { 'toc-toggle--selected': accumulatorBuildForm.oopInhousePharmacy === null }]" @click="accumulatorBuildForm.oopInhousePharmacy = null">
+                              <span>N/A</span>
+                            </button>
+                          </div>
+                        </div>
+
+                        <!-- Step 5: Incentive -->
+                        <div v-else-if="accumulatorBuildStep === 5">
+                          <span class="pd-optional-chip">Optional</span>
+                          <v-checkbox v-model="accumulatorBuildForm.waiveIncentiveDedAndOop" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox my-3" label="Waive DED and OOP deductibles" />
+                          <TextField v-model.number="accumulatorBuildForm.incentiveAmount" label="Incentive Amount" type="number" prefix="$" min="0" step="100" style="max-width: 260px" />
+                        </div>
+
+                        <!-- Step 6: Penalty -->
+                        <div v-else-if="accumulatorBuildStep === 6">
+                          <span class="pd-optional-chip">Optional</span>
+                          <v-checkbox v-model="accumulatorBuildForm.waivePenaltyDedAndOop" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox my-3" label="Waive DED and OOP deductibles" />
+                          <TextField v-model.number="accumulatorBuildForm.penaltyAmount" label="Penalty Amount" type="number" prefix="$" min="0" step="100" style="max-width: 260px" />
+                        </div>
+
+                        <!-- Step 7: Benefit Max -->
+                        <div v-else-if="accumulatorBuildStep === 7">
+                          <TextField v-model.number="accumulatorBuildForm.benefitMaxAmount" label="Benefit Max Amount" hint="Benefit max within DED or OOP" persistent-hint type="number" prefix="$" min="0" step="1000" class="mb-4" style="max-width: 260px" />
+                          <v-checkbox v-model="accumulatorBuildForm.rejectWhenMet" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox mb-4" label="Reject when plan max met" />
+                          <template v-if="accumulatorBuildForm.rejectWhenMet">
+                            <TextField
+                              v-model="accumulatorBuildForm.rejectMessage"
+                              label="Rejection Message *"
+                              maxlength="200"
+                              class="mb-4"
+                              :error-messages="accumulatorBuildTouched && !accumulatorBuildForm.rejectMessage ? ['Required'] : []"
+                            />
+                            <Select
+                              v-model="accumulatorBuildForm.ncpdpRejectCode"
+                              :items="accumulatorNcpdpRejectCodeOptions"
+                              label="NCPDP Reject Code *"
+                              :error-messages="accumulatorBuildTouched && !accumulatorBuildForm.ncpdpRejectCode ? ['Required'] : []"
+                            />
+                          </template>
+                        </div>
+
+                        <!-- Step 8: Review & Save -->
+                        <div v-else-if="accumulatorBuildStep === 8">
+                          <table class="accum-review-table">
+                            <tbody>
+                              <tr>
+                                <td>Name</td><td>{{ accumulatorBuildForm.name || '—' }}</td>
+                                <td class="accum-review-edit-cell"><button type="button" class="button button-thirtiary" @click="accumulatorBuildStep = 1"><Pencil :size="13" :stroke-width="1.5" />Edit</button></td>
+                              </tr>
+                              <tr>
+                                <td>Type</td><td>{{ accumulatorBuildForm.accumulatorType === 'BenefitMax' ? 'Benefit Max' : 'Standard Accumulation' }}</td>
+                                <td class="accum-review-edit-cell"><button type="button" class="button button-thirtiary" @click="accumulatorBuildStep = 1"><Pencil :size="13" :stroke-width="1.5" />Edit</button></td>
+                              </tr>
+                              <tr>
+                                <td>Accumulation Type</td><td>{{ accumulatorBuildForm.ledgerBucket || '—' }}</td>
+                                <td class="accum-review-edit-cell"><button type="button" class="button button-thirtiary" @click="accumulatorBuildStep = 2"><Pencil :size="13" :stroke-width="1.5" />Edit</button></td>
+                              </tr>
+                              <tr>
+                                <td>Period</td><td>{{ accumulatorBuildForm.ledgerPeriod || '—' }}</td>
+                                <td class="accum-review-edit-cell"><button type="button" class="button button-thirtiary" @click="accumulatorBuildStep = 2"><Pencil :size="13" :stroke-width="1.5" />Edit</button></td>
+                              </tr>
+                              <template v-if="accumulatorBuildForm.accumulatorType !== 'BenefitMax'">
+                                <tr>
+                                  <td>Deductible</td><td>{{ accumulatorTypeIdLabel(accumulatorBuildForm.deductibleType) }} — {{ accumulatorAmountLabel(accumulatorBuildForm.deductibleAmount) }} / {{ accumulatorAmountLabel(accumulatorBuildForm.deductibleFamilyAmount) }}</td>
+                                  <td class="accum-review-edit-cell"><button type="button" class="button button-thirtiary" @click="accumulatorBuildStep = 3"><Pencil :size="13" :stroke-width="1.5" />Edit</button></td>
+                                </tr>
+                                <tr>
+                                  <td>Out-of-Pocket</td><td>{{ accumulatorTypeIdLabel(accumulatorBuildForm.oopType) }} — {{ accumulatorAmountLabel(accumulatorBuildForm.oopAmount) }} / {{ accumulatorAmountLabel(accumulatorBuildForm.oopFamilyAmount) }}</td>
+                                  <td class="accum-review-edit-cell"><button type="button" class="button button-thirtiary" @click="accumulatorBuildStep = 4"><Pencil :size="13" :stroke-width="1.5" />Edit</button></td>
+                                </tr>
+                                <tr>
+                                  <td>Incentive Amount</td><td>{{ accumulatorAmountLabel(accumulatorBuildForm.incentiveAmount) }}</td>
+                                  <td class="accum-review-edit-cell"><button type="button" class="button button-thirtiary" @click="accumulatorBuildStep = 5"><Pencil :size="13" :stroke-width="1.5" />Edit</button></td>
+                                </tr>
+                                <tr>
+                                  <td>Penalty Amount</td><td>{{ accumulatorAmountLabel(accumulatorBuildForm.penaltyAmount) }}</td>
+                                  <td class="accum-review-edit-cell"><button type="button" class="button button-thirtiary" @click="accumulatorBuildStep = 6"><Pencil :size="13" :stroke-width="1.5" />Edit</button></td>
+                                </tr>
+                              </template>
+                              <tr>
+                                <td>Benefit Max Amount</td><td>{{ accumulatorAmountLabel(accumulatorBuildForm.benefitMaxAmount) }}</td>
+                                <td class="accum-review-edit-cell"><button type="button" class="button button-thirtiary" @click="accumulatorBuildStep = 7"><Pencil :size="13" :stroke-width="1.5" />Edit</button></td>
+                              </tr>
+                              <tr>
+                                <td>Reject When Plan Max Met</td><td>{{ accumulatorBuildForm.rejectWhenMet ? 'Yes' : 'No' }}</td>
+                                <td class="accum-review-edit-cell"><button type="button" class="button button-thirtiary" @click="accumulatorBuildStep = 7"><Pencil :size="13" :stroke-width="1.5" />Edit</button></td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </v-card-text>
+
+                      <v-divider />
+                      <v-card-actions class="nl-dialog-footer">
+                        <button class="button button-secondary" :disabled="accumulatorBuildSaving" @click="closeAccumulatorBuildDialog">Cancel</button>
+                        <v-spacer />
+                        <button v-if="accumulatorBuildStepIndex > 0" class="button button-secondary" :disabled="accumulatorBuildSaving" @click="accumulatorBuildGoBack">Back</button>
+                        <button v-if="!accumulatorBuildIsLastStep" class="button button-primary" @click="accumulatorBuildGoNext">Next</button>
+                        <button v-else class="button button-primary" :disabled="!accumulatorBuildIsValid || accumulatorBuildSaving" @click="saveAccumulatorBuild">Save Accumulator</button>
+                      </v-card-actions>
+                    </v-card>
+                  </v-dialog>
 
                   <Dialog
                     v-model="showAccumulatorEditDatesDialog"
@@ -1595,7 +1912,7 @@
                         <div class="pd-section">
                           <div class="pd-section-header pd-section-header--table">
                             <h4 class="text-h4">Associated Accumulators</h4>
-                            <button v-if="plan.accumulators.length > 0" class="button button-primary" @click="openAccumulatorAssociateDialog(plan)">Associate Accumulator</button>
+                            <button v-if="plan.accumulators.length > 0" class="button button-primary" @click="openAccumulatorAddChoiceDialog(plan)">+ Add Accumulator</button>
                           </div>
                           <ReportDataTable
                             item-value="id"
@@ -1614,7 +1931,7 @@
                               <div class="nc-empty-state">
                                 <img :src="EmptyStateImg" alt="No data" class="nc-empty-icon" />
                                 <p class="nc-empty-title">Nothing configured yet</p>
-                                <button class="button button-secondary pd-empty-cta" @click="openAccumulatorAssociateDialog(plan)">Associate Accumulator</button>
+                                <button class="button button-secondary pd-empty-cta" @click="openAccumulatorAddChoiceDialog(plan)">+ Add Accumulator</button>
                               </div>
                             </template>
                             <template #expanded-row="{ item, columns }">
@@ -4431,7 +4748,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, nextTick } from 'vue';
+import { ref, reactive, computed, watch, nextTick } from 'vue';
 import AccountSelector from '@/components/common/AccountSelector.vue';
 import PageCard from '@/components/common/PageCard.vue';
 import Button from '@/components/ui/Button.vue';
@@ -4449,6 +4766,7 @@ import {
   Save as SaveIcon, LayoutList as LayoutListIcon, CircleCheck as CircleCheckIcon,
   ArrowRight as ArrowRightIcon, Pencil, CheckSquare, Square, ChevronDown, X, Check, CloudDownload, TriangleAlert,
   Building2, Shield, Link2, Users, FileText, Search, Globe, Trash2, Paperclip, Info, Plus,
+  Calculator, CheckCircle2,
 } from 'lucide-vue-next';
 import EmptyStateImg from '@/assets/EmptyState.svg';
 import { useDocumentsStore } from '@/stores/documents';
@@ -7154,12 +7472,12 @@ type AccumulatorLibraryEntry = {
   id: string; name: string; type: string;
   deductibleAmount: string; deductibleFamilyAmount: string; oopAmount: string; oopFamilyAmount: string; benefitMaxAmount: string;
 };
-const accumulatorLibraryByAccount: Record<number, AccumulatorLibraryEntry[]> = {
+const accumulatorLibraryByAccount: Record<number, AccumulatorLibraryEntry[]> = reactive({
   1: [
     { id: 'acc-1', name: 'Standard Deductible/OOP', type: 'Standard Accumulation', deductibleAmount: '$500', deductibleFamilyAmount: '$1,500', oopAmount: '$3,000', oopFamilyAmount: '$6,000', benefitMaxAmount: '—' },
     { id: 'acc-2', name: 'Specialty Benefit Max', type: 'Benefit Max', deductibleAmount: '—', deductibleFamilyAmount: '—', oopAmount: '—', oopFamilyAmount: '—', benefitMaxAmount: '$10,000' },
   ],
-};
+});
 const currentAccumulatorLibrary = computed(() => selectedAccount.value ? (accumulatorLibraryByAccount[selectedAccount.value] ?? []) : []);
 
 type PlanAccumulatorRow = {
@@ -7262,6 +7580,274 @@ const accumulatorEditDatesDialogActions = computed(() => [
   { text: 'Cancel', styleType: 'secondary' as const, onClick: () => { showAccumulatorEditDatesDialog.value = false; } },
   { text: 'Save Changes', styleType: 'primary' as const, onClick: saveAccumulatorEditDates },
 ]);
+
+// ─── Add Accumulator: choice dialog + Build New wizard ────────────────────────
+// Master (Liv.ClientPortal AccumulatorConfigDialog.vue) builds a new accumulator independent of
+// any plan — it's saved to the account's library and associated to plan(s) separately, same as
+// this portal's existing "Associate Existing Accumulator" flow. This wizard mirrors Master's
+// 8-step Standard path / 4-step Benefit Max path (Name & Type, Initial Config, Deductible, OOP,
+// Incentive, Penalty, Benefit Max, Review & Save).
+const showAccumulatorAddChoiceDialog = ref(false);
+const accumulatorAddChoicePlanId = ref<number | null>(null);
+
+const openAccumulatorAddChoiceDialog = (plan: { id: number }) => {
+  accumulatorAddChoicePlanId.value = plan.id;
+  showAccumulatorAddChoiceDialog.value = true;
+};
+
+const chooseAccumulatorAssociate = () => {
+  showAccumulatorAddChoiceDialog.value = false;
+  const plan = planDesignPlans.value.find(p => p.id === accumulatorAddChoicePlanId.value);
+  if (plan) openAccumulatorAssociateDialog(plan);
+};
+
+const chooseAccumulatorBuildNew = () => {
+  showAccumulatorAddChoiceDialog.value = false;
+  openAccumulatorBuildDialog();
+};
+
+const currentPlanCodeOptions = computed(() => {
+  const plan = planDesignPlans.value.find(p => p.id === accumulatorAddChoicePlanId.value);
+  return plan ? plan.planCodes.map((c: { planCode: string }) => c.planCode) : [];
+});
+
+const accumulatorLedgerBucketOptions = ['Deductible/OOP', 'Copay Accumulator', 'MOOP Only'];
+const accumulatorLedgerPeriodOptions = ['Calendar Year', 'Plan Year', 'Rolling 12 Months'];
+const accumulatorCoverageLevelOptions = ['Individual', 'Family', 'Employee + Spouse', 'Employee + Children'];
+const accumulatorNcpdpRejectCodeOptions = ['76 - Plan Limitations Exceeded', '65 - Patient Is Not Covered', '70 - Product/Service Not Covered'];
+const accumulatorTypeIdOptions: { title: string; value: 'IND' | 'FAM' | 'Embedded' | 'NA' }[] = [
+  { title: 'Aggregate - IND', value: 'IND' },
+  { title: 'Aggregate - FAM', value: 'FAM' },
+  { title: 'Embedded', value: 'Embedded' },
+  { title: 'N/A', value: 'NA' },
+];
+
+function accumulatorShowIndividualAmount(typeId: string | null) {
+  return typeId === 'IND' || typeId === 'Embedded';
+}
+function accumulatorShowFamilyAmount(typeId: string | null) {
+  return typeId === 'FAM' || typeId === 'Embedded';
+}
+function accumulatorTypeIdLabel(typeId: string | null) {
+  return accumulatorTypeIdOptions.find(o => o.value === typeId)?.title ?? '—';
+}
+function accumulatorAmountLabel(amount: number | null) {
+  return amount === null ? '—' : `$${amount.toLocaleString()}`;
+}
+
+interface AccumulatorBuildForm {
+  name: string;
+  accumulatorType: 'Standard' | 'BenefitMax' | null;
+  ledgerBucket: string | null;
+  ledgerPeriod: string | null;
+  isAllPlanCodes: boolean;
+  planCodeIds: string[];
+  coverageLevelCodeIds: string[];
+  deductibleType: 'IND' | 'FAM' | 'Embedded' | 'NA' | null;
+  deductibleAmount: number | null;
+  deductibleFamilyAmount: number | null;
+  deductibleInhousePharmacy: boolean | null;
+  oopType: 'IND' | 'FAM' | 'Embedded' | 'NA' | null;
+  oopAmount: number | null;
+  oopFamilyAmount: number | null;
+  oopInhousePharmacy: boolean | null;
+  waiveIncentiveDedAndOop: boolean;
+  incentiveAmount: number | null;
+  waivePenaltyDedAndOop: boolean;
+  penaltyAmount: number | null;
+  benefitMaxAmount: number | null;
+  rejectWhenMet: boolean;
+  rejectMessage: string | null;
+  ncpdpRejectCode: string | null;
+}
+
+function defaultAccumulatorBuildForm(): AccumulatorBuildForm {
+  return {
+    name: '',
+    accumulatorType: null,
+    ledgerBucket: null,
+    ledgerPeriod: null,
+    isAllPlanCodes: true,
+    planCodeIds: [],
+    coverageLevelCodeIds: [],
+    deductibleType: null,
+    deductibleAmount: null,
+    deductibleFamilyAmount: null,
+    deductibleInhousePharmacy: null,
+    oopType: null,
+    oopAmount: null,
+    oopFamilyAmount: null,
+    oopInhousePharmacy: null,
+    waiveIncentiveDedAndOop: false,
+    incentiveAmount: null,
+    waivePenaltyDedAndOop: false,
+    penaltyAmount: null,
+    benefitMaxAmount: null,
+    rejectWhenMet: false,
+    rejectMessage: null,
+    ncpdpRejectCode: null,
+  };
+}
+
+const showAccumulatorBuildDialog = ref(false);
+const accumulatorBuildForm = ref<AccumulatorBuildForm>(defaultAccumulatorBuildForm());
+const accumulatorBuildStep = ref(1);
+const accumulatorBuildTouched = ref(false);
+const accumulatorBuildSaving = ref(false);
+
+const accumulatorBuildVisitedSteps = ref<Set<number>>(new Set([1]));
+
+const openAccumulatorBuildDialog = () => {
+  accumulatorBuildForm.value = defaultAccumulatorBuildForm();
+  accumulatorBuildStep.value = 1;
+  accumulatorBuildTouched.value = false;
+  accumulatorBuildVisitedSteps.value = new Set([1]);
+  showAccumulatorBuildDialog.value = true;
+};
+
+// A step's circle only turns green once the user has actually landed on it — pre-filled
+// defaults (e.g. isAllPlanCodes) or "optional" steps (Incentive/Penalty) shouldn't show as
+// complete before they've been seen.
+watch(accumulatorBuildStep, (step) => {
+  accumulatorBuildVisitedSteps.value.add(step);
+});
+
+const closeAccumulatorBuildDialog = () => {
+  showAccumulatorBuildDialog.value = false;
+};
+
+// Switching type resets steps 2-7 form state, mirroring Master's onSelectType (handoff §3.1) —
+// name is preserved since it's set alongside type on the same step.
+function selectAccumulatorBuildType(value: 'Standard' | 'BenefitMax') {
+  const name = accumulatorBuildForm.value.name;
+  accumulatorBuildForm.value = defaultAccumulatorBuildForm();
+  accumulatorBuildForm.value.name = name;
+  accumulatorBuildForm.value.accumulatorType = value;
+}
+
+function onAccumulatorTypeChange(field: 'deductible' | 'oop', typeId: 'IND' | 'FAM' | 'Embedded' | 'NA') {
+  const f = accumulatorBuildForm.value;
+  if (field === 'deductible') {
+    f.deductibleType = typeId;
+    if (!accumulatorShowIndividualAmount(typeId)) f.deductibleAmount = null;
+    if (!accumulatorShowFamilyAmount(typeId)) f.deductibleFamilyAmount = null;
+    if (typeId === 'NA') f.deductibleInhousePharmacy = null;
+  } else {
+    f.oopType = typeId;
+    if (!accumulatorShowIndividualAmount(typeId)) f.oopAmount = null;
+    if (!accumulatorShowFamilyAmount(typeId)) f.oopFamilyAmount = null;
+    if (typeId === 'NA') f.oopInhousePharmacy = null;
+  }
+}
+
+const accumulatorBuildIsBenefitMax = computed(() => accumulatorBuildForm.value.accumulatorType === 'BenefitMax');
+
+const accumulatorBuildStepItems = computed(() =>
+  accumulatorBuildIsBenefitMax.value
+    ? [
+        { title: 'Name & Type', value: 1 },
+        { title: 'Initial Config', value: 2 },
+        { title: 'Benefit Max', value: 7 },
+        { title: 'Review & Save', value: 8 },
+      ]
+    : [
+        { title: 'Name & Type', value: 1 },
+        { title: 'Initial Config', value: 2 },
+        { title: 'Deductible', value: 3 },
+        { title: 'OOP', value: 4 },
+        { title: 'Incentive', value: 5 },
+        { title: 'Penalty', value: 6 },
+        { title: 'Benefit Max', value: 7 },
+        { title: 'Review & Save', value: 8 },
+      ],
+);
+
+const accumulatorBuildStepIndex = computed(() => accumulatorBuildStepItems.value.findIndex(i => i.value === accumulatorBuildStep.value));
+const accumulatorBuildIsLastStep = computed(() => accumulatorBuildStepIndex.value === accumulatorBuildStepItems.value.length - 1);
+
+function accumulatorBuildGoBack() {
+  const target = accumulatorBuildStepItems.value[accumulatorBuildStepIndex.value - 1];
+  if (target) accumulatorBuildStep.value = target.value;
+}
+function accumulatorBuildGoNext() {
+  const target = accumulatorBuildStepItems.value[accumulatorBuildStepIndex.value + 1];
+  if (target) accumulatorBuildStep.value = target.value;
+}
+
+// Per-step required-field check driving both the "Next" gate and the stepper circle color
+// (navy = incomplete, green = complete) — steps 5/6 (Incentive/Penalty) are optional.
+function isAccumulatorBuildStepValid(stepValue: number): boolean {
+  const f = accumulatorBuildForm.value;
+  switch (stepValue) {
+    case 1:
+      return !!f.name && !!f.accumulatorType;
+    case 2:
+      return !!f.ledgerBucket && !!f.ledgerPeriod;
+    case 3:
+      return !!f.deductibleType && !(accumulatorShowIndividualAmount(f.deductibleType) && f.deductibleAmount === null) && !(accumulatorShowFamilyAmount(f.deductibleType) && f.deductibleFamilyAmount === null);
+    case 4:
+      return !!f.oopType && !(accumulatorShowIndividualAmount(f.oopType) && f.oopAmount === null) && !(accumulatorShowFamilyAmount(f.oopType) && f.oopFamilyAmount === null);
+    case 7:
+      return !accumulatorBuildIsRejectInvalid.value;
+    case 8:
+      return accumulatorBuildIsValid.value;
+    default:
+      return true;
+  }
+}
+
+function isAccumulatorBuildStepComplete(stepValue: number): boolean {
+  return accumulatorBuildVisitedSteps.value.has(stepValue) && isAccumulatorBuildStepValid(stepValue);
+}
+
+const accumulatorBuildIsEmbeddedInvalid = computed(() => {
+  const f = accumulatorBuildForm.value;
+  return (
+    (accumulatorShowIndividualAmount(f.deductibleType) && f.deductibleAmount === null) ||
+    (accumulatorShowFamilyAmount(f.deductibleType) && f.deductibleFamilyAmount === null) ||
+    (accumulatorShowIndividualAmount(f.oopType) && f.oopAmount === null) ||
+    (accumulatorShowFamilyAmount(f.oopType) && f.oopFamilyAmount === null)
+  );
+});
+
+const accumulatorBuildIsRejectInvalid = computed(() => {
+  const f = accumulatorBuildForm.value;
+  return f.rejectWhenMet && (!f.rejectMessage || !f.ncpdpRejectCode);
+});
+
+// Validation mirrors Master's `isValid` (handoff §7): Standard requires name/type/ledger
+// bucket/period/DED-type/OOP-type plus conditional Embedded amounts and reject fields;
+// Benefit Max only requires name/type/ledger bucket/period.
+const accumulatorBuildIsValid = computed(() => {
+  const f = accumulatorBuildForm.value;
+  if (!f.name || !f.accumulatorType) return false;
+  if (!f.ledgerBucket || !f.ledgerPeriod) return false;
+  if (accumulatorBuildIsRejectInvalid.value) return false;
+  if (accumulatorBuildIsBenefitMax.value) return true;
+  if (!f.deductibleType || !f.oopType) return false;
+  return !accumulatorBuildIsEmbeddedInvalid.value;
+});
+
+const saveAccumulatorBuild = () => {
+  accumulatorBuildTouched.value = true;
+  if (!accumulatorBuildIsValid.value || !selectedAccount.value) return;
+  accumulatorBuildSaving.value = true;
+  const f = accumulatorBuildForm.value;
+  const id = `acc-${Date.now()}`;
+  const library = accumulatorLibraryByAccount[selectedAccount.value] ?? (accumulatorLibraryByAccount[selectedAccount.value] = []);
+  library.push({
+    id,
+    name: f.name,
+    type: f.accumulatorType === 'BenefitMax' ? 'Benefit Max' : 'Standard Accumulation',
+    deductibleAmount: f.deductibleAmount !== null ? `$${f.deductibleAmount}` : '—',
+    deductibleFamilyAmount: f.deductibleFamilyAmount !== null ? `$${f.deductibleFamilyAmount}` : '—',
+    oopAmount: f.oopAmount !== null ? `$${f.oopAmount}` : '—',
+    oopFamilyAmount: f.oopFamilyAmount !== null ? `$${f.oopFamilyAmount}` : '—',
+    benefitMaxAmount: f.benefitMaxAmount !== null ? `$${f.benefitMaxAmount}` : '—',
+  });
+  accumulatorBuildSaving.value = false;
+  showAccumulatorBuildDialog.value = false;
+};
 
 // ─── Copay Structure ──────────────────────────────────────────────────────────
 
@@ -10088,6 +10674,172 @@ watch(selectedAccount, (newVal) => {
     cursor: not-allowed;
     pointer-events: none;
   }
+}
+
+.accum-choice-grid {
+  display: flex;
+  gap: $spacing-medium;
+  flex-wrap: wrap;
+  margin-top: $spacing-medium;
+}
+
+.accum-choice-card {
+  flex: 1 1 260px;
+  min-width: 240px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: $spacing-xsmall;
+  padding: $spacing-medium;
+  border: 1px solid $color-border;
+  border-radius: 8px;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  position: relative;
+
+  &:hover {
+    border-color: $color-primary;
+  }
+
+  &--selected {
+    border-color: $color-primary;
+    border-width: 2px;
+  }
+}
+
+.accum-choice-icon {
+  color: $color-primary;
+}
+
+.accum-choice-title {
+  font-weight: 700;
+}
+
+.accum-choice-desc {
+  color: $color-text-secondary;
+  font-size: $font-size-small;
+}
+
+.accum-choice-check {
+  position: absolute;
+  top: $spacing-medium;
+  right: $spacing-medium;
+  color: $color-primary;
+}
+
+.accum-wizard-steps {
+  display: flex;
+  align-items: flex-start;
+  padding: $spacing-small $spacing-medium;
+}
+
+.accum-wizard-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 1 1 0;
+  min-width: 0;
+  text-align: center;
+  background: none;
+  border: none;
+  padding: 2px;
+  cursor: pointer;
+  border-radius: 4px;
+
+  &:hover .accum-wizard-step-label {
+    color: $color-primary;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-primary;
+    outline-offset: 2px;
+  }
+}
+
+.accum-wizard-step-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background-color: $color-neutral-white;
+  border: 1.5px solid $color-border;
+  color: $color-text-secondary;
+  font-family: $font-family-base;
+  font-size: 0.7rem;
+  font-weight: $font-weight-semibold;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+
+  &--active {
+    background-color: $color-primary;
+    border-color: $color-primary;
+    color: $color-neutral-white;
+  }
+
+  &--complete {
+    background-color: $color-success;
+    border-color: $color-success;
+    color: $color-neutral-white;
+  }
+}
+
+.accum-wizard-step-label {
+  font-size: $font-size-small;
+  font-weight: 600;
+  color: $color-text-secondary;
+  line-height: 1.2;
+
+  &--active {
+    color: $color-primary;
+  }
+}
+
+.accum-wizard-step-divider {
+  flex: 1 1 auto;
+  height: 1px;
+  min-width: 8px;
+  margin-top: 11px;
+  background-color: $color-border;
+}
+
+.accum-review-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  td {
+    padding: $spacing-xsmall $spacing-small;
+    border-bottom: 1px solid $color-border;
+
+    &:first-child {
+      font-weight: 700;
+      width: 220px;
+    }
+  }
+}
+
+.accum-review-edit-cell {
+  width: 90px;
+  text-align: right;
+}
+
+.accum-field-error {
+  color: $color-error;
+  font-size: $font-size-small;
+  margin-top: -6px;
+  margin-bottom: $spacing-small;
+}
+
+.pd-optional-chip {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  background-color: $color-information-background;
+  font-size: $font-size-small;
+  font-weight: 600;
 }
 
 .nl-level-check {
