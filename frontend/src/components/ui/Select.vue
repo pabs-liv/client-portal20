@@ -15,6 +15,7 @@
     @update:search="searchable ? internalSearch = $event : null"
     :custom-filter="searchable ? customFilter : undefined"
     :menu-icon="ChevronDown"
+    :clearable="clearable"
     :base-color="isDark ? 'rgba(255,255,255,0.6)' : undefined"
     :bg-color="isDark ? 'var(--color-input-bg)' : undefined"
   >
@@ -38,6 +39,7 @@ interface Props {
   itemValue?: string;
   noDataText?: string;
   variant?: 'filled' | 'outlined' | 'plain' | 'underlined' | 'solo';
+  clearable?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -47,6 +49,7 @@ const props = withDefaults(defineProps<Props>(), {
   itemValue: 'value',
   noDataText: 'No data available',
   variant: 'outlined',
+  clearable: false,
 });
 
 const internalSearch = ref<string>('');

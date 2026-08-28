@@ -27,16 +27,23 @@
       headerText="Test Results"
       descriptionText="Review and manage test report results from plan design configurations."
     >
-      <div class="global-controls">
+      <div class="search-filter-row">
+        <div class="search-bar-wrapper">
+          <SearchBar
+            @update:searchTerm="testResultsSearchTerm = $event"
+            placeholder="Search by account"
+            :showFilterButton="false"
+          />
+        </div>
         <AdvancedFiltersButton @click="openFilters" />
-        <FilteringPillsGroup
-          v-if="activeFilterPills.length"
-          :filters="activeFilterPills"
-          :closable="true"
-          @close:filter="handleFilterPillClose"
-          class="filter-pills"
-        />
       </div>
+      <FilteringPillsGroup
+        v-if="activeFilterPills.length"
+        :filters="activeFilterPills"
+        :closable="true"
+        @close:filter="handleFilterPillClose"
+        class="filter-pills"
+      />
       <ReportDataTable
         ref="testResultsTable"
         :headers="processedTestResultsHeaders"
@@ -76,7 +83,6 @@
       :actions="advancedFiltersDialogActions"
     >
       <template #filter-account="{ filter }">
-        <p class="filter-section-label">{{ filter.label }}</p>
         <div v-if="dialogAccounts.length > 0" class="selected-chips">
           <v-chip
             v-for="acct in dialogAccounts"
@@ -97,7 +103,7 @@
               v-model="accountSearch"
               type="text"
               class="account-search-input"
-              placeholder="Search accounts"
+              placeholder="Account"
               @mousedown="showAccountList = true"
               @blur="handleAccountPickerBlur"
             />
@@ -129,7 +135,6 @@
         </div>
       </template>
       <template #filter-approvedBy="{ filter }">
-        <p class="filter-section-label">{{ filter.label }}</p>
         <div v-if="dialogApprovedBy.length > 0" class="selected-chips">
           <v-chip
             v-for="person in dialogApprovedBy"
@@ -150,7 +155,7 @@
               v-model="approvedBySearch"
               type="text"
               class="account-search-input"
-              placeholder="Search reviewers"
+              placeholder="Reviewed By"
               @mousedown="showApprovedByList = true"
               @blur="handleApprovedByPickerBlur"
             />
@@ -182,18 +187,47 @@
         </div>
       </template>
       <template #filter-status="{ filter }">
-        <p class="filter-section-label">{{ filter.label }}</p>
-        <div>
-          <div
-            v-for="opt in filter.options"
-            :key="String(opt.value)"
-            class="account-option"
-            @click="toggleDialogStatus(opt.value as string)"
+        <div v-if="dialogStatuses.length > 0" class="selected-chips">
+          <v-chip
+            v-for="status in dialogStatuses"
+            :key="status"
+            variant="flat"
+            color="primary"
+            class="autocomplete-chip"
           >
-            <div class="acct-checkbox" :class="{ active: dialogStatuses.includes(opt.value as string) }">
-              <Check v-if="dialogStatuses.includes(opt.value as string)" :size="12" :stroke-width="3" />
+            {{ status }}
+            <span class="chip-close" @click.stop="toggleDialogStatus(status)">
+              <X :size="12" />
+            </span>
+          </v-chip>
+        </div>
+        <div class="account-picker-wrap">
+          <div class="account-search-field" :class="{ 'account-search-field--active': showStatusList }">
+            <input
+              v-model="statusSearch"
+              type="text"
+              class="account-search-input"
+              placeholder="Status"
+              @mousedown="showStatusList = true"
+              @blur="handleStatusPickerBlur"
+            />
+          </div>
+          <div v-if="showStatusList" class="account-dropdown">
+            <div
+              v-for="opt in filteredStatusOptions"
+              :key="String(opt.value)"
+              class="account-option"
+              @mousedown.prevent
+              @click="toggleDialogStatus(opt.value as string)"
+            >
+              <div class="acct-checkbox" :class="{ active: dialogStatuses.includes(opt.value as string) }">
+                <Check v-if="dialogStatuses.includes(opt.value as string)" :size="12" :stroke-width="3" />
+              </div>
+              <span>{{ opt.text }}</span>
             </div>
-            <span>{{ opt.text }}</span>
+            <div v-if="filteredStatusOptions.length === 0" class="no-acct-results">
+              No statuses found
+            </div>
           </div>
         </div>
       </template>
@@ -248,6 +282,7 @@ import ReportDataTable from '@/components/common/ReportDataTable.vue';
 import Dialog from '@/components/ui/Dialog.vue';
 import SummaryWidget from '@/components/common/SummaryWidget.vue';
 import AdvancedFiltersButton from '@/components/ui/AdvancedFiltersButton.vue';
+import SearchBar from '@/components/ui/SearchBar.vue';
 import AdvancedFiltersDialog from '@/components/common/AdvancedFiltersDialog.vue';
 import FilteringPillsGroup from '@/components/ui/FilteringPillsGroup.vue';
 import DatePicker from '@/components/ui/DatePicker.vue';
@@ -268,6 +303,7 @@ const showDownloadSnackbar = ref(false);
 const downloadSnackbarText = ref('');
 
 const isAdvancedFiltersOpen = ref(false);
+const testResultsSearchTerm = ref('');
 
 // Applied state — what the table actually uses
 const appliedAccounts = ref<string[]>([]);
@@ -297,6 +333,8 @@ const accountSearch = ref('');
 const showAccountList = ref(false);
 const approvedBySearch = ref('');
 const showApprovedByList = ref(false);
+const statusSearch = ref('');
+const showStatusList = ref(false);
 
 const handleApproveClick = (item: any) => {
   selectedTestResult.value = item;
@@ -406,7 +444,7 @@ const testResultsHeaders = ref([
   { title: 'Status', key: 'status' },
   { title: 'Reviewed By', key: 'approvedBy' },
   { title: 'Review Date', key: 'approvedDate', align: 'start' },
-  { title: 'Actions', key: 'actions', sortable: false, align: 'end' },
+  { title: '', key: 'actions', sortable: false, align: 'end' },
 ]);
 
 const processedTestResultsHeaders = computed(() => testResultsHeaders.value);
@@ -462,11 +500,20 @@ const handleApprovedByPickerBlur = () => {
   setTimeout(() => { showApprovedByList.value = false; }, 150);
 };
 
+const handleStatusPickerBlur = () => {
+  setTimeout(() => { showStatusList.value = false; }, 150);
+};
+
 const testResultStatusOptions = [
   { text: 'Pending', value: 'Pending', active: false },
   { text: 'Approved', value: 'Approved', active: false },
   { text: 'Rejected', value: 'Rejected', active: false },
 ];
+
+const filteredStatusOptions = computed(() => {
+  const q = statusSearch.value?.toLowerCase() ?? '';
+  return testResultStatusOptions.filter(o => o.text.toLowerCase().includes(q));
+});
 
 // Status is always last in the filter list, for consistency across pages.
 const testResultFilters = computed<FilterGroup[]>(() => [
@@ -491,6 +538,8 @@ const openFilters = () => {
   showAccountList.value = false;
   approvedBySearch.value = '';
   showApprovedByList.value = false;
+  statusSearch.value = '';
+  showStatusList.value = false;
   isAdvancedFiltersOpen.value = true;
 };
 
@@ -565,6 +614,10 @@ const parseMDYYYY = (dateStr: string): number => {
 
 const filteredTestResultsData = computed(() => {
   let items = testResultsData.value;
+  if (testResultsSearchTerm.value) {
+    const q = testResultsSearchTerm.value.toLowerCase();
+    items = items.filter(item => item.accountName.toLowerCase().includes(q));
+  }
   if (appliedAccounts.value.length > 0) {
     items = items.filter(item => appliedAccounts.value.includes(item.accountName));
   }
@@ -606,8 +659,15 @@ const pendingReports = computed(() => testResultsData.value.filter(item => item.
   gap: $spacing-medium;
 }
 
-.global-controls {
-  margin-bottom: $spacing-medium;
+.search-filter-row {
+  display: flex;
+  align-items: center;
+  gap: $spacing-medium;
+  margin-bottom: $spacing-small;
+}
+
+.search-bar-wrapper {
+  flex: 1;
 }
 
 .filter-pills {

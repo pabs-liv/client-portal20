@@ -39,6 +39,36 @@
       headerText="High Cost Claim Manager"
       :descriptionText="isExternal ? 'Review, acknowledge, or ask questions about high-cost claims.' : 'Review high-cost claims and monitor clinical assistance requests submitted by clients.'"
     >
+      <div v-if="pendingAssistanceClaims.length > 0" class="pending-assistance-section mb-large">
+        <h3 class="pending-assistance-section__title">Pending Clinical Assistance</h3>
+        <v-table density="compact">
+          <thead>
+            <tr>
+              <th class="font-weight-bold">EOC ID</th>
+              <th class="font-weight-bold">Account Name</th>
+              <th class="font-weight-bold">Drug Name</th>
+              <th class="font-weight-bold">Date of Service</th>
+              <th class="font-weight-bold text-end">Estimated Cost</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="claim in pendingAssistanceClaims" :key="claim.id">
+              <td>{{ claim.eocId }}</td>
+              <td>{{ claim.accountName }}</td>
+              <td>{{ claim.drugName }}</td>
+              <td>{{ claim.claimDate }}</td>
+              <td class="text-end">{{ claim.cost }}</td>
+              <td>
+                <v-chip :color="assistanceStatusColor(claim.assistanceStatus)" variant="tonal" size="small">
+                  {{ claim.assistanceStatus }}
+                </v-chip>
+              </td>
+            </tr>
+          </tbody>
+        </v-table>
+      </div>
+
       <Banner
         variant="warning"
         message="Please acknowledge high-cost claims within 24 hours. If a claim is not acknowledged within 24 hours, it will automatically be processed to be filled in order to avoid member disruption and a delay in treatment with the approved therapy. If you have questions about a claim, select Request Clinical Assistance from the row's menu."
@@ -80,16 +110,6 @@
             {{ (item as any).status }}
           </v-chip>
         </template>
-        <template #item.assistanceRequested="{ item }">
-          <v-tooltip
-            v-if="(item as any).notes"
-            :text="`Assistance Requested by ${(item as any).requestedBy} on ${formatRequestedDate((item as any).requestedDate)}`"
-          >
-            <template #activator="{ props: tooltipProps }">
-              <CircleHelp v-bind="tooltipProps" :size="18" :stroke-width="1.5" class="assistance-requested-icon" />
-            </template>
-          </v-tooltip>
-        </template>
       </ReportDataTable>
     </PageCard>
 
@@ -101,7 +121,6 @@
       :actions="advancedFiltersDialogActions"
     >
       <template #filter-account="{ filter }">
-        <p class="filter-section-label">{{ filter.label }}</p>
         <div v-if="dialogAccounts.length > 0" class="selected-chips">
           <v-chip
             v-for="acct in dialogAccounts"
@@ -122,7 +141,7 @@
               v-model="accountSearch"
               type="text"
               class="account-search-input"
-              placeholder="Search accounts"
+              placeholder="Account"
               @mousedown="showAccountList = true"
               @blur="handleAccountPickerBlur"
             />
@@ -263,7 +282,7 @@
 </template>
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { CircleCheckBig, Info, ClockFading, DollarSign, Calculator, SlidersHorizontal, Check, CircleHelp, X } from 'lucide-vue-next';
+import { CircleCheckBig, Info, ClockFading, DollarSign, Calculator, SlidersHorizontal, Check, X } from 'lucide-vue-next';
 import PageCard from '@/components/common/PageCard.vue';
 import Banner from '@/components/common/Banner.vue';
 import ReportDataTable from '@/components/common/ReportDataTable.vue';
@@ -291,7 +310,6 @@ const claimsHeaders = computed(() => {
     { title: 'Days Supply', key: 'daysSupply', align: 'end' },
     { title: 'Estimated Cost', key: 'cost', align: 'start' },
     { title: 'Status', key: 'status' },
-    { title: 'Assistance', key: 'assistanceRequested', align: 'center', sortable: false },
   ];
   if (isExternal.value) {
     headers.push({ title: 'Actions', key: 'actions', sortable: false, align: 'start' });
@@ -304,11 +322,11 @@ const claimsHeaders = computed(() => {
 // that — mock costs reflect realistic specialty-drug pricing, not the old
 // low-dollar placeholder amounts.
 const claimsData = ref([
-  { id: 157826931, eocId: 'EOC30021', accountName: 'Company A', drugName: 'Drug A', ndc: '00071-0155-23', claimDate: '2025-07-15', quantity: 1, daysSupply: 30, cost: '$12,450.00', status: 'Pending', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null },
-  { id: 158088181, eocId: 'EOC30047', accountName: 'Company B', drugName: 'Drug B', ndc: '00069-0944-30', claimDate: '2025-07-14', quantity: 2, daysSupply: 90, cost: '$45,800.00', status: 'Acknowledged', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null },
-  { id: 158480891, eocId: 'EOC30058', accountName: 'Company C', drugName: 'Drug C', ndc: '00078-0421-15', claimDate: '2025-07-13', quantity: 4, daysSupply: 30, cost: '$18,750.00', status: 'Pending', notes: 'Can you confirm if a savings program applies to this claim?' as string | null, requestedBy: 'Jane Doe' as string | null, requestedDate: '2025-07-16' as string | null },
-  { id: 152987510, eocId: 'EOC30063', accountName: 'Company D', drugName: 'Drug D', ndc: '00006-0749-31', claimDate: '2025-07-12', quantity: 1, daysSupply: 28, cost: '$92,300.00', status: 'Acknowledged', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null },
-  { id: 153219641, eocId: 'EOC30079', accountName: 'Company E', drugName: 'Drug E', ndc: '00173-0879-00', claimDate: '2025-07-11', quantity: 3, daysSupply: 84, cost: '$61,200.00', status: 'Pending', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null },
+  { id: 157826931, eocId: 'EOC30021', accountName: 'Company A', drugName: 'Drug A', ndc: '00071-0155-23', claimDate: '2025-07-15', quantity: 1, daysSupply: 30, cost: '$12,450.00', status: 'Pending', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, assistanceStatus: null as string | null },
+  { id: 158088181, eocId: 'EOC30047', accountName: 'Company B', drugName: 'Drug B', ndc: '00069-0944-30', claimDate: '2025-07-14', quantity: 2, daysSupply: 90, cost: '$45,800.00', status: 'Acknowledged', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, assistanceStatus: null as string | null },
+  { id: 158480891, eocId: 'EOC30058', accountName: 'Company C', drugName: 'Drug C', ndc: '00078-0421-15', claimDate: '2025-07-13', quantity: 4, daysSupply: 30, cost: '$18,750.00', status: 'Pending', notes: 'Can you confirm if a savings program applies to this claim?' as string | null, requestedBy: 'Jane Doe' as string | null, requestedDate: '2025-07-16' as string | null, assistanceStatus: 'Pending Clinical Assistance' },
+  { id: 152987510, eocId: 'EOC30063', accountName: 'Company D', drugName: 'Drug D', ndc: '00006-0749-31', claimDate: '2025-07-12', quantity: 1, daysSupply: 28, cost: '$92,300.00', status: 'Acknowledged', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, assistanceStatus: null as string | null },
+  { id: 153219641, eocId: 'EOC30079', accountName: 'Company E', drugName: 'Drug E', ndc: '00173-0879-00', claimDate: '2025-07-11', quantity: 3, daysSupply: 84, cost: '$61,200.00', status: 'Pending', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, assistanceStatus: null as string | null },
 ]);
 
 // The kebab's Acknowledge item is available any time a claim is still
@@ -316,15 +334,27 @@ const claimsData = ref([
 // nothing more. Request Clinical Assistance is always available (even
 // after Acknowledge, and even if a request is already open).
 const tableItems = computed(() =>
-  filteredClaimsData.value.map(claim => {
-    const assistanceRequested = !!claim.notes;
-    return {
-      ...claim,
-      assistanceRequested,
-      canAcknowledge: claim.status !== 'Acknowledged',
-    };
-  })
+  filteredClaimsData.value.map(claim => ({
+    ...claim,
+    canAcknowledge: claim.status !== 'Acknowledged',
+  }))
 );
+
+// Surfaced as its own table right under the page header — mirrors master's
+// HighCostClaimsPage treatment, shown regardless of user type (internal staff
+// need this visibility too, not just external clients).
+const pendingAssistanceClaims = computed(() => claimsData.value.filter(claim => claim.notes != null));
+
+// assistanceStatus is expected to be wired up to the actual support ticket's status
+// once that integration exists — the color mapping is kept separate from the display
+// text so new statuses just need a bucket added here, not template changes.
+// Default matches $color-link (#2C82CB) — the same blue as the section's border/title
+// and master's StatusChip 'info' variant — not Vuetify's navy theme primary.
+const assistanceStatusColor = (status: string | null): string => {
+  if (status === 'Resolved') return 'success';
+  if (status === 'In Progress') return 'warning';
+  return '#2C82CB'; // Pending Clinical Assistance and any unrecognized status
+};
 
 const parseCost = (cost: string) => {
   const value = parseFloat(cost.replace(/[^0-9.-]+/g, ''));
@@ -413,14 +443,6 @@ const assistanceDialogActions = computed(() => [
   { text: 'Cancel', onClick: () => (showAssistanceDialog.value = false), styleType: 'secondary' as const },
   { text: 'Send Request', onClick: confirmAssistanceRequest, color: 'primary', variant: 'flat' as const, disabled: assistanceNotes.value.trim() === '' },
 ]);
-
-// The assistance indicator's tooltip shows the requestor and date of the
-// most recent request — same for external and internal, no separate
-// internal-only view. See formatRequestedDate below.
-const formatRequestedDate = (dateString: string | null) => {
-  if (!dateString) return '';
-  return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-};
 
 const rowActionItems = [
   { label: 'Acknowledge', action: 'acknowledge' },
@@ -751,11 +773,25 @@ const filteredClaimsData = computed(() => {
   text-align: center;
 }
 
-.assistance-requested-icon {
-  color: $color-link;
+.pending-assistance-section {
+  border: 2px solid $color-link;
+  border-radius: 8px;
+  background-color: $color-information-background;
+  padding: $spacing-medium;
 
-  &--clickable {
-    cursor: pointer;
+  &__title {
+    color: $color-link;
+    margin-bottom: $spacing-small;
+  }
+
+  :deep(table) {
+    background-color: transparent;
+
+    thead th,
+    tbody td {
+      color: $color-text-primary;
+      background-color: rgba($color-neutral-white, 0.8);
+    }
   }
 }
 

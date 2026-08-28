@@ -932,9 +932,9 @@ const confirmRequest = () => {
 }
 
 .cart-cta-btn {
-  background-color: $color-neutral-white;
-  color: $color-primary-dark;
-  border: none;
+  background-color: transparent;
+  color: $color-neutral-white;
+  border: 1px solid $color-neutral-white;
   border-radius: 100px;
   padding: 8px $spacing-medium;
   font-size: $font-size-body;
@@ -944,7 +944,7 @@ const confirmRequest = () => {
   transition: background-color 0.15s ease;
 
   &:hover {
-    background-color: rgba(255, 255, 255, 0.9);
+    background-color: rgba(255, 255, 255, 0.15);
   }
 }
 

@@ -38,6 +38,34 @@
       headerText="Prior Authorization Manager"
       :descriptionText="isExternal ? 'Review the status of your prior authorizations, or ask a question about a submission.' : 'Review prior authorization statuses and monitor clinical assistance requests submitted by clients.'"
     >
+      <div v-if="pendingClinicalAssistanceItems.length > 0" class="pending-assistance-section mb-large">
+        <h3 class="pending-assistance-section__title">Pending Clinical Assistance</h3>
+        <v-table density="compact">
+          <thead>
+            <tr>
+              <th class="font-weight-bold">EOC ID</th>
+              <th class="font-weight-bold">Account Name</th>
+              <th class="font-weight-bold">Drug Name</th>
+              <th class="font-weight-bold">Submission Date</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="auth in pendingClinicalAssistanceItems" :key="auth.eocId">
+              <td>{{ auth.eocId }}</td>
+              <td>{{ auth.accountName }}</td>
+              <td>{{ auth.drugName }}</td>
+              <td>{{ auth.submissionDate }}</td>
+              <td>
+                <v-chip :color="assistanceStatusColor(auth.assistanceStatus)" variant="tonal" size="small">
+                  {{ auth.assistanceStatus }}
+                </v-chip>
+              </td>
+            </tr>
+          </tbody>
+        </v-table>
+      </div>
+
       <div class="search-filter-row">
         <div class="search-bar-wrapper">
           <SearchBar
@@ -64,9 +92,9 @@
           :show-filter-button="false"
           :show-filter-pills="false"
           :show-selection-checkboxes="false"
-          :show-action-icons="isExternal"
-          :action-icons="actionIcons"
-          :show-row-actions="false"
+          :show-row-actions="isExternal"
+          :row-action-items="rowActionItems"
+          @row-action="handleRowAction"
           :show-bulk-approve="false"
           :show-bulk-reject="false"
           :show-bulk-download="false"
@@ -75,16 +103,6 @@
             <v-chip :color="getStatusDisplay((item as any).rawStatus).color" variant="tonal" size="small">
               {{ getStatusDisplay((item as any).rawStatus).label }}
             </v-chip>
-          </template>
-          <template #item.assistanceRequested="{ item }">
-            <v-tooltip
-              v-if="(item as any).notes"
-              :text="`Assistance Requested by ${(item as any).requestedBy} on ${formatRequestedDate((item as any).requestedDate)}`"
-            >
-              <template #activator="{ props: tooltipProps }">
-                <CircleHelp v-bind="tooltipProps" :size="18" :stroke-width="1.5" class="assistance-requested-icon" />
-              </template>
-            </v-tooltip>
           </template>
         </ReportDataTable>
       </div>
@@ -98,7 +116,6 @@
       :actions="advancedFiltersDialogActions"
     >
       <template #filter-account="{ filter }">
-        <p class="filter-section-label">{{ filter.label }}</p>
         <div v-if="dialogAccounts.length > 0" class="selected-chips">
           <v-chip
             v-for="acct in dialogAccounts"
@@ -119,7 +136,7 @@
               v-model="accountSearch"
               type="text"
               class="account-search-input"
-              placeholder="Search accounts"
+              placeholder="Account"
               @mousedown="showAccountList = true"
               @blur="handleAccountPickerBlur"
             />
@@ -144,18 +161,47 @@
         </div>
       </template>
       <template #filter-status="{ filter }">
-        <p class="filter-section-label">{{ filter.label }}</p>
-        <div>
-          <div
-            v-for="opt in filter.options"
-            :key="String(opt.value)"
-            class="account-option"
-            @click="toggleDialogStatus(opt.value as string)"
+        <div v-if="dialogStatuses.length > 0" class="selected-chips">
+          <v-chip
+            v-for="status in dialogStatuses"
+            :key="status"
+            variant="flat"
+            color="primary"
+            class="autocomplete-chip"
           >
-            <div class="acct-checkbox" :class="{ active: dialogStatuses.includes(opt.value as string) }">
-              <Check v-if="dialogStatuses.includes(opt.value as string)" :size="12" :stroke-width="3" />
+            {{ status }}
+            <span class="chip-close" @click.stop="toggleDialogStatus(status)">
+              <X :size="12" />
+            </span>
+          </v-chip>
+        </div>
+        <div class="account-picker-wrap">
+          <div class="account-search-field" :class="{ 'account-search-field--active': showStatusList }">
+            <input
+              v-model="statusSearch"
+              type="text"
+              class="account-search-input"
+              placeholder="Status"
+              @mousedown="showStatusList = true"
+              @blur="handleStatusPickerBlur"
+            />
+          </div>
+          <div v-if="showStatusList" class="account-dropdown">
+            <div
+              v-for="opt in filteredStatusOptions"
+              :key="String(opt.value)"
+              class="account-option"
+              @mousedown.prevent
+              @click="toggleDialogStatus(opt.value as string)"
+            >
+              <div class="acct-checkbox" :class="{ active: dialogStatuses.includes(opt.value as string) }">
+                <Check v-if="dialogStatuses.includes(opt.value as string)" :size="12" :stroke-width="3" />
+              </div>
+              <span>{{ opt.text }}</span>
             </div>
-            <span>{{ opt.text }}</span>
+            <div v-if="filteredStatusOptions.length === 0" class="no-acct-results">
+              No statuses found
+            </div>
           </div>
         </div>
       </template>
@@ -221,7 +267,7 @@ import FilteringPillsGroup from '@/components/ui/FilteringPillsGroup.vue';
 import DatePicker from '@/components/ui/DatePicker.vue';
 import SearchBar from '@/components/ui/SearchBar.vue';
 import { useUserType } from '@/composables/useUserType';
-import { Hourglass, CircleCheckBig, XCircle, Info, SlidersHorizontal, Check, X, CircleHelp } from 'lucide-vue-next';
+import { Hourglass, CircleCheckBig, XCircle, Info, SlidersHorizontal, Check, X } from 'lucide-vue-next';
 import type { FilterGroup } from '@/types/filters';
 import type { FilterPill } from '@/components/ui/FilteringPill.vue';
 
@@ -236,10 +282,9 @@ const priorAuthHeaders = computed(() => {
     { title: 'Drug Name', key: 'drugName' },
     { title: 'Submission Date', key: 'submissionDate', align: 'end' },
     { title: 'Status', key: 'status' },
-    { title: 'Assistance', key: 'assistanceRequested', align: 'center', sortable: false },
   ];
   if (isExternal.value) {
-    headers.push({ title: 'Actions', key: 'actions', sortable: false, align: 'end' });
+    headers.push({ title: '', key: 'actions', sortable: false, align: 'end' });
   }
   return headers;
 });
@@ -249,16 +294,16 @@ const priorAuthHeaders = computed(() => {
 // HCC's model: a real flag for "client has requested clinical assistance,"
 // not a guess derived from status.
 const priorAuthData = ref([
-  { accountName: 'Company A', eocId: 'EOC12345', drugName: 'Drug A', rawStatus: 'Submitted', submissionDate: '2025-07-01', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null },
-  { accountName: 'Company B', eocId: 'EOC67890', drugName: 'Drug B', rawStatus: 'Approved', submissionDate: '2025-06-25', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null },
-  { accountName: 'Company C', eocId: 'EOC11223', drugName: 'Drug C', rawStatus: 'Rejected', submissionDate: '2025-06-20', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null },
-  { accountName: 'Company D', eocId: 'EOC44556', drugName: 'Drug D', rawStatus: 'RPH Sign-Off', submissionDate: '2025-07-05', notes: 'Can you confirm the expected turnaround time for this authorization?' as string | null, requestedBy: 'Jane Doe' as string | null, requestedDate: '2025-07-06' as string | null },
-  { accountName: 'Company E', eocId: 'EOC77889', drugName: 'Drug E', rawStatus: 'Approved', submissionDate: '2025-06-18', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null },
-  { accountName: 'Company F', eocId: 'EOC99001', drugName: 'Drug F', rawStatus: 'Show Review', submissionDate: '2025-07-10', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null },
-  { accountName: 'Company G', eocId: 'EOC22334', drugName: 'Drug G', rawStatus: 'Submitted', submissionDate: '2025-06-15', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null },
-  { accountName: 'Company H', eocId: 'EOC55667', drugName: 'Drug H', rawStatus: 'MD Sign-Off', submissionDate: '2025-07-02', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null },
-  { accountName: 'Company I', eocId: 'EOC88990', drugName: 'Drug I', rawStatus: 'Client Sign-Off', submissionDate: '2025-06-28', notes: 'What additional documentation is needed from the prescriber?' as string | null, requestedBy: 'John Smith' as string | null, requestedDate: '2025-06-29' as string | null },
-  { accountName: 'Company J', eocId: 'EOC10112', drugName: 'Drug J', rawStatus: 'Approved', submissionDate: '2025-07-08', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null },
+  { accountName: 'Company A', eocId: 'EOC12345', drugName: 'Drug A', rawStatus: 'Submitted', submissionDate: '2025-07-01', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, assistanceStatus: null as string | null },
+  { accountName: 'Company B', eocId: 'EOC67890', drugName: 'Drug B', rawStatus: 'Approved', submissionDate: '2025-06-25', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, assistanceStatus: null as string | null },
+  { accountName: 'Company C', eocId: 'EOC11223', drugName: 'Drug C', rawStatus: 'Rejected', submissionDate: '2025-06-20', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, assistanceStatus: null as string | null },
+  { accountName: 'Company D', eocId: 'EOC44556', drugName: 'Drug D', rawStatus: 'RPH Sign-Off', submissionDate: '2025-07-05', notes: 'Can you confirm the expected turnaround time for this authorization?' as string | null, requestedBy: 'Jane Doe' as string | null, requestedDate: '2025-07-06' as string | null, assistanceStatus: 'Pending Clinical Assistance' as string | null },
+  { accountName: 'Company E', eocId: 'EOC77889', drugName: 'Drug E', rawStatus: 'Approved', submissionDate: '2025-06-18', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, assistanceStatus: null as string | null },
+  { accountName: 'Company F', eocId: 'EOC99001', drugName: 'Drug F', rawStatus: 'Show Review', submissionDate: '2025-07-10', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, assistanceStatus: null as string | null },
+  { accountName: 'Company G', eocId: 'EOC22334', drugName: 'Drug G', rawStatus: 'Submitted', submissionDate: '2025-06-15', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, assistanceStatus: null as string | null },
+  { accountName: 'Company H', eocId: 'EOC55667', drugName: 'Drug H', rawStatus: 'MD Sign-Off', submissionDate: '2025-07-02', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, assistanceStatus: null as string | null },
+  { accountName: 'Company I', eocId: 'EOC88990', drugName: 'Drug I', rawStatus: 'Client Sign-Off', submissionDate: '2025-06-28', notes: 'What additional documentation is needed from the prescriber?' as string | null, requestedBy: 'John Smith' as string | null, requestedDate: '2025-06-29' as string | null, assistanceStatus: 'Pending Clinical Assistance' as string | null },
+  { accountName: 'Company J', eocId: 'EOC10112', drugName: 'Drug J', rawStatus: 'Approved', submissionDate: '2025-07-08', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, assistanceStatus: null as string | null },
 ]);
 
 // Six statuses only — every raw sub-status from the adjudication pipeline
@@ -298,12 +343,21 @@ function getStatusBucket(rawStatus: string): 'Pending' | 'Approved' | 'Denied' {
 // available regardless of prior requests — mirrors HCC's pattern (confirmed
 // against the old portal's actual RequestMoreInformation/
 // RequestClinicalAssistance handlers, neither of which locks re-requesting).
-const tableItems = computed(() =>
-  filteredPriorAuthData.value.map(item => ({
-    ...item,
-    assistanceRequested: !!item.notes,
-  }))
-);
+const tableItems = computed(() => filteredPriorAuthData.value);
+
+// Surfaced as its own table right under the page header — mirrors HCC's
+// pattern, shown regardless of user type.
+const pendingClinicalAssistanceItems = computed(() => priorAuthData.value.filter(item => item.notes != null));
+
+// assistanceStatus is expected to be wired up to the actual support ticket's status
+// once that integration exists — matches HCC's assistanceStatusColor pattern.
+// Default matches $color-link (#2C82CB) — the same blue as the section's border/title
+// and master's StatusChip 'info' variant — not Vuetify's navy theme primary.
+const assistanceStatusColor = (status: string | null): string => {
+  if (status === 'Resolved') return 'success';
+  if (status === 'In Progress') return 'warning';
+  return '#2C82CB'; // Pending Clinical Assistance and any unrecognized status
+};
 
 const pendingCount = computed(() => priorAuthData.value.filter(item => getStatusBucket(item.rawStatus) === 'Pending').length);
 const approvedCount = computed(() => priorAuthData.value.filter(item => getStatusBucket(item.rawStatus) === 'Approved').length);
@@ -354,20 +408,12 @@ const assistanceDialogActions = computed(() => [
   { text: 'Send Request', onClick: confirmAssistanceRequest, styleType: 'primary' as const, disabled: assistanceNotes.value.trim() === '' },
 ]);
 
-const actionIcons = ref([
-  {
-    icon: Info,
-    tooltip: 'Request Clinical Assistance',
-    onClick: (item: any) => openAssistanceDialog([item]),
-  },
-]);
+const rowActionItems = [
+  { label: 'Request Clinical Assistance', action: 'assistance' },
+];
 
-// The assistance indicator's tooltip shows the requestor and date of the
-// most recent request — same for external and internal, no separate
-// internal-only view (matches HCC's formatRequestedDate).
-const formatRequestedDate = (dateString: string | null) => {
-  if (!dateString) return '';
-  return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+const handleRowAction = ({ action, item }: { action: string; item: any }) => {
+  if (action === 'assistance') openAssistanceDialog([item]);
 };
 
 // === FILTERS === //
@@ -404,11 +450,18 @@ const dialogDateTo = ref('');
 
 const accountSearch = ref('');
 const showAccountList = ref(false);
+const statusSearch = ref('');
+const showStatusList = ref(false);
 
 const accountOptions = computed(() => [...new Set(priorAuthData.value.map(a => a.accountName))].sort());
 const filteredAccountOptions = computed(() => {
   const q = accountSearch.value?.toLowerCase() ?? '';
   return accountOptions.value.filter(a => a.toLowerCase().includes(q));
+});
+
+const filteredStatusOptions = computed(() => {
+  const q = statusSearch.value?.toLowerCase() ?? '';
+  return priorAuthStatusOptions.filter(o => o.text.toLowerCase().includes(q));
 });
 
 const toggleAccount = (account: string) => {
@@ -419,6 +472,10 @@ const toggleAccount = (account: string) => {
 
 const handleAccountPickerBlur = () => {
   setTimeout(() => { showAccountList.value = false; }, 150);
+};
+
+const handleStatusPickerBlur = () => {
+  setTimeout(() => { showStatusList.value = false; }, 150);
 };
 
 const toggleDialogStatus = (value: string) => {
@@ -434,6 +491,8 @@ const openFilters = () => {
   dialogDateTo.value = appliedDateTo.value;
   accountSearch.value = '';
   showAccountList.value = false;
+  statusSearch.value = '';
+  showStatusList.value = false;
   isAdvancedFiltersOpen.value = true;
 };
 
@@ -686,8 +745,26 @@ const filteredPriorAuthData = computed(() => {
   text-align: center;
 }
 
-.assistance-requested-icon {
-  color: $color-link;
+.pending-assistance-section {
+  border: 2px solid $color-link;
+  border-radius: 8px;
+  background-color: $color-information-background;
+  padding: $spacing-medium;
+
+  &__title {
+    color: $color-link;
+    margin-bottom: $spacing-small;
+  }
+
+  :deep(table) {
+    background-color: transparent;
+
+    thead th,
+    tbody td {
+      color: $color-text-primary;
+      background-color: rgba($color-neutral-white, 0.8);
+    }
+  }
 }
 
 .claim-summary-table {

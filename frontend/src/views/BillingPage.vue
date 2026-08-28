@@ -28,10 +28,10 @@
         :items="filteredBillingData"
         :show-search-bar="false"
         :show-filter-button="false"
-        :show-row-actions="false"
+        :show-row-actions="true"
+        :row-action-items="billingRowActions"
+        @row-action="handleBillingRowAction"
         :show-filter-pills="false"
-        :show-action-icons="true"
-        :action-icons="billingActionIcons"
         :default-sort-by="[{ key: 'startDate', order: 'desc' }]"
         :custom-key-sort="billingCustomKeySort"
         :items-per-page="10"
@@ -58,7 +58,6 @@
       :actions="advancedFiltersDialogActions"
     >
       <template #filter-account="{ filter }">
-        <p class="filter-section-label">{{ filter.label }}</p>
         <div v-if="dialogAccounts.length > 0" class="selected-chips">
           <v-chip
             v-for="acct in dialogAccounts"
@@ -79,7 +78,7 @@
               v-model="accountSearch"
               type="text"
               class="account-search-input"
-              placeholder="Search accounts"
+              placeholder="Account"
               @mousedown="showAccountList = true"
               @blur="handleAccountPickerBlur"
             />
@@ -120,7 +119,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue';
-import { SlidersHorizontal, CloudDownload, Check, X } from 'lucide-vue-next';
+import { SlidersHorizontal, Check, X } from 'lucide-vue-next';
 import PageCard from '@/components/common/PageCard.vue';
 import ReportDataTable from '@/components/common/ReportDataTable.vue';
 import Tabs from '@/components/common/Tabs.vue';
@@ -299,18 +298,17 @@ const billingCustomKeySort = {
 const showDownloadSnackbar = ref(false);
 const downloadSnackbarText = ref('');
 
-const billingActionIcons = ref([
-  {
-    icon: CloudDownload,
-    tooltip: 'Download',
-    size: 20,
-    onClick: (item: any) => {
-      console.log('Download item:', item);
-      downloadSnackbarText.value = `${item.accountName} statement downloaded successfully!`;
-      showDownloadSnackbar.value = true;
-    },
-  },
-]);
+const billingRowActions = [
+  { label: 'Download', action: 'download' },
+];
+
+const handleBillingRowAction = ({ action, item }: { action: string; item: any }) => {
+  if (action === 'download') {
+    console.log('Download item:', item);
+    downloadSnackbarText.value = `${item.accountName} statement downloaded successfully!`;
+    showDownloadSnackbar.value = true;
+  }
+};
 
 const handleBulkDownload = (items: any[]) => {
   console.log('bulk downloaded', items);

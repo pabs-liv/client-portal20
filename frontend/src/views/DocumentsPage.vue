@@ -16,6 +16,10 @@
         header-text="Document Explorer"
         :description-text="pageDescription"
       >
+        <div class="doc-cta-row">
+          <button class="button button-primary doc-upload-cta" @click="openUploadModal">+Add Document</button>
+        </div>
+        <Tabs :tabs="documentTabs" @tab-selected="handleTabSelected" class="documents-tabs" />
         <div class="search-filter-row">
           <div class="search-bar-wrapper">
             <SearchBar
@@ -33,10 +37,6 @@
           @close:filter="handleFilterPillClose"
           class="filter-pills"
         />
-        <Tabs :tabs="documentTabs" @tab-selected="handleTabSelected" class="mb-large" />
-        <div v-if="filteredDocumentItems.length > 0" class="doc-upload-cta-row">
-          <button class="button button-primary" @click="openUploadModal">+ Add Documents</button>
-        </div>
         <ReportDataTable
           :headers="documentHeaders"
           :items="filteredDocumentItems"
@@ -54,7 +54,7 @@
               <img :src="EmptyStateImg" alt="No data" class="doc-empty-icon" />
               <p class="doc-empty-title">Nothing to see here</p>
               <p class="doc-empty-subtitle">No documents have been uploaded yet.</p>
-              <button class="button button-secondary" @click="openUploadModal">+ Add Documents</button>
+              <button class="button button-secondary" @click="openUploadModal">+Add Document</button>
             </div>
           </template>
         </ReportDataTable>
@@ -69,7 +69,6 @@
       :actions="advancedFiltersDialogActions"
     >
       <template #filter-modifiedBy="{ filter }">
-        <p class="filter-section-label">{{ filter.label }}</p>
         <div v-if="dialogModifiedBy.length > 0" class="selected-chips">
           <v-chip
             v-for="person in dialogModifiedBy"
@@ -90,7 +89,7 @@
               v-model="modifiedBySearch"
               type="text"
               class="account-search-input"
-              placeholder="Search by name"
+              placeholder="Uploaded By"
               @mousedown="showModifiedByList = true"
               @blur="handleModifiedByPickerBlur"
             />
@@ -123,9 +122,11 @@
       </template>
     </AdvancedFiltersDialog>
 
-    <!-- Add Documents modal — account/category are locked from whichever tab it was opened
-         from (not editable here), so an upload can never be misdirected to the wrong
-         account or category. Same persistent-dialog pattern as Plan Explorer > Network
+    <!-- Add Documents modal — account is locked from whichever account is currently
+         selected (not editable here), so an upload can never be misdirected to the
+         wrong account. Document Type defaults to whichever tab it was opened from but
+         is editable, since the user may realize they meant to upload under a different
+         category. Same persistent-dialog pattern as Plan Explorer > Network
          Configuration's "+ Add Network Link". -->
     <Dialog
       v-model="showUploadModal"
@@ -135,16 +136,22 @@
       :actions="uploadDialogActions"
       :show-secondary-button="true"
     >
-      <div class="upload-context">
-        <div class="ap-field">
-          <span class="ap-field-label">Account</span>
-          <span class="ap-field-value">{{ selectedAccountName }}</span>
-        </div>
-        <div class="ap-field">
-          <span class="ap-field-label">Category</span>
-          <span class="ap-field-value">{{ selectedTabKey }}</span>
-        </div>
+      <Banner
+        variant="warning"
+        always-show
+        message="Choosing the wrong document type can expose PHI to unauthorized users. Please confirm the correct type before uploading - PHI documents are only visible to users with appropriate access when labeled correctly."
+        class="upload-warning-banner"
+      />
+      <div class="ap-field upload-account-field">
+        <span class="ap-field-label">Account</span>
+        <span class="ap-field-value">{{ selectedAccountName }}</span>
       </div>
+      <Select
+        v-model="uploadDocumentType"
+        label="Document Type *"
+        :items="documentTypeOptions"
+        class="upload-document-type-select"
+      />
 
       <template v-if="stagedFileName">
         <v-chip color="primary" variant="flat" class="bl-file-chip">
@@ -156,7 +163,7 @@
       <FileUploader v-else :show-document-type-selection="false" @file-selected="(name) => { stagedFileName = name }" />
 
       <template v-if="stagedFileName">
-        <p v-if="selectedTabKey === 'PHI Documents'" class="text-body upload-review-line">
+        <p v-if="uploadDocumentType === 'PHI Documents'" class="text-body upload-review-line">
           This will be added to {{ selectedAccountName }}'s PHI Documents.
         </p>
         <div v-else class="ap-checkbox-toggle upload-phi-ack" @click="uploadPhiAck = !uploadPhiAck">
@@ -190,12 +197,14 @@ import PageCard from '@/components/common/PageCard.vue';
 import AccountSelector from '@/components/common/AccountSelector.vue';
 import ReportDataTable from '@/components/common/ReportDataTable.vue';
 import Tabs from '@/components/common/Tabs.vue';
+import Banner from '@/components/common/Banner.vue';
 import FileUploader from '@/components/ui/FileUploader.vue';
 import SearchBar from '@/components/ui/SearchBar.vue';
 import AdvancedFiltersButton from '@/components/ui/AdvancedFiltersButton.vue';
 import AdvancedFiltersDialog from '@/components/common/AdvancedFiltersDialog.vue';
 import FilteringPillsGroup from '@/components/ui/FilteringPillsGroup.vue';
 import DatePicker from '@/components/ui/DatePicker.vue';
+import Select from '@/components/ui/Select.vue';
 import Dialog from '@/components/ui/Dialog.vue';
 import type { FilterGroup } from '@/types/filters';
 import type { FilterPill } from '@/components/ui/FilteringPill.vue';
@@ -479,16 +488,23 @@ const removeDocumentDialogActions = [
   { text: 'Remove', onClick: confirmRemoveDocument, type: 'destructive' as const },
 ];
 
-// Add Documents modal — category and account are locked from whichever tab was active
-// when it was opened (selectedTabKey / selectedAccountName), never chosen inside the
-// modal itself, so an upload can't be misdirected to the wrong place.
+// Add Documents modal — account is locked from whichever account is currently selected
+// (selectedAccountName), never chosen inside the modal itself, so an upload can't be
+// misdirected to the wrong account. Document Type defaults to whichever tab was active
+// when the modal was opened but is editable here.
 const showUploadModal = ref(false);
 const stagedFileName = ref('');
 const uploadPhiAck = ref(false);
+const uploadDocumentType = ref('PHI Documents');
+
+const documentTypeOptions = computed(() =>
+  documentTabs.value.map(tab => ({ title: tab.label, value: tab.key }))
+);
 
 const openUploadModal = () => {
   stagedFileName.value = '';
   uploadPhiAck.value = false;
+  uploadDocumentType.value = selectedTabKey.value;
   showUploadModal.value = true;
 };
 
@@ -497,7 +513,7 @@ const closeUploadModal = () => {
 };
 
 const canConfirmUpload = computed(() =>
-  !!stagedFileName.value && (selectedTabKey.value === 'PHI Documents' || uploadPhiAck.value)
+  !!stagedFileName.value && (uploadDocumentType.value === 'PHI Documents' || uploadPhiAck.value)
 );
 
 const confirmUpload = () => {
@@ -508,7 +524,7 @@ const confirmUpload = () => {
     uploadDate: new Date().toISOString().slice(0, 10),
     lastModifiedBy: 'Pablo Duarte', // "Pablo" matches the logged-in-user placeholder used on Home; always show first + last name here
     status: 'Published',
-    category: selectedTabKey.value,
+    category: uploadDocumentType.value,
     accountName: selectedAccountName.value,
   });
   showUploadModal.value = false;
@@ -516,7 +532,7 @@ const confirmUpload = () => {
 
 const uploadDialogActions = computed(() => [
   { text: 'Cancel', onClick: closeUploadModal, styleType: 'secondary' as const },
-  { text: 'Upload Document', onClick: confirmUpload, disabled: !canConfirmUpload.value },
+  { text: '+Add Document', onClick: confirmUpload, disabled: !canConfirmUpload.value },
 ]);
 </script>
 
@@ -687,10 +703,16 @@ html.dark .account-option:hover {
   }
 }
 
-.doc-upload-cta-row {
+// CTA sits in its own row above the tabs, rather than overlapping the tab strip's
+// own dividing line (which spans the full width, tabs still anchored left).
+.doc-cta-row {
   display: flex;
   justify-content: flex-end;
   margin-bottom: $spacing-medium;
+}
+
+.documents-tabs {
+  width: 100%;
 }
 
 // Same base button styling as Plan Explorer's .button/.button-primary — scoped styles
@@ -762,9 +784,21 @@ html.dark .account-option:hover {
   margin: 0 0 $spacing-small;
 }
 
+.upload-warning-banner {
+  margin-bottom: $spacing-medium;
+}
+
 .upload-context {
   display: flex;
   gap: $spacing-xlarge;
+  margin-bottom: $spacing-medium;
+}
+
+.upload-account-field {
+  margin-bottom: $spacing-medium;
+}
+
+.upload-document-type-select {
   margin-bottom: $spacing-medium;
 }
 
