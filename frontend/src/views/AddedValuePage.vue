@@ -56,16 +56,38 @@
                   <span class="detail-label">Program Option</span>
                   <span class="detail-value">{{ program.optionName }}</span>
                 </div>
-                <div v-if="program.selectedOptions?.length" class="detail-field detail-field--full">
-                  <span class="detail-label">Active Configuration</span>
-                  <ul class="selected-options-list">
+
+                <div
+                  v-if="program.details.paragraphs?.length || program.details.bullets?.length || program.details.configItems?.length || program.details.note"
+                  class="detail-field detail-field--full"
+                >
+                  <span class="detail-label">Program Details</span>
+
+                  <p
+                    v-for="(para, i) in program.details.paragraphs"
+                    :key="'p'+i"
+                    class="detail-para"
+                    :style="isDark ? { color: 'var(--color-text-primary)' } : {}"
+                  >{{ para }}</p>
+
+                  <ul v-if="program.details.bullets?.length" class="detail-bullets">
                     <li
-                      v-for="(opt, i) in program.selectedOptions"
-                      :key="i"
-                      class="selected-option-item"
+                      v-for="(bullet, i) in program.details.bullets"
+                      :key="'b'+i"
                       :style="isDark ? { color: 'var(--color-text-primary)' } : {}"
-                    >{{ opt }}</li>
+                    >{{ bullet }}</li>
                   </ul>
+
+                  <p
+                    v-for="(item, i) in program.details.configItems"
+                    :key="'c'+i"
+                    class="detail-config-item"
+                    :style="isDark ? { color: 'var(--color-text-primary)' } : {}"
+                  >{{ item }}</p>
+
+                  <p v-if="program.details.note" class="detail-note" :style="isDark ? { backgroundColor: 'rgba(44,130,203,0.12)', color: 'var(--color-text-secondary)' } : {}">
+                    {{ program.details.note }}
+                  </p>
                 </div>
               </div>
             </div>
@@ -339,7 +361,6 @@ interface Program {
   category: string;
   description: string;
   optionName: string;
-  selectedOptions?: string[];
   invoice: boolean;
   merpAdminName: string;
   fees: Fee[];
@@ -365,12 +386,6 @@ const programs: Program[] = [
     category: 'Wellness',
     description: 'A clinically proven digital health program that uses psychology-based coaching and cognitive behavioral techniques to help members build lasting habits, manage weight, and improve overall wellbeing.',
     optionName: 'Noom Standard',
-    selectedOptions: [
-      'Program tier: Noom Weight + GLP-1 Companion',
-      'Coverage: All prescription plan members aged 18 and older',
-      'Weight loss medication coverage: Included',
-      'Add-on: Noom Mood',
-    ],
     invoice: true,
     merpAdminName: '—',
     fees: [
@@ -396,11 +411,6 @@ const programs: Program[] = [
     category: 'Wellness',
     description: 'A comprehensive diabetes management program that combines wearable device integration, real-time health data, and GLP-1 medication coverage to help members manage Type 2 diabetes and improve long-term outcomes.',
     optionName: 'Sync+ Standard',
-    selectedOptions: [
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit',
-      'GLP-1 medication coverage: Included (diabetes management only)',
-      'Ut enim ad minim veniam, quis nostrud exercitation',
-    ],
     invoice: false,
     merpAdminName: '—',
     fees: [],
@@ -423,11 +433,6 @@ const programs: Program[] = [
     category: 'Wellness',
     description: 'Genetic testing that analyzes how each member\'s DNA affects their response to medications, helping optimize drug therapy and reduce adverse reactions.',
     optionName: 'Liviniti Pharmacogenomics Standard',
-    selectedOptions: [
-      'Testing method: Mindera Mind.Px dermal biomarker patch',
-      'Coverage: All prescription plan members',
-      'Indication: Psoriasis biologic selection',
-    ],
     invoice: false,
     merpAdminName: '—',
     fees: [],
@@ -445,12 +450,6 @@ const programs: Program[] = [
     category: 'Savings',
     description: 'Same-day and next-day prescription delivery connecting members with local pharmacies for convenient, fast access to their medications.',
     optionName: 'Liviniti Delivery on Demand Standard',
-    selectedOptions: [
-      'Delivery provider: ScriptDrop',
-      'Delivery speed: Same-day and next-day',
-      'Coverage: All prescription plan members',
-      'Member co-pay responsibility: Paid directly to pharmacy prior to delivery',
-    ],
     invoice: false,
     merpAdminName: '—',
     fees: [],
