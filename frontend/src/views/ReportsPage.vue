@@ -33,7 +33,7 @@
         @row-action="handleReportRowAction"
         :show-filter-pills="false"
         :show-selection-checkboxes="true"
-        :default-sort-by="[{ key: 'reportingPeriod', order: 'desc' }]"
+        :default-sort-by="[{ key: 'startDate', order: 'desc' }]"
         :custom-key-sort="reportCustomKeySort"
         :items-per-page="10"
         :items-per-page-options="[
@@ -103,7 +103,6 @@
         </div>
       </template>
       <template #filter-reportType>
-        <p class="filter-helper-text">Only one report type can be filtered at a time, since each has its own reporting period cadence.</p>
         <Select
           v-model="dialogReportType"
           label="Report Type"
@@ -111,29 +110,11 @@
           clearable
         />
       </template>
-      <template #filter-reportingPeriod>
-        <p v-if="!dialogReportType" class="filter-helper-text">Select a report type above to filter by reporting period.</p>
-        <div v-if="dialogCadences.includes('quarterly')">
-          <p class="filter-helper-text">Quarter Range</p>
-          <div class="date-range-row">
-            <Select v-model="dialogQuarterFrom" label="From Quarter" :items="quarterOptions" />
-            <Select v-model="dialogQuarterFromYear" label="From Year" :items="yearOptions" />
-          </div>
-          <div class="date-range-row">
-            <Select v-model="dialogQuarterTo" label="To Quarter" :items="quarterOptions" />
-            <Select v-model="dialogQuarterToYear" label="To Year" :items="yearOptions" />
-          </div>
-        </div>
-        <div v-if="dialogCadences.includes('monthly')">
-          <p class="filter-helper-text">Month Range</p>
-          <div class="date-range-row">
-            <Select v-model="dialogMonthFrom" label="From Month" :items="monthOptions" />
-            <Select v-model="dialogMonthFromYear" label="From Year" :items="yearOptions" />
-          </div>
-          <div class="date-range-row">
-            <Select v-model="dialogMonthTo" label="To Month" :items="monthOptions" />
-            <Select v-model="dialogMonthToYear" label="To Year" :items="yearOptions" />
-          </div>
+      <template #filter-dateRange="{ filter }">
+        <p class="filter-section-label">{{ filter.label }}</p>
+        <div class="date-range-row">
+          <DatePicker label="From" v-model="dialogDateFrom" />
+          <DatePicker label="To" v-model="dialogDateTo" />
         </div>
       </template>
     </AdvancedFiltersDialog>
@@ -154,6 +135,7 @@ import AdvancedFiltersButton from '@/components/ui/AdvancedFiltersButton.vue';
 import AdvancedFiltersDialog from '@/components/common/AdvancedFiltersDialog.vue';
 import FilteringPillsGroup from '@/components/ui/FilteringPillsGroup.vue';
 import Select from '@/components/ui/Select.vue';
+import DatePicker from '@/components/ui/DatePicker.vue';
 import type { FilterGroup } from '@/types/filters';
 import type { FilterPill } from '@/components/ui/FilteringPill.vue';
 
@@ -161,29 +143,15 @@ const isAdvancedFiltersOpen = ref(false);
 
 // Applied state — what the table actually uses
 const appliedAccounts = ref<string[]>([]);
-// Report Type is single-select — filtering by reporting period range only makes sense
-// against one cadence at a time, so mixing report types would make the range ambiguous.
 const appliedReportType = ref('');
-const appliedQuarterFrom = ref('');
-const appliedQuarterFromYear = ref('');
-const appliedQuarterTo = ref('');
-const appliedQuarterToYear = ref('');
-const appliedMonthFrom = ref('');
-const appliedMonthFromYear = ref('');
-const appliedMonthTo = ref('');
-const appliedMonthToYear = ref('');
+const appliedDateFrom = ref('');
+const appliedDateTo = ref('');
 
 // Dialog draft state — only committed when Apply is clicked
 const dialogAccounts = ref<string[]>([]);
 const dialogReportType = ref('');
-const dialogQuarterFrom = ref('');
-const dialogQuarterFromYear = ref('');
-const dialogQuarterTo = ref('');
-const dialogQuarterToYear = ref('');
-const dialogMonthFrom = ref('');
-const dialogMonthFromYear = ref('');
-const dialogMonthTo = ref('');
-const dialogMonthToYear = ref('');
+const dialogDateFrom = ref('');
+const dialogDateTo = ref('');
 
 const accountSearch = ref('');
 const showAccountList = ref(false);
@@ -202,30 +170,6 @@ const reportData = ref([
   { id: 11, accountName: 'Company A', type: 'Rebate Summary',  startDate: '1/1/2024',  endDate: '3/31/2024' },
   { id: 12, accountName: 'Company B', type: 'Rebate Payments', startDate: '4/1/2025',  endDate: '6/30/2025' },
 ]);
-
-// Every report type in this prototype is either quarterly or monthly cadence — no annual reports.
-const cadenceOf = (type: string): 'quarterly' | 'monthly' => type === 'Monthly Value' ? 'monthly' : 'quarterly';
-
-const formatReportingPeriod = (item: { type: string; startDate: string }): string => {
-  const [month, , year] = item.startDate.split('/').map(Number);
-  if (cadenceOf(item.type) === 'monthly') {
-    return `${String(month).padStart(2, '0')}-${year}`;
-  }
-  const quarter = Math.floor((month - 1) / 3) + 1;
-  return `Q${quarter} ${year}`;
-};
-
-const parseReportingPeriod = (period: string): number => {
-  const quarterMatch = period.match(/^Q(\d) (\d{4})$/);
-  if (quarterMatch) {
-    return new Date(Number(quarterMatch[2]), (Number(quarterMatch[1]) - 1) * 3, 1).getTime();
-  }
-  const monthMatch = period.match(/^(\d{2})-(\d{4})$/);
-  if (monthMatch) {
-    return new Date(Number(monthMatch[2]), Number(monthMatch[1]) - 1, 1).getTime();
-  }
-  return 0;
-};
 
 const accountOptions = computed(() =>
   [...new Set(reportData.value.map(item => item.accountName))].sort()
@@ -259,14 +203,8 @@ const handleAccountPickerBlur = () => {
 const openFilters = () => {
   dialogAccounts.value = [...appliedAccounts.value];
   dialogReportType.value = appliedReportType.value;
-  dialogQuarterFrom.value = appliedQuarterFrom.value;
-  dialogQuarterFromYear.value = appliedQuarterFromYear.value;
-  dialogQuarterTo.value = appliedQuarterTo.value;
-  dialogQuarterToYear.value = appliedQuarterToYear.value;
-  dialogMonthFrom.value = appliedMonthFrom.value;
-  dialogMonthFromYear.value = appliedMonthFromYear.value;
-  dialogMonthTo.value = appliedMonthTo.value;
-  dialogMonthToYear.value = appliedMonthToYear.value;
+  dialogDateFrom.value = appliedDateFrom.value;
+  dialogDateTo.value = appliedDateTo.value;
   accountSearch.value = '';
   showAccountList.value = false;
   isAdvancedFiltersOpen.value = true;
@@ -275,14 +213,8 @@ const openFilters = () => {
 const applyFilters = () => {
   appliedAccounts.value = [...dialogAccounts.value];
   appliedReportType.value = dialogReportType.value;
-  appliedQuarterFrom.value = dialogQuarterFrom.value;
-  appliedQuarterFromYear.value = dialogQuarterFromYear.value;
-  appliedQuarterTo.value = dialogQuarterTo.value;
-  appliedQuarterToYear.value = dialogQuarterToYear.value;
-  appliedMonthFrom.value = dialogMonthFrom.value;
-  appliedMonthFromYear.value = dialogMonthFromYear.value;
-  appliedMonthTo.value = dialogMonthTo.value;
-  appliedMonthToYear.value = dialogMonthToYear.value;
+  appliedDateFrom.value = dialogDateFrom.value;
+  appliedDateTo.value = dialogDateTo.value;
   isAdvancedFiltersOpen.value = false;
 };
 
@@ -291,40 +223,14 @@ const cancelFilters = () => {
 };
 
 const reportFilters = reactive<FilterGroup[]>([
-  { type: 'account',          label: 'Account',           multiselect: true,  options: [], modelValue: null },
-  { type: 'reportType',       label: 'Report Type',       multiselect: false, options: [], modelValue: null },
-  { type: 'reportingPeriod',  label: 'Reporting Period',  multiselect: false, options: [], modelValue: null },
+  { type: 'account',     label: 'Account',      multiselect: true,  options: [], modelValue: null },
+  { type: 'reportType',  label: 'Report Type',  multiselect: false, options: [], modelValue: null },
+  { type: 'dateRange',   label: 'Date Range',   multiselect: false, options: [], modelValue: null },
 ]);
 
-// Reporting Period picker only appears once a report type is selected — a quarterly type
-// gets a Quarter range picker, a monthly type gets a Month range picker.
-const dialogCadences = computed<('quarterly' | 'monthly')[]>(() => {
-  if (!dialogReportType.value) return [];
-  return [cadenceOf(dialogReportType.value)];
-});
-
-const quarterOptions = [
-  { title: 'Q1', value: 'Q1' },
-  { title: 'Q2', value: 'Q2' },
-  { title: 'Q3', value: 'Q3' },
-  { title: 'Q4', value: 'Q4' },
-];
-
-const monthOptions = [
-  { title: 'January', value: '01' }, { title: 'February', value: '02' }, { title: 'March', value: '03' },
-  { title: 'April', value: '04' },   { title: 'May', value: '05' },      { title: 'June', value: '06' },
-  { title: 'July', value: '07' },    { title: 'August', value: '08' },   { title: 'September', value: '09' },
-  { title: 'October', value: '10' }, { title: 'November', value: '11' }, { title: 'December', value: '12' },
-];
-
-const yearOptions = computed(() => {
-  const years = [...new Set(reportData.value.map(item => Number(item.startDate.split('/')[2])))];
-  return years.sort((a, b) => b - a).map(y => ({ title: String(y), value: String(y) }));
-});
-
-const parseMDYYYY = (dateStr: string): number => {
-  const [month, day, year] = dateStr.split('/').map(Number);
-  return new Date(year, month - 1, day).getTime();
+const formatDateDisplay = (dateStr: string): string => {
+  const parsed = new Date(dateStr);
+  return isNaN(parsed.getTime()) ? dateStr : parsed.toLocaleDateString();
 };
 
 const activeFilterPills = computed<FilterPill[]>(() => {
@@ -335,17 +241,9 @@ const activeFilterPills = computed<FilterPill[]>(() => {
   if (appliedReportType.value) {
     pills.push({ type: 'reportType', value: appliedReportType.value, label: appliedReportType.value, isActive: true });
   }
-  if (appliedQuarterFrom.value && appliedQuarterFromYear.value && appliedQuarterTo.value && appliedQuarterToYear.value) {
-    const from = `${appliedQuarterFrom.value} ${appliedQuarterFromYear.value}`;
-    const to = `${appliedQuarterTo.value} ${appliedQuarterToYear.value}`;
-    pills.push({ type: 'reportingPeriod', value: 'quarter', label: `Reporting Period: ${from}${from === to ? '' : ` – ${to}`}`, isActive: true });
-  }
-  if (appliedMonthFrom.value && appliedMonthFromYear.value && appliedMonthTo.value && appliedMonthToYear.value) {
-    const fromLabel = monthOptions.find(m => m.value === appliedMonthFrom.value)?.title;
-    const toLabel = monthOptions.find(m => m.value === appliedMonthTo.value)?.title;
-    const from = `${fromLabel} ${appliedMonthFromYear.value}`;
-    const to = `${toLabel} ${appliedMonthToYear.value}`;
-    pills.push({ type: 'reportingPeriod', value: 'month', label: `Reporting Period: ${from}${from === to ? '' : ` – ${to}`}`, isActive: true });
+  if (appliedDateFrom.value || appliedDateTo.value) {
+    const parts = [appliedDateFrom.value, appliedDateTo.value].filter(Boolean).map(formatDateDisplay);
+    pills.push({ type: 'dateRange', value: null, label: `Date Range: ${parts.join(' – ')}`, isActive: true });
   }
   return pills;
 });
@@ -355,16 +253,9 @@ const handleFilterPillClose = (pill: FilterPill) => {
     appliedAccounts.value = appliedAccounts.value.filter(v => v !== pill.value);
   } else if (pill.type === 'reportType') {
     appliedReportType.value = '';
-  } else if (pill.type === 'reportingPeriod' && pill.value === 'quarter') {
-    appliedQuarterFrom.value = '';
-    appliedQuarterFromYear.value = '';
-    appliedQuarterTo.value = '';
-    appliedQuarterToYear.value = '';
-  } else if (pill.type === 'reportingPeriod' && pill.value === 'month') {
-    appliedMonthFrom.value = '';
-    appliedMonthFromYear.value = '';
-    appliedMonthTo.value = '';
-    appliedMonthToYear.value = '';
+  } else if (pill.type === 'dateRange') {
+    appliedDateFrom.value = '';
+    appliedDateTo.value = '';
   }
 };
 
@@ -382,41 +273,37 @@ const filteredReportData = computed(() => {
   if (appliedReportType.value) {
     items = items.filter(item => item.type === appliedReportType.value);
   }
-  if (appliedQuarterFrom.value && appliedQuarterFromYear.value && appliedQuarterTo.value && appliedQuarterToYear.value) {
-    const fromTs = parseReportingPeriod(`${appliedQuarterFrom.value} ${appliedQuarterFromYear.value}`);
-    const toTs = parseReportingPeriod(`${appliedQuarterTo.value} ${appliedQuarterToYear.value}`);
+  if (appliedDateFrom.value || appliedDateTo.value) {
     items = items.filter(item => {
-      if (cadenceOf(item.type) !== 'quarterly') return true;
-      const periodTs = parseReportingPeriod(formatReportingPeriod(item));
-      return periodTs >= fromTs && periodTs <= toTs;
-    });
-  }
-  if (appliedMonthFrom.value && appliedMonthFromYear.value && appliedMonthTo.value && appliedMonthToYear.value) {
-    const fromTs = parseReportingPeriod(`${appliedMonthFrom.value}-${appliedMonthFromYear.value}`);
-    const toTs = parseReportingPeriod(`${appliedMonthTo.value}-${appliedMonthToYear.value}`);
-    items = items.filter(item => {
-      if (cadenceOf(item.type) !== 'monthly') return true;
-      const periodTs = parseReportingPeriod(formatReportingPeriod(item));
-      return periodTs >= fromTs && periodTs <= toTs;
+      const start = new Date(item.startDate);
+      const end = new Date(item.endDate);
+      if (appliedDateFrom.value && end < new Date(appliedDateFrom.value)) return false;
+      if (appliedDateTo.value && start > new Date(appliedDateTo.value)) return false;
+      return true;
     });
   }
   return items;
 });
 
 const reportHeaders = ref([
-  { title: 'Account Name',      key: 'accountName',      minWidth: '160px' },
-  { title: 'Type',              key: 'type',              minWidth: '140px' },
-  { title: 'Reporting Period',  key: 'reportingPeriod',  minWidth: '140px' },
-  { title: '',                  key: 'actions', sortable: false, align: 'end', minWidth: '60px' },
+  { title: 'Account Name',  key: 'accountName',  minWidth: '160px' },
+  { title: 'Type',          key: 'type',          minWidth: '140px' },
+  { title: 'Start Date',    key: 'startDate',    minWidth: '120px' },
+  { title: 'End Date',      key: 'endDate',      minWidth: '120px' },
+  { title: '',              key: 'actions', sortable: false, align: 'end', minWidth: '60px' },
 ]);
 
-const reportCustomKeySort = {
-  reportingPeriod: (a: string, b: string) => parseReportingPeriod(a) - parseReportingPeriod(b),
+const parseMDYYYY = (dateStr: string): number => {
+  const [month, day, year] = dateStr.split('/').map(Number);
+  return new Date(year, month - 1, day).getTime();
 };
 
-const tableItems = computed(() =>
-  filteredReportData.value.map(item => ({ ...item, reportingPeriod: formatReportingPeriod(item) }))
-);
+const reportCustomKeySort = {
+  startDate: (a: string, b: string) => parseMDYYYY(a) - parseMDYYYY(b),
+  endDate: (a: string, b: string) => parseMDYYYY(a) - parseMDYYYY(b),
+};
+
+const tableItems = computed(() => filteredReportData.value);
 
 const showDownloadSnackbar = ref(false);
 const downloadSnackbarText = ref('');
@@ -468,9 +355,10 @@ const advancedFiltersDialogActions = [
   font-size: $font-size-body;
 }
 
-.filter-helper-text {
-  font-size: $font-size-small;
-  color: $color-text-secondary;
+.filter-section-label {
+  font-size: $font-size-body;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
   margin-bottom: $spacing-small;
 }
 
