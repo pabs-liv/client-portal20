@@ -19,6 +19,14 @@
       :header-text="selectedAccountName"
       :description-text="selectedAccountDescription"
     >
+      <Banner
+        v-if="isWizardAccount && planSetupComplete"
+        variant="warning"
+        :always-show="true"
+        message="This account's Plan Setup has been finalized and locked for editing. Any further updates can be made via SoloRx."
+        class="mb-4"
+      />
+
       <!-- Wayne Enterprises: Active/fully-implemented view -->
       <div v-if="isWayneEnterprises" class="gap-view">
         <p class="text-body gap-dev-note">
@@ -4043,7 +4051,7 @@
                     <div class="ap-section">
                       <div class="ap-section-header">
                         <h4 class="text-h4">Upload Inclusion/Exclusion Document</h4>
-                        <button v-if="(!gpsEditingIe) && !planSetupComplete" class="button button-thirtiary" @click="gpsIeStartEdit">
+                        <button v-if="!gpsEditingIe" class="button button-thirtiary" @click="gpsIeStartEdit">
                           <Pencil :size="14" :stroke-width="1.5" />Edit
                         </button>
                       </div>
@@ -4056,7 +4064,7 @@
                         </div>
                       </template>
                       <template v-else>
-                        <p class="text-small bl-note mb-2">Required to generate the GPS below. Upload Clinical's completed Inclusion/Exclusion PDF — its pages will be included automatically.</p>
+                        <p class="text-small bl-note mb-2">Upload Clinical's completed Inclusion/Exclusion PDF to include its pages automatically when generating the GPS below.</p>
                         <div class="bl-upload-item">
                           <template v-if="gpsIeFile && !gpsPendingIeRemoval">
                             <v-chip color="primary" variant="flat" class="bl-file-chip">
@@ -4079,11 +4087,8 @@
                       <div class="ap-section-header">
                         <h4 class="text-h4">Generate GPS Document</h4>
                       </div>
-                      <p v-if="wizardCompletionPercent !== 100" class="text-small bl-note mb-2">All steps above must be complete before generating.</p>
-                      <p v-else-if="!gpsIeFile || gpsPendingIeRemoval" class="text-small bl-note mb-2">Upload the Inclusion/Exclusion document before generating.</p>
                       <button
                         class="button button-primary vs-gps-generate-btn"
-                        :disabled="wizardCompletionPercent !== 100 || !gpsIeFile || gpsPendingIeRemoval"
                         @click="generateGpsDocument"
                       >
                         <CloudDownload :size="16" :stroke-width="2" />Generate &amp; Download GPS
@@ -4093,8 +4098,8 @@
                     <!-- Upload Signed GPS -->
                     <div class="ap-section">
                       <div class="ap-section-header">
-                        <h4 class="text-h4">Upload Signed GPS <span class="bl-required" aria-label="required">*</span></h4>
-                        <button v-if="(!gpsEditingSigned && !gpsSignedFile) && !planSetupComplete" class="button button-thirtiary" @click="gpsSignedStartEdit">
+                        <h4 class="text-h4">Upload Signed GPS</h4>
+                        <button v-if="!gpsEditingSigned && !gpsSignedFile" class="button button-thirtiary" @click="gpsSignedStartEdit">
                           <Pencil :size="14" :stroke-width="1.5" />Edit
                         </button>
                       </div>
@@ -4108,7 +4113,7 @@
                         <p v-if="gpsSignedFile" class="text-small bl-note mt-2">To replace this file, upload a new version in Documents &gt; Plan &amp; Compliance.</p>
                       </template>
                       <template v-else>
-                        <p class="text-small bl-note mb-2">Required to finish Plan Setup. Once the client has signed and returned the GPS, upload it here to save it to Documents &gt; Plan &amp; Compliance.</p>
+                        <p class="text-small bl-note mb-2">Once the client has signed and returned the GPS, upload it here to save it to Documents &gt; Plan &amp; Compliance.</p>
                         <div class="bl-upload-item">
                           <template v-if="gpsSignedFile && !gpsPendingSignedRemoval">
                             <v-chip color="primary" variant="flat" class="bl-file-chip">
@@ -4138,27 +4143,37 @@
                 </template>
               </div>
 
-              <div class="wizard-footer">
-                <button v-if="currentWizardStep > 0" class="button button-secondary" @click="prevWizardStep">Previous</button>
-                <span v-else></span>
-                <div class="wizard-footer-actions">
-                  <button
-                    v-if="wizardSteps[currentWizardStep].status !== 'complete' && !planSetupComplete"
-                    class="button button-secondary"
-                    @click="markCurrentStepComplete"
-                  >Mark as Complete</button>
-                  <button
-                    v-else-if="!planSetupComplete"
-                    class="button button-secondary"
-                    @click="markCurrentStepIncomplete"
-                  >Mark as Incomplete</button>
-                  <button v-if="currentWizardStep < wizardSteps.length - 1" class="button button-primary" @click="nextWizardStep">Next</button>
-                  <button
-                    v-if="currentWizardStep === wizardSteps.length - 1"
-                    class="button button-primary"
-                    :disabled="wizardCompletionPercent !== 100 || !gpsSignedFile || gpsPendingSignedRemoval"
-                    @click="finishPlanSetup"
-                  >Finish Plan Setup</button>
+              <div class="wizard-footer-section">
+                <Banner
+                  v-if="currentWizardStep === wizardSteps.length - 1 && !planSetupComplete"
+                  variant="warning"
+                  :always-show="true"
+                  message="Finishing plan setup locks the entire wizard. Any subsequent changes must be made via SoloRx."
+                  class="mb-4"
+                />
+
+                <div class="wizard-footer">
+                  <button v-if="currentWizardStep > 0" class="button button-secondary" @click="prevWizardStep">Previous</button>
+                  <span v-else></span>
+                  <div class="wizard-footer-actions">
+                    <button
+                      v-if="currentWizardStep !== wizardSteps.length - 1 && wizardSteps[currentWizardStep].status !== 'complete' && !planSetupComplete"
+                      class="button button-secondary"
+                      @click="markCurrentStepComplete"
+                    >Mark as Complete</button>
+                    <button
+                      v-else-if="currentWizardStep !== wizardSteps.length - 1 && !planSetupComplete"
+                      class="button button-secondary"
+                      @click="markCurrentStepIncomplete"
+                    >Mark as Incomplete</button>
+                    <button v-if="currentWizardStep < wizardSteps.length - 1" class="button button-primary" @click="nextWizardStep">Next</button>
+                    <button
+                      v-if="currentWizardStep === wizardSteps.length - 1 && !planSetupComplete"
+                      class="button button-primary"
+                      :disabled="wizardCompletionPercent !== 100"
+                      @click="finishPlanSetup"
+                    >Finish Plan Setup</button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -4751,6 +4766,7 @@
 import { ref, reactive, computed, watch, nextTick } from 'vue';
 import AccountSelector from '@/components/common/AccountSelector.vue';
 import PageCard from '@/components/common/PageCard.vue';
+import Banner from '@/components/common/Banner.vue';
 import Button from '@/components/ui/Button.vue';
 import ReportDataTable from '@/components/common/ReportDataTable.vue';
 import FilteringPill from '@/components/ui/FilteringPill.vue';
@@ -4777,6 +4793,7 @@ const STARK_INDUSTRIES_ID = 1;
 const WAYNE_ENTERPRISES_ID = 2;
 const CYBERDYNE_SYSTEMS_ID = 3;
 const OSCORP_ID = 4;
+const TYRELL_CORPORATION_ID = 5;
 
 const accountOptions = ref([
   { id: 1, name: 'Stark Industries' },
@@ -5410,8 +5427,8 @@ watch(() => blExistingParty.value, () => {
 const blIncludePhi = ref('no');
 
 // B-11: Billing cycle
-const blBillingCycle = ref('Bi-Weekly');
-const blCycleOptions = ['Weekly', 'Bi-Weekly', 'Semi-Monthly', 'Monthly', 'Quad-Monthly', 'Custom'];
+const blBillingCycle = ref('Semi-Monthly');
+const blCycleOptions = ['Weekly', 'Semi-Monthly', 'Monthly', 'Annual', 'Quad-Monthly', 'Custom'];
 const blCustomCycleNote = ref('');
 
 // B-20: Separate invoices
@@ -5523,7 +5540,7 @@ const cancelPaymentCard = () => {
 
 // Card 3: Invoice Configuration
 let blInvoiceSnapshot = {
-  billingCycle: 'Bi-Weekly', customCycleNote: '',
+  billingCycle: 'Semi-Monthly', customCycleNote: '',
   separateInvoices: 'no', separateInvoicesSplit: '',
   invoiceBreakout: 'no', invoiceBreakoutSelection: '', invoiceBreakoutNote: '',
 };
@@ -5790,7 +5807,10 @@ const gpsPendingSignedRemoval = ref(false);
 const gpsAccountName = () => accountOptions.value.find(acc => acc.id === selectedAccount.value)?.name ?? 'Account';
 
 const generateGpsDocument = () => {
-  showToast('GPS document generated successfully — Inclusion/Exclusion pages included!', 'success');
+  const message = (gpsIeFile.value && !gpsPendingIeRemoval.value)
+    ? 'GPS document generated successfully — Inclusion/Exclusion pages included!'
+    : 'GPS document generated successfully!';
+  showToast(message, 'success');
 };
 
 // Step 1 widget: Upload Inclusion/Exclusion Document
@@ -5864,7 +5884,8 @@ const isStarkIndustries = computed(() => selectedAccount.value === STARK_INDUSTR
 const isWayneEnterprises = computed(() => selectedAccount.value === WAYNE_ENTERPRISES_ID);
 const isCyberdyne = computed(() => selectedAccount.value === CYBERDYNE_SYSTEMS_ID);
 const isOscorp = computed(() => selectedAccount.value === OSCORP_ID);
-const isWizardAccount = computed(() => isStarkIndustries.value || isCyberdyne.value || isOscorp.value);
+const isTyrell = computed(() => selectedAccount.value === TYRELL_CORPORATION_ID);
+const isWizardAccount = computed(() => isStarkIndustries.value || isCyberdyne.value || isOscorp.value || isTyrell.value);
 
 const gapSections = [
   { label: 'Account Information',  icon: Building2  },
@@ -6036,6 +6057,7 @@ const markStepIncomplete = (index: number) => {
 };
 
 const finishPlanSetup = () => {
+  wizardSteps.value[wizardSteps.value.length - 1].status = 'complete';
   wizardActive.value = false;
   planSetupComplete.value = true;
   const contractStatus = implementationSteps.value.find(s => s.title === 'Contract Status');
@@ -8384,6 +8406,23 @@ watch(selectedAccount, (newVal) => {
   wizardActive.value = false;
   currentWizardStep.value = 0;
 
+  // Reset Plan Setup wizard state on account switch
+  wizardSteps.value.forEach(step => { step.status = 'not-started'; });
+  planSetupComplete.value = false;
+  gpsIeFile.value = '';
+  gpsPendingIeRemoval.value = false;
+  gpsSignedFile.value = '';
+  gpsPendingSignedRemoval.value = false;
+
+  // Tyrell Corporation: Plan Setup already finished and locked — lets Charity review the
+  // locked state directly without manually marking off all 9 steps first.
+  if (newVal === TYRELL_CORPORATION_ID) {
+    wizardSteps.value.forEach(step => { step.status = 'complete'; });
+    gpsIeFile.value = 'Inclusion-Exclusion_TyrellCorp.pdf';
+    gpsSignedFile.value = 'Signed_GPS_TyrellCorp.pdf';
+    planSetupComplete.value = true;
+  }
+
   // Reset programs state on account switch
   rxCompassPending.value = false;
   vcpPending.value = false;
@@ -8416,6 +8455,12 @@ watch(selectedAccount, (newVal) => {
   } else {
     implementationSteps.value.forEach(step => { step.active = false; });
     activeTimelineItem.value = null;
+  }
+
+  // Tyrell Corporation: land directly on the locked Verification & Summary step
+  if (newVal === TYRELL_CORPORATION_ID) {
+    wizardActive.value = true;
+    currentWizardStep.value = 9;
   }
 }, { immediate: true });
 </script>
@@ -8791,13 +8836,16 @@ watch(selectedAccount, (newVal) => {
   background-color: rgba($color-border, 0.15);
 }
 
+.wizard-footer-section {
+  padding-top: $spacing-medium;
+  margin-top: $spacing-medium;
+  border-top: 1px solid $color-border;
+}
+
 .wizard-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-top: $spacing-medium;
-  margin-top: $spacing-medium;
-  border-top: 1px solid $color-border;
 }
 
 .wizard-footer-actions {

@@ -14,3 +14,9 @@ When given a reference image, use it only as a reference for content and layout 
 - **Interactive elements**: Buttons, links, and form controls must have visible focus states and meet the 3:1 contrast requirement for their boundaries/states.
 - **Color alone**: Never convey meaning (status, error, selection) using color alone — always pair with an icon, label, or other visual indicator.
 - **Images and icons**: Decorative icons need no alt text; functional icons (used as buttons or conveying information) must have a tooltip or aria-label.
+
+## Search & Agent Policy (hard rules — no exceptions)
+
+- **No Agent tool without explicit permission.** Never launch any subagent (Explore, general-purpose, or otherwise) unless Charity has explicitly said yes to it in that conversation. This applies no matter how broad, routine, or well-justified the lookup seems in the moment — ask first, every time.
+- **Prefer graphify over Grep/Glob for repo-wide searches**, when a prebuilt graphify graph exists for the repo in question. Query it; don't rebuild it.
+- **If no graphify graph exists for the repo** (e.g. this Client Portal 2.0 prototype folder), use direct Grep/Read/Glob calls yourself — narrow and targeted, not broad exploration — rather than reaching for an Agent. A single-file, known-location lookup should cost a handful of tool calls, not a delegated search.
