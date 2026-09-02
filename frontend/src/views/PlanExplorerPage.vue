@@ -1321,6 +1321,84 @@
                     </div>
                   </Dialog>
 
+                  <Dialog
+                    v-model="showCopayTierDialog"
+                    heading="Edit Copay Tier"
+                    :show-secondary-button="true"
+                    :actions="copayTierDialogActions"
+                  >
+                    <Select
+                      v-if="copayTierDialogIsNetwork"
+                      v-model="copayTierDialogForm.networkId"
+                      :items="copayNetworkOptions"
+                      label="Pharmacy Network"
+                      style="max-width: 320px;"
+                      class="mb-3 mt-1"
+                      :error="copayTierDialogTouched && !copayTierDialogForm.networkId"
+                      :error-messages="copayTierDialogTouched && !copayTierDialogForm.networkId ? ['Required'] : []"
+                    />
+                    <div class="cs-tier-dates mt-1">
+                      <TextField
+                        v-model="copayTierDialogForm.daysSupplyMin"
+                        label="Days Supply Min"
+                        type="number"
+                        min="0"
+                        style="max-width: 160px;"
+                      />
+                      <TextField
+                        v-model="copayTierDialogForm.daysSupply"
+                        label="Days Supply Max"
+                        type="number"
+                        min="0"
+                        style="max-width: 160px;"
+                      />
+                    </div>
+                    <p v-if="copayTierDialogTouched && copayTierDialogOverlapping" class="cs-tier-error">
+                      This day-supply range overlaps another tier.
+                    </p>
+                    <ReportDataTable
+                      :headers="copayMatrixHeaders"
+                      :items="copayProductTypes.map(pt => ({ productType: pt }))"
+                      :show-search-bar="false"
+                      :show-filter-pills="false"
+                      :show-selection-checkboxes="false"
+                      :show-row-actions="false"
+                      :show-table-footer="false"
+                      class="cs-matrix-table mt-3"
+                    >
+                      <template #item.formula="{ item }">
+                        <Select v-model="copayTierDialogCellFor(item.productType).formula" :items="copayFormulaOptions" density="compact" />
+                      </template>
+                      <template #item.copay="{ item }">
+                        <TextField v-model="copayTierDialogCellFor(item.productType).copay" density="compact" />
+                      </template>
+                      <template #item.coinsurance="{ item }">
+                        <TextField v-model="copayTierDialogCellFor(item.productType).coinsurance" density="compact" />
+                      </template>
+                      <template #item.coinsMin="{ item }">
+                        <TextField v-model="copayTierDialogCellFor(item.productType).coinsMin" density="compact" />
+                      </template>
+                      <template #item.coinsMax="{ item }">
+                        <TextField v-model="copayTierDialogCellFor(item.productType).coinsMax" density="compact" />
+                      </template>
+                      <template #item.incentiveMin="{ item }">
+                        <TextField v-model="copayTierDialogCellFor(item.productType).incentiveMin" density="compact" />
+                      </template>
+                      <template #item.incentiveMax="{ item }">
+                        <TextField v-model="copayTierDialogCellFor(item.productType).incentiveMax" density="compact" />
+                      </template>
+                      <template #item.patientPayMax="{ item }">
+                        <TextField v-model="copayTierDialogCellFor(item.productType).patientPayMax" density="compact" />
+                      </template>
+                      <template #item.dedWaived="{ item }">
+                        <v-checkbox v-model="copayTierDialogCellFor(item.productType).dedWaived" hide-details density="compact" />
+                      </template>
+                      <template #item.oopWaived="{ item }">
+                        <v-checkbox v-model="copayTierDialogCellFor(item.productType).oopWaived" hide-details density="compact" />
+                      </template>
+                    </ReportDataTable>
+                  </Dialog>
+
                   <div class="pd-accordion-list">
                     <div
                       v-for="plan in planDesignPlans"
@@ -1977,9 +2055,6 @@
                         <div class="cs-card">
                           <div class="cs-card-header">
                             <h4 class="text-h4">Copay Structure</h4>
-                            <button v-if="(!isEditingCopay(plan.id)) && !planSetupComplete" class="button button-thirtiary" @click="startEditCopay(plan)">
-                              <Pencil :size="14" :stroke-width="1.5" /> Edit
-                            </button>
                           </div>
 
                           <div class="nc-tabs">
@@ -1993,295 +2068,178 @@
 
                           <!-- Pharmacy Network tab -->
                           <template v-if="activeCopayTab === 'pharmacyNetwork'">
-                            <Autocomplete
-                              v-if="isEditingCopay(plan.id)"
-                              v-model="plan.copayNetworkIds"
-                              :items="copayNetworkOptions"
-                              :multiple="true"
-                              label="Pharmacy Networks"
-                              style="max-width: 480px;"
-                              class="mb-3"
-                            />
-                            <div v-if="plan.copayNetworkIds.length === 0" class="text-body cs-hint">
-                              Select one or more pharmacy networks to configure their copay tiers.
+                            <div class="cs-tab-actions">
+                              <button v-if="getCopayTiers(plan, 'network').length > 0" class="button button-primary" @click="addCopayTierAndEdit(plan, 'network')">+ Add Tier</button>
                             </div>
-                            <div v-for="networkId in plan.copayNetworkIds" :key="networkId" class="cs-network-block">
-                              <div class="cs-network-header">
-                                <span class="cs-network-title">{{ networkId }}</span>
-                              </div>
-                              <template v-for="tier in getCopayTiers(plan, `network:${networkId}`)" :key="tier.id">
-                                <div class="cs-tier-header">
-                                  <template v-if="isEditingCopay(plan.id)">
-                                    <div class="cs-tier-toolbar">
-                                      <span class="cs-tier-label">Tier</span>
-                                      <button class="button button-danger" @click="removeCopayTier(plan, `network:${networkId}`, tier.id)">
-                                        <Trash2 :size="14" :stroke-width="1.5" /> Remove Tier
-                                      </button>
-                                    </div>
-                                    <div class="cs-tier-dates">
-                                      <TextField
-                                        :model-value="tier.daysSupplyMin === null ? '' : String(tier.daysSupplyMin)"
-                                        label="Days Supply Min"
-                                        type="number"
-                                        min="0"
-                                        style="max-width: 160px;"
-                                        @update:model-value="(v) => (tier.daysSupplyMin = toNonNegativeIntOrNull(v))"
-                                      />
-                                      <TextField
-                                        :model-value="tier.daysSupply === null ? '' : String(tier.daysSupply)"
-                                        label="Days Supply Max"
-                                        type="number"
-                                        min="0"
-                                        style="max-width: 160px;"
-                                        @update:model-value="(v) => (tier.daysSupply = toNonNegativeIntOrNull(v))"
-                                      />
-                                    </div>
-                                  </template>
-                                  <span v-else class="cs-tier-title">Days Supply {{ tier.daysSupplyMin ?? '—' }}–{{ tier.daysSupply ?? '—' }}</span>
+                            <ReportDataTable
+                              :headers="copayNetworkTierSummaryHeaders"
+                              :items="getCopayTiers(plan, 'network')"
+                              item-value="id"
+                              :show-search-bar="false"
+                              :show-filter-pills="false"
+                              :show-selection-checkboxes="false"
+                              :show-expand="true"
+                              :show-row-actions="true"
+                              :row-action-items="copayTierRowActions"
+                              :show-table-footer="false"
+                              class="cs-tier-summary-table mb-4"
+                              @row-action="(payload) => handleCopayTierRowAction(plan, 'network', payload)"
+                            >
+                              <template #empty-state>
+                                <div class="nc-empty-state">
+                                  <img :src="EmptyStateImg" alt="No data" class="nc-empty-icon" />
+                                  <p class="nc-empty-title">Nothing configured yet</p>
+                                  <button class="button button-secondary pd-empty-cta" @click="addCopayTierAndEdit(plan, 'network')">+ Add Tier</button>
                                 </div>
-                                <p v-if="isEditingCopay(plan.id) && isCopayTierRangeOverlapping(plan, `network:${networkId}`, tier)" class="cs-tier-error">
-                                  This day-supply range overlaps another tier.
-                                </p>
-                                <ReportDataTable
-                                  :headers="copayMatrixHeaders"
-                                  :items="copayProductTypes.map(pt => ({ productType: pt, tier }))"
-                                  :show-search-bar="false"
-                                  :show-filter-pills="false"
-                                  :show-selection-checkboxes="false"
-                                  :show-row-actions="false"
-                                  :show-table-footer="false"
-                                  class="cs-matrix-table mb-4"
-                                >
-                                  <template #item.formula="{ item }">
-                                    <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).formula ?? '—' }}</span>
-                                    <Select v-else v-model="copayCellFor(item.tier, item.productType).formula" :items="copayFormulaOptions" density="compact" />
-                                  </template>
-                                  <template #item.copay="{ item }">
-                                    <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).copay ?? '—' }}</span>
-                                    <TextField v-else v-model="copayCellFor(item.tier, item.productType).copay" density="compact" />
-                                  </template>
-                                  <template #item.coinsurance="{ item }">
-                                    <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).coinsurance ?? '—' }}</span>
-                                    <TextField v-else v-model="copayCellFor(item.tier, item.productType).coinsurance" density="compact" />
-                                  </template>
-                                  <template #item.coinsMin="{ item }">
-                                    <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).coinsMin ?? '—' }}</span>
-                                    <TextField v-else v-model="copayCellFor(item.tier, item.productType).coinsMin" density="compact" />
-                                  </template>
-                                  <template #item.coinsMax="{ item }">
-                                    <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).coinsMax ?? '—' }}</span>
-                                    <TextField v-else v-model="copayCellFor(item.tier, item.productType).coinsMax" density="compact" />
-                                  </template>
-                                  <template #item.incentiveMin="{ item }">
-                                    <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).incentiveMin ?? '—' }}</span>
-                                    <TextField v-else v-model="copayCellFor(item.tier, item.productType).incentiveMin" density="compact" />
-                                  </template>
-                                  <template #item.incentiveMax="{ item }">
-                                    <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).incentiveMax ?? '—' }}</span>
-                                    <TextField v-else v-model="copayCellFor(item.tier, item.productType).incentiveMax" density="compact" />
-                                  </template>
-                                  <template #item.patientPayMax="{ item }">
-                                    <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).patientPayMax ?? '—' }}</span>
-                                    <TextField v-else v-model="copayCellFor(item.tier, item.productType).patientPayMax" density="compact" />
-                                  </template>
-                                  <template #item.dedWaived="{ item }">
-                                    <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).dedWaived ? 'Yes' : 'No' }}</span>
-                                    <v-checkbox v-else v-model="copayCellFor(item.tier, item.productType).dedWaived" hide-details density="compact" />
-                                  </template>
-                                  <template #item.oopWaived="{ item }">
-                                    <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).oopWaived ? 'Yes' : 'No' }}</span>
-                                    <v-checkbox v-else v-model="copayCellFor(item.tier, item.productType).oopWaived" hide-details density="compact" />
-                                  </template>
-                                </ReportDataTable>
                               </template>
-                              <button v-if="isEditingCopay(plan.id)" class="button button-secondary mb-4" @click="addCopayTier(plan, `network:${networkId}`)">
-                                <Plus :size="14" :stroke-width="1.5" /> Add Tier
-                              </button>
-                            </div>
+                              <template #item.networkId="{ item }">{{ item.networkId ?? '—' }}</template>
+                              <template #item.daysSupplyMin="{ item }">{{ item.daysSupplyMin ?? '—' }}</template>
+                              <template #item.daysSupply="{ item }">{{ item.daysSupply ?? '—' }}</template>
+                              <template #expanded-row="{ item, columns }">
+                                <tr>
+                                  <td :colspan="columns.length" class="cs-tier-detail-td">
+                                    <ReportDataTable
+                                      :headers="copayMatrixHeaders"
+                                      :items="copayProductTypes.map(pt => ({ productType: pt, tier: item }))"
+                                      :show-search-bar="false"
+                                      :show-filter-pills="false"
+                                      :show-selection-checkboxes="false"
+                                      :show-row-actions="false"
+                                      :show-table-footer="false"
+                                      class="cs-matrix-table"
+                                    >
+                                      <template #item.formula="{ item: cellItem }">{{ copayCellFor(cellItem.tier, cellItem.productType).formula ?? '—' }}</template>
+                                      <template #item.copay="{ item: cellItem }">{{ copayCellFor(cellItem.tier, cellItem.productType).copay ?? '—' }}</template>
+                                      <template #item.coinsurance="{ item: cellItem }">{{ copayCellFor(cellItem.tier, cellItem.productType).coinsurance ?? '—' }}</template>
+                                      <template #item.coinsMin="{ item: cellItem }">{{ copayCellFor(cellItem.tier, cellItem.productType).coinsMin ?? '—' }}</template>
+                                      <template #item.coinsMax="{ item: cellItem }">{{ copayCellFor(cellItem.tier, cellItem.productType).coinsMax ?? '—' }}</template>
+                                      <template #item.incentiveMin="{ item: cellItem }">{{ copayCellFor(cellItem.tier, cellItem.productType).incentiveMin ?? '—' }}</template>
+                                      <template #item.incentiveMax="{ item: cellItem }">{{ copayCellFor(cellItem.tier, cellItem.productType).incentiveMax ?? '—' }}</template>
+                                      <template #item.patientPayMax="{ item: cellItem }">{{ copayCellFor(cellItem.tier, cellItem.productType).patientPayMax ?? '—' }}</template>
+                                      <template #item.dedWaived="{ item: cellItem }">{{ copayCellFor(cellItem.tier, cellItem.productType).dedWaived ? 'Yes' : 'No' }}</template>
+                                      <template #item.oopWaived="{ item: cellItem }">{{ copayCellFor(cellItem.tier, cellItem.productType).oopWaived ? 'Yes' : 'No' }}</template>
+                                    </ReportDataTable>
+                                  </td>
+                                </tr>
+                              </template>
+                            </ReportDataTable>
                           </template>
 
                           <!-- Mail Order Pharmacy tab -->
                           <template v-else-if="activeCopayTab === 'mailOrder'">
-                            <template v-for="tier in getCopayTiers(plan, 'mailOrder')" :key="tier.id">
-                              <div class="cs-tier-header">
-                                <template v-if="isEditingCopay(plan.id)">
-                                  <div class="cs-tier-toolbar">
-                                    <span class="cs-tier-label">Tier</span>
-                                    <button class="button button-danger" @click="removeCopayTier(plan, 'mailOrder', tier.id)">
-                                      <Trash2 :size="14" :stroke-width="1.5" /> Remove Tier
-                                    </button>
-                                  </div>
-                                  <div class="cs-tier-dates">
-                                    <TextField
-                                      :model-value="tier.daysSupplyMin === null ? '' : String(tier.daysSupplyMin)"
-                                      label="Days Supply Min"
-                                      type="number"
-                                      min="0"
-                                      style="max-width: 160px;"
-                                      @update:model-value="(v) => (tier.daysSupplyMin = toNonNegativeIntOrNull(v))"
-                                    />
-                                    <TextField
-                                      :model-value="tier.daysSupply === null ? '' : String(tier.daysSupply)"
-                                      label="Days Supply Max"
-                                      type="number"
-                                      min="0"
-                                      style="max-width: 160px;"
-                                      @update:model-value="(v) => (tier.daysSupply = toNonNegativeIntOrNull(v))"
-                                    />
-                                  </div>
-                                </template>
-                                <span v-else class="cs-tier-title">Days Supply {{ tier.daysSupplyMin ?? '—' }}–{{ tier.daysSupply ?? '—' }}</span>
-                              </div>
-                              <ReportDataTable
-                                :headers="copayMatrixHeaders"
-                                :items="copayProductTypes.map(pt => ({ productType: pt, tier }))"
-                                :show-search-bar="false"
-                                :show-filter-pills="false"
-                                :show-selection-checkboxes="false"
-                                :show-row-actions="false"
-                                :show-table-footer="false"
-                                class="cs-matrix-table mb-4"
-                              >
-                                <template #item.formula="{ item }">
-                                  <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).formula ?? '—' }}</span>
-                                  <Select v-else v-model="copayCellFor(item.tier, item.productType).formula" :items="copayFormulaOptions" density="compact" />
-                                </template>
-                                <template #item.copay="{ item }">
-                                  <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).copay ?? '—' }}</span>
-                                  <TextField v-else v-model="copayCellFor(item.tier, item.productType).copay" density="compact" />
-                                </template>
-                                <template #item.coinsurance="{ item }">
-                                  <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).coinsurance ?? '—' }}</span>
-                                  <TextField v-else v-model="copayCellFor(item.tier, item.productType).coinsurance" density="compact" />
-                                </template>
-                                <template #item.coinsMin="{ item }">
-                                  <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).coinsMin ?? '—' }}</span>
-                                  <TextField v-else v-model="copayCellFor(item.tier, item.productType).coinsMin" density="compact" />
-                                </template>
-                                <template #item.coinsMax="{ item }">
-                                  <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).coinsMax ?? '—' }}</span>
-                                  <TextField v-else v-model="copayCellFor(item.tier, item.productType).coinsMax" density="compact" />
-                                </template>
-                                <template #item.incentiveMin="{ item }">
-                                  <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).incentiveMin ?? '—' }}</span>
-                                  <TextField v-else v-model="copayCellFor(item.tier, item.productType).incentiveMin" density="compact" />
-                                </template>
-                                <template #item.incentiveMax="{ item }">
-                                  <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).incentiveMax ?? '—' }}</span>
-                                  <TextField v-else v-model="copayCellFor(item.tier, item.productType).incentiveMax" density="compact" />
-                                </template>
-                                <template #item.patientPayMax="{ item }">
-                                  <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).patientPayMax ?? '—' }}</span>
-                                  <TextField v-else v-model="copayCellFor(item.tier, item.productType).patientPayMax" density="compact" />
-                                </template>
-                                <template #item.dedWaived="{ item }">
-                                  <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).dedWaived ? 'Yes' : 'No' }}</span>
-                                  <v-checkbox v-else v-model="copayCellFor(item.tier, item.productType).dedWaived" hide-details density="compact" />
-                                </template>
-                                <template #item.oopWaived="{ item }">
-                                  <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).oopWaived ? 'Yes' : 'No' }}</span>
-                                  <v-checkbox v-else v-model="copayCellFor(item.tier, item.productType).oopWaived" hide-details density="compact" />
-                                </template>
-                              </ReportDataTable>
-                            </template>
-                            <button v-if="isEditingCopay(plan.id)" class="button button-secondary mb-4" @click="addCopayTier(plan, 'mailOrder')">
-                              <Plus :size="14" :stroke-width="1.5" /> Add Tier
-                            </button>
+                            <div class="cs-tab-actions">
+                              <button v-if="getCopayTiers(plan, 'mailOrder').length > 0" class="button button-primary" @click="addCopayTierAndEdit(plan, 'mailOrder')">+ Add Tier</button>
+                            </div>
+                            <ReportDataTable
+                              :headers="copayTierSummaryHeaders"
+                              :items="getCopayTiers(plan, 'mailOrder')"
+                              item-value="id"
+                              :show-search-bar="false"
+                              :show-filter-pills="false"
+                              :show-selection-checkboxes="false"
+                              :show-expand="true"
+                              :show-row-actions="true"
+                              :row-action-items="copayTierRowActions"
+                              :show-table-footer="false"
+                              class="cs-tier-summary-table mb-4"
+                              @row-action="(payload) => handleCopayTierRowAction(plan, 'mailOrder', payload)"
+                            >
+                              <template #empty-state>
+                                <div class="nc-empty-state">
+                                  <img :src="EmptyStateImg" alt="No data" class="nc-empty-icon" />
+                                  <p class="nc-empty-title">Nothing configured yet</p>
+                                  <button class="button button-secondary pd-empty-cta" @click="addCopayTierAndEdit(plan, 'mailOrder')">+ Add Tier</button>
+                                </div>
+                              </template>
+                              <template #item.daysSupplyMin="{ item }">{{ item.daysSupplyMin ?? '—' }}</template>
+                              <template #item.daysSupply="{ item }">{{ item.daysSupply ?? '—' }}</template>
+                              <template #expanded-row="{ item, columns }">
+                                <tr>
+                                  <td :colspan="columns.length" class="cs-tier-detail-td">
+                                    <ReportDataTable
+                                      :headers="copayMatrixHeaders"
+                                      :items="copayProductTypes.map(pt => ({ productType: pt, tier: item }))"
+                                      :show-search-bar="false"
+                                      :show-filter-pills="false"
+                                      :show-selection-checkboxes="false"
+                                      :show-row-actions="false"
+                                      :show-table-footer="false"
+                                      class="cs-matrix-table"
+                                    >
+                                      <template #item.formula="{ item: cellItem }">{{ copayCellFor(cellItem.tier, cellItem.productType).formula ?? '—' }}</template>
+                                      <template #item.copay="{ item: cellItem }">{{ copayCellFor(cellItem.tier, cellItem.productType).copay ?? '—' }}</template>
+                                      <template #item.coinsurance="{ item: cellItem }">{{ copayCellFor(cellItem.tier, cellItem.productType).coinsurance ?? '—' }}</template>
+                                      <template #item.coinsMin="{ item: cellItem }">{{ copayCellFor(cellItem.tier, cellItem.productType).coinsMin ?? '—' }}</template>
+                                      <template #item.coinsMax="{ item: cellItem }">{{ copayCellFor(cellItem.tier, cellItem.productType).coinsMax ?? '—' }}</template>
+                                      <template #item.incentiveMin="{ item: cellItem }">{{ copayCellFor(cellItem.tier, cellItem.productType).incentiveMin ?? '—' }}</template>
+                                      <template #item.incentiveMax="{ item: cellItem }">{{ copayCellFor(cellItem.tier, cellItem.productType).incentiveMax ?? '—' }}</template>
+                                      <template #item.patientPayMax="{ item: cellItem }">{{ copayCellFor(cellItem.tier, cellItem.productType).patientPayMax ?? '—' }}</template>
+                                      <template #item.dedWaived="{ item: cellItem }">{{ copayCellFor(cellItem.tier, cellItem.productType).dedWaived ? 'Yes' : 'No' }}</template>
+                                      <template #item.oopWaived="{ item: cellItem }">{{ copayCellFor(cellItem.tier, cellItem.productType).oopWaived ? 'Yes' : 'No' }}</template>
+                                    </ReportDataTable>
+                                  </td>
+                                </tr>
+                              </template>
+                            </ReportDataTable>
                           </template>
 
                           <!-- In-House Pharmacy tab -->
                           <template v-else-if="activeCopayTab === 'inHouse'">
-                            <template v-for="tier in getCopayTiers(plan, 'inHouse')" :key="tier.id">
-                              <div class="cs-tier-header">
-                                <template v-if="isEditingCopay(plan.id)">
-                                  <div class="cs-tier-toolbar">
-                                    <span class="cs-tier-label">Tier</span>
-                                    <button class="button button-danger" @click="removeCopayTier(plan, 'inHouse', tier.id)">
-                                      <Trash2 :size="14" :stroke-width="1.5" /> Remove Tier
-                                    </button>
-                                  </div>
-                                  <div class="cs-tier-dates">
-                                    <TextField
-                                      :model-value="tier.daysSupplyMin === null ? '' : String(tier.daysSupplyMin)"
-                                      label="Days Supply Min"
-                                      type="number"
-                                      min="0"
-                                      style="max-width: 160px;"
-                                      @update:model-value="(v) => (tier.daysSupplyMin = toNonNegativeIntOrNull(v))"
-                                    />
-                                    <TextField
-                                      :model-value="tier.daysSupply === null ? '' : String(tier.daysSupply)"
-                                      label="Days Supply Max"
-                                      type="number"
-                                      min="0"
-                                      style="max-width: 160px;"
-                                      @update:model-value="(v) => (tier.daysSupply = toNonNegativeIntOrNull(v))"
-                                    />
-                                  </div>
-                                </template>
-                                <span v-else class="cs-tier-title">Days Supply {{ tier.daysSupplyMin ?? '—' }}–{{ tier.daysSupply ?? '—' }}</span>
-                              </div>
-                              <ReportDataTable
-                                :headers="copayMatrixHeaders"
-                                :items="copayProductTypes.map(pt => ({ productType: pt, tier }))"
-                                :show-search-bar="false"
-                                :show-filter-pills="false"
-                                :show-selection-checkboxes="false"
-                                :show-row-actions="false"
-                                :show-table-footer="false"
-                                class="cs-matrix-table mb-4"
-                              >
-                                <template #item.formula="{ item }">
-                                  <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).formula ?? '—' }}</span>
-                                  <Select v-else v-model="copayCellFor(item.tier, item.productType).formula" :items="copayFormulaOptions" density="compact" />
-                                </template>
-                                <template #item.copay="{ item }">
-                                  <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).copay ?? '—' }}</span>
-                                  <TextField v-else v-model="copayCellFor(item.tier, item.productType).copay" density="compact" />
-                                </template>
-                                <template #item.coinsurance="{ item }">
-                                  <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).coinsurance ?? '—' }}</span>
-                                  <TextField v-else v-model="copayCellFor(item.tier, item.productType).coinsurance" density="compact" />
-                                </template>
-                                <template #item.coinsMin="{ item }">
-                                  <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).coinsMin ?? '—' }}</span>
-                                  <TextField v-else v-model="copayCellFor(item.tier, item.productType).coinsMin" density="compact" />
-                                </template>
-                                <template #item.coinsMax="{ item }">
-                                  <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).coinsMax ?? '—' }}</span>
-                                  <TextField v-else v-model="copayCellFor(item.tier, item.productType).coinsMax" density="compact" />
-                                </template>
-                                <template #item.incentiveMin="{ item }">
-                                  <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).incentiveMin ?? '—' }}</span>
-                                  <TextField v-else v-model="copayCellFor(item.tier, item.productType).incentiveMin" density="compact" />
-                                </template>
-                                <template #item.incentiveMax="{ item }">
-                                  <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).incentiveMax ?? '—' }}</span>
-                                  <TextField v-else v-model="copayCellFor(item.tier, item.productType).incentiveMax" density="compact" />
-                                </template>
-                                <template #item.patientPayMax="{ item }">
-                                  <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).patientPayMax ?? '—' }}</span>
-                                  <TextField v-else v-model="copayCellFor(item.tier, item.productType).patientPayMax" density="compact" />
-                                </template>
-                                <template #item.dedWaived="{ item }">
-                                  <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).dedWaived ? 'Yes' : 'No' }}</span>
-                                  <v-checkbox v-else v-model="copayCellFor(item.tier, item.productType).dedWaived" hide-details density="compact" />
-                                </template>
-                                <template #item.oopWaived="{ item }">
-                                  <span v-if="!isEditingCopay(plan.id)">{{ copayCellFor(item.tier, item.productType).oopWaived ? 'Yes' : 'No' }}</span>
-                                  <v-checkbox v-else v-model="copayCellFor(item.tier, item.productType).oopWaived" hide-details density="compact" />
-                                </template>
-                              </ReportDataTable>
-                            </template>
-                            <button v-if="isEditingCopay(plan.id)" class="button button-secondary mb-4" @click="addCopayTier(plan, 'inHouse')">
-                              <Plus :size="14" :stroke-width="1.5" /> Add Tier
-                            </button>
+                            <div class="cs-tab-actions">
+                              <button v-if="getCopayTiers(plan, 'inHouse').length > 0" class="button button-primary" @click="addCopayTierAndEdit(plan, 'inHouse')">+ Add Tier</button>
+                            </div>
+                            <ReportDataTable
+                              :headers="copayTierSummaryHeaders"
+                              :items="getCopayTiers(plan, 'inHouse')"
+                              item-value="id"
+                              :show-search-bar="false"
+                              :show-filter-pills="false"
+                              :show-selection-checkboxes="false"
+                              :show-expand="true"
+                              :show-row-actions="true"
+                              :row-action-items="copayTierRowActions"
+                              :show-table-footer="false"
+                              class="cs-tier-summary-table mb-4"
+                              @row-action="(payload) => handleCopayTierRowAction(plan, 'inHouse', payload)"
+                            >
+                              <template #empty-state>
+                                <div class="nc-empty-state">
+                                  <img :src="EmptyStateImg" alt="No data" class="nc-empty-icon" />
+                                  <p class="nc-empty-title">Nothing configured yet</p>
+                                  <button class="button button-secondary pd-empty-cta" @click="addCopayTierAndEdit(plan, 'inHouse')">+ Add Tier</button>
+                                </div>
+                              </template>
+                              <template #item.daysSupplyMin="{ item }">{{ item.daysSupplyMin ?? '—' }}</template>
+                              <template #item.daysSupply="{ item }">{{ item.daysSupply ?? '—' }}</template>
+                              <template #expanded-row="{ item, columns }">
+                                <tr>
+                                  <td :colspan="columns.length" class="cs-tier-detail-td">
+                                    <ReportDataTable
+                                      :headers="copayMatrixHeaders"
+                                      :items="copayProductTypes.map(pt => ({ productType: pt, tier: item }))"
+                                      :show-search-bar="false"
+                                      :show-filter-pills="false"
+                                      :show-selection-checkboxes="false"
+                                      :show-row-actions="false"
+                                      :show-table-footer="false"
+                                      class="cs-matrix-table"
+                                    >
+                                      <template #item.formula="{ item: cellItem }">{{ copayCellFor(cellItem.tier, cellItem.productType).formula ?? '—' }}</template>
+                                      <template #item.copay="{ item: cellItem }">{{ copayCellFor(cellItem.tier, cellItem.productType).copay ?? '—' }}</template>
+                                      <template #item.coinsurance="{ item: cellItem }">{{ copayCellFor(cellItem.tier, cellItem.productType).coinsurance ?? '—' }}</template>
+                                      <template #item.coinsMin="{ item: cellItem }">{{ copayCellFor(cellItem.tier, cellItem.productType).coinsMin ?? '—' }}</template>
+                                      <template #item.coinsMax="{ item: cellItem }">{{ copayCellFor(cellItem.tier, cellItem.productType).coinsMax ?? '—' }}</template>
+                                      <template #item.incentiveMin="{ item: cellItem }">{{ copayCellFor(cellItem.tier, cellItem.productType).incentiveMin ?? '—' }}</template>
+                                      <template #item.incentiveMax="{ item: cellItem }">{{ copayCellFor(cellItem.tier, cellItem.productType).incentiveMax ?? '—' }}</template>
+                                      <template #item.patientPayMax="{ item: cellItem }">{{ copayCellFor(cellItem.tier, cellItem.productType).patientPayMax ?? '—' }}</template>
+                                      <template #item.dedWaived="{ item: cellItem }">{{ copayCellFor(cellItem.tier, cellItem.productType).dedWaived ? 'Yes' : 'No' }}</template>
+                                      <template #item.oopWaived="{ item: cellItem }">{{ copayCellFor(cellItem.tier, cellItem.productType).oopWaived ? 'Yes' : 'No' }}</template>
+                                    </ReportDataTable>
+                                  </td>
+                                </tr>
+                              </template>
+                            </ReportDataTable>
                           </template>
-
-                          <div v-if="isEditingCopay(plan.id)" class="ap-section-footer">
-                            <button class="button button-primary" @click="saveEditCopay(plan)">Save Changes</button>
-                            <button class="button button-secondary" @click="cancelEditCopay(plan)">Cancel</button>
-                          </div>
                         </div>
 
                       </div>
@@ -6783,7 +6741,12 @@ const deriveStatus = (startDate: string, endDate: string): string => {
 };
 
 const networkLinkForm = ref({ linkingLevel: 'Account Level', selectedGroupIds: [] as string[], startDate: '', endDate: '', selectedNetwork: '' });
-const availableNetworks = ['First Choice Broad', 'First Choice Preferred', 'First Choice Limited', 'Mail Order - Network', 'Specialty Pharmacies', 'Variable Copay', 'SavePlus'];
+const availableNetworks = [
+  'First Choice Broad', 'First Choice Preferred', 'First Choice Limited', 'Mail Order - Network',
+  'Specialty Pharmacies', 'CVS Discount Card', 'Overlay Programs Network', 'Evaluations',
+  'LTC Pharmacy Network', 'Non Contracted', 'Eversana Voucher', 'SavePlus', 'Variable Copay',
+  'Compliance', 'Pillar',
+];
 
 const closeNetworkLinkDialog = () => {
   showNetworkLinkDialog.value = false;
@@ -7257,11 +7220,10 @@ const planDesignPlans = ref([
     accumulators: [
       { id: '70953-acc-1', accumulatorId: 'acc-1', accumulatorName: 'Standard Deductible/OOP', type: 'Standard Accumulation', effStartDate: '03/06/2026', effEndDate: '—', deductibleAmount: '$500', deductibleFamilyAmount: '$1,500', oopAmount: '$3,000', oopFamilyAmount: '$6,000', benefitMaxAmount: '—' },
     ] as PlanAccumulatorRow[],
-    copayNetworkIds: ['First Choice Broad'] as string[],
     copayTiers: {
-      'network:First Choice Broad': [
+      network: [
         {
-          id: 0, daysSupplyMin: 1, daysSupply: 30,
+          id: 0, networkId: 'First Choice Broad', daysSupplyMin: 1, daysSupply: 30,
           cells: {
             Generic: { formula: 'Copay', copay: '$1.00', coinsurance: '2%', coinsMin: '$1.00', coinsMax: '$3.00', incentiveMin: '$2.00', incentiveMax: '$5.00', patientPayMax: '$6.00', dedWaived: false, oopWaived: false },
           },
@@ -7297,7 +7259,6 @@ const planDesignPlans = ref([
     ],
     benefitCodes: [] as { benefitCode: string; effStartDate: string; effEndDate: string }[],
     accumulators: [] as PlanAccumulatorRow[],
-    copayNetworkIds: [] as string[],
     copayTiers: {} as CopayTiersByContext,
   },
 ]);
@@ -7869,7 +7830,7 @@ const saveAccumulatorBuild = () => {
 
 const copayTabs = [
   { key: 'pharmacyNetwork', label: 'Pharmacy Network' },
-  { key: 'mailOrder',       label: 'Mail Order - Pharmacy' },
+  { key: 'mailOrder',       label: 'Mail Order Pharmacy' },
   { key: 'inHouse',         label: 'In-House Pharmacy' },
 ];
 const activeCopayTab = ref('pharmacyNetwork');
@@ -7902,7 +7863,7 @@ type CopayCell = {
   coinsMin: string | null; coinsMax: string | null; incentiveMin: string | null;
   incentiveMax: string | null; patientPayMax: string | null; dedWaived: boolean; oopWaived: boolean;
 };
-type CopayTier = { id: number; daysSupplyMin: number | null; daysSupply: number | null; cells: Record<string, CopayCell> };
+type CopayTier = { id: number; networkId?: string | null; daysSupplyMin: number | null; daysSupply: number | null; cells: Record<string, CopayCell> };
 type CopayTiersByContext = Record<string, CopayTier[]>;
 
 function toNonNegativeIntOrNull(value: string | number | null): number | null {
@@ -7929,7 +7890,7 @@ function getCopayTiers(plan: { copayTiers: CopayTiersByContext }, contextKey: st
 
 let nextCopayTierId = 1;
 function addCopayTier(plan: { copayTiers: CopayTiersByContext }, contextKey: string) {
-  getCopayTiers(plan, contextKey).push({ id: nextCopayTierId++, daysSupplyMin: null, daysSupply: null, cells: {} });
+  getCopayTiers(plan, contextKey).push({ id: nextCopayTierId++, networkId: null, daysSupplyMin: null, daysSupply: null, cells: {} });
 }
 
 function removeCopayTier(plan: { copayTiers: CopayTiersByContext }, contextKey: string, tierId: number) {
@@ -7941,38 +7902,134 @@ function removeCopayTier(plan: { copayTiers: CopayTiersByContext }, contextKey: 
 function isCopayTierRangeOverlapping(plan: { copayTiers: CopayTiersByContext }, contextKey: string, tier: CopayTier): boolean {
   if (tier.daysSupplyMin === null || tier.daysSupply === null) return false;
   return getCopayTiers(plan, contextKey).some(other =>
-    other.id !== tier.id && other.daysSupplyMin !== null && other.daysSupply !== null &&
+    other.id !== tier.id && other.networkId === tier.networkId && other.daysSupplyMin !== null && other.daysSupply !== null &&
     tier.daysSupplyMin! <= other.daysSupply! && other.daysSupplyMin! <= tier.daysSupply!
   );
 }
 
-type PlanCopayFields = { id: number; copayNetworkIds: string[]; copayTiers: CopayTiersByContext };
+const copayTierSummaryHeaders = [
+  { title: 'Days Supply Min', key: 'daysSupplyMin' },
+  { title: 'Days Supply Max', key: 'daysSupply' },
+  { title: '',                key: 'actions', sortable: false },
+];
 
-const copayEditingIds = ref<number[]>([]);
-const copaySnapshots: Record<number, { copayNetworkIds: string[]; copayTiers: CopayTiersByContext }> = {};
+const copayNetworkTierSummaryHeaders = [
+  { title: 'Network',         key: 'networkId' },
+  { title: 'Days Supply Min', key: 'daysSupplyMin' },
+  { title: 'Days Supply Max', key: 'daysSupply' },
+  { title: '',                key: 'actions', sortable: false },
+];
 
-const isEditingCopay = (id: number) => copayEditingIds.value.includes(id);
+const copayTierRowActions = [
+  { label: 'Edit',   action: 'edit'   },
+  { label: 'Remove', action: 'remove' },
+];
 
-const startEditCopay = (plan: PlanCopayFields) => {
-  copaySnapshots[plan.id] = {
-    copayNetworkIds: [...plan.copayNetworkIds],
-    copayTiers: JSON.parse(JSON.stringify(plan.copayTiers)),
-  };
-  copayEditingIds.value.push(plan.id);
-};
+const showCopayTierDialog = ref(false);
+const copayTierDialogPlanId = ref<number | null>(null);
+const copayTierDialogContextKey = ref<string | null>(null);
+const copayTierDialogTierId = ref<number | null>(null);
+const copayTierDialogTouched = ref(false);
+const copayTierDialogForm = ref<{ networkId: string | null; daysSupplyMin: string; daysSupply: string; cells: Record<string, CopayCell> }>({
+  networkId: null, daysSupplyMin: '', daysSupply: '', cells: {},
+});
 
-const cancelEditCopay = (plan: PlanCopayFields) => {
-  const snap = copaySnapshots[plan.id];
-  if (snap) {
-    plan.copayNetworkIds = [...snap.copayNetworkIds];
-    plan.copayTiers = JSON.parse(JSON.stringify(snap.copayTiers));
+const copayTierDialogIsNetwork = computed(() => copayTierDialogContextKey.value === 'network');
+
+function copayTierDialogCellFor(productType: string): CopayCell {
+  if (!copayTierDialogForm.value.cells[productType]) {
+    copayTierDialogForm.value.cells[productType] = {
+      formula: null, copay: null, coinsurance: null, coinsMin: null, coinsMax: null,
+      incentiveMin: null, incentiveMax: null, patientPayMax: null, dedWaived: false, oopWaived: false,
+    };
   }
-  copayEditingIds.value = copayEditingIds.value.filter(id => id !== plan.id);
-};
+  return copayTierDialogForm.value.cells[productType];
+}
 
-const saveEditCopay = (plan: { id: number }) => {
-  copayEditingIds.value = copayEditingIds.value.filter(id => id !== plan.id);
-};
+const copayTierDialogOverlapping = computed(() => {
+  const plan = planDesignPlans.value.find(p => p.id === copayTierDialogPlanId.value);
+  const contextKey = copayTierDialogContextKey.value;
+  if (!plan || !contextKey) return false;
+  const min = toNonNegativeIntOrNull(copayTierDialogForm.value.daysSupplyMin);
+  const max = toNonNegativeIntOrNull(copayTierDialogForm.value.daysSupply);
+  if (min === null || max === null) return false;
+  return getCopayTiers(plan, contextKey).some(other =>
+    other.id !== copayTierDialogTierId.value && other.networkId === copayTierDialogForm.value.networkId &&
+    other.daysSupplyMin !== null && other.daysSupply !== null &&
+    min <= other.daysSupply! && other.daysSupplyMin! <= max
+  );
+});
+
+const copayTierDialogIsNew = ref(false);
+
+function openCopayTierDialog(plan: { id: number; copayTiers: CopayTiersByContext }, contextKey: string, tier: CopayTier) {
+  copayTierDialogPlanId.value = plan.id;
+  copayTierDialogContextKey.value = contextKey;
+  copayTierDialogTierId.value = tier.id;
+  copayTierDialogTouched.value = false;
+  copayTierDialogIsNew.value = false;
+  copayTierDialogForm.value = {
+    networkId: tier.networkId ?? null,
+    daysSupplyMin: tier.daysSupplyMin === null ? '' : String(tier.daysSupplyMin),
+    daysSupply: tier.daysSupply === null ? '' : String(tier.daysSupply),
+    cells: JSON.parse(JSON.stringify(tier.cells)),
+  };
+  showCopayTierDialog.value = true;
+}
+
+function discardPendingCopayTierDialog() {
+  if (!copayTierDialogIsNew.value) return;
+  const plan = planDesignPlans.value.find(p => p.id === copayTierDialogPlanId.value);
+  const contextKey = copayTierDialogContextKey.value;
+  if (plan && contextKey && copayTierDialogTierId.value !== null) {
+    removeCopayTier(plan, contextKey, copayTierDialogTierId.value);
+  }
+  copayTierDialogIsNew.value = false;
+}
+
+watch(showCopayTierDialog, (isOpen) => {
+  if (!isOpen) discardPendingCopayTierDialog();
+});
+
+function handleCopayTierRowAction(plan: { id: number; copayTiers: CopayTiersByContext }, contextKey: string, { action, item }: { action: string; item: CopayTier }) {
+  if (action === 'remove') {
+    removeCopayTier(plan, contextKey, item.id);
+    return;
+  }
+  if (action === 'edit') {
+    openCopayTierDialog(plan, contextKey, item);
+  }
+}
+
+function saveCopayTierDialog() {
+  copayTierDialogTouched.value = true;
+  if (copayTierDialogIsNetwork.value && !copayTierDialogForm.value.networkId) return;
+  if (copayTierDialogOverlapping.value) return;
+  const plan = planDesignPlans.value.find(p => p.id === copayTierDialogPlanId.value);
+  const contextKey = copayTierDialogContextKey.value;
+  if (!plan || !contextKey) return;
+  const tier = getCopayTiers(plan, contextKey).find(t => t.id === copayTierDialogTierId.value);
+  if (!tier) return;
+  tier.networkId = copayTierDialogForm.value.networkId;
+  tier.daysSupplyMin = toNonNegativeIntOrNull(copayTierDialogForm.value.daysSupplyMin);
+  tier.daysSupply = toNonNegativeIntOrNull(copayTierDialogForm.value.daysSupply);
+  tier.cells = JSON.parse(JSON.stringify(copayTierDialogForm.value.cells));
+  copayTierDialogIsNew.value = false;
+  showCopayTierDialog.value = false;
+}
+
+const copayTierDialogActions = computed(() => [
+  { text: 'Cancel', styleType: 'secondary' as const, onClick: () => { showCopayTierDialog.value = false; } },
+  { text: 'Save Changes', styleType: 'primary' as const, onClick: saveCopayTierDialog },
+]);
+
+function addCopayTierAndEdit(plan: { id: number; copayTiers: CopayTiersByContext }, contextKey: string) {
+  addCopayTier(plan, contextKey);
+  const tiers = getCopayTiers(plan, contextKey);
+  const newTier = tiers[tiers.length - 1];
+  openCopayTierDialog(plan, contextKey, newTier);
+  copayTierDialogIsNew.value = true;
+}
 
 const togglePlan = (id: number) => {
   const idx = expandedPlans.value.indexOf(id);
@@ -8030,7 +8087,6 @@ const pdSaveNewPlan = () => {
     planCodes: [],
     benefitCodes: [],
     accumulators: [],
-    copayNetworkIds: [],
     copayTiers: {},
   });
   expandedPlans.value.push(newId);
@@ -9470,63 +9526,16 @@ watch(selectedAccount, (newVal) => {
   gap: $spacing-xsmall;
 }
 
-.cs-network-header {
+.cs-tab-actions {
   display: flex;
-  align-items: center;
-  gap: $spacing-xsmall;
+  justify-content: flex-end;
   margin-bottom: $spacing-small;
-
-  .cs-network-title {
-    font-size: $font-size-body;
-    font-weight: $font-weight-semibold;
-    color: $color-primary;
-  }
-}
-
-.cs-hint {
-  color: $color-text-secondary;
-  margin-bottom: $spacing-medium;
-}
-
-.cs-network-block {
-  margin-bottom: $spacing-large;
-  padding-bottom: $spacing-medium;
-  border-bottom: 1px solid $color-border;
-
-  &:last-child {
-    border-bottom: none;
-  }
-}
-
-.cs-tier-header {
-  margin-bottom: $spacing-small;
-}
-
-.cs-tier-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: $spacing-small;
-}
-
-.cs-tier-label {
-  font-size: $font-size-small;
-  font-weight: $font-weight-semibold;
-  color: $color-text-secondary;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
 }
 
 .cs-tier-dates {
   display: flex;
   align-items: center;
   gap: $spacing-medium;
-}
-
-.cs-tier-title {
-  font-size: $font-size-body;
-  font-weight: $font-weight-semibold;
-  color: $color-text-primary;
 }
 
 .cs-tier-error {
@@ -9647,6 +9656,16 @@ watch(selectedAccount, (newVal) => {
 .pd-accum-detail-td {
   padding: $spacing-medium $spacing-large !important;
   background-color: #f5f5f5;
+}
+
+.cs-tier-detail-td {
+  padding: $spacing-medium $spacing-large !important;
+  background-color: #f5f5f5;
+  // Without this, the wide nested copay matrix table (cs-matrix-table, forced to
+  // width: max-content) blows out the outer summary table's auto layout instead of
+  // scrolling on its own — max-width: 0 caps this cell's contribution to that layout
+  // so the nested table's own overflow-x scroll stays contained to the expanded row.
+  max-width: 0;
 }
 
 .prog-detail {

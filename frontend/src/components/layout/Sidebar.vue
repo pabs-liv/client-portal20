@@ -64,12 +64,32 @@
         </div>
       </v-list-item>
     </v-list>
+
+    <!-- Development-only user type switcher -->
+    <div v-if="isDev" class="dev-switcher">
+      <v-switch
+        :model-value="isInternal"
+        label="Internal User"
+        density="compact"
+        hide-details
+        @update:model-value="toggleUserType"
+      ></v-switch>
+    </div>
   </v-navigation-drawer>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
 import { House, FileChartColumnIncreasing, FileText, Tablets, RotateCcwKey, ScrollText, Blocks, CircleGauge, MonitorCog } from 'lucide-vue-next';
+import { useUserType } from '@/composables/useUserType';
+
+const { isInternal, setUserType } = useUserType();
+
+const isDev = import.meta.env.DEV;
+
+const toggleUserType = (value: boolean) => {
+  setUserType(value ? 'internal' : 'external');
+};
 
 const navItems = ref([
   { title: 'Home', to: '/' },
@@ -152,6 +172,17 @@ const navItems = ref([
 :global(html.dark) .nav-item-active .nav-icon,
 :global(html.dark) .nav-item-active .nav-title {
   color: #7BA7E0 !important; // 6.9:1 contrast on #13161F — WCAG AA ✓
+}
+
+.dev-switcher {
+  padding: 8px 4px 16px;
+  text-align: center;
+
+  :deep(.v-label) {
+    font-size: 0.6875rem;
+    opacity: 1;
+    color: var(--color-nav-title);
+  }
 }
 
 </style>
