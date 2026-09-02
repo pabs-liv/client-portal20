@@ -2101,7 +2101,8 @@
                               <template #empty-state>
                                 <div class="nc-empty-state">
                                   <img :src="EmptyStateImg" alt="No data" class="nc-empty-icon" />
-                                  <p class="nc-empty-title">No copay tiers configured yet</p>
+                                  <p class="nc-empty-title">Nothing to see here</p>
+                                  <p class="nc-empty-subtitle">No copay tiers configured.</p>
                                   <button class="button button-secondary pd-empty-cta" @click="addCopayTierAndEdit(plan, 'network')">+ Add Tier</button>
                                 </div>
                               </template>
@@ -2160,7 +2161,8 @@
                               <template #empty-state>
                                 <div class="nc-empty-state">
                                   <img :src="EmptyStateImg" alt="No data" class="nc-empty-icon" />
-                                  <p class="nc-empty-title">No copay tiers configured yet</p>
+                                  <p class="nc-empty-title">Nothing to see here</p>
+                                  <p class="nc-empty-subtitle">No copay tiers configured.</p>
                                   <button class="button button-secondary pd-empty-cta" @click="addCopayTierAndEdit(plan, 'mailOrder')">+ Add Tier</button>
                                 </div>
                               </template>
@@ -2218,7 +2220,8 @@
                               <template #empty-state>
                                 <div class="nc-empty-state">
                                   <img :src="EmptyStateImg" alt="No data" class="nc-empty-icon" />
-                                  <p class="nc-empty-title">No copay tiers configured yet</p>
+                                  <p class="nc-empty-title">Nothing to see here</p>
+                                  <p class="nc-empty-subtitle">No copay tiers configured.</p>
                                   <button class="button button-secondary pd-empty-cta" @click="addCopayTierAndEdit(plan, 'inHouse')">+ Add Tier</button>
                                 </div>
                               </template>
