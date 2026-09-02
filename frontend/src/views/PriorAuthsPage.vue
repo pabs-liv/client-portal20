@@ -46,8 +46,9 @@
               <th class="font-weight-bold">EOC ID</th>
               <th class="font-weight-bold">Account Name</th>
               <th class="font-weight-bold">Drug Name</th>
-              <th class="font-weight-bold">Submission Date</th>
-              <th></th>
+              <th class="font-weight-bold">Requested By</th>
+              <th class="font-weight-bold">Requested Date</th>
+              <th class="font-weight-bold">Request Status</th>
             </tr>
           </thead>
           <tbody>
@@ -55,7 +56,8 @@
               <td>{{ auth.eocId }}</td>
               <td>{{ auth.accountName }}</td>
               <td>{{ auth.drugName }}</td>
-              <td>{{ auth.submissionDate }}</td>
+              <td>{{ auth.requestedBy }}</td>
+              <td>{{ auth.requestedDate }}</td>
               <td>
                 <v-chip :color="assistanceStatusColor(auth.assistanceStatus)" variant="tonal" size="small">
                   {{ auth.assistanceStatus }}

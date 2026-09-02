@@ -47,9 +47,10 @@
               <th class="font-weight-bold">EOC ID</th>
               <th class="font-weight-bold">Account Name</th>
               <th class="font-weight-bold">Drug Name</th>
-              <th class="font-weight-bold">Date of Service</th>
               <th class="font-weight-bold text-end">Estimated Cost</th>
-              <th></th>
+              <th class="font-weight-bold">Requested By</th>
+              <th class="font-weight-bold">Requested Date</th>
+              <th class="font-weight-bold">Request Status</th>
             </tr>
           </thead>
           <tbody>
@@ -57,8 +58,9 @@
               <td>{{ claim.eocId }}</td>
               <td>{{ claim.accountName }}</td>
               <td>{{ claim.drugName }}</td>
-              <td>{{ claim.claimDate }}</td>
               <td class="text-end">{{ claim.cost }}</td>
+              <td>{{ claim.requestedBy }}</td>
+              <td>{{ claim.requestedDate }}</td>
               <td>
                 <v-chip :color="assistanceStatusColor(claim.assistanceStatus)" variant="tonal" size="small">
                   {{ claim.assistanceStatus }}
