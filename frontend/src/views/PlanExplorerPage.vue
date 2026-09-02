@@ -1323,7 +1323,7 @@
 
                   <Dialog
                     v-model="showCopayTierDialog"
-                    heading="Edit Copay Tier"
+                    :heading="copayTierDialogIsNew ? 'Add Copay Tier' : 'Edit Copay Tier'"
                     :show-secondary-button="true"
                     :actions="copayTierDialogActions"
                   >
@@ -8020,7 +8020,7 @@ function saveCopayTierDialog() {
 
 const copayTierDialogActions = computed(() => [
   { text: 'Cancel', styleType: 'secondary' as const, onClick: () => { showCopayTierDialog.value = false; } },
-  { text: 'Save Changes', styleType: 'primary' as const, onClick: saveCopayTierDialog },
+  { text: copayTierDialogIsNew.value ? 'Add Copay Tier' : 'Save Changes', styleType: 'primary' as const, onClick: saveCopayTierDialog },
 ]);
 
 function addCopayTierAndEdit(plan: { id: number; copayTiers: CopayTiersByContext }, contextKey: string) {
