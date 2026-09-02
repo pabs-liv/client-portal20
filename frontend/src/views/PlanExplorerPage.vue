@@ -2101,7 +2101,7 @@
                               <template #empty-state>
                                 <div class="nc-empty-state">
                                   <img :src="EmptyStateImg" alt="No data" class="nc-empty-icon" />
-                                  <p class="nc-empty-title">Nothing configured yet</p>
+                                  <p class="nc-empty-title">No copay tiers configured yet</p>
                                   <button class="button button-secondary pd-empty-cta" @click="addCopayTierAndEdit(plan, 'network')">+ Add Tier</button>
                                 </div>
                               </template>
@@ -2160,7 +2160,7 @@
                               <template #empty-state>
                                 <div class="nc-empty-state">
                                   <img :src="EmptyStateImg" alt="No data" class="nc-empty-icon" />
-                                  <p class="nc-empty-title">Nothing configured yet</p>
+                                  <p class="nc-empty-title">No copay tiers configured yet</p>
                                   <button class="button button-secondary pd-empty-cta" @click="addCopayTierAndEdit(plan, 'mailOrder')">+ Add Tier</button>
                                 </div>
                               </template>
@@ -2218,7 +2218,7 @@
                               <template #empty-state>
                                 <div class="nc-empty-state">
                                   <img :src="EmptyStateImg" alt="No data" class="nc-empty-icon" />
-                                  <p class="nc-empty-title">Nothing configured yet</p>
+                                  <p class="nc-empty-title">No copay tiers configured yet</p>
                                   <button class="button button-secondary pd-empty-cta" @click="addCopayTierAndEdit(plan, 'inHouse')">+ Add Tier</button>
                                 </div>
                               </template>
@@ -8059,9 +8059,14 @@ function saveCopayTierDialog() {
   showCopayTierDialog.value = false;
 }
 
+const copayTierDialogRequiredFieldsMissing = computed(() => {
+  const f = copayTierDialogForm.value;
+  return (copayTierDialogIsNetwork.value && !f.networkId) || f.daysSupplyMin === '' || f.daysSupply === '';
+});
+
 const copayTierDialogActions = computed(() => [
   { text: 'Cancel', styleType: 'secondary' as const, onClick: () => { showCopayTierDialog.value = false; } },
-  { text: copayTierDialogIsNew.value ? 'Add Copay Tier' : 'Save Changes', styleType: 'primary' as const, onClick: saveCopayTierDialog },
+  { text: copayTierDialogIsNew.value ? 'Add Copay Tier' : 'Save Changes', styleType: 'primary' as const, onClick: saveCopayTierDialog, disabled: copayTierDialogRequiredFieldsMissing.value },
 ]);
 
 function addCopayTierAndEdit(plan: { id: number; copayTiers: CopayTiersByContext }, contextKey: string) {
