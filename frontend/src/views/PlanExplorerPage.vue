@@ -1331,7 +1331,7 @@
                       v-if="copayTierDialogIsNetwork"
                       v-model="copayTierDialogForm.networkId"
                       :items="copayNetworkOptions"
-                      label="Pharmacy Network"
+                      label="Pharmacy Network *"
                       style="max-width: 320px;"
                       class="mb-3 mt-1"
                       :error="copayTierDialogTouched && !copayTierDialogForm.networkId"
@@ -1340,17 +1340,21 @@
                     <div class="cs-tier-dates mt-1">
                       <TextField
                         v-model="copayTierDialogForm.daysSupplyMin"
-                        label="Days Supply Min"
+                        label="Days Supply Min *"
                         type="number"
                         min="0"
-                        style="max-width: 160px;"
+                        style="max-width: 190px;"
+                        :error="copayTierDialogTouched && copayTierDialogForm.daysSupplyMin === ''"
+                        :error-messages="copayTierDialogTouched && copayTierDialogForm.daysSupplyMin === '' ? ['Required'] : []"
                       />
                       <TextField
                         v-model="copayTierDialogForm.daysSupply"
-                        label="Days Supply Max"
+                        label="Days Supply Max *"
                         type="number"
                         min="0"
-                        style="max-width: 160px;"
+                        style="max-width: 190px;"
+                        :error="copayTierDialogTouched && copayTierDialogForm.daysSupply === ''"
+                        :error-messages="copayTierDialogTouched && copayTierDialogForm.daysSupply === '' ? ['Required'] : []"
                       />
                     </div>
                     <p v-if="copayTierDialogTouched && copayTierDialogOverlapping" class="cs-tier-error">
@@ -1398,6 +1402,15 @@
                       </template>
                     </ReportDataTable>
                   </Dialog>
+
+                  <Dialog
+                    v-model="showCopayTierRemoveDialog"
+                    :icon="Trash2"
+                    heading="Remove Tier"
+                    :text="copayTierRemoveText"
+                    :actions="copayTierRemoveDialogActions"
+                    :show-secondary-button="true"
+                  />
 
                   <div class="pd-accordion-list">
                     <div
@@ -7991,9 +8004,36 @@ watch(showCopayTierDialog, (isOpen) => {
   if (!isOpen) discardPendingCopayTierDialog();
 });
 
+const showCopayTierRemoveDialog = ref(false);
+const copayTierPendingRemove = ref<{ plan: { id: number; copayTiers: CopayTiersByContext }; contextKey: string; tier: CopayTier } | null>(null);
+
+const copayTierRemoveText = computed(() => {
+  const pending = copayTierPendingRemove.value;
+  if (!pending) return '';
+  const { tier, contextKey } = pending;
+  const range = `${tier.daysSupplyMin ?? '—'}–${tier.daysSupply ?? '—'} Days Supply`;
+  if (contextKey === 'network') {
+    return `Are you sure you want to remove the ${tier.networkId ?? '—'} ${range} tier?`;
+  }
+  return `Are you sure you want to remove the ${range} tier?`;
+});
+
+function confirmRemoveCopayTier() {
+  const pending = copayTierPendingRemove.value;
+  if (pending) removeCopayTier(pending.plan, pending.contextKey, pending.tier.id);
+  showCopayTierRemoveDialog.value = false;
+  copayTierPendingRemove.value = null;
+}
+
+const copayTierRemoveDialogActions = [
+  { text: 'Cancel', styleType: 'secondary' as const, onClick: () => { showCopayTierRemoveDialog.value = false; copayTierPendingRemove.value = null; } },
+  { text: 'Remove', onClick: confirmRemoveCopayTier, type: 'destructive' as const },
+];
+
 function handleCopayTierRowAction(plan: { id: number; copayTiers: CopayTiersByContext }, contextKey: string, { action, item }: { action: string; item: CopayTier }) {
   if (action === 'remove') {
-    removeCopayTier(plan, contextKey, item.id);
+    copayTierPendingRemove.value = { plan, contextKey, tier: item };
+    showCopayTierRemoveDialog.value = true;
     return;
   }
   if (action === 'edit') {
@@ -8004,6 +8044,7 @@ function handleCopayTierRowAction(plan: { id: number; copayTiers: CopayTiersByCo
 function saveCopayTierDialog() {
   copayTierDialogTouched.value = true;
   if (copayTierDialogIsNetwork.value && !copayTierDialogForm.value.networkId) return;
+  if (copayTierDialogForm.value.daysSupplyMin === '' || copayTierDialogForm.value.daysSupply === '') return;
   if (copayTierDialogOverlapping.value) return;
   const plan = planDesignPlans.value.find(p => p.id === copayTierDialogPlanId.value);
   const contextKey = copayTierDialogContextKey.value;
