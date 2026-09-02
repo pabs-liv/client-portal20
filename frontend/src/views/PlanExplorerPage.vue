@@ -6656,9 +6656,7 @@ function groupSetupBinLabel(bin: string): string {
 }
 
 const groupSetupRowsByAccount = ref<Record<number, GroupSetupRow[]>>({
-  1: [
-    { groupName: 'Allied Finishing, Inc', groupId: '1275', bin: GROUP_SETUP_LIVINITI_BIN, pcn: 'SSN', claimSourceId: null, startDate: '03/01/2026', endDate: '—' },
-  ],
+  1: [],
   2: [],
   3: [],
   4: [
@@ -7251,9 +7249,7 @@ const planDesignPlans = ref([
     benefitPeriodType: 'CalendarYear' as string,
     benefitPeriodRanges: [{ startDate: '01/01/2026', endDate: '12/31/2026' }] as { startDate: string; endDate: string }[],
     benefitByFlag: false,
-    bpgRows: [
-      { bin: '025945', pcn: 'SSN', groupId: '1275', groupName: 'Allied Finishing, Inc', effStartDate: '03/01/2026', effEndDate: '—' },
-    ],
+    bpgRows: [] as { bin: string; pcn: string; groupId: string; groupName: string; effStartDate: string; effEndDate: string }[],
     planCodes: [
       { planCode: '1423T', effStartDate: '03/05/2026', effEndDate: '—' },
     ],
@@ -7295,9 +7291,7 @@ const planDesignPlans = ref([
     benefitPeriodType: 'PlanYear' as string,
     benefitPeriodRanges: [{ startDate: '03/06/2026', endDate: '03/05/2027' }] as { startDate: string; endDate: string }[],
     benefitByFlag: false,
-    bpgRows: [
-      { bin: '025945', pcn: 'SSN', groupId: '1275', groupName: 'Allied Finishing, Inc', effStartDate: '03/01/2026', effEndDate: '—' },
-    ],
+    bpgRows: [] as { bin: string; pcn: string; groupId: string; groupName: string; effStartDate: string; effEndDate: string }[],
     planCodes: [
       { planCode: '1423T', effStartDate: '03/05/2026', effEndDate: '—' },
     ],
