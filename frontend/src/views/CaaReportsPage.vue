@@ -8,14 +8,10 @@
       <Banner
         variant="info"
         always-show
-        message="To update your CAA reporting preference, go to <strong>Settings</strong> in the sidebar and select the <strong>CAA Drug Cost Reporting</strong> tab, or use the button below."
+        message="To update your CAA reporting preference, go to the <strong>Settings</strong> in the sidebar menu and select an account; then select the <strong>CAA Drug Cost Reporting</strong> tab."
         class="caa-preference-banner"
       />
       <div class="caa-cta-row">
-        <button type="button" class="button button-secondary" @click="goToCaaSettings">
-          <MonitorCog :size="16" :stroke-width="1.5" />
-          Go to CAA Settings
-        </button>
         <a
           class="button button-secondary"
           href="/Content/Documents/2025 Narrative Responses.pdf"
@@ -139,8 +135,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, nextTick } from 'vue';
-import { useRouter } from 'vue-router';
-import { SlidersHorizontal, FileDown, MonitorCog, Check, X } from 'lucide-vue-next';
+import { SlidersHorizontal, FileDown, Check, X } from 'lucide-vue-next';
 import PageCard from '@/components/common/PageCard.vue';
 import ReportDataTable from '@/components/common/ReportDataTable.vue';
 import Banner from '@/components/common/Banner.vue';
@@ -151,12 +146,6 @@ import FilteringPillsGroup from '@/components/ui/FilteringPillsGroup.vue';
 import DatePicker from '@/components/ui/DatePicker.vue';
 import type { FilterGroup } from '@/types/filters';
 import type { FilterPill } from '@/components/ui/FilteringPill.vue';
-
-const router = useRouter();
-
-const goToCaaSettings = () => {
-  router.push('/settings?tab=caa-drug-cost-reporting');
-};
 
 // The Advanced Filters dialog (AdvancedFiltersDialog.vue) is a Vuetify v-card, which
 // clips overflow by default (for its rounded corners) — a plain position: absolute
@@ -546,6 +535,10 @@ html.dark .account-option:hover {
   border-radius: 100px;
   text-decoration: none;
 
+  // Overrides the global a:hover underline (style.scss) — that rule is meant for
+  // plain text links, not anchor elements styled as buttons like the narrative
+  // response CTA below.
+  &:hover { text-decoration: none; }
   &:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 
