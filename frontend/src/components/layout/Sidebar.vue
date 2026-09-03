@@ -21,6 +21,9 @@
           <template v-else-if="item.title === 'Reports'">
             <FileChartColumnIncreasing  :stroke-width="1" class="nav-icon"  />
           </template>
+          <template v-else-if="item.title === 'CAA Reports'">
+            <FileCheck2  :stroke-width="1" class="nav-icon"  />
+          </template>
           <template v-else-if="item.title === 'Documents'">
             <FileText  :stroke-width="1" class="nav-icon"  />
           </template>
@@ -80,7 +83,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { House, FileChartColumnIncreasing, FileText, Tablets, RotateCcwKey, ScrollText, Blocks, CircleGauge, MonitorCog } from 'lucide-vue-next';
+import { House, FileChartColumnIncreasing, FileCheck2, FileText, Tablets, RotateCcwKey, ScrollText, Blocks, CircleGauge, MonitorCog } from 'lucide-vue-next';
 import { useUserType } from '@/composables/useUserType';
 
 const { isInternal, setUserType } = useUserType();
@@ -94,6 +97,7 @@ const toggleUserType = (value: boolean) => {
 const navItems = ref([
   { title: 'Home', to: '/' },
   { title: 'Reports', to: '/reports' },
+  { title: 'CAA Reports', to: '/caa-reports' },
   { title: 'Documents', to: '/documents' },
   { title: 'High-Cost Claims', to: '/high-cost-claims' },
   { title: 'Prior Auths', to: '/prior-auths' },
