@@ -14,7 +14,7 @@
       variant="outlined"
     >
       <div class="account-settings">
-        <Tabs v-if="selectedAccount" :tabs="settingTabs" @tab-selected="handleTabSelected" />
+        <Tabs v-if="selectedAccount" :tabs="settingTabs" :initial-tab="activeTab" @tab-selected="handleTabSelected" />
         <div v-if="selectedAccount && activeTab === 'company-information'">
           <!-- Mirrors Plan Explorer > Account Profile step (Account Profile + About This
                Company cards) — see project_settings_master_divergences.md. High Cost
@@ -1147,6 +1147,7 @@ import Banner from '@/components/common/Banner.vue';
 import { ChevronDown, CheckSquare, Square, Trash2, Check } from 'lucide-vue-next';
 import Dialog from '@/components/ui/Dialog.vue';
 import { ref, computed, watch } from 'vue';
+import { useRoute } from 'vue-router';
 import { useUserType } from '@/composables/useUserType';
 import { useHighCostNotifications } from '@/composables/useHighCostNotifications';
 
@@ -1906,7 +1907,14 @@ const agreementTypes = ref([
 
 const { isExternal } = useUserType();
 
-const activeTab = ref('company-information');
+const route = useRoute();
+
+// Allows other pages (e.g. CAA Reports' "CAA Settings" button) to deep-link straight
+// into a tab via ?tab=<key>, instead of always landing on Company Information.
+const requestedTab = typeof route.query.tab === 'string' ? route.query.tab : '';
+const activeTab = ref(
+  settingTabs.value.some(tab => tab.key === requestedTab) ? requestedTab : 'company-information'
+);
 
 const handleTabSelected = (tabKey: string) => {
   activeTab.value = tabKey;

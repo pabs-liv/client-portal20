@@ -33,12 +33,18 @@ interface Tab {
 
 interface Props {
   tabs: Tab[];
+  initialTab?: string;
 }
 
 const props = defineProps<Props>();
 const emit = defineEmits(['tab-selected']);
 
-const selectedTab = ref<string | null>(props.tabs.length > 0 ? props.tabs[0].key : null);
+// initialTab lets a caller deep-link straight to a specific tab (e.g. another page's
+// "go to Settings" CTA) instead of always landing on the first tab.
+const initialTabValid = props.initialTab && props.tabs.some(tab => tab.key === props.initialTab);
+const selectedTab = ref<string | null>(
+  initialTabValid ? props.initialTab! : (props.tabs.length > 0 ? props.tabs[0].key : null)
+);
 
 watch(() => props.tabs, (newTabs) => {
   if (newTabs.length > 0 && !newTabs.some(tab => tab.key === selectedTab.value)) {
