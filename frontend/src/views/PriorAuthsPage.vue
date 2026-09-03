@@ -6,7 +6,7 @@
       <SummaryWidget
         title="Pending"
         :count="pendingCount"
-        description="Authorizations awaiting review"
+        description="Authorizations awaiting review (Last 30 Days)"
         icon-background-color="rgba(253, 214, 113, 0.2)"
         icon-color="#FBBA13"
         :show-icon="true"
@@ -16,7 +16,7 @@
       <SummaryWidget
         title="Approved"
         :count="approvedCount"
-        description="Authorizations that have been approved"
+        description="Authorizations that have been approved (Last 30 Days)"
         icon-background-color="rgba(190, 227, 190, 0.4)"
         icon-color="#5CB85C"
         :show-icon="true"
@@ -26,7 +26,7 @@
       <SummaryWidget
         title="Denied"
         :count="deniedCount"
-        description="Authorizations that have been denied"
+        description="Authorizations that have been denied (Last 30 Days)"
         icon-background-color="rgba(212, 107, 107, 0.4)"
         icon-color="#B80909"
         :show-icon="true"

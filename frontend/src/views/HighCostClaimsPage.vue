@@ -6,7 +6,7 @@
       <SummaryWidget
         title="Claims Pending Acknowledgment"
         :count="claimsPendingAcknowledgmentCount"
-        description="Claims awaiting your acknowledgment"
+        description="Claims awaiting your acknowledgment (Last 30 Days)"
         icon-background-color="rgba(253, 214, 113, 0.2)"
         icon-color="#FBBA13"
         :show-icon="true"
@@ -16,7 +16,7 @@
       <SummaryWidget
         title="Total Cost"
         :count="totalClaimsCost"
-        description="Total estimated cost of all claims"
+        description="Total estimated cost of all claims (Last 30 Days)"
         icon-background-color="rgba(190, 227, 190, 0.4)"
         icon-color="#5CB85C"
         :show-icon="true"
@@ -26,7 +26,7 @@
       <SummaryWidget
         title="Average Claim Cost"
         :count="averageClaimCost"
-        description="Average estimated cost per claim"
+        description="Average estimated cost per claim (Last 30 Days)"
         icon-background-color="rgba(200, 220, 240, 0.4)"
         icon-color="#2C82CB"
         :show-icon="true"
