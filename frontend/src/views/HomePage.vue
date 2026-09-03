@@ -1,5 +1,11 @@
 <template>
   <div class="home-page-container">
+    <Banner
+      variant="warning"
+      :always-show="true"
+      :message="caaGagClauseNoticeMessage"
+    />
+
     <div class="sticky-controls-bar" :class="{ 'sticky-controls-bar--scrolled': isScrolled }">
       <h1 class="text-h1 home-header-title">Welcome back, Pablo! Here's what's new...</h1>
       <div class="home-header-controls">
@@ -1060,6 +1066,18 @@ const quarterlyClaimsCounts = computed(() => {
 const selectedAccountName = computed(() =>
   accountOptions.value.find((a) => a.id === selectedAccountId.value)?.name ?? 'All Accounts'
 );
+
+// Same annual reminder as the old portal's Dashboard notice, with corrected nav
+// instructions for CP2.0's sidebar (old copy referenced a top-toolbar gear icon that
+// doesn't exist here) — matches the phrasing used on the CAA Reports page's own
+// Settings pointer.
+const caaGagClauseNoticeMessage =
+  '<strong>IMPORTANT NOTICE!</strong> Consolidated Appropriations Act (CAA) Gag Clause ' +
+  'Attestations are due on or before <strong>December 31, 2026</strong>. If you wish for ' +
+  'Liviniti to file this attestation on your behalf, go to the <strong>Settings</strong> ' +
+  'in the sidebar menu and select an account; then select the ' +
+  '<strong>CAA Gag Clause Attestation</strong> tab and complete the questionnaire. ' +
+  'Selection must be made before <strong>November 30, 2026</strong>.';
 
 const executiveSummaryMessage = computed(() => {
   const scope = selectedAccountId.value === BOOK_OF_BUSINESS_ID ? '' : ` for ${selectedAccountName.value}`;

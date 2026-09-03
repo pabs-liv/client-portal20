@@ -2,7 +2,7 @@
   <div class="caa-reports-page">
     <h1 class="text-h1 mb-large">CAA Reports</h1>
     <PageCard
-      header-text="CAA Report - RxDC"
+      header-text="CAA Report Explorer"
       description-text="Browse and download RxDC data files by account and reporting period."
     >
       <Banner
