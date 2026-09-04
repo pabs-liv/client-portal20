@@ -28,15 +28,7 @@
               :showFilterButton="false"
             />
           </div>
-          <AdvancedFiltersButton @click="openFilters" />
         </div>
-        <FilteringPillsGroup
-          v-if="activeFilterPills.length"
-          :filters="activeFilterPills"
-          :closable="true"
-          @close:filter="handleFilterPillClose"
-          class="filter-pills"
-        />
         <ReportDataTable
           :headers="documentHeaders"
           :items="filteredDocumentItems"
@@ -60,67 +52,6 @@
         </ReportDataTable>
       </PageCard>
     </div>
-
-    <AdvancedFiltersDialog
-      v-model="isAdvancedFiltersOpen"
-      :filters="documentFilters"
-      :icon="SlidersHorizontal"
-      heading="Document Filters"
-      :actions="advancedFiltersDialogActions"
-    >
-      <template #filter-modifiedBy="{ filter }">
-        <div v-if="dialogModifiedBy.length > 0" class="selected-chips">
-          <v-chip
-            v-for="person in dialogModifiedBy"
-            :key="person"
-            variant="flat"
-            color="primary"
-            class="autocomplete-chip"
-          >
-            {{ person }}
-            <span class="chip-close" @click.stop="dialogModifiedBy = dialogModifiedBy.filter(p => p !== person)">
-              <X :size="8" :stroke-width="3" />
-            </span>
-          </v-chip>
-        </div>
-        <div class="account-picker-wrap">
-          <div class="account-search-field" :class="{ 'account-search-field--active': showModifiedByList }">
-            <input
-              v-model="modifiedBySearch"
-              type="text"
-              class="account-search-input"
-              placeholder="Uploaded By"
-              @mousedown="showModifiedByList = true"
-              @blur="handleModifiedByPickerBlur"
-            />
-          </div>
-          <div v-if="showModifiedByList" class="account-dropdown">
-            <div
-              v-for="person in filteredModifiedByOptions"
-              :key="person"
-              class="account-option"
-              @mousedown.prevent
-              @click="toggleModifiedBy(person)"
-            >
-              <div class="acct-checkbox" :class="{ active: dialogModifiedBy.includes(person) }">
-                <Check v-if="dialogModifiedBy.includes(person)" :size="12" :stroke-width="3" />
-              </div>
-              <span>{{ person }}</span>
-            </div>
-            <div v-if="filteredModifiedByOptions.length === 0" class="no-acct-results">
-              No results found
-            </div>
-          </div>
-        </div>
-      </template>
-      <template #filter-dateRange>
-        <p class="filter-section-label">Upload Date Range</p>
-        <div class="date-range-row">
-          <DatePicker label="From" v-model="dialogDateFrom" />
-          <DatePicker label="To" v-model="dialogDateTo" />
-        </div>
-      </template>
-    </AdvancedFiltersDialog>
 
     <!-- Add Documents modal — account is locked from whichever account is currently
          selected (not editable here), so an upload can never be misdirected to the
@@ -190,8 +121,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, watch } from 'vue';
-import { SlidersHorizontal, Check, X, CloudUpload, Paperclip, CheckSquare, Square, Trash2 } from 'lucide-vue-next';
+import { ref, computed, watch } from 'vue';
+import { CloudUpload, Paperclip, CheckSquare, Square, Trash2 } from 'lucide-vue-next';
 import EmptyStateImg from '@/assets/EmptyState.svg';
 import PageCard from '@/components/common/PageCard.vue';
 import AccountSelector from '@/components/common/AccountSelector.vue';
@@ -200,14 +131,8 @@ import Tabs from '@/components/common/Tabs.vue';
 import Banner from '@/components/common/Banner.vue';
 import FileUploader from '@/components/ui/FileUploader.vue';
 import SearchBar from '@/components/ui/SearchBar.vue';
-import AdvancedFiltersButton from '@/components/ui/AdvancedFiltersButton.vue';
-import AdvancedFiltersDialog from '@/components/common/AdvancedFiltersDialog.vue';
-import FilteringPillsGroup from '@/components/ui/FilteringPillsGroup.vue';
-import DatePicker from '@/components/ui/DatePicker.vue';
 import Select from '@/components/ui/Select.vue';
 import Dialog from '@/components/ui/Dialog.vue';
-import type { FilterGroup } from '@/types/filters';
-import type { FilterPill } from '@/components/ui/FilteringPill.vue';
 import { useDocumentsStore } from '@/stores/documents';
 
 const documentsStore = useDocumentsStore();
@@ -283,114 +208,7 @@ const handleTabSelected = (key: string) => {
 
 const combinedDocumentItems = computed(() => [...documentsStore.documents, ...allDocumentItems.value]);
 
-// Advanced Filters — same pattern as Reports/Billing (external AdvancedFiltersButton +
-// AdvancedFiltersDialog + FilteringPillsGroup, applied on top of the existing tab/category filter)
-const isAdvancedFiltersOpen = ref(false);
 const documentSearchTerm = ref('');
-
-// Applied state — what the table actually uses
-const appliedModifiedBy = ref<string[]>([]);
-const appliedDateFrom = ref('');
-const appliedDateTo = ref('');
-
-// Dialog draft state — only committed when Apply is clicked
-const dialogModifiedBy = ref<string[]>([]);
-const dialogDateFrom = ref('');
-const dialogDateTo = ref('');
-
-const modifiedBySearch = ref('');
-const showModifiedByList = ref(false);
-
-const modifiedByOptions = computed(() =>
-  [...new Set(combinedDocumentItems.value.map(item => item.lastModifiedBy).filter(Boolean))].sort()
-);
-
-const filteredModifiedByOptions = computed(() => {
-  const q = modifiedBySearch.value?.toLowerCase() ?? '';
-  return modifiedByOptions.value.filter(p => p.toLowerCase().includes(q));
-});
-
-const toggleModifiedBy = (person: string) => {
-  dialogModifiedBy.value = dialogModifiedBy.value.includes(person)
-    ? dialogModifiedBy.value.filter(p => p !== person)
-    : [...dialogModifiedBy.value, person];
-};
-
-const handleModifiedByPickerBlur = () => {
-  setTimeout(() => { showModifiedByList.value = false; }, 150);
-};
-
-const openFilters = () => {
-  dialogModifiedBy.value = [...appliedModifiedBy.value];
-  dialogDateFrom.value = appliedDateFrom.value;
-  dialogDateTo.value = appliedDateTo.value;
-  modifiedBySearch.value = '';
-  showModifiedByList.value = false;
-  isAdvancedFiltersOpen.value = true;
-};
-
-const applyFilters = () => {
-  appliedModifiedBy.value = [...dialogModifiedBy.value];
-  appliedDateFrom.value = dialogDateFrom.value;
-  appliedDateTo.value = dialogDateTo.value;
-  isAdvancedFiltersOpen.value = false;
-};
-
-const cancelFilters = () => {
-  isAdvancedFiltersOpen.value = false;
-};
-
-const advancedFiltersDialogActions = [
-  { text: 'Cancel',        type: 'cancel'  as const, onClick: cancelFilters },
-  { text: 'Apply Filters', type: 'confirm' as const, onClick: applyFilters  },
-];
-
-const documentFilters = reactive<FilterGroup[]>([
-  { type: 'modifiedBy',   label: 'Uploaded By', multiselect: true, options: [], modelValue: null },
-  { type: 'dateRange',    label: 'Upload Date Range',    multiselect: false, options: [], modelValue: null },
-]);
-
-// DatePicker (dialogDateFrom/To) emits M/D/YYYY; item.uploadDate is stored as ISO YYYY-MM-DD.
-// Parsed explicitly (both as local-time components) to avoid a timezone off-by-one-day bug
-// that native `new Date(string)` parsing would introduce when mixing these two formats.
-const parseMDYYYY = (dateStr: string): number => {
-  const [month, day, year] = dateStr.split('/').map(Number);
-  return new Date(year, month - 1, day).getTime();
-};
-
-const parseISODate = (dateStr: string): number => {
-  const [year, month, day] = dateStr.split('-').map(Number);
-  return new Date(year, month - 1, day).getTime();
-};
-
-const formatUploadDateDisplay = (dateStr: string): string => {
-  const parts = dateStr.split('/');
-  if (parts.length !== 3) return dateStr;
-  return `${parseInt(parts[0])}/${parseInt(parts[1])}/${parts[2]}`;
-};
-
-const activeFilterPills = computed<FilterPill[]>(() => {
-  const pills: FilterPill[] = [];
-  appliedModifiedBy.value.forEach(person => {
-    pills.push({ type: 'modifiedBy', value: person, label: `Uploaded by: ${person}`, isActive: true });
-  });
-  if (appliedDateFrom.value || appliedDateTo.value) {
-    const parts = [appliedDateFrom.value, appliedDateTo.value]
-      .filter(Boolean)
-      .map(formatUploadDateDisplay);
-    pills.push({ type: 'dateRange', value: null, label: `Upload Date: ${parts.join(' – ')}`, isActive: true });
-  }
-  return pills;
-});
-
-const handleFilterPillClose = (pill: FilterPill) => {
-  if (pill.type === 'modifiedBy') {
-    appliedModifiedBy.value = appliedModifiedBy.value.filter(v => v !== pill.value);
-  } else if (pill.type === 'dateRange') {
-    appliedDateFrom.value = '';
-    appliedDateTo.value = '';
-  }
-};
 
 // The category's full set before search/advanced-filters are applied — used to tell
 // "genuinely no documents in this category" apart from "filtered/searched down to zero",
@@ -408,28 +226,15 @@ const filteredDocumentItems = computed(() => {
 
   let items = categoryDocumentItems.value;
 
-  // Search is scoped to Document Name only — Uploaded By already has its own
-  // Advanced Filter, and Type isn't a meaningful free-text search target.
   if (documentSearchTerm.value) {
     const q = documentSearchTerm.value.toLowerCase();
     items = items.filter(item => item.documentName.toLowerCase().includes(q));
-  }
-  if (appliedModifiedBy.value.length > 0) {
-    items = items.filter(item => appliedModifiedBy.value.includes(item.lastModifiedBy));
-  }
-  if (appliedDateFrom.value || appliedDateTo.value) {
-    const fromTs = appliedDateFrom.value ? parseMDYYYY(appliedDateFrom.value) : -Infinity;
-    const toTs   = appliedDateTo.value   ? parseMDYYYY(appliedDateTo.value)   : Infinity;
-    items = items.filter(item => {
-      const uploaded = parseISODate(item.uploadDate);
-      return uploaded >= fromTs && uploaded <= toTs;
-    });
   }
 
   return items;
 });
 
-// True only when search/filters are the reason the table is empty — the category
+// True only when search is the reason the table is empty — the category
 // itself has documents, they're just all filtered out right now.
 const isFilteredToZero = computed(() =>
   categoryDocumentItems.value.length > 0 && filteredDocumentItems.value.length === 0
@@ -565,142 +370,6 @@ const uploadDialogActions = computed(() => [
 
 .search-bar-wrapper {
   flex: 1;
-}
-
-.filter-section-label {
-  font-size: $font-size-body;
-  font-weight: $font-weight-semibold;
-  color: $color-text-primary;
-  margin-bottom: $spacing-small;
-}
-
-.date-range-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: $spacing-medium;
-  margin-bottom: $spacing-small;
-}
-
-.filter-pills {
-  margin-top: $spacing-xsmall;
-}
-
-.selected-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: $spacing-xsmall;
-  margin-bottom: $spacing-xsmall;
-}
-
-.autocomplete-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-}
-
-.chip-close {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background-color: $color-neutral-white;
-  color: $color-primary;
-  cursor: pointer;
-  flex-shrink: 0;
-  opacity: 0.9;
-  margin-left: $spacing-nano;
-
-  &:hover {
-    opacity: 1;
-  }
-}
-
-.account-picker-wrap {
-  position: relative;
-  margin-bottom: $spacing-small;
-}
-
-.account-search-field {
-  border: 1px solid var(--color-input-border);
-  border-radius: 4px;
-  background-color: var(--color-input-bg);
-  padding: 6px $spacing-small;
-  transition: border-color 0.15s;
-
-  &--active,
-  &:focus-within {
-    border-color: $color-primary;
-  }
-}
-
-.account-search-input {
-  width: 100%;
-  border: none;
-  outline: none;
-  background: transparent;
-  font-family: $font-family-base;
-  font-size: $font-size-body;
-  color: var(--color-text-primary);
-
-  &::placeholder {
-    color: $color-neutral-disabled;
-  }
-}
-
-.account-dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  z-index: 50;
-  max-height: 200px;
-  overflow-y: auto;
-  background-color: var(--color-bg-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-}
-
-.no-acct-results {
-  padding: $spacing-small;
-  color: $color-text-secondary;
-  font-size: $font-size-small;
-  text-align: center;
-}
-
-.account-option {
-  display: flex;
-  align-items: center;
-  padding: $spacing-xsmall $spacing-small;
-  cursor: pointer;
-}
-
-html:not(.dark) .account-option:hover {
-  background-color: rgba(0, 0, 0, 0.04);
-}
-
-html.dark .account-option:hover {
-  background-color: rgba(255, 255, 255, 0.08);
-}
-
-.acct-checkbox {
-  width: 18px;
-  height: 18px;
-  border: 2px solid $color-border;
-  border-radius: 3px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: $spacing-xsmall;
-
-  &.active {
-    background-color: $color-primary !important;
-    border-color: $color-primary !important;
-    color: $color-neutral-white;
-  }
 }
 
 // CTA sits in its own row above the tabs, rather than overlapping the tab strip's
