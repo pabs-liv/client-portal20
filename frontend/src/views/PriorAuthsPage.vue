@@ -43,12 +43,12 @@
         <v-table density="compact">
           <thead>
             <tr>
-              <th class="font-weight-bold">EOC ID</th>
-              <th class="font-weight-bold">Account Name</th>
-              <th class="font-weight-bold">Drug Name</th>
-              <th class="font-weight-bold">Requested By</th>
-              <th class="font-weight-bold">Requested Date</th>
-              <th class="font-weight-bold">Request Status</th>
+              <th class="font-weight-bold" style="width: 12%;">EOC ID</th>
+              <th class="font-weight-bold" style="width: 25%;">Account Name</th>
+              <th class="font-weight-bold" style="width: 20%;">Drug Name</th>
+              <th class="font-weight-bold" style="width: 13%;">Ticket #</th>
+              <th class="font-weight-bold" style="width: 15%;">Requested Date</th>
+              <th class="font-weight-bold" style="width: 15%;">Request Status</th>
             </tr>
           </thead>
           <tbody>
@@ -56,7 +56,7 @@
               <td>{{ auth.eocId }}</td>
               <td>{{ auth.accountName }}</td>
               <td>{{ auth.drugName }}</td>
-              <td>{{ auth.requestedBy }}</td>
+              <td>{{ auth.ticketNumber }}</td>
               <td>{{ auth.requestedDate }}</td>
               <td>
                 <v-chip :color="assistanceStatusColor(auth.assistanceStatus)" variant="tonal" size="small">
@@ -296,16 +296,16 @@ const priorAuthHeaders = computed(() => {
 // HCC's model: a real flag for "client has requested clinical assistance,"
 // not a guess derived from status.
 const priorAuthData = ref([
-  { accountName: 'Company A', eocId: 'EOC12345', drugName: 'Drug A', rawStatus: 'Submitted', submissionDate: '2025-07-01', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, assistanceStatus: null as string | null },
-  { accountName: 'Company B', eocId: 'EOC67890', drugName: 'Drug B', rawStatus: 'Approved', submissionDate: '2025-06-25', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, assistanceStatus: null as string | null },
-  { accountName: 'Company C', eocId: 'EOC11223', drugName: 'Drug C', rawStatus: 'Rejected', submissionDate: '2025-06-20', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, assistanceStatus: null as string | null },
-  { accountName: 'Company D', eocId: 'EOC44556', drugName: 'Drug D', rawStatus: 'RPH Sign-Off', submissionDate: '2025-07-05', notes: 'Can you confirm the expected turnaround time for this authorization?' as string | null, requestedBy: 'Jane Doe' as string | null, requestedDate: '2025-07-06' as string | null, assistanceStatus: 'Pending Clinical Assistance' as string | null },
-  { accountName: 'Company E', eocId: 'EOC77889', drugName: 'Drug E', rawStatus: 'Approved', submissionDate: '2025-06-18', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, assistanceStatus: null as string | null },
-  { accountName: 'Company F', eocId: 'EOC99001', drugName: 'Drug F', rawStatus: 'Show Review', submissionDate: '2025-07-10', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, assistanceStatus: null as string | null },
-  { accountName: 'Company G', eocId: 'EOC22334', drugName: 'Drug G', rawStatus: 'Submitted', submissionDate: '2025-06-15', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, assistanceStatus: null as string | null },
-  { accountName: 'Company H', eocId: 'EOC55667', drugName: 'Drug H', rawStatus: 'MD Sign-Off', submissionDate: '2025-07-02', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, assistanceStatus: null as string | null },
-  { accountName: 'Company I', eocId: 'EOC88990', drugName: 'Drug I', rawStatus: 'Client Sign-Off', submissionDate: '2025-06-28', notes: 'What additional documentation is needed from the prescriber?' as string | null, requestedBy: 'John Smith' as string | null, requestedDate: '2025-06-29' as string | null, assistanceStatus: 'Pending Clinical Assistance' as string | null },
-  { accountName: 'Company J', eocId: 'EOC10112', drugName: 'Drug J', rawStatus: 'Approved', submissionDate: '2025-07-08', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, assistanceStatus: null as string | null },
+  { accountName: 'Company A', eocId: 'EOC12345', drugName: 'Drug A', rawStatus: 'Submitted', submissionDate: '2025-07-01', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, ticketNumber: null as string | null, assistanceStatus: null as string | null },
+  { accountName: 'Company B', eocId: 'EOC67890', drugName: 'Drug B', rawStatus: 'Approved', submissionDate: '2025-06-25', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, ticketNumber: null as string | null, assistanceStatus: null as string | null },
+  { accountName: 'Company C', eocId: 'EOC11223', drugName: 'Drug C', rawStatus: 'Rejected', submissionDate: '2025-06-20', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, ticketNumber: null as string | null, assistanceStatus: null as string | null },
+  { accountName: 'Company D', eocId: 'EOC44556', drugName: 'Drug D', rawStatus: 'RPH Sign-Off', submissionDate: '2025-07-05', notes: 'Can you confirm the expected turnaround time for this authorization?' as string | null, requestedBy: 'Jane Doe' as string | null, requestedDate: '2025-07-06' as string | null, ticketNumber: '1004821' as string | null, assistanceStatus: 'Submitted' as string | null },
+  { accountName: 'Company E', eocId: 'EOC77889', drugName: 'Drug E', rawStatus: 'Approved', submissionDate: '2025-06-18', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, ticketNumber: null as string | null, assistanceStatus: null as string | null },
+  { accountName: 'Company F', eocId: 'EOC99001', drugName: 'Drug F', rawStatus: 'Show Review', submissionDate: '2025-07-10', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, ticketNumber: null as string | null, assistanceStatus: null as string | null },
+  { accountName: 'Company G', eocId: 'EOC22334', drugName: 'Drug G', rawStatus: 'Submitted', submissionDate: '2025-06-15', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, ticketNumber: null as string | null, assistanceStatus: null as string | null },
+  { accountName: 'Company H', eocId: 'EOC55667', drugName: 'Drug H', rawStatus: 'MD Sign-Off', submissionDate: '2025-07-02', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, ticketNumber: null as string | null, assistanceStatus: null as string | null },
+  { accountName: 'Company I', eocId: 'EOC88990', drugName: 'Drug I', rawStatus: 'Client Sign-Off', submissionDate: '2025-06-28', notes: 'What additional documentation is needed from the prescriber?' as string | null, requestedBy: 'John Smith' as string | null, requestedDate: '2025-06-29' as string | null, ticketNumber: '1004793' as string | null, assistanceStatus: 'In Progress' as string | null },
+  { accountName: 'Company J', eocId: 'EOC10112', drugName: 'Drug J', rawStatus: 'Approved', submissionDate: '2025-07-08', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, ticketNumber: null as string | null, assistanceStatus: null as string | null },
 ]);
 
 // Six statuses only — every raw sub-status from the adjudication pipeline
@@ -351,14 +351,15 @@ const tableItems = computed(() => filteredPriorAuthData.value);
 // pattern, shown regardless of user type.
 const pendingClinicalAssistanceItems = computed(() => priorAuthData.value.filter(item => item.notes != null));
 
-// assistanceStatus is expected to be wired up to the actual support ticket's status
-// once that integration exists — matches HCC's assistanceStatusColor pattern.
-// Default matches $color-link (#2C82CB) — the same blue as the section's border/title
-// and master's StatusChip 'info' variant — not Vuetify's navy theme primary.
+// assistanceStatus reflects the Solo1 ticket's status once that integration
+// exists (Story #35379) — matches HCC's assistanceStatusColor pattern.
+// New -> Submitted (blue, matches $color-link/#2C82CB and master's StatusChip
+// 'info' variant); In Progress/Waiting on Response -> In Progress (yellow).
+// Closed tickets are removed from this table entirely, so no color case is
+// needed for Closed.
 const assistanceStatusColor = (status: string | null): string => {
-  if (status === 'Resolved') return 'success';
   if (status === 'In Progress') return 'warning';
-  return '#2C82CB'; // Pending Clinical Assistance and any unrecognized status
+  return '#2C82CB'; // Submitted and any unrecognized status
 };
 
 const pendingCount = computed(() => priorAuthData.value.filter(item => getStatusBucket(item.rawStatus) === 'Pending').length);
@@ -392,11 +393,16 @@ const confirmAssistanceRequest = () => {
   // of this hardcoded string (mirrors HCC's confirmAssistanceRequest).
   const requestedBy = 'Current User';
   const requestedDate = new Date().toISOString().slice(0, 10);
+  // Design placeholder — production ticket # comes back from the Solo1 ticket
+  // created for this request (Client Experience - AM/AE Escalation queue).
+  const ticketNumber = `${Math.floor(1000000 + Math.random() * 9000000)}`;
   priorAuthData.value.forEach(auth => {
     if (requestedEocIds.includes(auth.eocId)) {
       auth.notes = assistanceNotes.value;
       auth.requestedBy = requestedBy;
       auth.requestedDate = requestedDate;
+      auth.ticketNumber = ticketNumber;
+      auth.assistanceStatus = 'Submitted';
     }
   });
   showAssistanceDialog.value = false;

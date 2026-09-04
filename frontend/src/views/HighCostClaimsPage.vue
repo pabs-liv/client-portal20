@@ -44,13 +44,13 @@
         <v-table density="compact">
           <thead>
             <tr>
-              <th class="font-weight-bold">EOC ID</th>
-              <th class="font-weight-bold">Account Name</th>
-              <th class="font-weight-bold">Drug Name</th>
-              <th class="font-weight-bold text-end">Estimated Cost</th>
-              <th class="font-weight-bold">Requested By</th>
-              <th class="font-weight-bold">Requested Date</th>
-              <th class="font-weight-bold">Request Status</th>
+              <th class="font-weight-bold" style="width: 11%;">EOC ID</th>
+              <th class="font-weight-bold" style="width: 20%;">Account Name</th>
+              <th class="font-weight-bold" style="width: 17%;">Drug Name</th>
+              <th class="font-weight-bold text-end" style="width: 12%;">Estimated Cost</th>
+              <th class="font-weight-bold" style="width: 12%;">Ticket #</th>
+              <th class="font-weight-bold" style="width: 13%;">Requested Date</th>
+              <th class="font-weight-bold" style="width: 15%;">Request Status</th>
             </tr>
           </thead>
           <tbody>
@@ -59,7 +59,7 @@
               <td>{{ claim.accountName }}</td>
               <td>{{ claim.drugName }}</td>
               <td class="text-end">{{ claim.cost }}</td>
-              <td>{{ claim.requestedBy }}</td>
+              <td>{{ claim.ticketNumber }}</td>
               <td>{{ claim.requestedDate }}</td>
               <td>
                 <v-chip :color="assistanceStatusColor(claim.assistanceStatus)" variant="tonal" size="small">
@@ -324,11 +324,11 @@ const claimsHeaders = computed(() => {
 // that — mock costs reflect realistic specialty-drug pricing, not the old
 // low-dollar placeholder amounts.
 const claimsData = ref([
-  { id: 157826931, eocId: 'EOC30021', accountName: 'Company A', drugName: 'Drug A', ndc: '00071-0155-23', claimDate: '2025-07-15', quantity: 1, daysSupply: 30, cost: '$12,450.00', status: 'Pending', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, assistanceStatus: null as string | null },
-  { id: 158088181, eocId: 'EOC30047', accountName: 'Company B', drugName: 'Drug B', ndc: '00069-0944-30', claimDate: '2025-07-14', quantity: 2, daysSupply: 90, cost: '$45,800.00', status: 'Acknowledged', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, assistanceStatus: null as string | null },
-  { id: 158480891, eocId: 'EOC30058', accountName: 'Company C', drugName: 'Drug C', ndc: '00078-0421-15', claimDate: '2025-07-13', quantity: 4, daysSupply: 30, cost: '$18,750.00', status: 'Pending', notes: 'Can you confirm if a savings program applies to this claim?' as string | null, requestedBy: 'Jane Doe' as string | null, requestedDate: '2025-07-16' as string | null, assistanceStatus: 'Pending Clinical Assistance' },
-  { id: 152987510, eocId: 'EOC30063', accountName: 'Company D', drugName: 'Drug D', ndc: '00006-0749-31', claimDate: '2025-07-12', quantity: 1, daysSupply: 28, cost: '$92,300.00', status: 'Acknowledged', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, assistanceStatus: null as string | null },
-  { id: 153219641, eocId: 'EOC30079', accountName: 'Company E', drugName: 'Drug E', ndc: '00173-0879-00', claimDate: '2025-07-11', quantity: 3, daysSupply: 84, cost: '$61,200.00', status: 'Pending', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, assistanceStatus: null as string | null },
+  { id: 157826931, eocId: 'EOC30021', accountName: 'Company A', drugName: 'Drug A', ndc: '00071-0155-23', claimDate: '2025-07-15', quantity: 1, daysSupply: 30, cost: '$12,450.00', status: 'Pending', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, ticketNumber: null as string | null, assistanceStatus: null as string | null },
+  { id: 158088181, eocId: 'EOC30047', accountName: 'Company B', drugName: 'Drug B', ndc: '00069-0944-30', claimDate: '2025-07-14', quantity: 2, daysSupply: 90, cost: '$45,800.00', status: 'Acknowledged', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, ticketNumber: null as string | null, assistanceStatus: null as string | null },
+  { id: 158480891, eocId: 'EOC30058', accountName: 'Company C', drugName: 'Drug C', ndc: '00078-0421-15', claimDate: '2025-07-13', quantity: 4, daysSupply: 30, cost: '$18,750.00', status: 'Pending', notes: 'Can you confirm if a savings program applies to this claim?' as string | null, requestedBy: 'Jane Doe' as string | null, requestedDate: '2025-07-16' as string | null, ticketNumber: '1005014' as string | null, assistanceStatus: 'Submitted' },
+  { id: 152987510, eocId: 'EOC30063', accountName: 'Company D', drugName: 'Drug D', ndc: '00006-0749-31', claimDate: '2025-07-12', quantity: 1, daysSupply: 28, cost: '$92,300.00', status: 'Acknowledged', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, ticketNumber: null as string | null, assistanceStatus: null as string | null },
+  { id: 153219641, eocId: 'EOC30079', accountName: 'Company E', drugName: 'Drug E', ndc: '00173-0879-00', claimDate: '2025-07-11', quantity: 3, daysSupply: 84, cost: '$61,200.00', status: 'Pending', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, ticketNumber: null as string | null, assistanceStatus: null as string | null },
 ]);
 
 // The kebab's Acknowledge item is available any time a claim is still
@@ -347,15 +347,14 @@ const tableItems = computed(() =>
 // need this visibility too, not just external clients).
 const pendingAssistanceClaims = computed(() => claimsData.value.filter(claim => claim.notes != null));
 
-// assistanceStatus is expected to be wired up to the actual support ticket's status
-// once that integration exists — the color mapping is kept separate from the display
-// text so new statuses just need a bucket added here, not template changes.
-// Default matches $color-link (#2C82CB) — the same blue as the section's border/title
-// and master's StatusChip 'info' variant — not Vuetify's navy theme primary.
+// assistanceStatus reflects the Solo1 ticket's status once that integration
+// exists (Story #35379). New -> Submitted (blue, matches $color-link/#2C82CB
+// and master's StatusChip 'info' variant); In Progress/Waiting on Response ->
+// In Progress (yellow). Closed tickets are removed from this table entirely,
+// so no color case is needed for Closed.
 const assistanceStatusColor = (status: string | null): string => {
-  if (status === 'Resolved') return 'success';
   if (status === 'In Progress') return 'warning';
-  return '#2C82CB'; // Pending Clinical Assistance and any unrecognized status
+  return '#2C82CB'; // Submitted and any unrecognized status
 };
 
 const parseCost = (cost: string) => {
@@ -367,15 +366,18 @@ const parseCost = (cost: string) => {
 // acknowledged the claim yet, not a clinical/claim-processing status.
 const claimsPendingAcknowledgmentCount = computed(() => claimsData.value.filter(c => c.status === 'Pending').length);
 
+const formatCurrency = (amount: number): string =>
+  `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
 const totalClaimsCost = computed(() => {
   const total = claimsData.value.reduce((sum, claim) => sum + parseCost(claim.cost), 0);
-  return `${total.toFixed(2)}`;
+  return formatCurrency(total);
 });
 
 const averageClaimCost = computed(() => {
-  if (claimsData.value.length === 0) return '0.00';
+  if (claimsData.value.length === 0) return formatCurrency(0);
   const total = claimsData.value.reduce((sum, claim) => sum + parseCost(claim.cost), 0);
-  return `${(total / claimsData.value.length).toFixed(2)}`;
+  return formatCurrency(total / claimsData.value.length);
 });
 
 // === ACKNOWLEDGE (single row only) === //
@@ -428,11 +430,16 @@ const confirmAssistanceRequest = () => {
   // of this hardcoded string.
   const requestedBy = 'Current User';
   const requestedDate = new Date().toISOString().slice(0, 10);
+  // Design placeholder — production ticket # comes back from the Solo1 ticket
+  // created for this request (Client Experience - AM/AE Escalation queue).
+  const ticketNumber = `${Math.floor(1000000 + Math.random() * 9000000)}`;
   claimsData.value.forEach(claim => {
     if (requestedIds.includes(claim.id)) {
       claim.notes = assistanceNotes.value;
       claim.requestedBy = requestedBy;
       claim.requestedDate = requestedDate;
+      claim.ticketNumber = ticketNumber;
+      claim.assistanceStatus = 'Submitted';
     }
   });
   showAssistanceDialog.value = false;
