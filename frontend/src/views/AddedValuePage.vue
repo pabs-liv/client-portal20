@@ -21,21 +21,10 @@
         </div>
         <p class="text-body section-description">Review the programs currently active for your account.</p>
 
-        <div class="filter-pills-container">
-          <FilteringPill
-            v-for="pill in filterPills"
-            :key="pill.value"
-            :is-active="pill.value === activeFilterActive"
-            @click="activeFilterActive = pill.value"
-          >
-            {{ pill.label }}
-          </FilteringPill>
-        </div>
-
         <div class="program-list-scroll" :style="isDark ? { borderColor: 'var(--color-border)' } : {}">
           <div class="program-list">
             <div
-              v-for="program in filteredActivePrograms"
+              v-for="program in activePrograms"
               :key="program.id"
               class="program-list-item"
               :style="darkRow"
@@ -43,7 +32,6 @@
               <div class="program-list-main">
                 <div class="program-name-col">
                   <span class="program-name" :style="isDark ? { color: '#7BA7E0' } : {}">{{ program.name }}</span>
-                  <v-chip size="x-small" variant="outlined" color="primary" class="category-chip">{{ program.category }}</v-chip>
                 </div>
                 <div class="program-desc" :style="isDark ? { color: 'var(--color-text-secondary)' } : {}">{{ program.description }}</div>
                 <button class="view-details-link" :style="isDark ? { color: '#7BA7E0' } : {}" @click.stop="toggleExpandActive(program.id)">
@@ -102,20 +90,9 @@
         </div>
         <p class="text-body section-description">Browse programs available to add for your account. Click a program to select it, then submit a request to learn more.</p>
 
-        <div class="filter-pills-container">
-          <FilteringPill
-            v-for="pill in filterPills"
-            :key="pill.value"
-            :is-active="pill.value === activeFilterAvailable"
-            @click="activeFilterAvailable = pill.value"
-          >
-            {{ pill.label }}
-          </FilteringPill>
-        </div>
-
         <div class="program-tiles">
           <div
-            v-for="program in filteredAvailablePrograms"
+            v-for="program in availablePrograms"
             :key="program.id"
             class="program-tile"
             :class="{
@@ -147,7 +124,6 @@
 
             <div class="tile-header">
               <span class="tile-name" :style="isDark ? { color: '#7BA7E0' } : {}">{{ program.name }}</span>
-              <v-chip size="x-small" variant="outlined" color="primary" class="category-chip">{{ program.category }}</v-chip>
             </div>
 
             <p class="tile-description" :style="isDark ? { color: 'var(--color-text-secondary)' } : {}">{{ program.description }}</p>
@@ -216,7 +192,6 @@
       <v-card v-if="detailModalProgram" :style="isDark ? { backgroundColor: 'var(--color-card-bg)', color: 'var(--color-text-primary)' } : {}">
         <v-card-title class="modal-title-row" :style="isDark ? { borderBottomColor: 'var(--color-border)' } : {}">
           <span class="modal-program-name" :style="isDark ? { color: '#7BA7E0' } : {}">{{ detailModalProgram.name }}</span>
-          <v-chip size="x-small" variant="outlined" color="primary" class="category-chip ml-small">{{ detailModalProgram.category }}</v-chip>
         </v-card-title>
 
         <v-card-text class="modal-body" :style="isDark ? { color: 'var(--color-text-primary)' } : {}">
@@ -332,7 +307,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import AccountSelector from '@/components/common/AccountSelector.vue';
-import FilteringPill from '@/components/ui/FilteringPill.vue';
 import { Check, CheckCircle, X } from 'lucide-vue-next';
 import { useDarkMode } from '@/composables/useDarkMode';
 
@@ -471,12 +445,6 @@ const programs: Program[] = [
   },
 ];
 
-const filterPills = [
-  { value: 'all',      label: 'All' },
-  { value: 'Wellness', label: 'Wellness' },
-  { value: 'Savings',  label: 'Savings' },
-];
-
 const accountOptions = ref<Account[]>([
   { id: 1, name: 'Company A', carrier: 'Carrier A', bin: '025945', livesCovered: 1200, startDate: '09/01/2026', endDate: '12/31/2099', status: 'implementation', activePrograms: [] },
   { id: 2, name: 'Company B', carrier: 'Carrier A', bin: '025945', livesCovered: 5000, startDate: '01/01/2026', endDate: '01/01/2099', status: 'active', activePrograms: ['noom', 'liviniti-delivery'] },
@@ -486,8 +454,6 @@ const accountOptions = ref<Account[]>([
 ]);
 
 const selectedAccount        = ref<number | null>(null);
-const activeFilterActive     = ref<string>('all');
-const activeFilterAvailable  = ref<string>('all');
 const selectedAvailableIds   = ref<string[]>([]);
 const expandedActiveId       = ref<string | null>(null);
 const detailModalProgram     = ref<Program | null>(null);
@@ -508,18 +474,6 @@ const availablePrograms = computed<Program[]>(() =>
   programs.filter(p => !selectedAccountData.value?.activePrograms.includes(p.id))
 );
 
-const filteredActivePrograms = computed<Program[]>(() =>
-  activeFilterActive.value === 'all'
-    ? activePrograms.value
-    : activePrograms.value.filter(p => p.category === activeFilterActive.value)
-);
-
-const filteredAvailablePrograms = computed<Program[]>(() =>
-  activeFilterAvailable.value === 'all'
-    ? availablePrograms.value
-    : availablePrograms.value.filter(p => p.category === activeFilterAvailable.value)
-);
-
 const currentPendingIds = computed<string[]>(() =>
   selectedAccount.value !== null ? (pendingProgramIds.value[selectedAccount.value] ?? []) : []
 );
@@ -527,8 +481,6 @@ const currentPendingIds = computed<string[]>(() =>
 watch(selectedAccount, () => {
   selectedAvailableIds.value = [];
   expandedActiveId.value = null;
-  activeFilterActive.value = 'all';
-  activeFilterAvailable.value = 'all';
   showDetailModal.value = false;
   showConfirmModal.value = false;
 });
@@ -576,13 +528,6 @@ const confirmRequest = () => {
 @import '@/style.scss';
 
 // ─── Shared section layout ────────────────────────────────────────────────────
-.filter-pills-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: $spacing-small;
-  margin-bottom: $spacing-medium;
-}
-
 .programs-section {
   margin-bottom: $spacing-xlarge;
 }
@@ -652,8 +597,6 @@ const confirmRequest = () => {
   font-weight: $font-weight-bold;
   color: $color-primary;
 }
-
-.category-chip { flex-shrink: 0; white-space: nowrap; }
 
 .program-desc {
   font-size: $font-size-body;
@@ -1146,11 +1089,6 @@ const confirmRequest = () => {
   .fees-table { border-color: var(--color-border); }
 
   .section-description { color: var(--color-text-primary); }
-
-  .category-chip.v-chip {
-    border-color: var(--color-border) !important;
-    color: var(--color-text-secondary) !important;
-  }
 
   // Tiles
   .program-tile {
