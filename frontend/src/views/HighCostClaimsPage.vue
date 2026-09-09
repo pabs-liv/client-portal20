@@ -37,7 +37,7 @@
 
     <PageCard
       headerText="High Cost Claim Manager"
-      :descriptionText="isExternal ? 'Review, acknowledge, or ask questions about high-cost claims.' : 'Review high-cost claims and monitor clinical assistance requests submitted by clients.'"
+      :descriptionText="isExternal ? 'Review or ask questions about high-cost claims.' : 'Review high-cost claims and monitor clinical assistance requests submitted by clients.'"
     >
       <div v-if="pendingAssistanceClaims.length > 0" class="pending-assistance-section mb-large">
         <h3 class="pending-assistance-section__title">Pending Clinical Assistance</h3>
@@ -72,12 +72,11 @@
       </div>
 
       <Banner
-        variant="warning"
-        message="Please acknowledge high-cost claims within 24 hours. If a claim is not acknowledged within 24 hours, it will automatically be processed to be filled in order to avoid member disruption and a delay in treatment with the approved therapy. If you have questions about a claim, select Request Clinical Assistance from the row's menu."
+        v-if="isExternal"
+        variant="info"
+        message="Disclaimer: Cost represents estimated total cost of the medication, not inclusive of tax, member cost share, applicable program savings, etc."
+        class="mb-large"
       />
-      <p v-if="isExternal" class="text-small disclaimer-text mt-small mb-large">
-        Disclaimer: Cost represents estimated total cost of the medication, not inclusive of tax, member cost share, applicable program savings, etc.
-      </p>
       <div class="search-filter-row">
         <div class="search-bar-wrapper">
           <SearchBar
@@ -104,12 +103,11 @@
         :show-selection-checkboxes="false"
         :show-row-actions="isExternal"
         :row-action-items="rowActionItems"
-        :row-action-disabled="rowActionDisabled"
         @row-action="handleRowAction"
       >
         <template #item.status="{ item }">
-          <v-chip :color="(item as any).status === 'Acknowledged' ? 'success' : 'warning'" variant="tonal" size="small">
-            {{ (item as any).status }}
+          <v-chip :color="getStatusDisplay((item as any).rawStatus).color" variant="tonal" size="small">
+            {{ getStatusDisplay((item as any).rawStatus).label }}
           </v-chip>
         </template>
       </ReportDataTable>
@@ -167,6 +165,53 @@
           </div>
         </div>
       </template>
+      <template #filter-status="{ filter }">
+        <div class="mt-medium">
+          <div v-if="dialogStatuses.length > 0" class="selected-chips">
+            <v-chip
+              v-for="status in dialogStatuses"
+              :key="status"
+              variant="flat"
+              color="primary"
+              class="autocomplete-chip"
+            >
+              {{ status }}
+              <span class="chip-close" @click.stop="toggleDialogStatus(status)">
+                <X :size="12" />
+              </span>
+            </v-chip>
+          </div>
+          <div class="account-picker-wrap">
+            <div class="account-search-field" :class="{ 'account-search-field--active': showStatusList }">
+              <input
+                v-model="statusSearch"
+                type="text"
+                class="account-search-input"
+                placeholder="Status"
+                @mousedown="showStatusList = true"
+                @blur="handleStatusPickerBlur"
+              />
+            </div>
+            <div v-if="showStatusList" class="account-dropdown">
+              <div
+                v-for="opt in filteredStatusOptions"
+                :key="String(opt.value)"
+                class="account-option"
+                @mousedown.prevent
+                @click="toggleDialogStatus(opt.value as string)"
+              >
+                <div class="acct-checkbox" :class="{ active: dialogStatuses.includes(opt.value as string) }">
+                  <Check v-if="dialogStatuses.includes(opt.value as string)" :size="12" :stroke-width="3" />
+                </div>
+                <span>{{ opt.text }}</span>
+              </div>
+              <div v-if="filteredStatusOptions.length === 0" class="no-acct-results">
+                No statuses found
+              </div>
+            </div>
+          </div>
+        </div>
+      </template>
       <template #filter-dateRange="{ filter }">
         <p class="filter-section-label">{{ filter.label }}</p>
         <div class="date-range-row">
@@ -206,37 +251,6 @@
         </div>
       </template>
     </AdvancedFiltersDialog>
-
-    <Dialog
-      :model-value="showAcknowledgeDialog"
-      @update:model-value="showAcknowledgeDialog = $event"
-      :icon="CircleCheckBig"
-      heading="Acknowledge High-Cost Claim"
-      :actions="acknowledgeDialogActions"
-      :show-secondary-button="true"
-    >
-      <p class="text-body mb-small">
-        Are you sure you want to acknowledge this high-cost claim? This action cannot be undone.
-      </p>
-      <table class="claim-summary-table">
-        <thead>
-          <tr>
-            <th>Account</th>
-            <th>EOC ID</th>
-            <th>Drug Name</th>
-            <th>Cost</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="claim in pendingAcknowledgeItems" :key="claim.id">
-            <td>{{ claim.accountName }}</td>
-            <td>{{ claim.eocId }}</td>
-            <td>{{ claim.drugName }}</td>
-            <td>{{ claim.cost }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </Dialog>
 
     <Dialog
       :model-value="showAssistanceDialog"
@@ -284,7 +298,7 @@
 </template>
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { CircleCheckBig, Info, ClockFading, DollarSign, Calculator, SlidersHorizontal, Check, X } from 'lucide-vue-next';
+import { Info, ClockFading, DollarSign, Calculator, SlidersHorizontal, Check, X } from 'lucide-vue-next';
 import PageCard from '@/components/common/PageCard.vue';
 import Banner from '@/components/common/Banner.vue';
 import ReportDataTable from '@/components/common/ReportDataTable.vue';
@@ -323,24 +337,44 @@ const claimsHeaders = computed(() => {
 // (defaults to $10,000), so every claim here should already be well above
 // that — mock costs reflect realistic specialty-drug pricing, not the old
 // low-dollar placeholder amounts.
+// rawStatus mirrors Prior Auths — every high-cost claim is itself a prior
+// authorization, so it carries the same adjudication-pipeline status values.
+// ackStatus is a separate, portal-only field: whether the client has
+// acknowledged the claim, independent of its clinical/PA status.
 const claimsData = ref([
-  { id: 157826931, eocId: 'EOC30021', accountName: 'Company A', drugName: 'Drug A', ndc: '00071-0155-23', claimDate: '2025-07-15', quantity: 1, daysSupply: 30, cost: '$12,450.00', status: 'Pending', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, ticketNumber: null as string | null, assistanceStatus: null as string | null },
-  { id: 158088181, eocId: 'EOC30047', accountName: 'Company B', drugName: 'Drug B', ndc: '00069-0944-30', claimDate: '2025-07-14', quantity: 2, daysSupply: 90, cost: '$45,800.00', status: 'Acknowledged', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, ticketNumber: null as string | null, assistanceStatus: null as string | null },
-  { id: 158480891, eocId: 'EOC30058', accountName: 'Company C', drugName: 'Drug C', ndc: '00078-0421-15', claimDate: '2025-07-13', quantity: 4, daysSupply: 30, cost: '$18,750.00', status: 'Pending', notes: 'Can you confirm if a savings program applies to this claim?' as string | null, requestedBy: 'Jane Doe' as string | null, requestedDate: '2025-07-16' as string | null, ticketNumber: '1005014' as string | null, assistanceStatus: 'Submitted' },
-  { id: 152987510, eocId: 'EOC30063', accountName: 'Company D', drugName: 'Drug D', ndc: '00006-0749-31', claimDate: '2025-07-12', quantity: 1, daysSupply: 28, cost: '$92,300.00', status: 'Acknowledged', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, ticketNumber: null as string | null, assistanceStatus: null as string | null },
-  { id: 153219641, eocId: 'EOC30079', accountName: 'Company E', drugName: 'Drug E', ndc: '00173-0879-00', claimDate: '2025-07-11', quantity: 3, daysSupply: 84, cost: '$61,200.00', status: 'Pending', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, ticketNumber: null as string | null, assistanceStatus: null as string | null },
+  { id: 157826931, eocId: 'EOC30021', accountName: 'Company A', drugName: 'Drug A', ndc: '00071-0155-23', claimDate: '2025-07-15', quantity: 1, daysSupply: 30, cost: '$12,450.00', rawStatus: 'Submitted', ackStatus: 'Pending', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, ticketNumber: null as string | null, assistanceStatus: null as string | null },
+  { id: 158088181, eocId: 'EOC30047', accountName: 'Company B', drugName: 'Drug B', ndc: '00069-0944-30', claimDate: '2025-07-14', quantity: 2, daysSupply: 90, cost: '$45,800.00', rawStatus: 'Approved', ackStatus: 'Acknowledged', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, ticketNumber: null as string | null, assistanceStatus: null as string | null },
+  { id: 158480891, eocId: 'EOC30058', accountName: 'Company C', drugName: 'Drug C', ndc: '00078-0421-15', claimDate: '2025-07-13', quantity: 4, daysSupply: 30, cost: '$18,750.00', rawStatus: 'Show Review', ackStatus: 'Pending', notes: 'Can you confirm if a savings program applies to this claim?' as string | null, requestedBy: 'Jane Doe' as string | null, requestedDate: '2025-07-16' as string | null, ticketNumber: '1005014' as string | null, assistanceStatus: 'Submitted' },
+  { id: 152987510, eocId: 'EOC30063', accountName: 'Company D', drugName: 'Drug D', ndc: '00006-0749-31', claimDate: '2025-07-12', quantity: 1, daysSupply: 28, cost: '$92,300.00', rawStatus: 'Approved', ackStatus: 'Acknowledged', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, ticketNumber: null as string | null, assistanceStatus: null as string | null },
+  { id: 153219641, eocId: 'EOC30079', accountName: 'Company E', drugName: 'Drug E', ndc: '00173-0879-00', claimDate: '2025-07-11', quantity: 3, daysSupply: 84, cost: '$61,200.00', rawStatus: 'Rejected', ackStatus: 'Pending', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, ticketNumber: null as string | null, assistanceStatus: null as string | null },
 ]);
 
-// The kebab's Acknowledge item is available any time a claim is still
-// Pending — Pending means only "not yet acknowledged by the client,"
-// nothing more. Request Clinical Assistance is always available (even
-// after Acknowledge, and even if a request is already open).
-const tableItems = computed(() =>
-  filteredClaimsData.value.map(claim => ({
-    ...claim,
-    canAcknowledge: claim.status !== 'Acknowledged',
-  }))
-);
+// Six statuses only — mirrors Prior Auths' getStatusDisplay. Every raw
+// sub-status from the adjudication pipeline collapses into one of these.
+type StatusDisplay = { label: 'Approved' | 'Denied' | 'Awaiting Physician Response' | 'In Review' | 'Override Placement In Progress' | 'Status Unavailable'; color: 'success' | 'error' | 'warning' | 'default' };
+
+function getStatusDisplay(rawStatus: string | null | undefined): StatusDisplay {
+  switch (rawStatus) {
+    case 'Approved':
+      return { label: 'Approved', color: 'success' };
+    case 'Rejected':
+      return { label: 'Denied', color: 'error' };
+    case 'Show Review':
+      return { label: 'Awaiting Physician Response', color: 'warning' };
+    case 'Authorization':
+      return { label: 'Override Placement In Progress', color: 'warning' };
+    case null:
+    case undefined:
+    case '':
+      return { label: 'Status Unavailable', color: 'default' };
+    default:
+      return { label: 'In Review', color: 'warning' };
+  }
+}
+
+// Request Clinical Assistance is always available, even if a request is
+// already open for that claim.
+const tableItems = computed(() => filteredClaimsData.value);
 
 // Surfaced as its own table right under the page header — mirrors master's
 // HighCostClaimsPage treatment, shown regardless of user type (internal staff
@@ -364,7 +398,7 @@ const parseCost = (cost: string) => {
 
 // "Pending" is purely a portal-action state — it means the client hasn't
 // acknowledged the claim yet, not a clinical/claim-processing status.
-const claimsPendingAcknowledgmentCount = computed(() => claimsData.value.filter(c => c.status === 'Pending').length);
+const claimsPendingAcknowledgmentCount = computed(() => claimsData.value.filter(c => c.ackStatus === 'Pending').length);
 
 const formatCurrency = (amount: number): string =>
   `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -379,38 +413,6 @@ const averageClaimCost = computed(() => {
   const total = claimsData.value.reduce((sum, claim) => sum + parseCost(claim.cost), 0);
   return formatCurrency(total / claimsData.value.length);
 });
-
-// === ACKNOWLEDGE (single row only) === //
-
-const showAcknowledgeDialog = ref(false);
-const pendingAcknowledgeItems = ref<any[]>([]);
-
-const handleAcknowledgeClick = (items: any[]) => {
-  pendingAcknowledgeItems.value = items.filter(item => item.canAcknowledge);
-  showAcknowledgeDialog.value = true;
-};
-
-const confirmAcknowledge = () => {
-  // pendingAcknowledgeItems holds rows from tableItems, a computed that
-  // spreads {...claim} into new plain objects on every recompute — mutating
-  // those directly never reaches claimsData, so look the real item up by id
-  // and mutate that instead.
-  const acknowledgedIds = pendingAcknowledgeItems.value.map(claim => claim.id);
-  claimsData.value.forEach(claim => {
-    if (acknowledgedIds.includes(claim.id)) {
-      claim.status = 'Acknowledged';
-    }
-  });
-  showAcknowledgeDialog.value = false;
-  successSnackbarText.value = 'Claim acknowledged successfully';
-  showSuccessSnackbar.value = true;
-  pendingAcknowledgeItems.value = [];
-};
-
-const acknowledgeDialogActions = [
-  { text: 'Cancel', onClick: () => (showAcknowledgeDialog.value = false), styleType: 'secondary' as const },
-  { text: 'Acknowledge', onClick: confirmAcknowledge, color: 'primary', variant: 'flat' as const },
-];
 
 // === REQUEST CLINICAL ASSISTANCE (single row only) === //
 
@@ -454,37 +456,38 @@ const assistanceDialogActions = computed(() => [
 ]);
 
 const rowActionItems = [
-  { label: 'Acknowledge', action: 'acknowledge' },
   { label: 'Request Clinical Assistance', action: 'assistance' },
 ];
 
-const rowActionDisabled = (item: any, actionItem: { action: string }) => {
-  if (actionItem.action === 'acknowledge') {
-    return !item.canAcknowledge;
-  }
-  return false;
-};
-
 const handleRowAction = ({ action, item }: { action: string; item: any }) => {
-  if (action === 'acknowledge') handleAcknowledgeClick([item]);
-  else if (action === 'assistance') openAssistanceDialog([item]);
+  if (action === 'assistance') openAssistanceDialog([item]);
 };
 
 const showSuccessSnackbar = ref(false);
 const successSnackbarText = ref('');
 
 // === FILTERS === //
-// No Status filter — with only Pending/Acknowledged, sorting the Status
-// column covers it. Cost is an independent min/max range rather than preset
-// tiers, since every claim here is already above the account's NotifyAmount
-// threshold ($10,000 by default) — fixed low-dollar breakpoints don't mean
-// anything at this altitude, and min/max lets either bound be set alone or
-// both together.
+// Cost is an independent min/max range rather than preset tiers, since every
+// claim here is already above the account's NotifyAmount threshold ($10,000
+// by default) — fixed low-dollar breakpoints don't mean anything at this
+// altitude, and min/max lets either bound be set alone or both together.
+// Status options mirror Prior Auths' six-status set.
 
+const hccStatusOptions = [
+  { text: 'Approved', value: 'Approved', active: false },
+  { text: 'Denied', value: 'Denied', active: false },
+  { text: 'Awaiting Physician Response', value: 'Awaiting Physician Response', active: false },
+  { text: 'In Review', value: 'In Review', active: false },
+  { text: 'Override Placement In Progress', value: 'Override Placement In Progress', active: false },
+  { text: 'Status Unavailable', value: 'Status Unavailable', active: false },
+];
+
+// Status is always last in the filter list, for consistency across pages.
 const hccFilters = computed<FilterGroup[]>(() => [
   { type: 'account', label: 'Account', multiselect: true, options: [], modelValue: null },
   { type: 'dateRange', label: 'Date of Service Range', multiselect: false, options: [], modelValue: null },
   { type: 'cost', label: 'Cost Range', multiselect: false, options: [], modelValue: null },
+  { type: 'status', label: 'Status', multiselect: true, options: hccStatusOptions, modelValue: null },
 ]);
 
 const claimsSearchTerm = ref('');
@@ -492,12 +495,14 @@ const claimsSearchTerm = ref('');
 const isAdvancedFiltersOpen = ref(false);
 
 const appliedAccounts = ref<string[]>([]);
+const appliedStatuses = ref<string[]>([]);
 const appliedDateFrom = ref('');
 const appliedDateTo = ref('');
 const appliedMinCost = ref<number | null>(null);
 const appliedMaxCost = ref<number | null>(null);
 
 const dialogAccounts = ref<string[]>([]);
+const dialogStatuses = ref<string[]>([]);
 const dialogDateFrom = ref('');
 const dialogDateTo = ref('');
 const dialogMinCost = ref<string>('');
@@ -505,11 +510,18 @@ const dialogMaxCost = ref<string>('');
 
 const accountSearch = ref('');
 const showAccountList = ref(false);
+const statusSearch = ref('');
+const showStatusList = ref(false);
 
 const accountOptions = computed(() => [...new Set(claimsData.value.map(c => c.accountName))].sort());
 const filteredAccountOptions = computed(() => {
   const q = accountSearch.value?.toLowerCase() ?? '';
   return accountOptions.value.filter(a => a.toLowerCase().includes(q));
+});
+
+const filteredStatusOptions = computed(() => {
+  const q = statusSearch.value?.toLowerCase() ?? '';
+  return hccStatusOptions.filter(o => o.text.toLowerCase().includes(q));
 });
 
 const toggleAccount = (account: string) => {
@@ -522,19 +534,33 @@ const handleAccountPickerBlur = () => {
   setTimeout(() => { showAccountList.value = false; }, 150);
 };
 
+const handleStatusPickerBlur = () => {
+  setTimeout(() => { showStatusList.value = false; }, 150);
+};
+
+const toggleDialogStatus = (value: string) => {
+  dialogStatuses.value = dialogStatuses.value.includes(value)
+    ? dialogStatuses.value.filter(v => v !== value)
+    : [...dialogStatuses.value, value];
+};
+
 const openFilters = () => {
   dialogAccounts.value = [...appliedAccounts.value];
+  dialogStatuses.value = [...appliedStatuses.value];
   dialogDateFrom.value = appliedDateFrom.value;
   dialogDateTo.value = appliedDateTo.value;
   dialogMinCost.value = appliedMinCost.value != null ? String(appliedMinCost.value) : '';
   dialogMaxCost.value = appliedMaxCost.value != null ? String(appliedMaxCost.value) : '';
   accountSearch.value = '';
   showAccountList.value = false;
+  statusSearch.value = '';
+  showStatusList.value = false;
   isAdvancedFiltersOpen.value = true;
 };
 
 const applyFilters = () => {
   appliedAccounts.value = [...dialogAccounts.value];
+  appliedStatuses.value = [...dialogStatuses.value];
   appliedDateFrom.value = dialogDateFrom.value;
   appliedDateTo.value = dialogDateTo.value;
   const parsedMinCost = parseFloat(dialogMinCost.value);
@@ -563,6 +589,9 @@ const activeFilterPills = computed<FilterPill[]>(() => {
   appliedAccounts.value.forEach(acct => {
     pills.push({ type: 'account', value: acct, label: acct, isActive: true });
   });
+  appliedStatuses.value.forEach(status => {
+    pills.push({ type: 'status', value: status, label: status, isActive: true });
+  });
   if (appliedDateFrom.value || appliedDateTo.value) {
     const parts = [appliedDateFrom.value, appliedDateTo.value].filter(Boolean).map(formatDateDisplay);
     pills.push({ type: 'dateRange', value: null, label: `Date of Service: ${parts.join(' – ')}`, isActive: true });
@@ -584,6 +613,8 @@ const activeFilterPills = computed<FilterPill[]>(() => {
 const handleFilterPillClose = (pill: FilterPill) => {
   if (pill.type === 'account') {
     appliedAccounts.value = appliedAccounts.value.filter(a => a !== pill.value);
+  } else if (pill.type === 'status') {
+    appliedStatuses.value = appliedStatuses.value.filter(s => s !== pill.value);
   } else if (pill.type === 'dateRange') {
     appliedDateFrom.value = '';
     appliedDateTo.value = '';
@@ -606,6 +637,9 @@ const filteredClaimsData = computed(() => {
     if (appliedAccounts.value.length > 0 && !appliedAccounts.value.includes(claim.accountName)) {
       return false;
     }
+    if (appliedStatuses.value.length > 0 && !appliedStatuses.value.includes(getStatusDisplay(claim.rawStatus).label)) {
+      return false;
+    }
     if (appliedDateFrom.value || appliedDateTo.value) {
       const claimDate = new Date(claim.claimDate);
       if (appliedDateFrom.value && claimDate < new Date(appliedDateFrom.value)) return false;
@@ -623,10 +657,6 @@ const filteredClaimsData = computed(() => {
 </script>
 <style lang="scss" scoped>
 @import '@/style.scss';
-
-.disclaimer-text {
-  color: $color-neutral-disabled;
-}
 
 .widgets-container {
   display: grid;
@@ -654,6 +684,10 @@ const filteredClaimsData = computed(() => {
   font-weight: $font-weight-semibold;
   color: $color-text-primary;
   margin-bottom: $spacing-small;
+}
+
+.mt-medium {
+  margin-top: $spacing-medium;
 }
 
 .date-range-row {
