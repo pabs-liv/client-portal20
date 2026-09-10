@@ -7,6 +7,7 @@
       label="Select Account"
       item-title="name"
       item-value="id"
+      item-status="status"
       :searchable="true"
       v-model="selectedAccount"
       variant="outlined"

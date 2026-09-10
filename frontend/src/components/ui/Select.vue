@@ -20,6 +20,21 @@
     :bg-color="isDark ? 'var(--color-input-bg)' : undefined"
   >
     <template v-if="hasRequiredMarker" #label>{{ labelWithoutAsterisk }}<span class="select-required-asterisk">*</span></template>
+    <template v-if="itemStatus" #item="{ item, props: itemProps }">
+      <v-list-item v-bind="itemProps" :title="undefined">
+        <div class="select-item-row">
+          <span>{{ item.raw[itemTitle] }}</span>
+          <v-chip
+            v-if="item.raw[itemStatus]"
+            :color="statusChipColor(item.raw[itemStatus])"
+            variant="tonal"
+            size="x-small"
+          >
+            {{ statusChipLabel(item.raw[itemStatus]) }}
+          </v-chip>
+        </div>
+      </v-list-item>
+    </template>
   </v-select>
 </template>
 
@@ -40,6 +55,9 @@ interface Props {
   noDataText?: string;
   variant?: 'filled' | 'outlined' | 'plain' | 'underlined' | 'solo';
   clearable?: boolean;
+  /** Field on each item holding an account status ('active' | 'implementation' | 'termed').
+   *  When set, a colored status chip renders next to each item in the dropdown list. */
+  itemStatus?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -51,6 +69,15 @@ const props = withDefaults(defineProps<Props>(), {
   variant: 'outlined',
   clearable: false,
 });
+
+const STATUS_CHIP_COLORS: Record<string, string> = {
+  active: 'success',
+  implementation: 'warning',
+  termed: 'error',
+};
+
+const statusChipColor = (status: string) => STATUS_CHIP_COLORS[status.toLowerCase()] ?? 'default';
+const statusChipLabel = (status: string) => status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
 
 const internalSearch = ref<string>('');
 
@@ -81,6 +108,14 @@ watch(() => props.modelValue, () => {
 .select-required-asterisk {
   color: $color-error;
   margin-left: 2px;
+}
+
+.select-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-small;
+  width: 100%;
 }
 
 .v-select {

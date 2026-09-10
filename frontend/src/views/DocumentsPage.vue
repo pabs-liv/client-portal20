@@ -7,6 +7,7 @@
       label="Select Account"
       item-title="name"
       item-value="id"
+      item-status="status"
       :searchable="true"
       v-model="selectedAccount"
       variant="outlined"
@@ -139,12 +140,14 @@ const documentsStore = useDocumentsStore();
 
 // Same account list as Plan Explorer, since Transition of Care submissions there
 // (documentsStore.addDocument calls) land in Documents > PHI Documents under these accounts.
+// Documents scopes its account list to Active + Implementation accounts only
+// (matches master's AccountStatuses.ActiveAndImplementation) — no Termed here.
 const accountOptions = ref([
-  { id: 1, name: 'Stark Industries' },
-  { id: 2, name: 'Wayne Enterprises' },
-  { id: 3, name: 'Cyberdyne Systems' },
-  { id: 4, name: 'Oscorp' },
-  { id: 5, name: 'Tyrell Corporation' },
+  { id: 1, name: 'Stark Industries', status: 'active' },
+  { id: 2, name: 'Wayne Enterprises', status: 'active' },
+  { id: 3, name: 'Cyberdyne Systems', status: 'implementation' },
+  { id: 4, name: 'Oscorp', status: 'active' },
+  { id: 5, name: 'Tyrell Corporation', status: 'active' },
 ]);
 
 const selectedAccount = ref<number | null>(null);

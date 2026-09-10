@@ -8,6 +8,7 @@
       label="Select Account"
       item-title="name"
       item-value="id"
+      item-status="status"
       :searchable="true"
       v-model="selectedAccount"
       :show-slot="false"
@@ -4769,12 +4770,18 @@ const CYBERDYNE_SYSTEMS_ID = 3;
 const OSCORP_ID = 4;
 const TYRELL_CORPORATION_ID = 5;
 
+// Plan Explorer scopes its account list to Active + Implementation accounts
+// only (matches master's AccountStatuses.ActiveAndImplementation) — no Termed here.
+// Status must match isWizardAccount below: Wayne Enterprises is the only account
+// that's finished implementation and is shown Active; Stark, Cyberdyne, Oscorp,
+// and Tyrell are all still wizard (implementation) accounts, Tyrell included —
+// its Plan Setup is complete/locked, but it still renders through the wizard shell.
 const accountOptions = ref([
-  { id: 1, name: 'Stark Industries' },
-  { id: 2, name: 'Wayne Enterprises' },
-  { id: 3, name: 'Cyberdyne Systems' },
-  { id: 4, name: 'Oscorp' },
-  { id: 5, name: 'Tyrell Corporation' },
+  { id: 1, name: 'Stark Industries', status: 'implementation' },
+  { id: 2, name: 'Wayne Enterprises', status: 'active' },
+  { id: 3, name: 'Cyberdyne Systems', status: 'implementation' },
+  { id: 4, name: 'Oscorp', status: 'implementation' },
+  { id: 5, name: 'Tyrell Corporation', status: 'implementation' },
 ]);
 
 const selectedAccount = ref<number | null>(null);

@@ -18,6 +18,7 @@
           :items="accountOptions"
           item-title="name"
           item-value="id"
+          item-status="status"
           label="Account"
           :model-value="selectedAccountId"
           class="account-select"
@@ -220,13 +221,15 @@ const goToPriorAuths = () => {
 
 const BOOK_OF_BUSINESS_ID = null;
 
+// Home scopes its account list to Active + Termed (matches master's
+// AccountStatuses.ActiveAndTermed). "All Accounts" has no status of its own.
 const accountOptions = ref([
   { id: BOOK_OF_BUSINESS_ID, name: 'All Accounts' },
-  { id: 1, name: 'Company A' },
-  { id: 2, name: 'Company B' },
-  { id: 3, name: 'Company C' },
-  { id: 4, name: 'Company D' },
-  { id: 5, name: 'Company E' },
+  { id: 1, name: 'Company A', status: 'active' },
+  { id: 2, name: 'Company B', status: 'active' },
+  { id: 3, name: 'Company C', status: 'termed' },
+  { id: 4, name: 'Company D', status: 'active' },
+  { id: 5, name: 'Company E', status: 'active' },
 ]);
 
 const selectedAccountId = ref<number | null>(BOOK_OF_BUSINESS_ID);

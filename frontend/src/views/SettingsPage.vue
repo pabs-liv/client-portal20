@@ -8,6 +8,7 @@
       label="Select Account"
       item-title="name"
       item-value="id"
+      item-status="status"
       :searchable="true"
       v-model="selectedAccount"
       :show-slot="true"
@@ -1151,12 +1152,14 @@ import { useRoute } from 'vue-router';
 import { useUserType } from '@/composables/useUserType';
 import { useHighCostNotifications } from '@/composables/useHighCostNotifications';
 
+// Settings scopes its account list to Active + Implementation + Termed
+// (matches master's AccountStatuses.ActiveImplementationAndTermed).
 const accountOptions = ref([
-  { id: 1, name: 'Company A' },
-  { id: 2, name: 'Company B' },
-  { id: 3, name: 'Company C' },
-  { id: 4, name: 'Company D' },
-  { id: 5, name: 'Company E' },
+  { id: 1, name: 'Company A', status: 'active' },
+  { id: 2, name: 'Company B', status: 'implementation' },
+  { id: 3, name: 'Company C', status: 'active' },
+  { id: 4, name: 'Company D', status: 'termed' },
+  { id: 5, name: 'Company E', status: 'active' },
 ]);
 
 const selectedAccount = ref<number | null>(null);
