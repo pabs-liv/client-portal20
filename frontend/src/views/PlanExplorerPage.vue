@@ -1509,303 +1509,6 @@
                           </template>
                         </div>
 
-                        <!-- Plan Parameters -->
-                        <div class="pd-section">
-                          <div class="pd-section-header">
-                            <h4 class="text-h4">Plan Parameters</h4>
-                            <button v-if="!pdIsEditingParameters(plan.id) && plan.planParameterIds.length > 0 && !planSetupComplete" class="button button-thirtiary" @click="pdStartEditParameters(plan)">
-                              <Pencil :size="14" :stroke-width="1.5" /> Edit
-                            </button>
-                          </div>
-
-                          <!-- Edit mode: full tile grid, priority six + expandable additional options -->
-                          <template v-if="pdIsEditingParameters(plan.id)">
-                            <div class="pd-param-grid">
-                              <div
-                                v-for="param in pdPriorityParams()"
-                                :key="param.id"
-                                :class="['pd-param-tile', { 'pd-param-tile--on': pdIsParamOn(plan, param.id) }]"
-                                @click="pdToggleParam(plan, param.id)"
-                              >
-                                <div class="pd-param-tile-header">
-                                  <span class="pd-param-tile-name">{{ param.name }}</span>
-                                  <CircleCheckBig v-if="pdIsParamOn(plan, param.id)" :size="18" class="pd-param-tile-check" />
-                                </div>
-                                <p class="pd-param-tile-desc">{{ param.description }}</p>
-                                <div class="pd-param-tile-footer">
-                                  <template v-if="pdIsParamOn(plan, param.id)">
-                                    <Check :size="14" :stroke-width="2.5" /> Added
-                                  </template>
-                                  <template v-else>Click to add</template>
-                                </div>
-                              </div>
-                            </div>
-                            <template v-if="pdAdditionalParams().length > 0">
-                              <button class="pd-param-showall" @click="pdToggleShowAllParams(plan.id)">
-                                {{ pdShowAllParams[plan.id] ? 'Show less' : `Show all (${pdAdditionalParams().length} more)` }}
-                              </button>
-                              <div v-if="pdShowAllParams[plan.id]" class="pd-param-grid mt-3">
-                                <div
-                                  v-for="param in pdAdditionalParams()"
-                                  :key="param.id"
-                                  :class="['pd-param-tile', { 'pd-param-tile--on': pdIsParamOn(plan, param.id) }]"
-                                  @click="pdToggleParam(plan, param.id)"
-                                >
-                                  <div class="pd-param-tile-header">
-                                    <span class="pd-param-tile-name">{{ param.name }}</span>
-                                    <CircleCheckBig v-if="pdIsParamOn(plan, param.id)" :size="18" class="pd-param-tile-check" />
-                                  </div>
-                                  <p class="pd-param-tile-desc">{{ param.description }}</p>
-                                  <div class="pd-param-tile-footer">
-                                    <template v-if="pdIsParamOn(plan, param.id)">
-                                      <Check :size="14" :stroke-width="2.5" /> Added
-                                    </template>
-                                    <template v-else>Click to add</template>
-                                  </div>
-                                </div>
-                              </div>
-                            </template>
-                            <div class="ap-section-footer">
-                              <button class="button button-primary" @click="pdSaveEditParameters(plan)">Save Changes</button>
-                              <button class="button button-secondary" @click="pdCancelEditParameters(plan)">Cancel</button>
-                            </div>
-                          </template>
-
-                          <!-- Display-only: read-only tiles for the ON parameters -->
-                          <div v-else-if="plan.planParameterIds.length > 0" class="pd-param-grid">
-                            <div v-for="param in pdOnParams(plan)" :key="param.id" class="pd-param-tile pd-param-tile--on pd-param-tile--readonly">
-                              <div class="pd-param-tile-header">
-                                <span class="pd-param-tile-name">{{ param.name }}</span>
-                                <CircleCheckBig :size="18" class="pd-param-tile-check" />
-                              </div>
-                              <p class="pd-param-tile-desc">{{ param.description }}</p>
-                              <div class="pd-param-tile-footer">
-                                <Check :size="14" :stroke-width="2.5" /> Added
-                              </div>
-                            </div>
-                          </div>
-
-                          <!-- Empty state: no parameters configured yet -->
-                          <div v-else class="nc-empty-state">
-                            <img :src="EmptyStateImg" alt="No data" class="nc-empty-icon" />
-                            <p class="nc-empty-title">Nothing to see here</p>
-                            <p class="nc-empty-subtitle">No plan parameters configured.</p>
-                            <button v-if="!planSetupComplete" class="button button-secondary" @click="pdStartEditParameters(plan)">+ Add Parameters</button>
-                          </div>
-                        </div>
-
-                        <!-- Plan Max Spend Parameters -->
-                        <div class="pd-section">
-                          <div class="pd-section-header">
-                            <h4 class="text-h4">Plan Max Spend Parameters</h4>
-                            <button v-if="(!pdIsEditingMaxSpend(plan.id)) && !planSetupComplete" class="button button-thirtiary" @click="pdStartEditMaxSpend(plan)">
-                              <Pencil :size="14" :stroke-width="1.5" /> Edit
-                            </button>
-                          </div>
-                          <div v-if="!pdIsEditingMaxSpend(plan.id)" class="ap-field-row">
-                            <div class="ap-field">
-                              <span class="ap-field-label">Enable plan spend max configuration?</span>
-                              <span class="ap-field-value">{{ plan.maxSpendEnabled ? 'Yes' : 'No' }}</span>
-                            </div>
-                          </div>
-                          <template v-if="!pdIsEditingMaxSpend(plan.id) && plan.maxSpendEnabled">
-                            <div class="ap-field-row ap-field-row--multi ap-field-row--wrap mt-2">
-                              <div class="ap-field">
-                                <span class="ap-field-label">Enable plan spend max at NDC level?</span>
-                                <span class="ap-field-value">{{ plan.maxSpend.ndcLevel ? 'Yes' : 'No' }}</span>
-                              </div>
-                              <div class="ap-field">
-                                <span class="ap-field-label">Fill first NDC with no copay?</span>
-                                <span class="ap-field-value">{{ plan.maxSpend.firstNdcNoCopay ? 'Yes' : 'No' }}</span>
-                              </div>
-                              <div class="ap-field">
-                                <span class="ap-field-label">Reject when plan max met?</span>
-                                <span class="ap-field-value">{{ plan.maxSpend.rejectWhenMet ? 'Yes' : 'No' }}</span>
-                              </div>
-                              <div v-if="plan.maxSpend.rejectWhenMet" class="ap-field">
-                                <span class="ap-field-label">Plan Max Rejection Message</span>
-                                <span class="ap-field-value">{{ plan.maxSpend.rejectionMessage || '—' }}</span>
-                              </div>
-                              <div v-if="plan.maxSpend.rejectWhenMet" class="ap-field">
-                                <span class="ap-field-label">NCPDP Reject Code</span>
-                                <span class="ap-field-value">{{ ncpdpRejectCodeLabel(plan.maxSpend.ncpdpRejectCode) }}</span>
-                              </div>
-                            </div>
-                          </template>
-                          <template v-if="pdIsEditingMaxSpend(plan.id)">
-                            <div class="toc-question pd-param-question">
-                              <p class="toc-question-label">Enable plan spend max configuration?</p>
-                              <p class="text-body mb-3">This sets the maximum amount a plan will spend on covered medications within a specific timeframe, to help control costs and keep expenses within budget.</p>
-                              <div class="toc-toggle-group">
-                                <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': plan.maxSpendEnabled === false }]" @click="plan.maxSpendEnabled = false">No</button>
-                                <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': plan.maxSpendEnabled === true }]" @click="plan.maxSpendEnabled = true">Yes</button>
-                              </div>
-                            </div>
-
-                            <template v-if="plan.maxSpendEnabled">
-                              <div class="ap-checkbox-row mt-3" style="cursor:pointer" @click="plan.maxSpend.ndcLevel = !plan.maxSpend.ndcLevel">
-                                <CheckSquare v-if="plan.maxSpend.ndcLevel" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
-                                <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
-                                <span class="ap-field-value">Enable plan spend max at NDC level</span>
-                              </div>
-                              <div class="ap-checkbox-row mt-2" style="cursor:pointer" @click="plan.maxSpend.firstNdcNoCopay = !plan.maxSpend.firstNdcNoCopay">
-                                <CheckSquare v-if="plan.maxSpend.firstNdcNoCopay" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
-                                <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
-                                <span class="ap-field-value">Fill first NDC with no copay</span>
-                              </div>
-                              <div class="ap-checkbox-row mt-2" style="cursor:pointer" @click="plan.maxSpend.rejectWhenMet = !plan.maxSpend.rejectWhenMet">
-                                <CheckSquare v-if="plan.maxSpend.rejectWhenMet" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
-                                <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
-                                <span class="ap-field-value">Reject when plan max met</span>
-                              </div>
-                              <v-row v-if="plan.maxSpend.rejectWhenMet" class="mt-2">
-                                <v-col cols="12" md="8">
-                                  <TextField v-model="plan.maxSpend.rejectionMessage" label="Plan Max Rejection Message" :maxlength="200" counter />
-                                </v-col>
-                                <v-col cols="12" md="4">
-                                  <Select v-model="plan.maxSpend.ncpdpRejectCode" :items="ncpdpRejectCodeOptions" label="NCPDP Reject Code" />
-                                </v-col>
-                              </v-row>
-                            </template>
-                          </template>
-
-                          <template v-if="plan.maxSpendEnabled">
-                            <h5 class="ap-subsection-heading mt-6">Max Annual/Month Spend</h5>
-                            <template v-if="!pdIsEditingMaxSpend(plan.id)">
-                              <div class="ap-field-row ap-field-row--multi ap-field-row--wrap">
-                                <div class="ap-field">
-                                  <span class="ap-field-label">Spend Max Annual</span>
-                                  <span class="ap-field-value">{{ plan.maxSpend.annualAmount || '—' }}</span>
-                                </div>
-                                <div class="ap-field">
-                                  <span class="ap-field-label">Spend Max Per Month</span>
-                                  <span class="ap-field-value">{{ plan.maxSpend.perMonthAmount || '—' }}</span>
-                                </div>
-                                <div class="ap-field">
-                                  <span class="ap-field-label">Spend Max Per Fill</span>
-                                  <span class="ap-field-value">{{ plan.maxSpend.perFillAmount || '—' }}</span>
-                                </div>
-                              </div>
-                              <div class="ap-field-row mt-1">
-                                <div class="ap-field">
-                                  <span class="ap-field-label">Cover ingredient cost only?</span>
-                                  <span class="ap-field-value">{{ plan.maxSpend.ingredientCostOnly ? 'Yes' : 'No' }}</span>
-                                </div>
-                              </div>
-                            </template>
-                            <template v-else>
-                              <v-row class="mb-0">
-                                <v-col cols="12" sm="4">
-                                  <TextField v-model="plan.maxSpend.annualAmount" label="Spend Max Annual" prefix="$" />
-                                </v-col>
-                                <v-col cols="12" sm="4">
-                                  <TextField v-model="plan.maxSpend.perMonthAmount" label="Spend Max Per Month" prefix="$" />
-                                </v-col>
-                                <v-col cols="12" sm="4">
-                                  <TextField v-model="plan.maxSpend.perFillAmount" label="Spend Max Per Fill" prefix="$" />
-                                </v-col>
-                              </v-row>
-                              <div class="ap-checkbox-row mt-n2" style="cursor:pointer" @click="plan.maxSpend.ingredientCostOnly = !plan.maxSpend.ingredientCostOnly">
-                                <CheckSquare v-if="plan.maxSpend.ingredientCostOnly" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
-                                <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
-                                <span class="ap-field-value">Cover ingredient cost only</span>
-                              </div>
-                            </template>
-
-                            <h5 class="ap-subsection-heading">Max WAC + % Spend</h5>
-                            <div v-if="!pdIsEditingMaxSpend(plan.id)" class="ap-field-row">
-                              <div class="ap-field">
-                                <span class="ap-field-label">Max Per Fill WAC + %</span>
-                                <span class="ap-field-value">{{ plan.maxSpend.wacPercent || '—' }}</span>
-                              </div>
-                            </div>
-                            <v-row v-else>
-                              <v-col cols="12" sm="4">
-                                <TextField v-model="plan.maxSpend.wacPercent" label="Max Per Fill WAC + %" />
-                              </v-col>
-                            </v-row>
-
-                            <h5 class="ap-subsection-heading">Max Per Day Supply</h5>
-                            <template v-if="!pdIsEditingMaxSpend(plan.id)">
-                              <template v-if="plan.maxSpend.perDaySupplyRows.length">
-                                <div v-for="(row, idx) in plan.maxSpend.perDaySupplyRows" :key="idx" class="ap-field-row ap-field-row--multi ap-field-row--wrap mt-2">
-                                  <div class="ap-field">
-                                    <span class="ap-field-label">{{ plan.maxSpend.perDaySupplyRows.length > 1 ? `Range ${idx + 1} Days Supply` : 'Days Supply' }}</span>
-                                    <span class="ap-field-value">{{ row.dayStart || '—' }}–{{ row.dayEnd || '—' }}</span>
-                                  </div>
-                                  <div class="ap-field">
-                                    <span class="ap-field-label">{{ plan.maxSpend.perDaySupplyRows.length > 1 ? `Range ${idx + 1} Spend Per Fill` : 'Spend Per Fill' }}</span>
-                                    <span class="ap-field-value">{{ formatDollar(row.amount) }}</span>
-                                  </div>
-                                </div>
-                              </template>
-                              <div v-else class="ap-field-row">
-                                <div class="ap-field"><span class="ap-field-value">—</span></div>
-                              </div>
-                            </template>
-                            <template v-else>
-                              <div v-for="(row, idx) in plan.maxSpend.perDaySupplyRows" :key="idx" class="nl-repeatable-row mt-3">
-                                <div class="nl-repeatable-row-header">
-                                  <span class="nl-repeatable-row-label">Range {{ idx + 1 }}</span>
-                                  <button class="nl-remove-row-btn" title="Remove this row" @click="removeMaxSpendDayRow(plan, row)">
-                                    <Trash2 :size="16" :stroke-width="1.75" />
-                                  </button>
-                                </div>
-                                <div class="nl-date-row">
-                                  <TextField v-model="row.dayStart" label="Day Supply Start" />
-                                  <TextField v-model="row.dayEnd" label="Day Supply End" />
-                                  <TextField v-model="row.amount" label="Spend Per Fill" prefix="$" />
-                                </div>
-                              </div>
-                              <button class="button button-secondary mt-3" @click="addMaxSpendDayRow(plan)">
-                                <Plus :size="14" :stroke-width="1.5" /> Add Day Supply Range
-                              </button>
-                            </template>
-
-                            <h5 class="ap-subsection-heading">Max Per Quantity</h5>
-                            <template v-if="!pdIsEditingMaxSpend(plan.id)">
-                              <template v-if="plan.maxSpend.perQuantityRows.length">
-                                <div v-for="(row, idx) in plan.maxSpend.perQuantityRows" :key="idx" class="ap-field-row ap-field-row--multi ap-field-row--wrap mt-2">
-                                  <div class="ap-field">
-                                    <span class="ap-field-label">{{ plan.maxSpend.perQuantityRows.length > 1 ? `Range ${idx + 1} Quantity` : 'Quantity' }}</span>
-                                    <span class="ap-field-value">{{ row.minQuantity || '—' }}–{{ row.maxQuantity || '—' }}</span>
-                                  </div>
-                                  <div class="ap-field">
-                                    <span class="ap-field-label">{{ plan.maxSpend.perQuantityRows.length > 1 ? `Range ${idx + 1} Spend Max Per Fill` : 'Spend Max Per Fill' }}</span>
-                                    <span class="ap-field-value">{{ formatDollar(row.amount) }}</span>
-                                  </div>
-                                </div>
-                              </template>
-                              <div v-else class="ap-field-row">
-                                <div class="ap-field"><span class="ap-field-value">—</span></div>
-                              </div>
-                            </template>
-                            <template v-else>
-                              <div v-for="(row, idx) in plan.maxSpend.perQuantityRows" :key="idx" class="nl-repeatable-row mt-3">
-                                <div class="nl-repeatable-row-header">
-                                  <span class="nl-repeatable-row-label">Range {{ idx + 1 }}</span>
-                                  <button class="nl-remove-row-btn" title="Remove this row" @click="removeMaxSpendQtyRow(plan, row)">
-                                    <Trash2 :size="16" :stroke-width="1.75" />
-                                  </button>
-                                </div>
-                                <div class="nl-date-row">
-                                  <TextField v-model="row.minQuantity" label="Min Quantity" />
-                                  <TextField v-model="row.maxQuantity" label="Max Quantity" />
-                                  <TextField v-model="row.amount" label="Spend Max Per Fill" prefix="$" />
-                                </div>
-                              </div>
-                              <button class="button button-secondary mt-3" @click="addMaxSpendQtyRow(plan)">
-                                <Plus :size="14" :stroke-width="1.5" /> Add Quantity Range
-                              </button>
-                            </template>
-                          </template>
-
-                          <div v-if="pdIsEditingMaxSpend(plan.id)" class="ap-section-footer mt-4">
-                            <button class="button button-primary" @click="pdSaveEditMaxSpend(plan)">Save Changes</button>
-                            <button class="button button-secondary" @click="pdCancelEditMaxSpend(plan)">Cancel</button>
-                          </div>
-                        </div>
-
                         <!-- Coordination of Benefits -->
                         <div class="pd-section">
                           <div class="pd-section-header">
@@ -1933,6 +1636,91 @@
                               <button class="button button-secondary" @click="pdCancelEditBenefit(plan)">Cancel</button>
                             </div>
                           </template>
+                        </div>
+
+                        <!-- Plan Parameters -->
+                        <div class="pd-section">
+                          <div class="pd-section-header">
+                            <h4 class="text-h4">Plan Parameters</h4>
+                            <button v-if="!pdIsEditingParameters(plan.id) && plan.planParameterIds.length > 0 && !planSetupComplete" class="button button-thirtiary" @click="pdStartEditParameters(plan)">
+                              <Pencil :size="14" :stroke-width="1.5" /> Edit
+                            </button>
+                          </div>
+
+                          <!-- Edit mode: full tile grid, priority six + expandable additional options -->
+                          <template v-if="pdIsEditingParameters(plan.id)">
+                            <div class="pd-param-grid">
+                              <div
+                                v-for="param in pdPriorityParams()"
+                                :key="param.id"
+                                :class="['pd-param-tile', { 'pd-param-tile--on': pdIsParamOn(plan, param.id) }]"
+                                @click="pdToggleParam(plan, param.id)"
+                              >
+                                <div class="pd-param-tile-header">
+                                  <span class="pd-param-tile-name">{{ param.name }}</span>
+                                  <CircleCheckBig v-if="pdIsParamOn(plan, param.id)" :size="18" class="pd-param-tile-check" />
+                                </div>
+                                <p class="pd-param-tile-desc">{{ param.description }}</p>
+                                <div class="pd-param-tile-footer">
+                                  <template v-if="pdIsParamOn(plan, param.id)">
+                                    <Check :size="14" :stroke-width="2.5" /> Added
+                                  </template>
+                                  <template v-else>Click to add</template>
+                                </div>
+                              </div>
+                            </div>
+                            <template v-if="pdAdditionalParams().length > 0">
+                              <button class="pd-param-showall" @click="pdToggleShowAllParams(plan.id)">
+                                {{ pdShowAllParams[plan.id] ? 'Show less' : `Show all (${pdAdditionalParams().length} more)` }}
+                              </button>
+                              <div v-if="pdShowAllParams[plan.id]" class="pd-param-grid mt-3">
+                                <div
+                                  v-for="param in pdAdditionalParams()"
+                                  :key="param.id"
+                                  :class="['pd-param-tile', { 'pd-param-tile--on': pdIsParamOn(plan, param.id) }]"
+                                  @click="pdToggleParam(plan, param.id)"
+                                >
+                                  <div class="pd-param-tile-header">
+                                    <span class="pd-param-tile-name">{{ param.name }}</span>
+                                    <CircleCheckBig v-if="pdIsParamOn(plan, param.id)" :size="18" class="pd-param-tile-check" />
+                                  </div>
+                                  <p class="pd-param-tile-desc">{{ param.description }}</p>
+                                  <div class="pd-param-tile-footer">
+                                    <template v-if="pdIsParamOn(plan, param.id)">
+                                      <Check :size="14" :stroke-width="2.5" /> Added
+                                    </template>
+                                    <template v-else>Click to add</template>
+                                  </div>
+                                </div>
+                              </div>
+                            </template>
+                            <div class="ap-section-footer">
+                              <button class="button button-primary" @click="pdSaveEditParameters(plan)">Save Changes</button>
+                              <button class="button button-secondary" @click="pdCancelEditParameters(plan)">Cancel</button>
+                            </div>
+                          </template>
+
+                          <!-- Display-only: read-only tiles for the ON parameters -->
+                          <div v-else-if="plan.planParameterIds.length > 0" class="pd-param-grid">
+                            <div v-for="param in pdOnParams(plan)" :key="param.id" class="pd-param-tile pd-param-tile--on pd-param-tile--readonly">
+                              <div class="pd-param-tile-header">
+                                <span class="pd-param-tile-name">{{ param.name }}</span>
+                                <CircleCheckBig :size="18" class="pd-param-tile-check" />
+                              </div>
+                              <p class="pd-param-tile-desc">{{ param.description }}</p>
+                              <div class="pd-param-tile-footer">
+                                <Check :size="14" :stroke-width="2.5" /> Added
+                              </div>
+                            </div>
+                          </div>
+
+                          <!-- Empty state: no parameters configured yet -->
+                          <div v-else class="nc-empty-state">
+                            <img :src="EmptyStateImg" alt="No data" class="nc-empty-icon" />
+                            <p class="nc-empty-title">Nothing to see here</p>
+                            <p class="nc-empty-subtitle">No plan parameters configured.</p>
+                            <button v-if="!planSetupComplete" class="button button-secondary" @click="pdStartEditParameters(plan)">+ Add Parameters</button>
+                          </div>
                         </div>
 
                         <!-- BPG Configuration -->
@@ -7231,8 +7019,6 @@ const planDesignPlans = ref([
     situsState: 'CA',
     planParameterIds: [1, 2, 3, 4, 5] as number[],
     occCodes: ['1 - No other coverage'] as string[],
-    maxSpendEnabled: false,
-    maxSpend: newPlanMaxSpend(),
     allowSecondaryPayer: true,
     cobConfigOptions: ['Secondary Payer Only'] as string[],
     benefitPeriodType: 'CalendarYear' as string,
@@ -7267,8 +7053,6 @@ const planDesignPlans = ref([
     situsState: '',
     planParameterIds: [] as number[],
     occCodes: [] as string[],
-    maxSpendEnabled: false,
-    maxSpend: newPlanMaxSpend(),
     allowSecondaryPayer: false,
     cobConfigOptions: [] as string[],
     benefitPeriodType: 'PlanYear' as string,
@@ -8125,8 +7909,6 @@ const pdSaveNewPlan = () => {
     situsState: '',
     planParameterIds: [] as number[],
     occCodes: [] as string[],
-    maxSpendEnabled: false,
-    maxSpend: newPlanMaxSpend(),
     allowSecondaryPayer: false,
     cobConfigOptions: [] as string[],
     benefitPeriodType: 'Custom' as string,
@@ -8443,91 +8225,6 @@ const pdCancelEditParameters = (plan: PdParameterFields) => {
 
 const pdSaveEditParameters = (plan: { id: number }) => {
   pdParamEditingIds.value = pdParamEditingIds.value.filter(id => id !== plan.id);
-};
-
-// Plan Max Spend Parameters — matches Solo2's PlanMaxSpendSection.vue (master has nothing built yet).
-type MaxSpendDayRow = { dayStart: string; dayEnd: string; amount: string };
-type MaxSpendQtyRow = { minQuantity: string; maxQuantity: string; amount: string };
-type PlanMaxSpend = {
-  ndcLevel: boolean;
-  firstNdcNoCopay: boolean;
-  rejectWhenMet: boolean;
-  rejectionMessage: string;
-  ncpdpRejectCode: string | null;
-  annualAmount: string;
-  perMonthAmount: string;
-  perFillAmount: string;
-  ingredientCostOnly: boolean;
-  wacPercent: string;
-  perDaySupplyRows: MaxSpendDayRow[];
-  perQuantityRows: MaxSpendQtyRow[];
-};
-
-function newPlanMaxSpend(): PlanMaxSpend {
-  return {
-    ndcLevel: false, firstNdcNoCopay: false, rejectWhenMet: false,
-    rejectionMessage: '', ncpdpRejectCode: null,
-    annualAmount: '', perMonthAmount: '', perFillAmount: '', ingredientCostOnly: false,
-    wacPercent: '',
-    perDaySupplyRows: [], perQuantityRows: [],
-  };
-}
-
-const ncpdpRejectCodeOptions = [
-  { title: '65 - Patient Is Not Covered', value: '65' },
-  { title: '70 - Product/Service Not Covered', value: '70' },
-  { title: '75 - Prior Authorization Required', value: '75' },
-  { title: '76 - Plan Limitations Exceeded', value: '76' },
-];
-
-function formatDollar(value: string): string {
-  if (!value) return '—';
-  return value.trim().startsWith('$') ? value : `$${value}`;
-}
-
-function ncpdpRejectCodeLabel(code: string | null): string {
-  return ncpdpRejectCodeOptions.find(o => o.value === code)?.title ?? '—';
-}
-
-function addMaxSpendDayRow(plan: { maxSpend: PlanMaxSpend }) {
-  plan.maxSpend.perDaySupplyRows.push({ dayStart: '', dayEnd: '', amount: '' });
-}
-function removeMaxSpendDayRow(plan: { maxSpend: PlanMaxSpend }, row: MaxSpendDayRow) {
-  const idx = plan.maxSpend.perDaySupplyRows.indexOf(row);
-  if (idx !== -1) plan.maxSpend.perDaySupplyRows.splice(idx, 1);
-}
-function addMaxSpendQtyRow(plan: { maxSpend: PlanMaxSpend }) {
-  plan.maxSpend.perQuantityRows.push({ minQuantity: '', maxQuantity: '', amount: '' });
-}
-function removeMaxSpendQtyRow(plan: { maxSpend: PlanMaxSpend }, row: MaxSpendQtyRow) {
-  const idx = plan.maxSpend.perQuantityRows.indexOf(row);
-  if (idx !== -1) plan.maxSpend.perQuantityRows.splice(idx, 1);
-}
-
-const pdMaxSpendEditingIds = ref<number[]>([]);
-const pdMaxSpendSnapshots: Record<number, { maxSpendEnabled: boolean; maxSpend: PlanMaxSpend }> = {};
-
-const pdIsEditingMaxSpend = (id: number) => pdMaxSpendEditingIds.value.includes(id);
-
-const pdStartEditMaxSpend = (plan: { id: number; maxSpendEnabled: boolean; maxSpend: PlanMaxSpend }) => {
-  pdMaxSpendSnapshots[plan.id] = {
-    maxSpendEnabled: plan.maxSpendEnabled,
-    maxSpend: JSON.parse(JSON.stringify(plan.maxSpend)),
-  };
-  pdMaxSpendEditingIds.value.push(plan.id);
-};
-
-const pdCancelEditMaxSpend = (plan: { id: number; maxSpendEnabled: boolean; maxSpend: PlanMaxSpend }) => {
-  const snap = pdMaxSpendSnapshots[plan.id];
-  if (snap) {
-    plan.maxSpendEnabled = snap.maxSpendEnabled;
-    plan.maxSpend = JSON.parse(JSON.stringify(snap.maxSpend));
-  }
-  pdMaxSpendEditingIds.value = pdMaxSpendEditingIds.value.filter(id => id !== plan.id);
-};
-
-const pdSaveEditMaxSpend = (plan: { id: number }) => {
-  pdMaxSpendEditingIds.value = pdMaxSpendEditingIds.value.filter(id => id !== plan.id);
 };
 
 // ─── Timeline helpers ─────────────────────────────────────────────────────────
