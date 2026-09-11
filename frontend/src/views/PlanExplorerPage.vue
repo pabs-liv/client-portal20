@@ -887,7 +887,8 @@
 
                   <Dialog
                     v-model="showBpgDialog"
-                    heading="Add Group to Plan"
+                    heading="Add BPG Entry"
+                    text="Select a group to associate with this plan's BPG configuration."
                     :show-secondary-button="true"
                     :actions="bpgDialogActions"
                   >
@@ -7338,7 +7339,7 @@ const saveBpgEntry = () => {
 
 const bpgDialogActions = computed(() => [
   { text: 'Cancel', styleType: 'secondary' as const, onClick: () => { showBpgDialog.value = false; } },
-  { text: 'Add Group', styleType: 'primary' as const, onClick: saveBpgEntry },
+  { text: 'Add Group', styleType: 'primary' as const, disabled: bpgDialogGroupOptions.value.length === 0, onClick: saveBpgEntry },
 ]);
 
 function bpgActionIcons(plan: { bpgRows: { groupId: string }[] }) {
