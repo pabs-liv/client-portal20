@@ -1513,78 +1513,85 @@
                         <div class="pd-section">
                           <div class="pd-section-header">
                             <h4 class="text-h4">Plan Parameters</h4>
-                            <button v-if="(!pdIsEditingParameters(plan.id)) && !planSetupComplete" class="button button-thirtiary" @click="pdStartEditParameters(plan)">
+                            <button v-if="!pdIsEditingParameters(plan.id) && plan.planParameterIds.length > 0 && !planSetupComplete" class="button button-thirtiary" @click="pdStartEditParameters(plan)">
                               <Pencil :size="14" :stroke-width="1.5" /> Edit
                             </button>
                           </div>
-                          <div v-if="!pdIsEditingParameters(plan.id)" class="ap-field-row ap-field-row--multi ap-field-row--wrap">
-                            <div class="ap-field">
-                              <span class="ap-field-label">Is the group Grandfathered?</span>
-                              <span class="ap-field-value">{{ plan.isGrandfathered ? 'Yes' : 'No' }}</span>
-                            </div>
-                            <div class="ap-field">
-                              <span class="ap-field-label">Does the Affordable Care Act apply?</span>
-                              <span class="ap-field-value">{{ plan.acaApplies ? 'Yes' : 'No' }}</span>
-                            </div>
-                            <div v-if="plan.acaApplies" class="ap-field">
-                              <span class="ap-field-label">ACA applies at $0 cost share to the member?</span>
-                              <span class="ap-field-value">{{ plan.acaAppliesAtZeroCost ? 'Yes' : 'No' }}</span>
-                            </div>
-                            <div class="ap-field">
-                              <span class="ap-field-label">Qualified HDHP (per ERISA, subject to first dollar coverage)?</span>
-                              <span class="ap-field-value">{{ plan.isHdhp ? 'Yes' : 'No' }}</span>
-                            </div>
-                            <div v-if="plan.isHdhp && plan.hdhpNotes" class="ap-field">
-                              <span class="ap-field-label">HDHP Notes</span>
-                              <span class="ap-field-value">{{ plan.hdhpNotes }}</span>
-                            </div>
-                            <div class="ap-field">
-                              <span class="ap-field-label">Governed by ERISA?</span>
-                              <span class="ap-field-value">{{ plan.governedByErisa ? 'Yes' : 'No' }}</span>
-                            </div>
-                          </div>
-                          <template v-else>
-                            <div class="toc-question pd-param-question">
-                              <p class="toc-question-label">Is the group Grandfathered?</p>
-                              <div class="toc-toggle-group">
-                                <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': plan.isGrandfathered === false }]" @click="plan.isGrandfathered = false">No</button>
-                                <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': plan.isGrandfathered === true }]" @click="plan.isGrandfathered = true">Yes</button>
-                              </div>
-                            </div>
-                            <div class="toc-question pd-param-question">
-                              <p class="toc-question-label">Does the Affordable Care Act apply?</p>
-                              <div class="toc-toggle-group">
-                                <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': plan.acaApplies === false }]" @click="plan.acaApplies = false; plan.acaAppliesAtZeroCost = false">No</button>
-                                <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': plan.acaApplies === true }]" @click="plan.acaApplies = true">Yes</button>
-                              </div>
-                              <div v-if="plan.acaApplies" class="toc-question ml-6 mt-3">
-                                <p class="toc-question-label">Please confirm if ACA applies at $0 cost share to the member.</p>
-                                <div class="toc-toggle-group">
-                                  <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': plan.acaAppliesAtZeroCost === false }]" @click="plan.acaAppliesAtZeroCost = false">No</button>
-                                  <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': plan.acaAppliesAtZeroCost === true }]" @click="plan.acaAppliesAtZeroCost = true">Yes</button>
+
+                          <!-- Edit mode: full tile grid, priority six + expandable additional options -->
+                          <template v-if="pdIsEditingParameters(plan.id)">
+                            <div class="pd-param-grid">
+                              <div
+                                v-for="param in pdPriorityParams()"
+                                :key="param.id"
+                                :class="['pd-param-tile', { 'pd-param-tile--on': pdIsParamOn(plan, param.id) }]"
+                                @click="pdToggleParam(plan, param.id)"
+                              >
+                                <div class="pd-param-tile-header">
+                                  <span class="pd-param-tile-name">{{ param.name }}</span>
+                                  <CircleCheckBig v-if="pdIsParamOn(plan, param.id)" :size="18" class="pd-param-tile-check" />
+                                </div>
+                                <p class="pd-param-tile-desc">{{ param.description }}</p>
+                                <div class="pd-param-tile-footer">
+                                  <template v-if="pdIsParamOn(plan, param.id)">
+                                    <Check :size="14" :stroke-width="2.5" /> Added
+                                  </template>
+                                  <template v-else>Click to add</template>
                                 </div>
                               </div>
                             </div>
-                            <div class="toc-question pd-param-question">
-                              <p class="toc-question-label">Is this health plan a qualified high deductible health plan (HDHP) in accordance with ERISA and subject to first dollar coverage?</p>
-                              <div class="toc-toggle-group">
-                                <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': plan.isHdhp === false }]" @click="plan.isHdhp = false">No</button>
-                                <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': plan.isHdhp === true }]" @click="plan.isHdhp = true">Yes</button>
+                            <template v-if="pdAdditionalParams().length > 0">
+                              <button class="pd-param-showall" @click="pdToggleShowAllParams(plan.id)">
+                                {{ pdShowAllParams[plan.id] ? 'Show less' : `Show all (${pdAdditionalParams().length} more)` }}
+                              </button>
+                              <div v-if="pdShowAllParams[plan.id]" class="pd-param-grid mt-3">
+                                <div
+                                  v-for="param in pdAdditionalParams()"
+                                  :key="param.id"
+                                  :class="['pd-param-tile', { 'pd-param-tile--on': pdIsParamOn(plan, param.id) }]"
+                                  @click="pdToggleParam(plan, param.id)"
+                                >
+                                  <div class="pd-param-tile-header">
+                                    <span class="pd-param-tile-name">{{ param.name }}</span>
+                                    <CircleCheckBig v-if="pdIsParamOn(plan, param.id)" :size="18" class="pd-param-tile-check" />
+                                  </div>
+                                  <p class="pd-param-tile-desc">{{ param.description }}</p>
+                                  <div class="pd-param-tile-footer">
+                                    <template v-if="pdIsParamOn(plan, param.id)">
+                                      <Check :size="14" :stroke-width="2.5" /> Added
+                                    </template>
+                                    <template v-else>Click to add</template>
+                                  </div>
+                                </div>
                               </div>
-                              <v-textarea v-if="plan.isHdhp" v-model="plan.hdhpNotes" label="HDHP Notes" variant="outlined" density="compact" rows="2" auto-grow hide-details class="bl-notes-textarea mt-3" />
-                            </div>
-                            <div class="toc-question pd-param-question">
-                              <p class="toc-question-label">Is this plan governed by ERISA (Employee Retirement Income Security Act)?</p>
-                              <div class="toc-toggle-group">
-                                <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': plan.governedByErisa === false }]" @click="plan.governedByErisa = false">No</button>
-                                <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': plan.governedByErisa === true }]" @click="plan.governedByErisa = true">Yes</button>
-                              </div>
-                            </div>
+                            </template>
                             <div class="ap-section-footer">
                               <button class="button button-primary" @click="pdSaveEditParameters(plan)">Save Changes</button>
                               <button class="button button-secondary" @click="pdCancelEditParameters(plan)">Cancel</button>
                             </div>
                           </template>
+
+                          <!-- Display-only: read-only tiles for the ON parameters -->
+                          <div v-else-if="plan.planParameterIds.length > 0" class="pd-param-grid">
+                            <div v-for="param in pdOnParams(plan)" :key="param.id" class="pd-param-tile pd-param-tile--on pd-param-tile--readonly">
+                              <div class="pd-param-tile-header">
+                                <span class="pd-param-tile-name">{{ param.name }}</span>
+                                <CircleCheckBig :size="18" class="pd-param-tile-check" />
+                              </div>
+                              <p class="pd-param-tile-desc">{{ param.description }}</p>
+                              <div class="pd-param-tile-footer">
+                                <Check :size="14" :stroke-width="2.5" /> Added
+                              </div>
+                            </div>
+                          </div>
+
+                          <!-- Empty state: no parameters configured yet -->
+                          <div v-else class="nc-empty-state">
+                            <img :src="EmptyStateImg" alt="No data" class="nc-empty-icon" />
+                            <p class="nc-empty-title">Nothing to see here</p>
+                            <p class="nc-empty-subtitle">No plan parameters configured.</p>
+                            <button v-if="!planSetupComplete" class="button button-secondary" @click="pdStartEditParameters(plan)">+ Add Parameters</button>
+                          </div>
                         </div>
 
                         <!-- Plan Max Spend Parameters -->
@@ -7222,12 +7229,7 @@ const planDesignPlans = ref([
     effEndDate: '',
     benefitReset: 'February 1',
     situsState: 'CA',
-    isGrandfathered: true,
-    acaApplies: true,
-    acaAppliesAtZeroCost: true,
-    isHdhp: true,
-    hdhpNotes: '',
-    governedByErisa: true,
+    planParameterIds: [1, 2, 3, 4, 5] as number[],
     occCodes: ['1 - No other coverage'] as string[],
     maxSpendEnabled: false,
     maxSpend: newPlanMaxSpend(),
@@ -7263,12 +7265,7 @@ const planDesignPlans = ref([
     effEndDate: '',
     benefitReset: 'February 1',
     situsState: '',
-    isGrandfathered: false,
-    acaApplies: false,
-    acaAppliesAtZeroCost: false,
-    isHdhp: false,
-    hdhpNotes: '',
-    governedByErisa: false,
+    planParameterIds: [] as number[],
     occCodes: [] as string[],
     maxSpendEnabled: false,
     maxSpend: newPlanMaxSpend(),
@@ -8126,12 +8123,7 @@ const pdSaveNewPlan = () => {
     effEndDate: f.endDate,
     benefitReset: '',
     situsState: '',
-    isGrandfathered: false,
-    acaApplies: false,
-    acaAppliesAtZeroCost: false,
-    isHdhp: false,
-    hdhpNotes: '',
-    governedByErisa: false,
+    planParameterIds: [] as number[],
     occCodes: [] as string[],
     maxSpendEnabled: false,
     maxSpend: newPlanMaxSpend(),
@@ -8198,7 +8190,66 @@ const pdSaveEditOverview = (plan: PdOverviewFields) => {
 };
 
 // ─── Plan Design — Plan Parameters edit ───────────────────────────────────────
-type PdParameterFields = { id: number; isGrandfathered: boolean; acaApplies: boolean; acaAppliesAtZeroCost: boolean; isHdhp: boolean; hdhpNotes: string; governedByErisa: boolean };
+// Master's Plan Parameters is a global, non-account-scoped lookup catalog (PlanDesignOptions:
+// id/name/description only) — plans just associate to a subset of it. Mirrors that here rather
+// than the old fixed Q&A field set.
+interface PdPlanParameter {
+  id: number;
+  name: string;
+  description: string;
+}
+
+const pdPlanParameterCatalog: PdPlanParameter[] = [
+  { id: 1, name: 'ACA $0 Cost Share', description: 'Applies $0 cost share to the member under the Affordable Care Act.' },
+  { id: 2, name: 'HDHP', description: 'High Deductible Health Plan.' },
+  { id: 3, name: 'Grandfathered', description: 'Plan is grandfathered under the Affordable Care Act.' },
+  { id: 4, name: 'Follow Standard ACA', description: 'Applies standard Affordable Care Act rules to this plan.' },
+  { id: 5, name: 'Governed by ERISA', description: 'Plan is subject to the Employee Retirement Income Security Act.' },
+  { id: 6, name: 'Claim Spend by Demographics', description: 'Looks up claim spend using member demographics instead of ID.' },
+  { id: 7, name: 'Attribute VCP Amount to Accumulators', description: 'Applies the amount attributed to VCP toward the deductible and out-of-pocket max.' },
+  { id: 8, name: 'Accumulation Follows Plan Changes', description: 'When a member changes plans, deductible and OOP balances carry over without a specific accumulator lookup.' },
+  { id: 9, name: 'Claim History by Custom Grouping', description: 'Looks up claim history using a custom member grouping.' },
+  { id: 10, name: 'Claim History by Demographics', description: 'Looks up prior claims using member demographics.' },
+  { id: 11, name: 'Claim History by Demographics and Group ID', description: 'Looks up prior claims using member demographics plus group ID.' },
+  { id: 12, name: 'Claim History by Fuzzy Demographics', description: 'Matches on first 3 letters of first name, full last name, and birthdate.' },
+  { id: 13, name: 'Ignore Insured Eligibility Dates', description: 'Ignores insured effective dates. Confirm the client treats eligibility individually before enabling.' },
+  { id: 14, name: 'Ignore SCC 99', description: 'SCC 99 will be removed from the claim.' },
+  { id: 15, name: 'VCP – Accumulator', description: 'Prorates max value by day range: 0–27 days = ÷2, 56–83 days = ×2, 84+ days = ×3.' },
+  { id: 16, name: 'VCP – Maximizer', description: "Calculates a prorated daily amount by dividing the coupon's total value by its duration in days." },
+];
+
+const pdPriorityParamIds = [1, 2, 3, 4, 5, 6];
+
+function pdPriorityParams(): PdPlanParameter[] {
+  return pdPriorityParamIds
+    .map(id => pdPlanParameterCatalog.find(p => p.id === id))
+    .filter((p): p is PdPlanParameter => !!p);
+}
+
+function pdAdditionalParams(): PdPlanParameter[] {
+  return pdPlanParameterCatalog.filter(p => !pdPriorityParamIds.includes(p.id));
+}
+
+const pdShowAllParams = reactive<Record<number, boolean>>({});
+function pdToggleShowAllParams(planId: number) {
+  pdShowAllParams[planId] = !pdShowAllParams[planId];
+}
+
+function pdIsParamOn(plan: { planParameterIds: number[] }, paramId: number): boolean {
+  return plan.planParameterIds.includes(paramId);
+}
+
+function pdToggleParam(plan: { planParameterIds: number[] }, paramId: number) {
+  const idx = plan.planParameterIds.indexOf(paramId);
+  if (idx === -1) plan.planParameterIds.push(paramId);
+  else plan.planParameterIds.splice(idx, 1);
+}
+
+function pdOnParams(plan: { planParameterIds: number[] }): PdPlanParameter[] {
+  return pdPlanParameterCatalog.filter(p => plan.planParameterIds.includes(p.id));
+}
+
+type PdParameterFields = { id: number; planParameterIds: number[] };
 
 const pdOccCodeOptions = [
   '0 - Not specified by patient',
@@ -8377,12 +8428,7 @@ const pdIsEditingParameters = (id: number) => pdParamEditingIds.value.includes(i
 
 const pdStartEditParameters = (plan: PdParameterFields) => {
   pdParamSnapshots[plan.id] = {
-    isGrandfathered: plan.isGrandfathered,
-    acaApplies: plan.acaApplies,
-    acaAppliesAtZeroCost: plan.acaAppliesAtZeroCost,
-    isHdhp: plan.isHdhp,
-    hdhpNotes: plan.hdhpNotes,
-    governedByErisa: plan.governedByErisa,
+    planParameterIds: [...plan.planParameterIds],
   };
   pdParamEditingIds.value.push(plan.id);
 };
@@ -8390,12 +8436,7 @@ const pdStartEditParameters = (plan: PdParameterFields) => {
 const pdCancelEditParameters = (plan: PdParameterFields) => {
   const snap = pdParamSnapshots[plan.id];
   if (snap) {
-    plan.isGrandfathered = snap.isGrandfathered;
-    plan.acaApplies = snap.acaApplies;
-    plan.acaAppliesAtZeroCost = snap.acaAppliesAtZeroCost;
-    plan.isHdhp = snap.isHdhp;
-    plan.hdhpNotes = snap.hdhpNotes;
-    plan.governedByErisa = snap.governedByErisa;
+    plan.planParameterIds = [...snap.planParameterIds];
   }
   pdParamEditingIds.value = pdParamEditingIds.value.filter(id => id !== plan.id);
 };
@@ -9524,6 +9565,102 @@ watch(selectedAccount, (newVal) => {
   font-size: $font-size-small;
   color: $color-text-secondary;
   margin-top: 2px;
+}
+
+// ─── Plan Parameters tile grid ────────────────────────────────────────────────
+
+.pd-param-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $spacing-medium;
+
+  @media (max-width: 900px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.pd-param-tile {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid $color-border;
+  border-radius: 8px;
+  padding: $spacing-medium;
+  cursor: pointer;
+  transition: border-color 0.15s ease-in-out;
+
+  &:hover {
+    border-color: $color-primary;
+  }
+
+  &--on {
+    border-color: $color-primary;
+    background-color: rgba($color-primary, 0.04);
+  }
+
+  &--readonly {
+    cursor: default;
+
+    &:hover {
+      border-color: $color-primary;
+    }
+  }
+}
+
+.pd-param-tile-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: $spacing-small;
+}
+
+.pd-param-tile-name {
+  font-family: $font-family-base;
+  font-size: $font-size-h4;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+  line-height: $line-height-tight;
+}
+
+.pd-param-tile-check {
+  flex-shrink: 0;
+  color: $color-primary;
+}
+
+.pd-param-tile-desc {
+  font-family: $font-family-base;
+  font-size: $font-size-small;
+  color: $color-text-secondary;
+  margin: $spacing-xsmall 0 0;
+}
+
+.pd-param-tile-footer {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xsmall;
+  margin-top: auto;
+  padding-top: $spacing-small;
+  font-family: $font-family-base;
+  font-size: $font-size-small;
+  color: $color-text-secondary;
+  border-top: 1px solid $color-border;
+
+  .pd-param-tile--on & {
+    color: $color-primary;
+    font-weight: $font-weight-bold;
+  }
+}
+
+.pd-param-showall {
+  display: block;
+  margin-top: $spacing-small;
+  font-family: $font-family-base;
+  font-size: $font-size-small;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
 }
 
 // Empty states
