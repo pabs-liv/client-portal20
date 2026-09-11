@@ -95,16 +95,23 @@ defineEmits(['update:modelValue']);
 
 .ac-chip {
   padding: 0 8px;
+  max-width: 100%;
+  height: auto;
+  white-space: normal;
 
   :deep(.v-chip__content) {
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    max-width: 100%;
+    white-space: normal;
   }
 
   .ac-chip-label {
     color: $color-neutral-white;
     font-size: $font-size-small;
+    white-space: normal;
+    word-break: break-word;
   }
 
   .ac-chip-close {

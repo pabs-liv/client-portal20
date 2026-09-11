@@ -1538,7 +1538,7 @@
                               <span class="ap-field-value">Allow Secondary Payer</span>
                             </div>
                             <div v-if="plan.allowSecondaryPayer" class="ap-field-row mt-3">
-                              <div class="ap-field" style="max-width: 400px;">
+                              <div class="ap-field" style="max-width: 520px;">
                                 <Autocomplete v-model="plan.cobConfigOptions" :items="pdCobConfigOptions" :multiple="true" label="COB Configuration" />
                               </div>
                             </div>
@@ -1569,14 +1569,16 @@
                                 <span class="ap-field-label">Benefit Period</span>
                                 <span class="ap-field-value">{{ benefitPeriodTypeLabel(plan.benefitPeriodType) }}</span>
                               </div>
-                              <div v-for="(range, idx) in plan.benefitPeriodRanges" :key="idx" class="ap-field">
-                                <span class="ap-field-label">{{ plan.benefitPeriodRanges.length > 1 ? `Period ${idx + 1}` : 'Date Range' }}</span>
-                                <span class="ap-field-value">{{ range.startDate }} – {{ range.endDate }}</span>
-                              </div>
-                              <div v-if="!plan.benefitPeriodRanges.length" class="ap-field">
-                                <span class="ap-field-label">Date Range</span>
-                                <span class="ap-field-value">—</span>
-                              </div>
+                              <template v-if="!pdBenefitPeriodTypesWithNoDates.includes(plan.benefitPeriodType)">
+                                <div v-for="(range, idx) in plan.benefitPeriodRanges" :key="idx" class="ap-field">
+                                  <span class="ap-field-label">{{ plan.benefitPeriodRanges.length > 1 ? `Period ${idx + 1}` : 'Date Range' }}</span>
+                                  <span class="ap-field-value">{{ range.startDate }} – {{ range.endDate }}</span>
+                                </div>
+                                <div v-if="!plan.benefitPeriodRanges.length" class="ap-field">
+                                  <span class="ap-field-label">Date Range</span>
+                                  <span class="ap-field-value">—</span>
+                                </div>
+                              </template>
                               <div class="ap-field" style="grid-column: 1 / -1;">
                                 <span class="ap-field-label">Determine benefit stage by flag in eligibility file, not by accumulator data</span>
                                 <span class="ap-field-value">{{ plan.benefitByFlag ? 'Yes' : 'No' }}</span>
@@ -1596,14 +1598,14 @@
                               </div>
                             </div>
 
-                            <div v-if="plan.benefitPeriodType !== 'Custom'" class="ap-field-row ap-field-row--multi ap-field-row--wrap mt-3">
+                            <div v-if="!pdBenefitPeriodTypesWithNoDates.includes(plan.benefitPeriodType) && plan.benefitPeriodType !== 'Custom'" class="ap-field-row ap-field-row--multi ap-field-row--wrap mt-3">
                               <div v-for="(range, idx) in plan.benefitPeriodRanges" :key="idx" class="ap-field">
                                 <span class="ap-field-label">{{ plan.benefitPeriodRanges.length > 1 ? `Period ${idx + 1}` : 'Date Range' }}</span>
                                 <span class="ap-field-value">{{ range.startDate }} – {{ range.endDate }}</span>
                               </div>
                             </div>
 
-                            <template v-else>
+                            <template v-else-if="plan.benefitPeriodType === 'Custom'">
                               <div v-for="(range, idx) in plan.benefitPeriodRanges" :key="idx" class="nl-repeatable-row mt-3">
                                 <div v-if="plan.benefitPeriodRanges.length > 1" class="nl-repeatable-row-header">
                                   <span class="nl-repeatable-row-label">Period {{ idx + 1 }}</span>
@@ -8088,10 +8090,15 @@ const benefitPeriodTypeOptions = [
   { title: 'Calendar Year', value: 'CalendarYear' },
   { title: 'Custom', value: 'Custom' },
   { title: 'Lifetime', value: 'Lifetime' },
+  { title: 'Member Year', value: 'MemberYear' },
   { title: 'Monthly', value: 'Monthly' },
+  { title: 'Per Day', value: 'PerDay' },
   { title: 'Plan Quarterly', value: 'PlanQuarterly' },
   { title: 'Plan Year', value: 'PlanYear' },
 ];
+
+// Member Year and Per Day have no fixed calendar range in Solo2 (member-anchored / per-fill), so no date fields render for them.
+const pdBenefitPeriodTypesWithNoDates = ['MemberYear', 'PerDay'];
 
 function benefitPeriodTypeLabel(value: string) {
   return benefitPeriodTypeOptions.find(o => o.value === value)?.title ?? '—';
@@ -8126,7 +8133,7 @@ function endOfMonth(date: Date): Date {
 
 function computeBenefitPeriodRanges(type: string, effStartDate: string): PdBenefitRange[] {
   const start = parseMDY(effStartDate);
-  if (!start || type === 'Custom') return type === 'Custom' ? [] : [];
+  if (!start || type === 'Custom' || pdBenefitPeriodTypesWithNoDates.includes(type)) return [];
 
   if (type === 'Lifetime') {
     return [{ startDate: formatMDY(start), endDate: '12/31/2099' }];
