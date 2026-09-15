@@ -2152,7 +2152,7 @@ const confirmRemoveUser = () => {
 
 const removeUserDialogActions = [
   { text: 'Cancel', onClick: cancelRemoveUser, styleType: 'secondary' as const },
-  { text: 'Remove', onClick: confirmRemoveUser, type: 'destructive' as const },
+  { text: 'Remove User', onClick: confirmRemoveUser, type: 'destructive' as const },
 ];
 
 const saveUserAdmin = () => {

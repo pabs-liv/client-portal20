@@ -6008,7 +6008,7 @@ const apConfirmRemoveContact = () => {
 };
 const apRemoveContactDialogActions = [
   { text: 'Cancel', styleType: 'secondary' as const, onClick: () => { apShowRemoveContactDialog.value = false; apPendingRemoveContact.value = null; } },
-  { text: 'Remove', onClick: apConfirmRemoveContact, type: 'destructive' as const },
+  { text: 'Remove Contact', onClick: apConfirmRemoveContact, type: 'destructive' as const },
 ];
 
 const handleApClientContactRowAction = ({ action, item }: { action: string; item: any }) => {
@@ -7821,7 +7821,7 @@ function confirmRemoveCopayTier() {
 
 const copayTierRemoveDialogActions = [
   { text: 'Cancel', styleType: 'secondary' as const, onClick: () => { showCopayTierRemoveDialog.value = false; copayTierPendingRemove.value = null; } },
-  { text: 'Remove', onClick: confirmRemoveCopayTier, type: 'destructive' as const },
+  { text: 'Remove Tier', onClick: confirmRemoveCopayTier, type: 'destructive' as const },
 ];
 
 function handleCopayTierRowAction(plan: { id: number; copayTiers: CopayTiersByContext }, contextKey: string, { action, item }: { action: string; item: CopayTier }) {

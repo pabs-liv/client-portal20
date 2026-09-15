@@ -118,6 +118,9 @@
     <v-snackbar v-model="showDownloadSnackbar" :timeout="3000" color="success">
       {{ downloadSnackbarText }}
     </v-snackbar>
+    <v-snackbar v-model="showUploadSnackbar" :timeout="3000" color="success">
+      {{ uploadSnackbarText }}
+    </v-snackbar>
   </div>
 </template>
 
@@ -293,7 +296,7 @@ const confirmRemoveDocument = () => {
 
 const removeDocumentDialogActions = [
   { text: 'Cancel', onClick: cancelRemoveDocument, styleType: 'secondary' as const },
-  { text: 'Remove', onClick: confirmRemoveDocument, type: 'destructive' as const },
+  { text: 'Remove Document', onClick: confirmRemoveDocument, type: 'destructive' as const },
 ];
 
 // Add Documents modal — account is locked from whichever account is currently selected
@@ -324,6 +327,9 @@ const canConfirmUpload = computed(() =>
   !!stagedFileName.value && (uploadDocumentType.value === 'PHI Documents' || uploadPhiAck.value)
 );
 
+const showUploadSnackbar = ref(false);
+const uploadSnackbarText = ref('');
+
 const confirmUpload = () => {
   if (!canConfirmUpload.value || !selectedAccount.value) return;
   documentsStore.addDocument({
@@ -335,6 +341,8 @@ const confirmUpload = () => {
     category: uploadDocumentType.value,
     accountName: selectedAccountName.value,
   });
+  uploadSnackbarText.value = `${stagedFileName.value} added successfully!`;
+  showUploadSnackbar.value = true;
   showUploadModal.value = false;
 };
 
