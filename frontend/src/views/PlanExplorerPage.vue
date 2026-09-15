@@ -4233,7 +4233,10 @@
             </div>
             <div class="nl-edit-field-row">
               <span class="nl-edit-field-label">Pharmacy name</span>
-              <span class="nl-edit-field-value">{{ editingPharmacyItem?.pharmacyName || '—' }}</span>
+              <v-chip v-if="editingPharmacyItem?.pharmacyName" color="primary" variant="flat" class="nl-npi-chip nl-npi-chip--self-start">
+                <span class="nl-npi-chip-label">{{ editingPharmacyItem.pharmacyName }}</span>
+              </v-chip>
+              <span v-else class="nl-edit-field-value">—</span>
             </div>
             <label class="nl-checkbox">
               <input type="checkbox" v-model="inhouseEditForm.noBillNoPay" class="nl-checkbox-input" />
@@ -11045,6 +11048,10 @@ watch(selectedAccount, (newVal) => {
     align-items: center;
     gap: 8px;
   }
+}
+
+.nl-npi-chip--self-start {
+  align-self: flex-start;
 }
 
 .nl-npi-chip-label {
