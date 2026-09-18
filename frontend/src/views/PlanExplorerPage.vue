@@ -3824,7 +3824,7 @@
                     <div class="ap-section">
                       <div class="ap-section-header">
                         <h4 class="text-h4">Upload Inclusion/Exclusion Document</h4>
-                        <button v-if="!gpsEditingIe" class="button button-thirtiary" @click="gpsIeStartEdit">
+                        <button v-if="!gpsEditingIe && !gpsSigned" class="button button-thirtiary" @click="gpsIeStartEdit">
                           <Pencil :size="14" :stroke-width="1.5" />Edit
                         </button>
                       </div>
@@ -3835,6 +3835,7 @@
                             <span class="ap-field-value">{{ gpsIeFile || 'Not uploaded' }}</span>
                           </div>
                         </div>
+                        <p v-if="gpsSigned" class="text-small bl-note mt-2">Locked — the GPS has been electronically signed. Download the signed GPS below.</p>
                       </template>
                       <template v-else>
                         <p class="text-small bl-note mb-2">Upload Clinical's completed Inclusion/Exclusion PDF to include its pages automatically when generating the GPS below.</p>
@@ -3864,45 +3865,95 @@
                         class="button button-primary vs-gps-generate-btn"
                         @click="generateGpsDocument"
                       >
-                        <CloudDownload :size="16" :stroke-width="2" />Generate &amp; Download GPS
+                        <CloudDownload :size="16" :stroke-width="2" />{{ gpsSigned ? 'Download Signed GPS' : 'Generate & Download GPS' }}
                       </button>
+                      <p v-if="gpsSigned" class="text-small bl-note mt-2">
+                        Signed GPS: {{ gpsSignedFile }} — automatically saved to Documents &gt; Plan &amp; Compliance.
+                      </p>
+                      <p v-else class="text-small bl-note mt-2">
+                        This preview copy is unsigned. Complete the Electronic Signature below to generate the final signed version.
+                      </p>
                     </div>
 
-                    <!-- Upload Signed GPS -->
+                    <!-- Electronic Signature -->
                     <div class="ap-section">
                       <div class="ap-section-header">
-                        <h4 class="text-h4">Upload Signed GPS</h4>
-                        <button v-if="!gpsEditingSigned && !gpsSignedFile" class="button button-thirtiary" @click="gpsSignedStartEdit">
-                          <Pencil :size="14" :stroke-width="1.5" />Edit
-                        </button>
+                        <h4 class="text-h4">Electronic Signature</h4>
                       </div>
-                      <template v-if="!gpsEditingSigned">
+                      <template v-if="!gpsSigned">
+                        <p class="text-small bl-note mb-2">
+                          Typing your name below and checking the box(es) constitutes your electronic signature, with the same legal effect as a handwritten signature.
+                          <a href="#" class="vs-disclosure-link" @click.prevent="gpsShowDisclosure = true">Read Full Disclosure</a>
+                        </p>
                         <div class="ap-field-row">
-                          <div class="ap-field">
-                            <span class="ap-field-label">Signed GPS</span>
-                            <span class="ap-field-value">{{ gpsSignedFile || 'Not uploaded' }}</span>
-                          </div>
+                          <TextField v-model="gpsSignatureName" label="Type your full name to sign *" />
                         </div>
-                        <p v-if="gpsSignedFile" class="text-small bl-note mt-2">To replace this file, upload a new version in Documents &gt; Plan &amp; Compliance.</p>
-                      </template>
-                      <template v-else>
-                        <p class="text-small bl-note mb-2">Once the client has signed and returned the GPS, upload it here to save it to Documents &gt; Plan &amp; Compliance.</p>
-                        <div class="bl-upload-item">
-                          <template v-if="gpsSignedFile && !gpsPendingSignedRemoval">
-                            <v-chip color="primary" variant="flat" class="bl-file-chip">
-                              <Paperclip :size="12" :stroke-width="2" class="bl-file-chip-icon" />
-                              <span class="bl-file-chip-label">{{ gpsSignedFile }}</span>
-                              <span class="bl-file-chip-close" @click.stop="gpsPendingSignedRemoval = true"><X :size="10" :stroke-width="2.5" /></span>
-                            </v-chip>
-                          </template>
-                          <FileUploader v-else :show-document-type-selection="false" @file-selected="(name) => { gpsSignedFile = name; gpsPendingSignedRemoval = false }" />
+                        <div class="vs-ack-list">
+                          <v-checkbox
+                            v-model="gpsAckGps"
+                            :true-icon="CheckSquare"
+                            :false-icon="Square"
+                            color="primary"
+                            density="compact"
+                            hide-details
+                            class="ap-vcheckbox"
+                            label="I acknowledge the Group Plan Setup (GPS) document above accurately reflects our plan configuration."
+                          />
+                          <v-checkbox
+                            v-model="gpsAckIe"
+                            :true-icon="CheckSquare"
+                            :false-icon="Square"
+                            color="primary"
+                            density="compact"
+                            hide-details
+                            class="ap-vcheckbox"
+                            label="I acknowledge the Inclusion/Exclusion document above accurately reflects our plan configuration."
+                          />
                         </div>
                         <div class="ap-section-footer">
-                          <button class="button button-primary" @click="gpsSignedSaveEdit">Save Changes</button>
-                          <button class="button button-secondary" @click="gpsSignedCancelEdit">Cancel</button>
+                          <button class="button button-primary vs-gps-generate-btn" :disabled="!gpsCanSign" @click="signGps">
+                            <PenLine :size="16" :stroke-width="2" />Submit Signature
+                          </button>
                         </div>
                       </template>
+                      <template v-else>
+                        <div class="ap-field-row">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Signed By</span>
+                            <span class="ap-field-value">{{ gpsSignatureName }}</span>
+                          </div>
+                          <div class="ap-field">
+                            <span class="ap-field-label">Date Signed</span>
+                            <span class="ap-field-value">{{ gpsSignedDate }}</span>
+                          </div>
+                        </div>
+                        <div class="vs-ack-list mt-2">
+                          <div class="vs-ack-confirmed">
+                            <Check :size="14" :stroke-width="2.5" class="vs-ack-confirmed-icon" />
+                            <span>Acknowledged the Group Plan Setup (GPS) document.</span>
+                          </div>
+                          <div class="vs-ack-confirmed">
+                            <Check :size="14" :stroke-width="2.5" class="vs-ack-confirmed-icon" />
+                            <span>Acknowledged the Inclusion/Exclusion document.</span>
+                          </div>
+                        </div>
+                        <p class="text-small bl-note mt-2">This document has been electronically signed.</p>
+                      </template>
                     </div>
+
+                    <Dialog
+                      v-model="gpsShowDisclosure"
+                      heading="Electronic Signature Disclosure"
+                      :actions="[{ text: 'Close', onClick: () => (gpsShowDisclosure = false) }]"
+                    >
+                      <p class="text-small">
+                        By typing your name and checking the acknowledgment box(es) above, using a keyboard, mouse, or other device to select an item or
+                        button, you are providing your Electronic Signature and agreeing that it has the same legal effect as a handwritten signature.
+                        You agree that no certification authority or other third-party verification is necessary to validate your Electronic Signature,
+                        and that the lack of such certification will not affect its enforceability. You represent that you are authorized to sign on
+                        behalf of the Plan Sponsor.
+                      </p>
+                    </Dialog>
                   </div>
                 </template>
 
@@ -4556,7 +4607,7 @@ import DatePicker from '@/components/ui/DatePicker.vue';
 import {
   Hourglass, CircleCheckBig, XCircle,
   Save as SaveIcon, LayoutList as LayoutListIcon, CircleCheck as CircleCheckIcon,
-  ArrowRight as ArrowRightIcon, Pencil, CheckSquare, Square, ChevronDown, X, Check, CloudDownload, TriangleAlert,
+  ArrowRight as ArrowRightIcon, Pencil, PenLine, CheckSquare, Square, ChevronDown, X, Check, CloudDownload, TriangleAlert,
   Building2, Shield, Link2, Users, FileText, Search, Globe, Trash2, Paperclip, Info, Plus,
   Calculator, CheckCircle2,
 } from 'lucide-vue-next';
@@ -5580,15 +5631,50 @@ const handleFormDownload = (formName: string) => {
   showToast(`${formName} downloaded successfully!`, 'success');
 };
 
-// Step 9: Verification & Summary — GPS document generation, I/E merge, signed upload
+// Step 9: Verification & Summary — GPS document generation, I/E merge, e-signature
 const gpsIeFile = ref('');
 const gpsPendingIeRemoval = ref(false);
 const gpsSignedFile = ref('');
-const gpsPendingSignedRemoval = ref(false);
 
 const gpsAccountName = () => accountOptions.value.find(acc => acc.id === selectedAccount.value)?.name ?? 'Account';
 
+// Electronic Signature widget
+const gpsSignatureName = ref('');
+const gpsAckGps = ref(false);
+const gpsAckIe = ref(false);
+const gpsSigned = ref(false);
+const gpsSignedDate = ref('');
+const gpsShowDisclosure = ref(false);
+
+const gpsCanSign = computed(() => {
+  return gpsSignatureName.value.trim().length > 0 && gpsAckGps.value && gpsAckIe.value;
+});
+
+const signGps = () => {
+  if (!gpsCanSign.value) return;
+  gpsSigned.value = true;
+  gpsSignedDate.value = new Date().toISOString().slice(0, 10);
+  gpsSignedFile.value = `GPS_${gpsAccountName().replace(/[^a-zA-Z0-9]+/g, '_')}_Signed.pdf`;
+
+  // Simulates the app auto-generating the signed GPS (and Inclusion/Exclusion attestation page)
+  // and saving a copy to Documents > Plan & Compliance — no manual re-upload required.
+  documentsStore.addDocument({
+    documentName: gpsSignedFile.value,
+    type: 'pdf',
+    uploadDate: gpsSignedDate.value,
+    lastModifiedBy: gpsSignatureName.value,
+    status: 'Published',
+    category: 'Plan & Compliance',
+    accountName: gpsAccountName(),
+  });
+  showToast('GPS electronically signed and saved to Documents > Plan & Compliance!', 'success');
+};
+
 const generateGpsDocument = () => {
+  if (gpsSigned.value) {
+    showToast(`Signed GPS document downloaded — electronically signed by ${gpsSignatureName.value}.`, 'success');
+    return;
+  }
   const message = (gpsIeFile.value && !gpsPendingIeRemoval.value)
     ? 'GPS document generated successfully — Inclusion/Exclusion pages included!'
     : 'GPS document generated successfully!';
@@ -5611,37 +5697,6 @@ const gpsIeCancelEdit = () => {
   gpsIeFile.value = gpsIeSnapshot.ieFile;
   gpsPendingIeRemoval.value = false;
   gpsEditingIe.value = false;
-};
-
-// Step 3 widget: Upload Signed GPS
-const gpsEditingSigned = ref(false);
-let gpsSignedSnapshot: { signedFile: string } = { signedFile: '' };
-const gpsSignedStartEdit = () => {
-  gpsSignedSnapshot = { signedFile: gpsSignedFile.value };
-  gpsEditingSigned.value = true;
-};
-const gpsSignedSaveEdit = () => {
-  if (gpsPendingSignedRemoval.value) gpsSignedFile.value = '';
-  gpsPendingSignedRemoval.value = false;
-  gpsEditingSigned.value = false;
-
-  if (gpsSignedFile.value) {
-    documentsStore.addDocument({
-      documentName: gpsSignedFile.value,
-      type: gpsSignedFile.value.split('.').pop() ?? 'pdf',
-      uploadDate: new Date().toISOString().slice(0, 10),
-      lastModifiedBy: 'Implementation',
-      status: 'Published',
-      category: 'Plan & Compliance',
-      accountName: gpsAccountName(),
-    });
-    showToast('Signed GPS uploaded to Documents > Plan & Compliance!', 'success');
-  }
-};
-const gpsSignedCancelEdit = () => {
-  gpsSignedFile.value = gpsSignedSnapshot.signedFile;
-  gpsPendingSignedRemoval.value = false;
-  gpsEditingSigned.value = false;
 };
 
 const lcOverrides = [
@@ -8267,14 +8322,23 @@ watch(selectedAccount, (newVal) => {
   gpsIeFile.value = '';
   gpsPendingIeRemoval.value = false;
   gpsSignedFile.value = '';
-  gpsPendingSignedRemoval.value = false;
+  gpsSignatureName.value = '';
+  gpsAckGps.value = false;
+  gpsAckIe.value = false;
+  gpsSigned.value = false;
+  gpsSignedDate.value = '';
 
   // Tyrell Corporation: Plan Setup already finished and locked — lets Charity review the
   // locked state directly without manually marking off all 9 steps first.
   if (newVal === TYRELL_CORPORATION_ID) {
     wizardSteps.value.forEach(step => { step.status = 'complete'; });
     gpsIeFile.value = 'Inclusion-Exclusion_TyrellCorp.pdf';
-    gpsSignedFile.value = 'Signed_GPS_TyrellCorp.pdf';
+    gpsSignatureName.value = 'Peter Weyland';
+    gpsAckGps.value = true;
+    gpsAckIe.value = true;
+    gpsSigned.value = true;
+    gpsSignedDate.value = '2026-09-10';
+    gpsSignedFile.value = 'GPS_TyrellCorp_Signed.pdf';
     planSetupComplete.value = true;
   }
 
@@ -10457,6 +10521,31 @@ watch(selectedAccount, (newVal) => {
 .vs-gps-generate-btn {
   gap: $spacing-xsmall;
   align-self: flex-start;
+}
+
+.vs-ack-list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xsmall;
+  margin-bottom: $spacing-medium;
+}
+
+.vs-disclosure-link {
+  color: $color-primary;
+  text-decoration: underline;
+  white-space: nowrap;
+}
+
+.vs-ack-confirmed {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xsmall;
+  color: $color-text-secondary;
+}
+
+.vs-ack-confirmed-icon {
+  color: $color-success;
+  flex-shrink: 0;
 }
 
 // ─── Wayne Enterprises: Group Account Profile (GAP) view ──────────────────────
