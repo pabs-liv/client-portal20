@@ -3402,6 +3402,16 @@
                             <span class="ap-field-value">{{ idVendorNameDisplay }}</span>
                           </div>
                         </div>
+                        <div class="ap-field-row ap-field-row--multi">
+                          <div class="ap-field">
+                            <span class="ap-field-label">Effective start date</span>
+                            <span class="ap-field-value">{{ idEffectiveStart || '—' }}</span>
+                          </div>
+                          <div class="ap-field">
+                            <span class="ap-field-label">Effective end date</span>
+                            <span class="ap-field-value">{{ idEffectiveEnd || '—' }}</span>
+                          </div>
+                        </div>
                       </template>
                       <template v-else>
                         <div class="id-two-col-row">
@@ -3417,6 +3427,13 @@
                             label="Vendor name"
                           />
                         </div>
+                        <div class="bl-section">
+                          <p class="text-body bl-note">Start date defaults to the group's account start date; end date defaults to 12/31/2199. The value shown here is what saves to the card record.</p>
+                          <div class="id-two-col-row">
+                            <DatePicker v-model="idEffectiveStart" label="Effective start date" />
+                            <DatePicker v-model="idEffectiveEnd" label="Effective end date" />
+                          </div>
+                        </div>
                         <div class="ap-section-footer">
                           <button class="button button-primary" @click="idVendorSaveEdit">Save Changes</button>
                           <button class="button button-secondary" @click="idVendorCancelEdit">Cancel</button>
@@ -3424,12 +3441,6 @@
                       </template>
                     </div>
                   </div>
-
-                  <p v-if="idVendorType === 'N/A'" class="text-body bl-note">
-                    This account does not produce ID cards.
-                  </p>
-
-                  <template v-else>
 
                     <!-- Card 2: Card Details -->
                     <div class="ap-section">
@@ -3441,7 +3452,7 @@
                       </div>
                       <div class="ap-fields">
                         <template v-if="!idEditingDetails">
-                          <div class="ap-field-row ap-field-row--multi">
+                          <div v-if="idVendorType !== 'N/A'" class="ap-field-row ap-field-row--multi">
                             <div class="ap-field">
                               <span class="ap-field-label">Processing ID</span>
                               <span class="ap-field-value">{{ idProcessingId }}</span>
@@ -3455,15 +3466,32 @@
                               <span class="ap-field-value">{{ idCombineRxMedical ? 'Yes' : 'No' }}</span>
                             </div>
                           </div>
-                          <div class="ap-field-row">
+                          <p v-if="idVendorType === 'N/A'" class="text-body bl-note">This account does not produce ID cards.</p>
+                          <div v-if="idVendorType !== 'N/A'" class="ap-field-row">
                             <div class="ap-field">
                               <span class="ap-field-label">ID Card file</span>
                               <span class="ap-field-value">{{ idCardFile || 'Not uploaded' }}</span>
                             </div>
                           </div>
+                          <div v-if="idVendorType === 'Liviniti'" class="ap-field-row ap-field-row--multi">
+                            <div class="ap-field">
+                              <span class="ap-field-label">Display logo on digital cards</span>
+                              <span class="ap-field-value">{{ idDisplayLogo ? 'Yes' : 'No' }}</span>
+                            </div>
+                            <div v-if="idDisplayLogo" class="ap-field">
+                              <span class="ap-field-label">Card logo</span>
+                              <span class="ap-field-value">{{ idCardLogoFile || 'Not uploaded' }}</span>
+                            </div>
+                          </div>
+                          <div v-if="idVendorType === 'Liviniti'" class="ap-field-row">
+                            <div class="ap-field">
+                              <span class="ap-field-label">Digital cards only</span>
+                              <span class="ap-field-value">{{ idDigitalCardsOnly ? 'Yes' : 'No' }}</span>
+                            </div>
+                          </div>
                         </template>
                         <template v-else>
-                          <div class="bl-section">
+                          <div v-if="idVendorType !== 'N/A'" class="bl-section">
                             <div class="id-two-col-row">
                               <Select
                                 v-model="idProcessingId"
@@ -3483,7 +3511,7 @@
                               <span class="ap-field-value">Combine Rx and Medical information</span>
                             </div>
                           </div>
-                          <div class="bl-section">
+                          <div v-if="idVendorType !== 'N/A'" class="bl-section">
                             <p class="lc-hcn-label">ID Card file upload</p>
                             <template v-if="idCardFile && !idPendingCardFileRemoval">
                               <v-chip color="primary" variant="flat" class="bl-file-chip">
@@ -3494,18 +3522,51 @@
                             </template>
                             <FileUploader v-else :show-document-type-selection="false" @file-selected="(name) => { idCardFile = name; idPendingCardFileRemoval = false }" />
                           </div>
+
+                          <!-- Display logo on digital cards + Card logo upload (Liviniti only) — mirrors Solo2 Story B (ADO #35514) -->
+                          <div v-if="idVendorType === 'Liviniti'" class="bl-section">
+                            <div class="ap-checkbox-row" style="cursor:pointer" @click="idDisplayLogo = !idDisplayLogo">
+                              <CheckSquare v-if="idDisplayLogo" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                              <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                              <span class="ap-field-value">Display logo on digital cards</span>
+                            </div>
+                            <template v-if="idDisplayLogo">
+                              <p class="lc-hcn-label" style="margin-top: 12px;">Card logo</p>
+                              <template v-if="idCardLogoFile && !idPendingCardLogoRemoval">
+                                <v-chip color="primary" variant="flat" class="bl-file-chip">
+                                  <Paperclip :size="12" :stroke-width="2" class="bl-file-chip-icon" />
+                                  <span class="bl-file-chip-label">{{ idCardLogoFile }}</span>
+                                  <span class="bl-file-chip-close" @click.stop="idPendingCardLogoRemoval = true"><X :size="10" :stroke-width="2.5" /></span>
+                                </v-chip>
+                              </template>
+                              <FileUploader v-else :show-document-type-selection="false" @file-selected="(name) => { idCardLogoFile = name; idPendingCardLogoRemoval = false }" />
+                              <p v-if="!idCardLogoFile" class="text-body" style="color: #b80909; margin-top: 6px;">Card logo is required when Display logo on digital cards is checked</p>
+                            </template>
+                          </div>
+
+                          <!-- Digital cards only (Liviniti only) — mirrors Solo2 Story A (ADO #35513); mutually
+                               exclusive with Mail Physical Cards on Card 3, which also hides that entire card. -->
+                          <div v-if="idVendorType === 'Liviniti'" class="bl-section">
+                            <div class="ap-checkbox-row" style="cursor:pointer" @click="toggleDigitalCardsOnly">
+                              <CheckSquare v-if="idDigitalCardsOnly" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
+                              <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
+                              <span class="ap-field-value">Digital cards only</span>
+                            </div>
+                          </div>
+
                           <div class="ap-section-footer">
-                            <button class="button button-primary" @click="idDetailsSaveEdit">Save Changes</button>
+                            <button class="button button-primary" :disabled="idDetailsSaveDisabled" @click="idDetailsSaveEdit">Save Changes</button>
                             <button class="button button-secondary" @click="idDetailsCancelEdit">Cancel</button>
                           </div>
                         </template>
                       </div>
                     </div>
 
-                    <!-- Card 3: Mailing Preferences (Liviniti only) -->
-                    <div v-if="idVendorType === 'Liviniti'" class="ap-section">
+                    <!-- Card 3: Mailing Preferences (Liviniti only; hidden entirely when Digital Cards Only
+                         is checked on Card 2 — nothing here applies once physical mail is off the table) -->
+                    <div v-if="idVendorType === 'Liviniti' && !idDigitalCardsOnly" class="ap-section">
                       <div class="ap-section-header">
-                        <h4 class="text-h4">Mailing Preferences</h4>
+                        <h4 class="text-h4">Physical Card Mailing Preferences</h4>
                         <button v-if="(!idEditingMailing) && !planSetupComplete" class="button button-thirtiary" @click="idMailingStartEdit">
                           <Pencil :size="14" :stroke-width="1.5" />Edit
                         </button>
@@ -3514,10 +3575,6 @@
                         <template v-if="!idEditingMailing">
                           <div class="ap-field-row ap-field-row--multi">
                             <div class="ap-field">
-                              <span class="ap-field-label">Send cards</span>
-                              <span class="ap-field-value">{{ idSendCards ? 'Yes' : 'No' }}</span>
-                            </div>
-                            <div v-if="idSendCards" class="ap-field">
                               <span class="ap-field-label">Days to send cards before</span>
                               <span class="ap-field-value">{{ idDaysToSend || '—' }}</span>
                             </div>
@@ -3556,20 +3613,15 @@
                           </div>
                         </template>
                         <template v-else>
-                          <!-- Send cards + Days to send -->
+                          <!-- Days to send — no separate "Mail physical cards" checkbox: Digital Cards Only
+                               (Card 2) is the single on/off switch for the whole physical-mail section,
+                               matching Solo2's actual behavior (unchecking it there hides everything too). -->
                           <div class="bl-section">
-                            <div class="id-two-col-row id-two-col-row--checkbox-pair">
-                              <div class="ap-checkbox-row" style="cursor:pointer" @click="idSendCards = !idSendCards">
-                                <CheckSquare v-if="idSendCards" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
-                                <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
-                                <span class="ap-field-value">Send cards</span>
-                              </div>
-                              <TextField
-                                v-if="idSendCards"
-                                v-model="idDaysToSend"
-                                label="Days to send cards before"
-                              />
-                            </div>
+                            <TextField
+                              v-model="idDaysToSend"
+                              label="Days to send cards before"
+                              style="max-width: 260px"
+                            />
                           </div>
 
                           <div class="bl-section">
@@ -3671,44 +3723,7 @@
                       </div>
                     </div>
 
-                    <!-- Card 4: Effective Dates -->
-                    <div class="ap-section">
-                      <div class="ap-section-header">
-                        <h4 class="text-h4">Effective Dates</h4>
-                        <button v-if="(!idEditingDates) && !planSetupComplete" class="button button-thirtiary" @click="idDatesStartEdit">
-                          <Pencil :size="14" :stroke-width="1.5" />Edit
-                        </button>
-                      </div>
-                      <div class="ap-fields">
-                        <template v-if="!idEditingDates">
-                          <div class="ap-field-row ap-field-row--multi">
-                            <div class="ap-field">
-                              <span class="ap-field-label">Effective start date</span>
-                              <span class="ap-field-value">{{ idEffectiveStart || '—' }}</span>
-                            </div>
-                            <div class="ap-field">
-                              <span class="ap-field-label">Effective end date</span>
-                              <span class="ap-field-value">{{ idEffectiveEnd || '—' }}</span>
-                            </div>
-                          </div>
-                        </template>
-                        <template v-else>
-                          <div class="bl-section">
-                            <p class="text-body bl-note">Start date defaults to the group's account start date; end date defaults to 12/31/2199. The value shown here is what saves to the card record.</p>
-                            <div class="id-two-col-row">
-                              <DatePicker v-model="idEffectiveStart" label="Effective start date" />
-                              <DatePicker v-model="idEffectiveEnd" label="Effective end date" />
-                            </div>
-                          </div>
-                          <div class="ap-section-footer">
-                            <button class="button button-primary" @click="idDatesSaveEdit">Save Changes</button>
-                            <button class="button button-secondary" @click="idDatesCancelEdit">Cancel</button>
-                          </div>
-                        </template>
-                      </div>
-                    </div>
-
-                    <!-- Card 5: Card Assets & Information (Carrier only — read-only reference) -->
+                    <!-- Card 4: Card Assets & Information (Carrier only — read-only reference) -->
                     <div v-if="idVendorType === 'Carrier'" class="ap-section">
                       <div class="ap-section-header">
                         <h4 class="text-h4">Card Assets & Information</h4>
@@ -3778,8 +3793,6 @@
                         </div>
                       </div>
                     </div>
-
-                  </template>
 
                 </template>
 
@@ -5490,9 +5503,17 @@ const idVendorNameDisplay = computed(() => {
   return null;
 });
 
+// Effective Start/End — lives here (Vendor), not Card Details, because the dates describe
+// when this vendor relationship is active, matching how Master's real VendorSection.vue
+// bundles them (moved here 2026-09-21, was briefly in Card Details).
+const idEffectiveStart = ref('03/22/2026');
+const idEffectiveEnd = ref('12/31/2199');
+let idVendorDatesSnapshot = { start: '03/22/2026', end: '12/31/2199' };
+
 const idVendorStartEdit = () => {
   idVendorTypeDraft.value = idVendorType.value;
   idCarrierVendorNameDraft.value = idCarrierVendorName.value;
+  idVendorDatesSnapshot = { start: idEffectiveStart.value, end: idEffectiveEnd.value };
   idEditingVendor.value = true;
 };
 const idVendorSaveEdit = () => {
@@ -5501,6 +5522,8 @@ const idVendorSaveEdit = () => {
   idEditingVendor.value = false;
 };
 const idVendorCancelEdit = () => {
+  idEffectiveStart.value = idVendorDatesSnapshot.start;
+  idEffectiveEnd.value = idVendorDatesSnapshot.end;
   idEditingVendor.value = false;
 };
 
@@ -5513,19 +5536,40 @@ const idPersonCodeChars = ref('3');
 const idCardFile = ref<string | null>(null);
 const idPendingCardFileRemoval = ref(false);
 
-let idDetailsSnapshot = { combineRxMedical: false, processingId: 'Cardholder ID', personCodeChars: '3', cardFile: null as string | null };
+// Digital cards only / Display logo — mirrors Solo2's Link/Edit Card Provider modal (ADO
+// #35513/#35514). Digital Cards Only is the sole on/off switch for the entire Physical Card
+// Mailing Preferences card (Card 3) — there is no separate "Mail physical cards" checkbox to
+// stay in sync with, since that would just be a second switch doing the same job.
+const idDigitalCardsOnly = ref(false);
+const idDisplayLogo = ref(false);
+const idCardLogoFile = ref<string | null>(null);
+const idPendingCardLogoRemoval = ref(false);
+
+const toggleDigitalCardsOnly = () => {
+  idDigitalCardsOnly.value = !idDigitalCardsOnly.value;
+};
+
+let idDetailsSnapshot = {
+  combineRxMedical: false, processingId: 'Cardholder ID', personCodeChars: '3', cardFile: null as string | null,
+  digitalCardsOnly: false, displayLogo: false, cardLogoFile: null as string | null,
+};
 const idDetailsStartEdit = () => {
   idDetailsSnapshot = {
     combineRxMedical: idCombineRxMedical.value,
     processingId: idProcessingId.value,
     personCodeChars: idPersonCodeChars.value,
     cardFile: idCardFile.value,
+    digitalCardsOnly: idDigitalCardsOnly.value,
+    displayLogo: idDisplayLogo.value,
+    cardLogoFile: idCardLogoFile.value,
   };
   idEditingDetails.value = true;
 };
 const idDetailsSaveEdit = () => {
   if (idPendingCardFileRemoval.value) idCardFile.value = null;
   idPendingCardFileRemoval.value = false;
+  if (idPendingCardLogoRemoval.value) idCardLogoFile.value = null;
+  idPendingCardLogoRemoval.value = false;
   idEditingDetails.value = false;
 };
 const idDetailsCancelEdit = () => {
@@ -5534,16 +5578,28 @@ const idDetailsCancelEdit = () => {
   idPersonCodeChars.value = idDetailsSnapshot.personCodeChars;
   idCardFile.value = idDetailsSnapshot.cardFile;
   idPendingCardFileRemoval.value = false;
+  idDigitalCardsOnly.value = idDetailsSnapshot.digitalCardsOnly;
+  idDisplayLogo.value = idDetailsSnapshot.displayLogo;
+  idCardLogoFile.value = idDetailsSnapshot.cardLogoFile;
+  idPendingCardLogoRemoval.value = false;
   idEditingDetails.value = false;
 };
 
-// Card 3: Mailing Preferences (Liviniti only)
+// Blocks Save when "Display logo on digital cards" is checked but no logo has been uploaded —
+// matches the required-field validation in Solo2 Story B (ADO #35514).
+const idDetailsSaveDisabled = computed(() => idDisplayLogo.value && !idCardLogoFile.value);
+
+// Card 3: Physical Card Mailing Preferences (Liviniti only). No local "mail physical cards"
+// checkbox here — Digital Cards Only (Card 2) is the single on/off switch for this entire
+// card, matching Solo2's actual behavior.
 const idEditingMailing = ref(false);
-const idSendCards = ref(false);
 const idDaysToSend = ref('');
 const idInitialMailing = ref('');
 const idAdditionalCard = ref('');
-const idMailingOptions = ['Mail to member', 'Mail to employer', 'Mail to HR', 'No mailing'];
+// Real ACT.CardProductionMailingPreferences options — confirmed identical for Solo2 and CP2.0;
+// the previous placeholder list here ('Mail to member'/'Mail to employer'/'Mail to HR'/
+// 'No mailing') did not match the real data.
+const idMailingOptions = ['Cardholder Liviniti Standard', 'Group Specified Location'];
 const idAttention = ref('');
 const idMailingAddress = ref('');
 const idNotes = ref('');
@@ -5568,13 +5624,12 @@ const idAutoGenSummary = computed(() => {
 });
 
 let idMailingSnapshot = {
-  sendCards: false, daysToSend: '', initialMailing: '', additionalCard: '',
+  daysToSend: '', initialMailing: '', additionalCard: '',
   attention: '', mailingAddress: '', notes: '',
   autoGenCards: { nameChange: true, addressChange: true, dependentChange: true, locationChange: true, effectiveDateChange: true },
 };
 const idMailingStartEdit = () => {
   idMailingSnapshot = {
-    sendCards: idSendCards.value,
     daysToSend: idDaysToSend.value,
     initialMailing: idInitialMailing.value,
     additionalCard: idAdditionalCard.value,
@@ -5589,7 +5644,6 @@ const idMailingSaveEdit = () => {
   idEditingMailing.value = false;
 };
 const idMailingCancelEdit = () => {
-  idSendCards.value = idMailingSnapshot.sendCards;
   idDaysToSend.value = idMailingSnapshot.daysToSend;
   idInitialMailing.value = idMailingSnapshot.initialMailing;
   idAdditionalCard.value = idMailingSnapshot.additionalCard;
@@ -5600,26 +5654,7 @@ const idMailingCancelEdit = () => {
   idEditingMailing.value = false;
 };
 
-// Card 4: Effective Dates
-const idEditingDates = ref(false);
-const idEffectiveStart = ref('03/22/2026');
-const idEffectiveEnd = ref('12/31/2199');
-
-let idDatesSnapshot = { start: '', end: '' };
-const idDatesStartEdit = () => {
-  idDatesSnapshot = { start: idEffectiveStart.value, end: idEffectiveEnd.value };
-  idEditingDates.value = true;
-};
-const idDatesSaveEdit = () => {
-  idEditingDates.value = false;
-};
-const idDatesCancelEdit = () => {
-  idEffectiveStart.value = idDatesSnapshot.start;
-  idEffectiveEnd.value = idDatesSnapshot.end;
-  idEditingDates.value = false;
-};
-
-// Card 5: Card Assets & Information (Carrier only — read-only reference, no edit state)
+// Card 4: Card Assets & Information (Carrier only — read-only reference, no edit state)
 const downloadLivinitiLogo = () => {
   console.log('Download Liviniti logo');
   // Production: trigger static asset download
