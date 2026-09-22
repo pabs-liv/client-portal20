@@ -47,7 +47,6 @@
               <img :src="EmptyStateImg" alt="No data" class="doc-empty-icon" />
               <p class="doc-empty-title">Nothing to see here</p>
               <p class="doc-empty-subtitle">No documents have been uploaded yet.</p>
-              <button class="button button-secondary" @click="openUploadModal">+Add Document</button>
             </div>
           </template>
         </ReportDataTable>
@@ -126,7 +125,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
-import { CloudUpload, Paperclip, CheckSquare, Square, Trash2 } from 'lucide-vue-next';
+import { CloudUpload, Paperclip, CheckSquare, Square, Trash2, X } from 'lucide-vue-next';
 import EmptyStateImg from '@/assets/EmptyState.svg';
 import PageCard from '@/components/common/PageCard.vue';
 import AccountSelector from '@/components/common/AccountSelector.vue';
