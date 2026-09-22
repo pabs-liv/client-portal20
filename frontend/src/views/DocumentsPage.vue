@@ -94,10 +94,7 @@
       <FileUploader v-else :show-document-type-selection="false" @file-selected="(name) => { stagedFileName = name }" />
 
       <template v-if="stagedFileName">
-        <p v-if="uploadDocumentType === 'PHI Documents'" class="text-body upload-review-line">
-          This will be added to {{ selectedAccountName }}'s PHI Documents.
-        </p>
-        <div v-else class="ap-checkbox-toggle upload-phi-ack" @click="uploadPhiAck = !uploadPhiAck">
+        <div v-if="uploadDocumentType !== 'PHI Documents'" class="ap-checkbox-toggle upload-phi-ack" @click="uploadPhiAck = !uploadPhiAck">
           <CheckSquare v-if="uploadPhiAck" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
           <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
           <span class="text-small">I confirm this document does not contain Protected Health Information (PHI). If it does, it must be uploaded under the PHI Documents tab instead.</span>
@@ -535,11 +532,6 @@ const uploadDialogActions = computed(() => [
       opacity: 1;
     }
   }
-}
-
-.upload-review-line {
-  margin-top: $spacing-medium;
-  color: $color-text-secondary;
 }
 
 .ap-checkbox-toggle {
