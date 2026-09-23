@@ -3914,6 +3914,7 @@
                           />
                           <v-checkbox
                             v-model="gpsAckIe"
+                            :disabled="!gpsHasIeFile"
                             :true-icon="CheckSquare"
                             :false-icon="Square"
                             color="primary"
@@ -5681,8 +5682,16 @@ const gpsSigned = ref(false);
 const gpsSignedDate = ref('');
 const gpsShowDisclosure = ref(false);
 
+const gpsHasIeFile = computed(() => !!gpsIeFile.value && !gpsPendingIeRemoval.value);
+
 const gpsCanSign = computed(() => {
   return gpsSignatureName.value.trim().length > 0 && gpsAckGps.value && gpsAckIe.value;
+});
+
+// Keep the I/E acknowledgment in sync with the checkbox's disabled state — a checked box
+// left over from before the file was removed would otherwise silently satisfy gpsCanSign.
+watch(gpsHasIeFile, (hasFile) => {
+  if (!hasFile) gpsAckIe.value = false;
 });
 
 const signGps = () => {
