@@ -944,6 +944,31 @@
                   </Dialog>
 
                   <Dialog
+                    v-model="showPrescriberDialog"
+                    :heading="prescriberDialogHeading"
+                    :show-secondary-button="true"
+                    :actions="prescriberDialogActions"
+                  >
+                    <v-row class="mt-1">
+                      <v-col cols="12">
+                        <TextField
+                          v-model="prescriberForm.name"
+                          label="Prescriber Name *"
+                          :error-messages="prescriberTouched && !prescriberForm.name.trim() ? ['Required'] : []"
+                        />
+                      </v-col>
+                      <v-col cols="12">
+                        <TextField
+                          v-model="prescriberForm.npi"
+                          label="Prescriber NPI *"
+                          placeholder="10 digits"
+                          :error-messages="prescriberTouched && !pdIsValidNpi(prescriberForm.npi) ? ['Please enter a valid NPI containing 10 digits.'] : []"
+                        />
+                      </v-col>
+                    </v-row>
+                  </Dialog>
+
+                  <Dialog
                     v-model="showAccumulatorAddChoiceDialog"
                     heading="Add Accumulator"
                     text="How would you like to add an accumulator to this plan?"
@@ -1722,6 +1747,176 @@
                             <p class="nc-empty-title">Nothing to see here</p>
                             <p class="nc-empty-subtitle">No plan parameters configured.</p>
                             <button v-if="!planSetupComplete" class="button button-secondary" @click="pdStartEditParameters(plan)">+ Add Parameters</button>
+                          </div>
+                        </div>
+
+                        <!-- Preventive List -->
+                        <div class="pd-section">
+                          <div class="pd-section-header">
+                            <h4 class="text-h4">Preventive List</h4>
+                            <button v-if="!pdIsEditingPreventiveList(plan.id) && !planSetupComplete" class="button button-thirtiary" @click="pdStartEditPreventiveList(plan)">
+                              <Pencil :size="14" :stroke-width="1.5" /> Edit
+                            </button>
+                          </div>
+
+                          <template v-if="pdIsEditingPreventiveList(plan.id)">
+                            <div class="bl-section">
+                              <div class="toc-question">
+                                <p class="toc-question-label">Does the Liviniti preventive list apply?</p>
+                                <div class="toc-toggle-group">
+                                  <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': plan.preventiveListApplies === false }]" @click="plan.preventiveListApplies = false">No</button>
+                                  <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': plan.preventiveListApplies === true }]" @click="plan.preventiveListApplies = true">Yes</button>
+                                </div>
+                              </div>
+                            </div>
+
+                            <template v-if="plan.preventiveListApplies">
+                              <div class="bl-section">
+                                <p class="lc-hcn-label">Which list does your preventive list apply to?</p>
+                                <div class="bl-field-narrow">
+                                  <Select
+                                    v-model="plan.preventiveListName"
+                                    :items="pdPreventiveListNameOptions"
+                                    label="List"
+                                    :error-messages="pdPreventiveTouched[plan.id] && !plan.preventiveListName ? ['Required'] : []"
+                                  />
+                                </div>
+                              </div>
+
+                              <div class="bl-section">
+                                <div class="toc-question">
+                                  <p class="toc-question-label">Are lower copays applied for prescriptions written by specific physicians?</p>
+                                  <div class="toc-toggle-group">
+                                    <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': plan.lowerCopaysApplied === false }]" @click="plan.lowerCopaysApplied = false">No</button>
+                                    <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': plan.lowerCopaysApplied === true }]" @click="plan.lowerCopaysApplied = true">Yes</button>
+                                  </div>
+                                </div>
+
+                                <template v-if="plan.lowerCopaysApplied">
+                                  <div class="bl-subsection">
+                                    <div class="pd-subcard">
+                                      <div class="ap-section-header ap-section-header--space-between">
+                                        <p class="lc-hcn-label">Prescribers</p>
+                                        <button v-if="plan.lowerCopayPrescribers.length > 0" class="button button-primary" @click="openPrescriberDialog(plan)">+ Add Prescriber</button>
+                                      </div>
+                                      <ReportDataTable
+                                        :headers="prescriberHeaders"
+                                        :items="plan.lowerCopayPrescribers"
+                                        item-value="npi"
+                                        :show-search-bar="false"
+                                        :show-filter-pills="false"
+                                        :show-selection-checkboxes="false"
+                                        :show-row-actions="true"
+                                        :row-action-items="prescriberRowActions"
+                                        :show-table-footer="false"
+                                        @row-action="(payload) => handlePrescriberRowAction(plan, payload)"
+                                      >
+                                        <template #empty-state>
+                                          <div class="nc-empty-state">
+                                            <img :src="EmptyStateImg" alt="No data" class="nc-empty-icon" />
+                                            <p class="nc-empty-title">Nothing to see here</p>
+                                            <p class="nc-empty-subtitle">No prescribers added yet.</p>
+                                            <button class="button button-secondary pd-empty-cta" @click="openPrescriberDialog(plan)">+ Add Prescriber</button>
+                                          </div>
+                                        </template>
+                                      </ReportDataTable>
+                                      <p v-if="pdPreventiveTouched[plan.id] && plan.lowerCopayPrescribers.length === 0" class="text-small pd-inline-error">
+                                        Add at least one prescriber.
+                                      </p>
+                                    </div>
+                                    <v-textarea
+                                      v-model="plan.lowerCopayNotes"
+                                      label="Lower Copay Notes"
+                                      variant="outlined"
+                                      density="compact"
+                                      rows="2"
+                                      auto-grow
+                                      hide-details
+                                      class="bl-notes-textarea mt-3"
+                                    />
+                                  </div>
+                                </template>
+                              </div>
+
+                              <div class="bl-section">
+                                <div class="toc-question">
+                                  <p class="toc-question-label">Is the preventive list copay amount applicable?</p>
+                                  <div class="toc-toggle-group">
+                                    <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': plan.copayAmountApplicable === false }]" @click="plan.copayAmountApplicable = false">No</button>
+                                    <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': plan.copayAmountApplicable === true }]" @click="plan.copayAmountApplicable = true">Yes</button>
+                                  </div>
+                                </div>
+
+                                <div v-if="plan.copayAmountApplicable" class="bl-subsection">
+                                  <p class="lc-hcn-label">What is the preventive copay amount?</p>
+                                  <div class="bl-field-narrow">
+                                    <TextField
+                                      v-model.number="plan.copayAmount"
+                                      label="Amount"
+                                      type="text"
+                                      inputmode="decimal"
+                                      prefix="$"
+                                      :error-messages="pdPreventiveTouched[plan.id] && !plan.copayAmount ? ['Required'] : []"
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div class="bl-section bl-section--no-gap">
+                                <div class="toc-question">
+                                  <p class="toc-question-label">Deductible waived for preventive list drugs?</p>
+                                  <div class="toc-toggle-group">
+                                    <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': plan.deductibleWaived === false }]" @click="plan.deductibleWaived = false">No</button>
+                                    <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': plan.deductibleWaived === true }]" @click="plan.deductibleWaived = true">Yes</button>
+                                  </div>
+                                </div>
+                              </div>
+                            </template>
+
+                            <div class="ap-section-footer">
+                              <button class="button button-primary" @click="pdSaveEditPreventiveList(plan)">Save Changes</button>
+                              <button class="button button-secondary" @click="pdCancelEditPreventiveList(plan)">Cancel</button>
+                            </div>
+                          </template>
+
+                          <!-- Display-only -->
+                          <div v-else-if="plan.preventiveListApplies !== null" class="ap-fields">
+                            <div class="ap-field-row">
+                              <div class="ap-field">
+                                <span class="ap-field-label">Apply Preventive List</span>
+                                <span class="ap-field-value">{{ plan.preventiveListApplies ? 'Yes' : 'No' }}</span>
+                              </div>
+                            </div>
+                            <template v-if="plan.preventiveListApplies">
+                              <div class="ap-field-row ap-field-row--multi">
+                                <div class="ap-field">
+                                  <span class="ap-field-label">Applicable List</span>
+                                  <span class="ap-field-value">{{ plan.preventiveListName || '—' }}</span>
+                                </div>
+                                <div class="ap-field">
+                                  <span class="ap-field-label">Preventive Copay Amount</span>
+                                  <span class="ap-field-value">{{ plan.copayAmountApplicable ? `$${plan.copayAmount ?? 0}` : 'Not Applicable' }}</span>
+                                </div>
+                                <div class="ap-field">
+                                  <span class="ap-field-label">Deductible Waived</span>
+                                  <span class="ap-field-value">{{ plan.deductibleWaived ? 'Yes' : 'No' }}</span>
+                                </div>
+                              </div>
+                              <div class="ap-field-row">
+                                <div class="ap-field">
+                                  <span class="ap-field-label">Lower Copays for Specific Prescribers</span>
+                                  <span class="ap-field-value">{{ plan.lowerCopaysApplied ? (plan.lowerCopayPrescribers.map(p => `${p.name} (NPI ${p.npi})`).join(', ') || 'Yes') : 'No' }}</span>
+                                </div>
+                              </div>
+                            </template>
+                          </div>
+
+                          <!-- Empty state: nothing configured yet -->
+                          <div v-else class="nc-empty-state">
+                            <img :src="EmptyStateImg" alt="No data" class="nc-empty-icon" />
+                            <p class="nc-empty-title">Nothing to see here</p>
+                            <p class="nc-empty-subtitle">Preventive list has not been configured for this plan.</p>
+                            <button v-if="!planSetupComplete" class="button button-secondary" @click="pdStartEditPreventiveList(plan)">+ Add Preventive List</button>
                           </div>
                         </div>
 
@@ -7146,6 +7341,14 @@ const planDesignPlans = ref([
         },
       ],
     } as CopayTiersByContext,
+    preventiveListApplies: false as boolean | null,
+    preventiveListName: '' as string,
+    lowerCopaysApplied: false,
+    lowerCopayPrescribers: [] as { name: string; npi: string }[],
+    lowerCopayNotes: '',
+    copayAmountApplicable: false,
+    copayAmount: null as number | null,
+    deductibleWaived: false,
   },
   {
     id: 70954,
@@ -7169,6 +7372,14 @@ const planDesignPlans = ref([
     benefitCodes: [] as { benefitCode: string; effStartDate: string; effEndDate: string }[],
     accumulators: [] as PlanAccumulatorRow[],
     copayTiers: {} as CopayTiersByContext,
+    preventiveListApplies: false as boolean | null,
+    preventiveListName: '' as string,
+    lowerCopaysApplied: false,
+    lowerCopayPrescribers: [] as { name: string; npi: string }[],
+    lowerCopayNotes: '',
+    copayAmountApplicable: false,
+    copayAmount: null as number | null,
+    deductibleWaived: false,
   },
 ]);
 
@@ -8023,6 +8234,14 @@ const pdSaveNewPlan = () => {
     benefitCodes: [],
     accumulators: [],
     copayTiers: {},
+    preventiveListApplies: null,
+    preventiveListName: '',
+    lowerCopaysApplied: false,
+    lowerCopayPrescribers: [],
+    lowerCopayNotes: '',
+    copayAmountApplicable: false,
+    copayAmount: null,
+    deductibleWaived: false,
   });
   expandedPlans.value.push(newId);
   pdShowCreateDialog.value = false;
@@ -8334,6 +8553,152 @@ const pdCancelEditParameters = (plan: PdParameterFields) => {
 
 const pdSaveEditParameters = (plan: { id: number }) => {
   pdParamEditingIds.value = pdParamEditingIds.value.filter(id => id !== plan.id);
+};
+
+// ─── Plan Design — Preventive List ────────────────────────────────────────────
+// Solo2 has no live table for these fields today, so Save writes the full current
+// state as one new Solo2 account note (Plan Design note type, subject "Preventive
+// List — [Plan Name]") and hides the previous one — see 2026-09-22/24 design notes.
+// A hidden marker in the note body is what lets Edit read prior answers back in.
+type PdPreventivePrescriber = { name: string; npi: string };
+
+type PdPreventiveListFields = {
+  id: number;
+  preventiveListApplies: boolean | null;
+  preventiveListName: string;
+  lowerCopaysApplied: boolean;
+  lowerCopayPrescribers: PdPreventivePrescriber[];
+  lowerCopayNotes: string;
+  copayAmountApplicable: boolean;
+  copayAmount: number | null;
+  deductibleWaived: boolean;
+};
+
+const pdPreventiveListNameOptions = ['Standard', 'Expanded', 'Custom List', 'Generics Only'];
+
+const pdPreventiveEditingIds = ref<number[]>([]);
+let pdPreventiveSnapshots: Record<number, Omit<PdPreventiveListFields, 'id'>> = {};
+const pdPreventiveTouched = ref<Record<number, boolean>>({});
+const pdIsValidNpi = (npi: string) => /^\d{10}$/.test(npi.trim());
+
+const pdIsEditingPreventiveList = (id: number) => pdPreventiveEditingIds.value.includes(id);
+
+const pdStartEditPreventiveList = (plan: PdPreventiveListFields) => {
+  pdPreventiveSnapshots[plan.id] = {
+    preventiveListApplies: plan.preventiveListApplies,
+    preventiveListName: plan.preventiveListName,
+    lowerCopaysApplied: plan.lowerCopaysApplied,
+    lowerCopayPrescribers: [...plan.lowerCopayPrescribers],
+    lowerCopayNotes: plan.lowerCopayNotes,
+    copayAmountApplicable: plan.copayAmountApplicable,
+    copayAmount: plan.copayAmount,
+    deductibleWaived: plan.deductibleWaived,
+  };
+  // Snapshot keeps the true prior value (including "never configured") so Cancel
+  // reverts correctly; the live toggle defaults to No rather than showing unselected.
+  if (plan.preventiveListApplies === null) {
+    plan.preventiveListApplies = false;
+  }
+  pdPreventiveTouched.value[plan.id] = false;
+  pdPreventiveEditingIds.value.push(plan.id);
+};
+
+const pdCancelEditPreventiveList = (plan: PdPreventiveListFields) => {
+  const snap = pdPreventiveSnapshots[plan.id];
+  if (snap) {
+    plan.preventiveListApplies = snap.preventiveListApplies;
+    plan.preventiveListName = snap.preventiveListName;
+    plan.lowerCopaysApplied = snap.lowerCopaysApplied;
+    plan.lowerCopayPrescribers = [...snap.lowerCopayPrescribers];
+    plan.lowerCopayNotes = snap.lowerCopayNotes;
+    plan.copayAmountApplicable = snap.copayAmountApplicable;
+    plan.copayAmount = snap.copayAmount;
+    plan.deductibleWaived = snap.deductibleWaived;
+  }
+  pdPreventiveEditingIds.value = pdPreventiveEditingIds.value.filter(id => id !== plan.id);
+};
+
+const prescriberHeaders = [
+  { title: 'Prescriber Name', key: 'name' },
+  { title: 'NPI',             key: 'npi'  },
+  { title: '',                key: 'actions', sortable: false },
+];
+
+const prescriberRowActions = [
+  { label: 'Edit',   action: 'edit'   },
+  { label: 'Remove', action: 'remove' },
+];
+
+const showPrescriberDialog = ref(false);
+const prescriberDialogPlanId = ref<number | null>(null);
+const prescriberDialogMode = ref<'add' | 'edit'>('add');
+const prescriberEditingIndex = ref(-1);
+const prescriberTouched = ref(false);
+const prescriberForm = ref<PdPreventivePrescriber>({ name: '', npi: '' });
+
+const prescriberDialogHeading = computed(() =>
+  `${prescriberDialogMode.value === 'edit' ? 'Edit' : 'Add'} Prescriber`
+);
+const prescriberDialogPlan = computed(() => planDesignPlans.value.find(p => p.id === prescriberDialogPlanId.value));
+
+const openPrescriberDialog = (plan: { id: number }) => {
+  prescriberDialogPlanId.value = plan.id;
+  prescriberDialogMode.value = 'add';
+  prescriberEditingIndex.value = -1;
+  prescriberTouched.value = false;
+  prescriberForm.value = { name: '', npi: '' };
+  showPrescriberDialog.value = true;
+};
+
+const handlePrescriberRowAction = (plan: PdPreventiveListFields, { action, item }: { action: string; item: PdPreventivePrescriber }) => {
+  const arr = plan.lowerCopayPrescribers;
+  if (action === 'remove') {
+    const idx = arr.indexOf(item);
+    if (idx !== -1) arr.splice(idx, 1);
+    return;
+  }
+  if (action === 'edit') {
+    prescriberDialogPlanId.value = plan.id;
+    prescriberDialogMode.value = 'edit';
+    prescriberEditingIndex.value = arr.indexOf(item);
+    prescriberTouched.value = false;
+    prescriberForm.value = { name: item.name, npi: item.npi };
+    showPrescriberDialog.value = true;
+  }
+};
+
+const savePrescriberEntry = () => {
+  prescriberTouched.value = true;
+  const plan = prescriberDialogPlan.value;
+  const name = prescriberForm.value.name.trim();
+  const npi = prescriberForm.value.npi.trim();
+  if (!plan || !name || !pdIsValidNpi(npi)) return;
+
+  const entry: PdPreventivePrescriber = { name, npi };
+  if (prescriberDialogMode.value === 'edit' && prescriberEditingIndex.value !== -1) {
+    plan.lowerCopayPrescribers[prescriberEditingIndex.value] = entry;
+  } else {
+    plan.lowerCopayPrescribers.push(entry);
+  }
+  showPrescriberDialog.value = false;
+};
+
+const prescriberDialogActions = computed(() => [
+  { text: 'Cancel', styleType: 'secondary' as const, onClick: () => { showPrescriberDialog.value = false; } },
+  { text: prescriberDialogMode.value === 'edit' ? 'Save Changes' : 'Add Prescriber', styleType: 'primary' as const, onClick: savePrescriberEntry },
+]);
+
+const pdSaveEditPreventiveList = (plan: PdPreventiveListFields) => {
+  pdPreventiveTouched.value[plan.id] = true;
+  const missingListName = plan.preventiveListApplies && !plan.preventiveListName;
+  const missingPrescriber = plan.lowerCopaysApplied && plan.lowerCopayPrescribers.length === 0;
+  const missingCopayAmount = plan.copayAmountApplicable && !plan.copayAmount;
+  if (missingListName || missingPrescriber || missingCopayAmount) return;
+
+  // Prototype stub: real save sends the full current state to Solo2 as a new
+  // account note (Plan Design type) and hides the previous "Preventive List" note.
+  pdPreventiveEditingIds.value = pdPreventiveEditingIds.value.filter(id => id !== plan.id);
+  showToast('Preventive List saved', 'success');
 };
 
 // ─── Timeline helpers ─────────────────────────────────────────────────────────
@@ -9364,6 +9729,18 @@ watch(selectedAccount, (newVal) => {
   margin-top: $spacing-small;
 }
 
+.pd-subcard {
+  background-color: $color-neutral-white;
+  border: 1px solid $color-border;
+  border-radius: 8px;
+  padding: $spacing-medium;
+}
+
+.pd-inline-error {
+  color: $color-error;
+  margin-top: $spacing-small;
+}
+
 .pd-section-header {
   display: flex;
   align-items: center;
@@ -9601,13 +9978,13 @@ watch(selectedAccount, (newVal) => {
 
 .toc-toggle-group {
   display: flex;
-  gap: $spacing-xsmall;
+  gap: $spacing-small;
 }
 
 .toc-toggle {
   border: 1px solid $color-border;
-  border-radius: 6px;
-  padding: 6px $spacing-medium;
+  border-radius: 100px;
+  padding: 10px $spacing-large;
   background: $color-neutral-white;
   color: $color-text-primary;
   font-size: $font-size-body;
@@ -9615,7 +9992,8 @@ watch(selectedAccount, (newVal) => {
   min-width: 72px;
 
   &--selected {
-    border-color: $color-primary;
+    border: 2px solid $color-primary;
+    background-color: rgba($color-primary, 0.1);
     color: $color-primary;
     font-weight: $font-weight-semibold;
   }

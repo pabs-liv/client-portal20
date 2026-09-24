@@ -57,7 +57,7 @@ withDefaults(defineProps<Props>(), {
   label: '',
   multiple: false,
   readonly: false,
-  variant: 'outlined',
+  variant: 'underlined',
   density: 'compact',
 });
 

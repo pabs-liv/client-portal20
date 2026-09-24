@@ -57,7 +57,7 @@ const props = withDefaults(defineProps<Props>(), {
   modelValue: '',
   readonly: false,
   color: 'primary',
-  variant: 'outlined',
+  variant: 'underlined',
   density: 'compact',
   min: undefined,
 });

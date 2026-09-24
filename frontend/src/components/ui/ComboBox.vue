@@ -38,7 +38,7 @@ const props = withDefaults(defineProps<Props>(), {
   itemTitle: 'title',
   itemValue: 'value',
   noDataText: 'No data available',
-  variant: 'outlined',
+  variant: 'underlined',
 });
 
 const internalSearch = ref<string>('');

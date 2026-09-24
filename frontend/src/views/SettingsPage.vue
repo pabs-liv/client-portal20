@@ -823,16 +823,10 @@
                   <div class="caa-option-section">
                     <p>Do you want Liviniti to submit a Gag Attestation on your behalf?</p>
                   </div>
-                  <v-item-group v-model="editableGagClauseData.authorize" mandatory class="mt-small">
-                    <div class="form-row">
-                      <v-item v-slot="{ isSelected, toggle }" value="yes">
-                        <v-btn :color="isSelected ? 'primary' : ''" @click="toggle">Yes</v-btn>
-                      </v-item>
-                      <v-item v-slot="{ isSelected, toggle }" value="no">
-                        <v-btn :color="isSelected ? 'primary' : ''" @click="toggle">No</v-btn>
-                      </v-item>
-                    </div>
-                  </v-item-group>
+                  <div class="toc-toggle-group mt-small">
+                    <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': editableGagClauseData.authorize === 'no' }]" @click="editableGagClauseData.authorize = 'no'">No</button>
+                    <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': editableGagClauseData.authorize === 'yes' }]" @click="editableGagClauseData.authorize = 'yes'">Yes</button>
+                  </div>
                   <div v-if="editableGagClauseData.authorize === 'yes'" class="caa-fee-ack">
                     <p class="caa-fee-ack__notice">You acknowledge that a fee of $250 will be charged per reporting period.</p>
                     <label class="caa-checkbox-label">
@@ -2241,6 +2235,34 @@ const userAdminDialogActions = computed(() => [
   display: flex;
   flex-direction: column;
   
+}
+
+.toc-toggle-group {
+  display: flex;
+  gap: $spacing-small;
+}
+
+.toc-toggle {
+  border: 1px solid $color-border;
+  border-radius: 100px;
+  padding: 10px $spacing-large;
+  background: $color-neutral-white;
+  color: $color-text-primary;
+  font-size: $font-size-body;
+  cursor: pointer;
+  min-width: 72px;
+
+  &--selected {
+    border: 2px solid $color-primary;
+    background-color: rgba($color-primary, 0.1);
+    color: $color-primary;
+    font-weight: $font-weight-semibold;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 }
 
 .general-information-container {

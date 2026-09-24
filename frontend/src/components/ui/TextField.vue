@@ -5,7 +5,7 @@
         ref="textFieldRef"
         v-bind="{ ...$attrs, ...tooltipProps }"
         :label="hasRequiredMarker ? undefined : ($attrs.label as string)"
-        :variant="readonly ? 'outlined' : 'outlined'"
+        variant="underlined"
         :readonly="readonly"
         density="compact"
         :model-value="modelValue"
