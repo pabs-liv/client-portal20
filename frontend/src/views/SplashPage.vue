@@ -16,14 +16,21 @@
         </li>
       </ul>
 
-      <Button variant="primary" label="Continue to login" class="splash-continue-btn" @click="onContinue" />
+      <Button
+        variant="primary"
+        label="Check out the new experience"
+        class="splash-continue-btn"
+        show-icon
+        :icon="ChevronRight"
+        @click="onContinue"
+      />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
-import { LayoutPanelLeft, LayoutDashboard, Filter, Zap } from 'lucide-vue-next';
+import { LayoutPanelLeft, LayoutDashboard, Filter, Zap, ChevronRight } from 'lucide-vue-next';
 import Button from '@/components/ui/Button.vue';
 
 const router = useRouter();
