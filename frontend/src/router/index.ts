@@ -1,5 +1,7 @@
 
 import { createRouter, createWebHistory } from 'vue-router';
+import SplashPage from '@/views/SplashPage.vue';
+import LoginPage from '@/views/LoginPage.vue';
 import HomePage from '@/views/HomePage.vue';
 import ReportsPage from '@/views/ReportsPage.vue';
 import CaaReportsPage from '@/views/CaaReportsPage.vue';
@@ -13,7 +15,9 @@ import AddedValuePage from '@/views/AddedValuePage.vue';
 import SettingsPage from '@/views/SettingsPage.vue';
 
 const routes = [
-  { path: '/', name: 'Home', component: HomePage, meta: { breadcrumb: 'Home' } },
+  { path: '/', name: 'Splash', component: SplashPage },
+  { path: '/login', name: 'Login', component: LoginPage },
+  { path: '/home', name: 'Home', component: HomePage, meta: { breadcrumb: 'Home' } },
   { path: '/reports', name: 'Reports', component: ReportsPage, meta: { breadcrumb: 'Reports' } },
   { path: '/caa-reports', name: 'CaaReports', component: CaaReportsPage, meta: { breadcrumb: 'CAA Reports' } },
   { path: '/documents', name: 'Documents', component: DocumentsPage, meta: { breadcrumb: 'Documents' } },

@@ -3,7 +3,7 @@
     :model-value="modelValue"
     :persistent="persistent"
     @update:model-value="$emit('update:modelValue', $event)"
-    max-width="800"
+    :max-width="maxWidth"
   >
     <v-card class="pa-medium dialog-card">
       <v-card-title class="d-flex align-center">
@@ -49,12 +49,14 @@ interface Props {
   text?: string;
   actions?: Action[];
   showSecondaryButton?: boolean;
+  maxWidth?: string | number;
 }
 
 withDefaults(defineProps<Props>(), {
   persistent: false,
   actions: () => [],
   showSecondaryButton: false,
+  maxWidth: '800',
 });
 
 defineEmits(['update:modelValue']);

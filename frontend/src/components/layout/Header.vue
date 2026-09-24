@@ -28,7 +28,7 @@
         <v-list-item>
           <v-list-item-title>Profile</v-list-item-title>
         </v-list-item>
-        <v-list-item>
+        <v-list-item @click="onLogout">
           <v-list-item-title>Logout</v-list-item-title>
         </v-list-item>
       </v-list>
@@ -38,9 +38,15 @@
 
 <script setup lang="ts">
 import { Sun, Moon } from 'lucide-vue-next';
+import { useRouter } from 'vue-router';
 import { useDarkMode } from '@/composables/useDarkMode';
 
 const { isDark, toggleDarkMode } = useDarkMode();
+const router = useRouter();
+
+function onLogout() {
+  router.push('/login');
+}
 </script>
 
 <style lang="scss" scoped>
