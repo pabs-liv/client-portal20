@@ -1908,6 +1908,12 @@
                                   <span class="ap-field-value">{{ plan.lowerCopaysApplied ? (plan.lowerCopayPrescribers.map(p => `${p.name} (NPI ${p.npi})`).join(', ') || 'Yes') : 'No' }}</span>
                                 </div>
                               </div>
+                              <div v-if="plan.lowerCopaysApplied && plan.lowerCopayNotes" class="ap-field-row">
+                                <div class="ap-field">
+                                  <span class="ap-field-label">Lower Copay Notes</span>
+                                  <span class="ap-field-value">{{ plan.lowerCopayNotes }}</span>
+                                </div>
+                              </div>
                             </template>
                           </div>
 
