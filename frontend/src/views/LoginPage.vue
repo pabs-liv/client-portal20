@@ -3,17 +3,34 @@
     <div class="login-card">
       <img src="/icons/Logo.svg" alt="Client Portal Logo" class="login-logo" />
 
-      <h1 class="login-title">Client Portal</h1>
-      <p class="login-tagline">Sign in to view your reports, claims, and account details.</p>
+      <h1 class="login-title">We've just relaunched the Client Portal!</h1>
+
+      <p class="whats-new-label">Here's what's new:</p>
+      <ul class="whats-new-list">
+        <li v-for="feature in features" :key="feature.title" class="whats-new-item">
+          <component :is="feature.icon" :size="18" :stroke-width="1.5" class="whats-new-icon" />
+          <div class="whats-new-text">
+            <span class="whats-new-title">{{ feature.title }}</span>
+            <span class="whats-new-desc"> — {{ feature.description }}</span>
+          </div>
+        </li>
+      </ul>
 
       <Banner
         variant="info"
         :always-show="true"
         class="login-alert"
-        message="Logging in for the first time? Select 'Reset password' after clicking Login below to complete a one-time password update."
+        message="Logging in for the first time? Select 'Reset password' after clicking the button below to complete a one-time password update."
       />
 
-      <Button variant="primary" label="Login" class="login-btn" @click="onContinue" />
+      <Button
+        variant="primary"
+        label="Check out the new experience"
+        class="login-btn"
+        show-icon
+        :icon="ChevronRight"
+        @click="onContinue"
+      />
 
       <div class="vendor-callout">
         <UserPlus :size="20" :stroke-width="1.5" class="vendor-callout-icon" />
@@ -56,13 +73,36 @@
 <script setup lang="ts">
 import { reactive, ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { UserPlus } from 'lucide-vue-next';
+import { UserPlus, ChevronRight, LayoutPanelLeft, LayoutDashboard, Filter, Zap } from 'lucide-vue-next';
 import Button from '@/components/ui/Button.vue';
 import Dialog from '@/components/ui/Dialog.vue';
 import Banner from '@/components/common/Banner.vue';
 import TextField from '@/components/ui/TextField.vue';
 
 const router = useRouter();
+
+const features = [
+  {
+    icon: LayoutPanelLeft,
+    title: 'Redesigned interface',
+    description: 'a cleaner, modernized look and feel',
+  },
+  {
+    icon: LayoutDashboard,
+    title: 'New dashboard',
+    description: 'key metrics and insights at a glance, right when you log in',
+  },
+  {
+    icon: Filter,
+    title: 'Smarter navigation',
+    description: 'more filters and tools to help you find what you need, faster',
+  },
+  {
+    icon: Zap,
+    title: 'Built for speed',
+    description: 'no more waiting around for pages to load',
+  },
+];
 
 const showVendorDialog = ref(false);
 const submitted = ref(false);
@@ -115,7 +155,7 @@ const dialogActions = computed(() => submitted.value
   display: flex;
   flex-direction: column;
   align-items: center;
-  max-width: 440px;
+  max-width: 480px;
   width: 100%;
   background: $color-neutral-white;
   border: 1px solid $color-border;
@@ -138,10 +178,51 @@ const dialogActions = computed(() => submitted.value
   margin: 0 0 $spacing-medium;
 }
 
-.login-tagline {
+.whats-new-label {
+  width: 100%;
   font-size: $font-size-small;
   color: $color-text-secondary;
+  text-align: center;
   margin: 0 0 $spacing-medium;
+}
+
+.whats-new-list {
+  width: 100%;
+  list-style: none;
+  margin: 0 0 $spacing-medium;
+  padding: 0;
+  text-align: left;
+}
+
+.whats-new-item {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-small;
+  padding: $spacing-xsmall 0;
+  border-bottom: 1px solid $color-border;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.whats-new-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: $color-primary;
+}
+
+.whats-new-text {
+  font-size: $font-size-small;
+}
+
+.whats-new-title {
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.whats-new-desc {
+  color: $color-text-secondary;
 }
 
 .login-alert {

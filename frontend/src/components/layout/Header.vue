@@ -45,7 +45,7 @@ const { isDark, toggleDarkMode } = useDarkMode();
 const router = useRouter();
 
 function onLogout() {
-  router.push('/login');
+  router.push('/');
 }
 </script>
 

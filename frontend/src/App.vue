@@ -22,7 +22,7 @@ import Header from '@/components/layout/Header.vue';
 import Sidebar from '@/components/layout/Sidebar.vue';
 
 const route = useRoute();
-const isLoginRoute = computed(() => route.name === 'Splash' || route.name === 'Login');
+const isLoginRoute = computed(() => route.name === 'Login');
 </script>
 
 <style lang="scss" scoped>
