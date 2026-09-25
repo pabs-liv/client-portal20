@@ -43,7 +43,6 @@
         <v-table density="compact">
           <thead>
             <tr>
-              <th class="font-weight-bold" style="width: 12%;">EOC ID</th>
               <th class="font-weight-bold" style="width: 25%;">Account Name</th>
               <th class="font-weight-bold" style="width: 20%;">Drug Name</th>
               <th class="font-weight-bold" style="width: 13%;">Ticket #</th>
@@ -53,7 +52,6 @@
           </thead>
           <tbody>
             <tr v-for="auth in pendingClinicalAssistanceItems" :key="auth.eocId">
-              <td>{{ auth.eocId }}</td>
               <td>{{ auth.accountName }}</td>
               <td>{{ auth.drugName }}</td>
               <td>{{ auth.ticketNumber }}</td>
@@ -72,7 +70,7 @@
         <div class="search-bar-wrapper">
           <SearchBar
             @update:searchTerm="priorAuthSearchTerm = $event"
-            placeholder="Search by EOC ID or drug name"
+            placeholder="Search by drug name"
             :showFilterButton="false"
           />
         </div>
@@ -230,14 +228,12 @@
         <thead>
           <tr>
             <th>Account</th>
-            <th>EOC ID</th>
             <th>Drug Name</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="auth in pendingAssistanceItems" :key="auth.eocId">
             <td>{{ auth.accountName }}</td>
-            <td>{{ auth.eocId }}</td>
             <td>{{ auth.drugName }}</td>
           </tr>
         </tbody>
@@ -280,9 +276,8 @@ import type { FilterPill } from '@/components/ui/FilteringPill.vue';
 const priorAuthHeaders = computed(() => {
   const headers: any[] = [
     { title: 'Account Name', key: 'accountName' },
-    { title: 'EOC ID', key: 'eocId' },
     { title: 'Drug Name', key: 'drugName' },
-    { title: 'Submission Date', key: 'submissionDate', align: 'end' },
+    { title: 'Submission Date', key: 'submissionDate' },
     { title: 'Status', key: 'status' },
   ];
   if (isExternal.value) {
@@ -600,24 +595,11 @@ const filteredPriorAuthData = computed(() => {
   margin-bottom: $spacing-small;
 }
 
-// Vuetify's v-data-table doesn't reliably honor a per-column "width" header
-// property under its default table-layout:auto, so column sizing is forced
-// directly via nth-child (same fix pattern as Plan Explorer's cs-matrix-table).
-// Actions (external only) gets a small fixed width layered on top of the six
-// percentage widths below, which sum to 100% on their own for internal users.
+// All columns here hold short mock values (e.g. "Company A", "Drug A"), so
+// letting the table size columns to content (table-layout:auto, the
+// v-data-table default) spaces everything evenly without hand-tuned widths.
 .pa-table {
-  :deep(table) {
-    table-layout: fixed;
-    width: 100%;
-  }
-
-  :deep(th:nth-child(1)), :deep(td:nth-child(1)) { width: 22%; }
-  :deep(th:nth-child(2)), :deep(td:nth-child(2)) { width: 13%; }
-  :deep(th:nth-child(3)), :deep(td:nth-child(3)) { width: 17%; }
-  :deep(th:nth-child(4)), :deep(td:nth-child(4)) { width: 15%; }
-  :deep(th:nth-child(5)), :deep(td:nth-child(5)) { width: 17%; }
-  :deep(th:nth-child(6)), :deep(td:nth-child(6)) { width: 16%; }
-  :deep(th:nth-child(7)), :deep(td:nth-child(7)) { width: 60px; }
+  :deep(th:last-child), :deep(td:last-child) { width: 60px; }
 }
 
 .filter-section-label {

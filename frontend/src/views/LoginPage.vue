@@ -20,12 +20,12 @@
         variant="info"
         :always-show="true"
         class="login-alert"
-        message="Logging in for the first time? Select 'Reset password' after clicking the button below to complete a one-time password update."
+        message="Logging in for the first time? After clicking the button below, enter your email, then select 'Reset password' on the screen that follows to complete a one-time password update."
       />
 
       <Button
         variant="primary"
-        label="Check out the new experience"
+        label="Continue to Login"
         class="login-btn"
         show-icon
         :icon="ChevronRight"
@@ -155,7 +155,7 @@ const dialogActions = computed(() => submitted.value
   display: flex;
   flex-direction: column;
   align-items: center;
-  max-width: 480px;
+  max-width: 520px;
   width: 100%;
   background: $color-neutral-white;
   border: 1px solid $color-border;

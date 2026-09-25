@@ -44,7 +44,6 @@
         <v-table density="compact">
           <thead>
             <tr>
-              <th class="font-weight-bold" style="width: 11%;">EOC ID</th>
               <th class="font-weight-bold" style="width: 20%;">Account Name</th>
               <th class="font-weight-bold" style="width: 17%;">Drug Name</th>
               <th class="font-weight-bold text-end" style="width: 12%;">Estimated Cost</th>
@@ -55,7 +54,6 @@
           </thead>
           <tbody>
             <tr v-for="claim in pendingAssistanceClaims" :key="claim.id">
-              <td>{{ claim.eocId }}</td>
               <td>{{ claim.accountName }}</td>
               <td>{{ claim.drugName }}</td>
               <td class="text-end">{{ claim.cost }}</td>
@@ -81,7 +79,7 @@
         <div class="search-bar-wrapper">
           <SearchBar
             @update:searchTerm="claimsSearchTerm = $event"
-            placeholder="Search by EOC ID, drug name, or NDC"
+            placeholder="Search by drug name or NDC"
             :showFilterButton="false"
           />
         </div>
@@ -104,13 +102,7 @@
         :show-row-actions="isExternal"
         :row-action-items="rowActionItems"
         @row-action="handleRowAction"
-      >
-        <template #item.status="{ item }">
-          <v-chip :color="getStatusDisplay((item as any).rawStatus).color" variant="tonal" size="small">
-            {{ getStatusDisplay((item as any).rawStatus).label }}
-          </v-chip>
-        </template>
-      </ReportDataTable>
+      />
     </PageCard>
 
     <AdvancedFiltersDialog
@@ -267,7 +259,6 @@
         <thead>
           <tr>
             <th>Account</th>
-            <th>EOC ID</th>
             <th>Drug Name</th>
             <th>Cost</th>
           </tr>
@@ -275,7 +266,6 @@
         <tbody>
           <tr v-for="claim in pendingAssistanceItems" :key="claim.id">
             <td>{{ claim.accountName }}</td>
-            <td>{{ claim.eocId }}</td>
             <td>{{ claim.drugName }}</td>
             <td>{{ claim.cost }}</td>
           </tr>
@@ -318,14 +308,12 @@ const { isExternal } = useUserType();
 const claimsHeaders = computed(() => {
   const headers: any[] = [
     { title: 'Account Name', key: 'accountName' },
-    { title: 'EOC ID', key: 'eocId' },
     { title: 'Drug Name', key: 'drugName' },
     { title: 'NDC', key: 'ndc' },
-    { title: 'Date of Service', key: 'claimDate', align: 'end' },
-    { title: 'Quantity', key: 'quantity', align: 'end' },
-    { title: 'Days Supply', key: 'daysSupply', align: 'end' },
-    { title: 'Estimated Cost', key: 'cost', align: 'start' },
-    { title: 'Status', key: 'status' },
+    { title: 'Date of Service', key: 'claimDate' },
+    { title: 'Quantity', key: 'quantity' },
+    { title: 'Days Supply', key: 'daysSupply' },
+    { title: 'Estimated Cost', key: 'cost' },
   ];
   if (isExternal.value) {
     headers.push({ title: 'Actions', key: 'actions', sortable: false, align: 'start' });
