@@ -51,17 +51,41 @@
       heading="Request vendor access"
       :actions="dialogActions"
       show-secondary-button
-      max-width="440"
+      max-width="600"
     >
       <p v-if="!submitted" class="text-body vendor-dialog-text">
         Enter your details below and we'll create a ticket to review your request.
       </p>
 
       <template v-if="!submitted">
-        <TextField v-model="vendorForm.firstName" label="First name" class="vendor-field" />
-        <TextField v-model="vendorForm.lastName" label="Last name" class="vendor-field" />
-        <TextField v-model="vendorForm.email" label="Email address" type="email" class="vendor-field" />
+        <div class="vendor-field-row">
+          <TextField v-model="vendorForm.firstName" label="First name" class="vendor-field" />
+          <TextField v-model="vendorForm.lastName" label="Last name" class="vendor-field" />
+        </div>
+        <TextField v-model="vendorForm.email" label="Business Email Address" type="email" class="vendor-field" />
+        <TextField v-model="vendorForm.jobTitle" label="Business Job Title" class="vendor-field" />
         <TextField v-model="vendorForm.vendorName" label="Vendor name" class="vendor-field" />
+        <TextField v-model="vendorForm.addressLine1" label="Business Address" class="vendor-field" />
+        <div class="vendor-field-row">
+          <TextField v-model="vendorForm.addressLine2" label="Suite, Apt, Building" class="vendor-field" />
+          <TextField v-model="vendorForm.city" label="City" class="vendor-field" />
+        </div>
+        <div class="vendor-field-row">
+          <Select
+            v-model="vendorForm.state"
+            :items="usStates"
+            label="State"
+            class="vendor-field"
+          />
+          <TextField v-model="vendorForm.zipCode" label="Zip Code" class="vendor-field" />
+        </div>
+        <TextField
+          v-model="vendorForm.associatedAccount"
+          label="Associated client account"
+          hint="Enter an account you manage or are associated with so we can identify you."
+          persistent-hint
+          class="vendor-field"
+        />
       </template>
       <p v-else class="text-body vendor-dialog-text">
         Your request has been submitted. A ticket has been created and the Client Portal team will follow up by email once your access is approved.
@@ -78,6 +102,7 @@ import Button from '@/components/ui/Button.vue';
 import Dialog from '@/components/ui/Dialog.vue';
 import Banner from '@/components/common/Banner.vue';
 import TextField from '@/components/ui/TextField.vue';
+import Select from '@/components/ui/Select.vue';
 
 const router = useRouter();
 
@@ -107,11 +132,33 @@ const features = [
 const showVendorDialog = ref(false);
 const submitted = ref(false);
 
+// Based on old-client-portal's AddressModel.USStates enum (the canonical
+// state list used across account info, ID cards, and rebate address forms),
+// minus "British Columbia" — a legacy non-US entry in that enum, dropped here.
+const usStates = [
+  'Alabama', 'Alaska', 'Arkansas', 'Arizona', 'California',
+  'Colorado', 'Connecticut', 'D.C.', 'Delaware', 'Florida', 'Georgia', 'Hawaii',
+  'Iowa', 'Idaho', 'Illinois', 'Indiana', 'Kansas', 'Kentucky', 'Louisiana',
+  'Massachusetts', 'Maryland', 'Maine', 'Michigan', 'Minnesota', 'Missouri',
+  'Mississippi', 'Montana', 'North Carolina', 'North Dakota', 'Nebraska',
+  'New Hampshire', 'New Jersey', 'New Mexico', 'Nevada', 'New York', 'Oklahoma',
+  'Ohio', 'Oregon', 'Pennsylvania', 'Rhode Island', 'South Carolina',
+  'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Virginia', 'Vermont',
+  'Washington', 'Wisconsin', 'West Virginia', 'Wyoming',
+];
+
 const vendorForm = reactive({
   firstName: '',
   lastName: '',
   email: '',
+  jobTitle: '',
   vendorName: '',
+  addressLine1: '',
+  addressLine2: '',
+  city: '',
+  state: '',
+  zipCode: '',
+  associatedAccount: '',
 });
 
 function onContinue() {
@@ -128,7 +175,14 @@ function closeVendorDialog() {
   vendorForm.firstName = '';
   vendorForm.lastName = '';
   vendorForm.email = '';
+  vendorForm.jobTitle = '';
   vendorForm.vendorName = '';
+  vendorForm.addressLine1 = '';
+  vendorForm.addressLine2 = '';
+  vendorForm.city = '';
+  vendorForm.state = '';
+  vendorForm.zipCode = '';
+  vendorForm.associatedAccount = '';
 }
 
 const dialogActions = computed(() => submitted.value
@@ -286,5 +340,16 @@ const dialogActions = computed(() => submitted.value
 
 .vendor-field {
   margin-bottom: $spacing-small;
+}
+
+.vendor-field-row {
+  display: flex;
+  align-items: flex-end;
+  gap: $spacing-medium;
+
+  :deep(.vendor-field) {
+    flex: 1;
+    min-width: 0;
+  }
 }
 </style>
