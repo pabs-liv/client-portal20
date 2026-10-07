@@ -3151,14 +3151,8 @@
                             <span class="ap-field-value">{{ blExistingParty === 'yes' ? 'Yes' : 'No' }}</span>
                           </div>
                           <div v-if="blExistingParty === 'yes'" class="ap-field">
-                            <span class="ap-field-label">Billing Party</span>
+                            <span class="ap-field-label">Third Party</span>
                             <span class="ap-field-value">{{ blSelectedCarrier || '—' }}</span>
-                          </div>
-                        </div>
-                        <div class="ap-field-row">
-                          <div class="ap-field">
-                            <span class="ap-field-label">Responsible Party</span>
-                            <span class="ap-field-value">{{ blResponsibleContacts.length ? blResponsibleContacts.join(', ') : '—' }}</span>
                           </div>
                         </div>
                       </template>
@@ -3170,27 +3164,34 @@
                           <p class="lc-hcn-label">Is billing managed by a third party?</p>
                           <div class="toc-toggle-group">
                             <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blExistingParty === 'yes' }]" @click="blExistingParty = 'yes'">Yes</button>
-                            <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blExistingParty === 'no' }]" @click="blExistingParty = 'no'">No</button>
+                            <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blExistingParty === 'no' }]" @click="blExistingParty = 'no'; blSelectedCarrier = ''">No</button>
                           </div>
                           <div v-if="blExistingParty === 'yes'" class="bl-subsection">
                             <div class="bl-field-narrow">
-                              <Select v-model="blSelectedCarrier" :items="blCarrierOptions" label="Select billing party" />
+                              <Select
+                                v-model="blSelectedCarrier"
+                                :items="blCarrierOptions"
+                                label="Select third party *"
+                                :error-messages="blSetupTouched && !blSelectedCarrier ? ['Required'] : []"
+                              />
                             </div>
-                            <p class="text-body bl-note">Don't see the billing party? Third party vendors must be added in SoloRx before they appear here.</p>
-                            <p v-if="blSelectedCarrier" class="text-body bl-note">Contacts from the selected billing party will populate the Responsible Party field below.</p>
+                            <p class="text-body bl-note">Don't see the third party? Third party vendors must be added in SoloRx before they appear here.</p>
                           </div>
-                        </div>
-                        <div class="bl-section">
-                          <p class="lc-hcn-label">Responsible Party</p>
-                          <div class="bl-field-narrow">
-                            <Autocomplete v-model="blResponsibleContacts" :items="blResponsibleContactOptions" label="Select contacts" :multiple="true" />
-                          </div>
-                        </div>
-                        <div class="ap-section-footer">
-                          <button class="button button-primary" @click="blSetupSaveEdit">Save Changes</button>
-                          <button class="button button-secondary" @click="blSetupCancelEdit">Cancel</button>
                         </div>
                       </template>
+                      <!-- Read-only reflection of who holds the Invoices permission on this account; shown in view and edit mode alike. -->
+                      <div class="bl-section">
+                        <p class="lc-hcn-label">Responsible Party</p>
+                        <div v-if="blInvoiceContactUsers.length > 0">
+                          <div v-for="name in blInvoiceContactUsers" :key="name" class="ap-field-value">{{ name }}</div>
+                        </div>
+                        <div v-else class="ap-field-value">No users with the Invoice permission have been configured yet. Permissions can be set up under Client Contacts or Vendor Contacts in the Account Profile step.</div>
+                        <p v-if="blPendingUserRequestCount > 0" class="text-body bl-note">There are {{ blPendingUserRequestCount }} pending user accounts. Once approved, additional users may display if they contain the applicable permission.</p>
+                      </div>
+                      <div v-if="blEditingSetup" class="ap-section-footer">
+                        <button class="button button-primary" @click="blSetupSaveEdit">Save Changes</button>
+                        <button class="button button-secondary" @click="blSetupCancelEdit">Cancel</button>
+                      </div>
                     </div>
                   </div>
 
@@ -3207,7 +3208,7 @@
                         <template v-if="blExistingParty === 'yes' && blSkipAchSetup">
                           <div class="ap-field-row">
                             <div class="ap-field">
-                              <span class="ap-field-value">Payment handled under existing Carrier billing agreement.</span>
+                              <span class="ap-field-value">Payment handled under existing third party billing agreement.</span>
                             </div>
                           </div>
                         </template>
@@ -3243,7 +3244,7 @@
                           <div class="ap-checkbox-row mb-3" @click="blSkipAchSetup = !blSkipAchSetup" style="cursor:pointer">
                             <CheckSquare v-if="blSkipAchSetup" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
                             <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
-                            <span class="ap-field-value">Skip ACH setup — Carrier has an existing billing agreement with Liviniti.</span>
+                            <span class="ap-field-value">Skip ACH setup — Third party has an existing billing agreement with Liviniti.</span>
                           </div>
                         </div>
                         <div v-if="!blSkipAchSetup" class="bl-section">
@@ -3271,7 +3272,7 @@
                             </div>
                             <div v-else-if="blAchMethod === 'debit'" class="bl-subsection">
                               <p v-if="blExistingParty !== 'yes'" class="text-body bl-note">W-9 and ACH authorization forms are required for Billing to complete account setup. Download, complete, and upload the signed forms.</p>
-                              <p v-else class="text-body bl-note">Up-to-date W-9 and ACH authorization forms are required for Billing to complete account setup. If this billing party is already established with Liviniti, forms may already be on file — please confirm they are current. Upload updated forms below if needed.</p>
+                              <p v-else class="text-body bl-note">Up-to-date W-9 and ACH authorization forms are required for Billing to complete account setup. If this third party is already established with Liviniti, forms may already be on file — please confirm they are current. Upload updated forms below if needed.</p>
                               <div class="bl-download-group">
                                 <button class="button bl-download-btn" @click.prevent="handleFormDownload('Blank W-9')">
                                   <CloudDownload :size="16" :stroke-width="2" />Download Blank W-9
@@ -3312,8 +3313,9 @@
                               <div v-if="blDebitTiming === 'Prior approval required'" class="bl-subsection">
                                 <TextField v-model="blDebitApprovalEmail" label="Approval notification email" />
                               </div>
-                              <div v-if="blDebitTiming === 'Custom'" class="bl-subsection">
-                                <v-textarea v-model="blDebitTimingNote" label="Describe the debit pull schedule" variant="outlined" density="compact" rows="2" auto-grow hide-details class="bl-notes-textarea" />
+                              <div v-if="blDebitTiming === 'Custom'" class="bl-custom-warning">
+                                <TriangleAlert :size="16" :stroke-width="2" class="bl-warning-icon" />
+                                <p class="text-body bl-warning-text">Please add a description of the custom debit pull schedule to Billing Notes below.</p>
                               </div>
                             </div>
                           </div>
@@ -3358,55 +3360,56 @@
                             <span class="ap-field-value">{{ blInvoiceBreakout === 'yes' ? `Yes — ${blInvoiceBreakoutSelection || 'type not set'}` : 'No' }}</span>
                           </div>
                         </div>
-                        <div v-if="blBillingCycle === 'Custom'" class="ap-field-row">
-                          <div class="ap-field">
-                            <span class="ap-field-label">Billing Schedule Note</span>
-                            <span class="ap-field-value">{{ blCustomCycleNote || '—' }}</span>
-                          </div>
-                        </div>
-                        <div v-if="blInvoiceBreakoutSelection === 'Custom'" class="ap-field-row">
-                          <div class="ap-field">
-                            <span class="ap-field-label">Custom Breakout Note</span>
-                            <span class="ap-field-value">{{ blInvoiceBreakoutNote || '—' }}</span>
-                          </div>
-                        </div>
                       </template>
                       <template v-else>
                         <div class="bl-section">
                           <p class="lc-hcn-label">Billing Cycle</p>
                           <div class="bl-field-narrow">
-                            <Select v-model="blBillingCycle" :items="blCycleOptions" label="Billing Cycle" />
+                            <Select
+                              v-model="blBillingCycle"
+                              :items="blCycleOptions"
+                              label="Billing Cycle *"
+                              :error-messages="blInvoiceTouched && !blBillingCycle ? ['Required'] : []"
+                            />
                           </div>
-                          <div v-if="blBillingCycle === 'Custom'" class="bl-subsection">
-                            <v-textarea v-model="blCustomCycleNote" label="Describe the billing schedule" variant="outlined" density="compact" rows="2" auto-grow hide-details class="bl-notes-textarea" />
+                          <div v-if="blBillingCycle === 'Custom'" class="bl-custom-warning">
+                            <TriangleAlert :size="16" :stroke-width="2" class="bl-warning-icon" />
+                            <p class="text-body bl-warning-text">Please add a description of the custom billing cycle to Billing Notes below.</p>
                           </div>
                         </div>
                         <div class="bl-section">
                           <p class="lc-hcn-label">Are separate invoices required?</p>
                           <div class="toc-toggle-group">
-                            <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blSeparateInvoices === 'no' }]" @click="blSeparateInvoices = 'no'">No</button>
+                            <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blSeparateInvoices === 'no' }]" @click="blSeparateInvoices = 'no'; blSeparateInvoicesSplit = ''">No</button>
                             <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blSeparateInvoices === 'yes' }]" @click="blSeparateInvoices = 'yes'">Yes</button>
                           </div>
                           <div v-if="blSeparateInvoices === 'yes'" class="bl-subsection-select">
-                            <Select v-model="blSeparateInvoicesSplit" :items="blInvoiceSplitOptions" label="Split invoices by" />
+                            <Select
+                              v-model="blSeparateInvoicesSplit"
+                              :items="blInvoiceSplitOptions"
+                              label="Split invoices by *"
+                              :error-messages="blInvoiceTouched && !blSeparateInvoicesSplit ? ['Required'] : []"
+                            />
                           </div>
                         </div>
                         <div class="bl-section">
                           <p class="lc-hcn-label">Are invoice breakouts required?</p>
                           <div class="toc-toggle-group">
-                            <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blInvoiceBreakout === 'no' }]" @click="blInvoiceBreakout = 'no'">No</button>
+                            <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blInvoiceBreakout === 'no' }]" @click="blInvoiceBreakout = 'no'; blInvoiceBreakoutSelection = ''">No</button>
                             <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blInvoiceBreakout === 'yes' }]" @click="blInvoiceBreakout = 'yes'">Yes</button>
                           </div>
                           <div v-if="blInvoiceBreakout === 'yes'" class="bl-subsection">
                             <div class="bl-field-narrow">
-                              <Select v-model="blInvoiceBreakoutSelection" :items="blInvoiceBreakoutItems" label="Select breakout type" />
+                              <Select
+                                v-model="blInvoiceBreakoutSelection"
+                                :items="blInvoiceBreakoutItems"
+                                label="Select breakout type *"
+                                :error-messages="blInvoiceTouched && !blInvoiceBreakoutSelection ? ['Required'] : []"
+                              />
                             </div>
                             <div v-if="blInvoiceBreakoutSelection === 'Custom'" class="bl-custom-warning">
                               <TriangleAlert :size="16" :stroke-width="2" class="bl-warning-icon" />
-                              <p class="text-body bl-warning-text">Custom invoice breakouts require coordination with Accounting. Open a ticket with Accounting to coordinate setup before proceeding.</p>
-                            </div>
-                            <div v-if="blInvoiceBreakoutSelection === 'Custom'" class="bl-subsection">
-                              <v-textarea v-model="blInvoiceBreakoutNote" label="Describe the custom breakout requirement" variant="outlined" density="compact" rows="2" auto-grow hide-details class="bl-notes-textarea" />
+                              <p class="text-body bl-warning-text">Custom invoice breakouts require coordination with Accounting. Please add a description of the custom breakout requirement to Billing Notes below.</p>
                             </div>
                           </div>
                         </div>
@@ -3456,12 +3459,18 @@
                         <div class="bl-section">
                           <p class="lc-hcn-label">Are reporting breakouts required?</p>
                           <div class="toc-toggle-group">
-                            <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blReportingBreakouts === 'no' }]" @click="blReportingBreakouts = 'no'">No</button>
+                            <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blReportingBreakouts === 'no' }]" @click="blReportingBreakouts = 'no'; blReportingBreakoutSelections = []">No</button>
                             <button :class="['button', 'toc-toggle', { 'toc-toggle--selected': blReportingBreakouts === 'yes' }]" @click="blReportingBreakouts = 'yes'">Yes</button>
                           </div>
                           <div v-if="blReportingBreakouts === 'yes'" class="bl-subsection">
                             <div class="bl-field-narrow">
-                              <Autocomplete v-model="blReportingBreakoutSelections" :items="blReportingBreakoutItems" :multiple="true" label="Select breakout types" />
+                              <Autocomplete
+                                v-model="blReportingBreakoutSelections"
+                                :items="blReportingBreakoutItems"
+                                :multiple="true"
+                                label="Select breakout types *"
+                                :error-messages="blReportTouched && blReportingBreakoutSelections.length === 0 ? ['Select at least one breakout type'] : []"
+                              />
                             </div>
                           </div>
                         </div>
@@ -3482,13 +3491,16 @@
                       </button>
                     </div>
                     <div class="ap-fields">
-                      <template v-if="!blEditingRebate">
-                        <div class="ap-field-row">
-                          <div class="ap-field">
-                            <span class="ap-field-label">Rebate Notification Contacts</span>
-                            <span class="ap-field-value">{{ blRebateContacts.length ? blRebateContacts.join(', ') : '—' }}</span>
-                          </div>
+                      <!-- Read-only reflection of who holds the Rebates permission on this account; shown in view and edit mode alike. -->
+                      <div class="bl-section">
+                        <p class="lc-hcn-label">Rebate Notification Contacts</p>
+                        <div v-if="blRebateContactUsers.length > 0">
+                          <div v-for="name in blRebateContactUsers" :key="name" class="ap-field-value">{{ name }}</div>
                         </div>
+                        <div v-else class="ap-field-value">No users with the Rebates permission have been configured yet. Permissions can be set up under Client Contacts or Vendor Contacts in the Account Profile step.</div>
+                        <p v-if="blPendingUserRequestCount > 0" class="text-body bl-note">There are {{ blPendingUserRequestCount }} pending user accounts. Once approved, additional users may display if they contain the applicable permission.</p>
+                      </div>
+                      <template v-if="!blEditingRebate">
                         <div class="ap-field-row ap-field-row--multi">
                           <div class="ap-field">
                             <span class="ap-field-label">Completed W-9</span>
@@ -3501,13 +3513,6 @@
                         </div>
                       </template>
                       <template v-else>
-                        <div class="bl-section">
-                          <p class="lc-hcn-label">Who should receive rebate notifications?</p>
-                          <p class="text-body bl-note">Selected contacts will be notified when rebates are issued.</p>
-                          <div class="bl-field-narrow">
-                            <Autocomplete v-model="blRebateContacts" :items="blRebateContactOptions" label="Select contacts" :multiple="true" />
-                          </div>
-                        </div>
                         <div class="bl-section">
                           <p class="lc-hcn-label">Rebate ACH Setup</p>
                           <p class="text-body bl-note">Download, complete, and upload the signed W-9 and ACH authorization forms for rebate payments.</p>
@@ -5404,6 +5409,7 @@ const formatEin = (val: string) => {
 const blExistingParty = ref('no');
 const blCarrierOptions = ['Southern Scripts Carrier', 'Acclaim Benefits', 'Benefit Advantage'];
 const blSelectedCarrier = ref('');
+const blSetupTouched = ref(false);
 
 // B-01/B-02: Payment method
 const blPaymentMethod = ref('ACH');
@@ -5417,7 +5423,6 @@ const resetPaymentFields = () => {
   blAchMethod.value = 'debit';
   blDebitTiming.value = '';
   blDebitApprovalEmail.value = '';
-  blDebitTimingNote.value = '';
   blW9File.value = null;
   blAchAuthFile.value = null;
   blPendingW9Removal.value = false;
@@ -5432,41 +5437,17 @@ watch(blSkipAchSetup, (val) => {
 const blDebitTiming = ref('');
 const blDebitTimingOptions = ['3–5 business days after billing complete', '10 business days', 'Prior approval required', 'Custom'];
 const blDebitApprovalEmail = ref('');
-const blDebitTimingNote = ref('');
 
-// B-05/B-14: Contacts
-const blResponsibleContactOptions = computed(() => {
-  if (blExistingParty.value === 'yes' && blSelectedCarrier.value) {
-    return apVendorContacts.value
-      .filter(c => c.vendor === blSelectedCarrier.value)
-      .map(c => c.name);
-  }
-  return apClientContacts.value.map(c => c.name);
-});
-const blRebateContactOptions = computed(() => {
-  const items: any[] = [
-    { type: 'subheader', title: 'Client Contacts' },
-    ...apClientContacts.value.map(c => ({ title: c.name, value: c.name })),
-  ];
-  const vendorGroups = new Map<string, string[]>();
-  apVendorContacts.value.forEach(c => {
-    if (!vendorGroups.has(c.vendor)) vendorGroups.set(c.vendor, []);
-    vendorGroups.get(c.vendor)!.push(c.name);
-  });
-  vendorGroups.forEach((names, vendor) => {
-    items.push({ type: 'divider' });
-    items.push({ type: 'subheader', title: vendor });
-    names.forEach(name => items.push({ title: name, value: name }));
-  });
-  return items;
-});
-const blResponsibleContacts = ref<string[]>([]);
-const blRebateContacts = ref<string[]>([]);
-let suppressResponsibleContactsReset = false;
-watch([() => blExistingParty.value, () => blSelectedCarrier.value], () => {
-  if (suppressResponsibleContactsReset) return;
-  blResponsibleContacts.value = [];
-});
+// B-05/B-14: Contacts — read-only. Responsible Party and Rebate Notification Contacts list the names of
+// users on the account who hold the Invoices / Rebates Client Portal permission; they are not selectable here.
+const blContactsWithPermission = (permission: 'invoices' | 'rebates') =>
+  [...apClientContacts.value, ...apVendorContacts.value]
+    .filter(c => c.portalAccess && c.permissions?.[permission])
+    .map(c => c.name);
+const blInvoiceContactUsers = computed(() => blContactsWithPermission('invoices'));
+const blRebateContactUsers = computed(() => blContactsWithPermission('rebates'));
+// Account-wide count of user access requests still awaiting approval (sample value for the prototype).
+const blPendingUserRequestCount = ref(2);
 watch(() => blExistingParty.value, () => {
   blSkipAchSetup.value = false;
 });
@@ -5477,11 +5458,11 @@ const blIncludePhi = ref('no');
 // B-11: Billing cycle
 const blBillingCycle = ref('Semi-Monthly');
 const blCycleOptions = ['Weekly', 'Semi-Monthly', 'Monthly', 'Annual', 'Quad-Monthly', 'Custom'];
-const blCustomCycleNote = ref('');
 
 // B-20: Separate invoices
 const blSeparateInvoices = ref('no');
 const blSeparateInvoicesSplit = ref('');
+const blInvoiceTouched = ref(false);
 const blInvoiceSplitOptions = ['AR Type', 'Employee Location', 'Member', 'Employee Status'];
 
 // B-08/B-09: Reporting breakouts
@@ -5504,7 +5485,6 @@ const blReportingBreakoutItems = [
 const blInvoiceBreakout = ref('no');
 const blInvoiceBreakoutSelection = ref('');
 const blInvoiceBreakoutItems = ['AR Type', 'Employee Location', 'Member', 'Employee Status', 'Custom'];
-const blInvoiceBreakoutNote = ref('');
 
 const blNotes = ref('');
 
@@ -5516,27 +5496,27 @@ const blEditingRebate = ref(false);
 const blEditingNotes = ref(false);
 
 // Card 1: Billing Setup — snapshot/restore so Cancel undoes every field, not just uploads
-let blSetupSnapshot = { einNumber: '', existingParty: 'no', selectedCarrier: '', responsibleContacts: [] as string[] };
+let blSetupSnapshot = { einNumber: '', existingParty: 'no', selectedCarrier: '' };
 const blSetupStartEdit = () => {
   blSetupSnapshot = {
     einNumber: blEinNumber.value,
     existingParty: blExistingParty.value,
     selectedCarrier: blSelectedCarrier.value,
-    responsibleContacts: [...blResponsibleContacts.value],
   };
+  blSetupTouched.value = false;
   blEditingSetup.value = true;
 };
 const blSetupSaveEdit = () => {
+  blSetupTouched.value = true;
+  if (blExistingParty.value === 'yes' && !blSelectedCarrier.value) return;
   blEditingSetup.value = false;
 };
 const blSetupCancelEdit = () => {
-  suppressResponsibleContactsReset = true;
   blEinNumber.value = blSetupSnapshot.einNumber;
   blExistingParty.value = blSetupSnapshot.existingParty;
   blSelectedCarrier.value = blSetupSnapshot.selectedCarrier;
-  blResponsibleContacts.value = blSetupSnapshot.responsibleContacts;
+  blSetupTouched.value = false;
   blEditingSetup.value = false;
-  nextTick(() => { suppressResponsibleContactsReset = false; });
 };
 
 // ACH upload state — Payment Method card
@@ -5548,7 +5528,7 @@ const blPendingAchAuthRemoval = ref(false);
 let blPaymentSnapshot = {
   skipAchSetup: false, paymentMethod: 'ACH', achMethod: 'debit',
   w9File: null as string | null, achAuthFile: null as string | null,
-  debitTiming: '', debitApprovalEmail: '', debitTimingNote: '',
+  debitTiming: '', debitApprovalEmail: '',
 };
 const blPaymentStartEdit = () => {
   blPaymentSnapshot = {
@@ -5559,7 +5539,6 @@ const blPaymentStartEdit = () => {
     achAuthFile: blAchAuthFile.value,
     debitTiming: blDebitTiming.value,
     debitApprovalEmail: blDebitApprovalEmail.value,
-    debitTimingNote: blDebitTimingNote.value,
   };
   blEditingPayment.value = true;
 };
@@ -5579,7 +5558,6 @@ const cancelPaymentCard = () => {
   blAchAuthFile.value = blPaymentSnapshot.achAuthFile;
   blDebitTiming.value = blPaymentSnapshot.debitTiming;
   blDebitApprovalEmail.value = blPaymentSnapshot.debitApprovalEmail;
-  blDebitTimingNote.value = blPaymentSnapshot.debitTimingNote;
   blPendingW9Removal.value = false;
   blPendingAchAuthRemoval.value = false;
   blEditingPayment.value = false;
@@ -5588,37 +5566,41 @@ const cancelPaymentCard = () => {
 
 // Card 3: Invoice Configuration
 let blInvoiceSnapshot = {
-  billingCycle: 'Semi-Monthly', customCycleNote: '',
+  billingCycle: 'Semi-Monthly',
   separateInvoices: 'no', separateInvoicesSplit: '',
-  invoiceBreakout: 'no', invoiceBreakoutSelection: '', invoiceBreakoutNote: '',
+  invoiceBreakout: 'no', invoiceBreakoutSelection: '',
 };
 const blInvoiceStartEdit = () => {
   blInvoiceSnapshot = {
     billingCycle: blBillingCycle.value,
-    customCycleNote: blCustomCycleNote.value,
     separateInvoices: blSeparateInvoices.value,
     separateInvoicesSplit: blSeparateInvoicesSplit.value,
     invoiceBreakout: blInvoiceBreakout.value,
     invoiceBreakoutSelection: blInvoiceBreakoutSelection.value,
-    invoiceBreakoutNote: blInvoiceBreakoutNote.value,
   };
+  blInvoiceTouched.value = false;
   blEditingInvoice.value = true;
 };
 const blInvoiceSaveEdit = () => {
+  blInvoiceTouched.value = true;
+  const missingCycle = !blBillingCycle.value;
+  const missingSplit = blSeparateInvoices.value === 'yes' && !blSeparateInvoicesSplit.value;
+  const missingBreakoutType = blInvoiceBreakout.value === 'yes' && !blInvoiceBreakoutSelection.value;
+  if (missingCycle || missingSplit || missingBreakoutType) return;
   blEditingInvoice.value = false;
 };
 const blInvoiceCancelEdit = () => {
   blBillingCycle.value = blInvoiceSnapshot.billingCycle;
-  blCustomCycleNote.value = blInvoiceSnapshot.customCycleNote;
   blSeparateInvoices.value = blInvoiceSnapshot.separateInvoices;
   blSeparateInvoicesSplit.value = blInvoiceSnapshot.separateInvoicesSplit;
   blInvoiceBreakout.value = blInvoiceSnapshot.invoiceBreakout;
   blInvoiceBreakoutSelection.value = blInvoiceSnapshot.invoiceBreakoutSelection;
-  blInvoiceBreakoutNote.value = blInvoiceSnapshot.invoiceBreakoutNote;
+  blInvoiceTouched.value = false;
   blEditingInvoice.value = false;
 };
 
 // Card 4: Report Configuration
+const blReportTouched = ref(false);
 let blReportSnapshot = { includePhi: 'no', reportingBreakouts: 'no', reportingBreakoutSelections: [] as string[] };
 const blReportStartEdit = () => {
   blReportSnapshot = {
@@ -5626,15 +5608,19 @@ const blReportStartEdit = () => {
     reportingBreakouts: blReportingBreakouts.value,
     reportingBreakoutSelections: [...blReportingBreakoutSelections.value],
   };
+  blReportTouched.value = false;
   blEditingReport.value = true;
 };
 const blReportSaveEdit = () => {
+  blReportTouched.value = true;
+  if (blReportingBreakouts.value === 'yes' && blReportingBreakoutSelections.value.length === 0) return;
   blEditingReport.value = false;
 };
 const blReportCancelEdit = () => {
   blIncludePhi.value = blReportSnapshot.includePhi;
   blReportingBreakouts.value = blReportSnapshot.reportingBreakouts;
   blReportingBreakoutSelections.value = blReportSnapshot.reportingBreakoutSelections;
+  blReportTouched.value = false;
   blEditingReport.value = false;
 };
 
@@ -5645,13 +5631,11 @@ const blPendingRebateW9Removal = ref(false);
 const blPendingRebateAchAuthRemoval = ref(false);
 
 let blRebateSnapshot = {
-  contacts: [] as string[],
   w9File: null as string | null,
   achAuthFile: null as string | null,
 };
 const blRebateStartEdit = () => {
   blRebateSnapshot = {
-    contacts: [...blRebateContacts.value],
     w9File: blRebateW9File.value,
     achAuthFile: blRebateAchAuthFile.value,
   };
@@ -5665,7 +5649,6 @@ const saveRebateCard = () => {
   blEditingRebate.value = false;
 };
 const cancelRebateCard = () => {
-  blRebateContacts.value = blRebateSnapshot.contacts;
   blRebateW9File.value = blRebateSnapshot.w9File;
   blRebateAchAuthFile.value = blRebateSnapshot.achAuthFile;
   blPendingRebateW9Removal.value = false;
