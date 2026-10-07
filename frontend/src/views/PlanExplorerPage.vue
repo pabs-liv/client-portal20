@@ -3185,7 +3185,7 @@
                         <div v-if="blInvoiceContactUsers.length > 0">
                           <div v-for="name in blInvoiceContactUsers" :key="name" class="ap-field-value">{{ name }}</div>
                         </div>
-                        <div v-else-if="blPendingUserRequestCount === 0" class="ap-field-value">No users with the Invoice permission have been configured yet. Permissions can be set up under Client Contacts or Vendor Contacts in the Account Profile step.</div>
+                        <div v-else-if="blPendingUserRequestCount === 0" class="ap-field-value">No users with the Invoice permission have been requested yet. To add one, submit a portal access request with the Invoices permission under Client Contacts or Vendor Contacts in the Account Profile step.</div>
                         <p v-if="blPendingUserRequestCount > 0" class="text-body bl-note">There are {{ blPendingUserRequestCount }} pending user accounts. Once approved, additional users may display if they contain the applicable permission.</p>
                       </div>
                       <div v-if="blEditingSetup" class="ap-section-footer">
@@ -3497,7 +3497,7 @@
                         <div v-if="blRebateContactUsers.length > 0">
                           <div v-for="name in blRebateContactUsers" :key="name" class="ap-field-value">{{ name }}</div>
                         </div>
-                        <div v-else-if="blPendingUserRequestCount === 0" class="ap-field-value">No users with the Rebates permission have been configured yet. Permissions can be set up under Client Contacts or Vendor Contacts in the Account Profile step.</div>
+                        <div v-else-if="blPendingUserRequestCount === 0" class="ap-field-value">No users with the Rebates permission have been requested yet. To add one, submit a portal access request with the Rebates permission under Client Contacts or Vendor Contacts in the Account Profile step.</div>
                         <p v-if="blPendingUserRequestCount > 0" class="text-body bl-note">There are {{ blPendingUserRequestCount }} pending user accounts. Once approved, additional users may display if they contain the applicable permission.</p>
                       </div>
                       <template v-if="!blEditingRebate">
