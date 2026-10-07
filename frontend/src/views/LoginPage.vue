@@ -57,36 +57,38 @@
         Enter your details below and we'll create a ticket to review your request.
       </p>
 
-      <template v-if="!submitted">
+      <v-form v-if="!submitted" ref="vendorFormRef">
         <div class="vendor-field-row">
-          <TextField v-model="vendorForm.firstName" label="First name" class="vendor-field" />
-          <TextField v-model="vendorForm.lastName" label="Last name" class="vendor-field" />
+          <TextField v-model="vendorForm.firstName" label="First name *" :rules="[requiredRule]" class="vendor-field" />
+          <TextField v-model="vendorForm.lastName" label="Last name *" :rules="[requiredRule]" class="vendor-field" />
         </div>
-        <TextField v-model="vendorForm.email" label="Business Email Address" type="email" class="vendor-field" />
+        <TextField v-model="vendorForm.email" label="Business Email Address *" type="email" :rules="[requiredRule, emailRule]" class="vendor-field" />
         <TextField v-model="vendorForm.jobTitle" label="Business Job Title" class="vendor-field" />
-        <TextField v-model="vendorForm.vendorName" label="Vendor name" class="vendor-field" />
-        <TextField v-model="vendorForm.addressLine1" label="Business Address" class="vendor-field" />
+        <TextField v-model="vendorForm.vendorName" label="Vendor name *" :rules="[requiredRule]" class="vendor-field" />
+        <TextField v-model="vendorForm.addressLine1" label="Business Address *" :rules="[requiredRule]" class="vendor-field" />
         <div class="vendor-field-row">
           <TextField v-model="vendorForm.addressLine2" label="Suite, Apt, Building" class="vendor-field" />
-          <TextField v-model="vendorForm.city" label="City" class="vendor-field" />
+          <TextField v-model="vendorForm.city" label="City *" :rules="[requiredRule]" class="vendor-field" />
         </div>
         <div class="vendor-field-row">
           <Select
             v-model="vendorForm.state"
             :items="usStates"
-            label="State"
+            label="State *"
+            :rules="[requiredRule]"
             class="vendor-field"
           />
-          <TextField v-model="vendorForm.zipCode" label="Zip Code" class="vendor-field" />
+          <TextField v-model="vendorForm.zipCode" label="Zip Code *" :rules="[requiredRule, zipRule]" class="vendor-field" />
         </div>
         <TextField
           v-model="vendorForm.associatedAccount"
-          label="Associated client account"
+          label="Associated client account *"
           hint="Enter an account you manage or are associated with so we can identify you."
           persistent-hint
+          :rules="[requiredRule]"
           class="vendor-field"
         />
-      </template>
+      </v-form>
       <p v-else class="text-body vendor-dialog-text">
         Your request has been submitted. A ticket has been created and the Client Portal team will follow up by email once your access is approved.
       </p>
@@ -103,6 +105,10 @@ import Dialog from '@/components/ui/Dialog.vue';
 import Banner from '@/components/common/Banner.vue';
 import TextField from '@/components/ui/TextField.vue';
 import Select from '@/components/ui/Select.vue';
+
+const requiredRule = (v: string) => !!v || 'This field is required.';
+const emailRule = (v: string) => !v || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) || 'Enter a valid email address.';
+const zipRule = (v: string) => !v || /^\d{5}(-\d{4})?$/.test(v) || 'Enter a valid zip code.';
 
 const router = useRouter();
 
@@ -131,6 +137,7 @@ const features = [
 
 const showVendorDialog = ref(false);
 const submitted = ref(false);
+const vendorFormRef = ref<any>(null);
 
 // Based on old-client-portal's AddressModel.USStates enum (the canonical
 // state list used across account info, ID cards, and rebate address forms),
@@ -165,7 +172,9 @@ function onContinue() {
   router.push('/home');
 }
 
-function submitVendorRequest() {
+async function submitVendorRequest() {
+  const result = await vendorFormRef.value?.validate();
+  if (!result?.valid) return;
   submitted.value = true;
 }
 
