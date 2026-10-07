@@ -3185,7 +3185,7 @@
                         <div v-if="blInvoiceContactUsers.length > 0">
                           <div v-for="name in blInvoiceContactUsers" :key="name" class="ap-field-value">{{ name }}</div>
                         </div>
-                        <div v-else class="ap-field-value">No users with the Invoice permission have been configured yet. Permissions can be set up under Client Contacts or Vendor Contacts in the Account Profile step.</div>
+                        <div v-else-if="blPendingUserRequestCount === 0" class="ap-field-value">No users with the Invoice permission have been configured yet. Permissions can be set up under Client Contacts or Vendor Contacts in the Account Profile step.</div>
                         <p v-if="blPendingUserRequestCount > 0" class="text-body bl-note">There are {{ blPendingUserRequestCount }} pending user accounts. Once approved, additional users may display if they contain the applicable permission.</p>
                       </div>
                       <div v-if="blEditingSetup" class="ap-section-footer">
@@ -3497,7 +3497,7 @@
                         <div v-if="blRebateContactUsers.length > 0">
                           <div v-for="name in blRebateContactUsers" :key="name" class="ap-field-value">{{ name }}</div>
                         </div>
-                        <div v-else class="ap-field-value">No users with the Rebates permission have been configured yet. Permissions can be set up under Client Contacts or Vendor Contacts in the Account Profile step.</div>
+                        <div v-else-if="blPendingUserRequestCount === 0" class="ap-field-value">No users with the Rebates permission have been configured yet. Permissions can be set up under Client Contacts or Vendor Contacts in the Account Profile step.</div>
                         <p v-if="blPendingUserRequestCount > 0" class="text-body bl-note">There are {{ blPendingUserRequestCount }} pending user accounts. Once approved, additional users may display if they contain the applicable permission.</p>
                       </div>
                       <template v-if="!blEditingRebate">
@@ -5440,14 +5440,23 @@ const blDebitApprovalEmail = ref('');
 
 // B-05/B-14: Contacts — read-only. Responsible Party and Rebate Notification Contacts list the names of
 // users on the account who hold the Invoices / Rebates Client Portal permission; they are not selectable here.
-const blContactsWithPermission = (permission: 'invoices' | 'rebates') =>
-  [...apClientContacts.value, ...apVendorContacts.value]
+// The sample contacts are shared across accounts, so Cyberdyne Systems and Oscorp are treated as accounts where
+// nobody holds either permission yet (nothing submitted in Account Profile, or only pending requests).
+const blAccountsWithoutPermissionUsers = [CYBERDYNE_SYSTEMS_ID, OSCORP_ID];
+const blContactsWithPermission = (permission: 'invoices' | 'rebates') => {
+  if (selectedAccount.value !== null && blAccountsWithoutPermissionUsers.includes(selectedAccount.value)) return [];
+  return [...apClientContacts.value, ...apVendorContacts.value]
     .filter(c => c.portalAccess && c.permissions?.[permission])
     .map(c => c.name);
+};
 const blInvoiceContactUsers = computed(() => blContactsWithPermission('invoices'));
 const blRebateContactUsers = computed(() => blContactsWithPermission('rebates'));
-// Account-wide count of user access requests still awaiting approval (sample value for the prototype).
-const blPendingUserRequestCount = ref(2);
+// Account-wide count of user access requests still awaiting approval (sample values for the prototype):
+// Cyberdyne Systems: nobody submitted yet (empty state). Oscorp: nobody approved, requests pending (pending note
+// only). Stark Industries: approved users plus pending requests (names and pending note).
+const blPendingUserRequestsByAccount: Record<number, number> = { [OSCORP_ID]: 2, [STARK_INDUSTRIES_ID]: 3 };
+const blPendingUserRequestCount = computed(() =>
+  selectedAccount.value === null ? 0 : (blPendingUserRequestsByAccount[selectedAccount.value] ?? 0));
 watch(() => blExistingParty.value, () => {
   blSkipAchSetup.value = false;
 });
