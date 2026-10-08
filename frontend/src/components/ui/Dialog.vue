@@ -9,6 +9,10 @@
       <v-card-title class="d-flex align-center">
         <component :is="icon" v-if="icon" :size="24" class="mr-2 text-primary" />
         <span class="text-h3 text-primary">{{ heading }}</span>
+        <v-spacer />
+        <v-btn v-if="closable && !persistent" icon variant="text" size="small" density="comfortable" aria-label="Close" @click="handleClose">
+          <X :size="20" />
+        </v-btn>
       </v-card-title>
       <v-card-text class="text-body dialog-text">
         <p v-if="text">{{ text }}</p>
@@ -30,7 +34,7 @@
 
 <script setup lang="ts">
 import { defineProps, defineEmits } from 'vue';
-import { Icon as LucideIcon } from 'lucide-vue-next';
+import { Icon as LucideIcon, X } from 'lucide-vue-next';
 import Button from '@/components/ui/Button.vue';
 
 interface Action {
@@ -50,16 +54,28 @@ interface Props {
   actions?: Action[];
   showSecondaryButton?: boolean;
   maxWidth?: string | number;
+  closable?: boolean;
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   persistent: false,
   actions: () => [],
   showSecondaryButton: false,
   maxWidth: '800',
+  closable: true,
 });
 
-defineEmits(['update:modelValue']);
+const emit = defineEmits(['update:modelValue']);
+
+// The X behaves like Cancel: run the secondary action if there is one, otherwise just close.
+function handleClose() {
+  const cancelAction = props.actions.find((action) => action.styleType === 'secondary');
+  if (cancelAction) {
+    cancelAction.onClick();
+  } else {
+    emit('update:modelValue', false);
+  }
+}
 </script>
 
 <style lang="scss" scoped>
