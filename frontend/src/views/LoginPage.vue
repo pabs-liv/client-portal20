@@ -56,6 +56,7 @@
       <p v-if="!submitted" class="text-body vendor-dialog-text">
         Enter your details below and we'll create a ticket to review your request.
       </p>
+      <p v-if="!submitted" class="vendor-required-legend">Fields marked <span class="vendor-required-asterisk">*</span> are required.</p>
 
       <v-form v-if="!submitted" ref="vendorFormRef">
         <div class="vendor-field-row">
@@ -198,7 +199,7 @@ const dialogActions = computed(() => submitted.value
   ? [{ text: 'Close', onClick: closeVendorDialog }]
   : [
     { text: 'Cancel', styleType: 'secondary', onClick: closeVendorDialog },
-    { text: 'Submit request', onClick: submitVendorRequest },
+    { text: 'Submit Request', onClick: submitVendorRequest },
   ]);
 </script>
 
@@ -345,6 +346,17 @@ const dialogActions = computed(() => submitted.value
 
 .vendor-dialog-text {
   margin-bottom: $spacing-small;
+}
+
+.vendor-required-asterisk {
+  color: $color-error;
+  margin-left: 2px;
+}
+
+.vendor-required-legend {
+  font-size: $font-size-small;
+  color: $color-text-secondary;
+  margin: 0 0 $spacing-small;
 }
 
 .vendor-field {
