@@ -4164,7 +4164,7 @@
                     <Dialog
                       v-model="gpsShowDisclosure"
                       heading="Electronic Signature Disclosure"
-                      :actions="[{ text: 'Close', onClick: () => (gpsShowDisclosure = false) }]"
+                      :actions="[{ text: 'Close', styleType: 'secondary', onClick: () => (gpsShowDisclosure = false) }]"
                     >
                       <p class="text-small">
                         By typing your name and checking the acknowledgment box(es) above, using a keyboard, mouse, or other device to select an item or
