@@ -98,7 +98,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, computed } from 'vue';
+import { reactive, ref, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { UserPlus, ChevronRight, LayoutPanelLeft, LayoutDashboard, Filter, Zap } from 'lucide-vue-next';
 import Button from '@/components/ui/Button.vue';
@@ -181,6 +181,15 @@ async function submitVendorRequest() {
 
 function closeVendorDialog() {
   showVendorDialog.value = false;
+}
+
+// Reset on every close path (buttons, X, clicking outside, Esc) so reopening always starts a blank form.
+watch(showVendorDialog, (isOpen) => {
+  if (isOpen) return;
+  resetVendorForm();
+});
+
+function resetVendorForm() {
   submitted.value = false;
   vendorForm.firstName = '';
   vendorForm.lastName = '';
@@ -196,7 +205,7 @@ function closeVendorDialog() {
 }
 
 const dialogActions = computed(() => submitted.value
-  ? [{ text: 'Close', onClick: closeVendorDialog }]
+  ? [{ text: 'Close', styleType: 'secondary', onClick: closeVendorDialog }]
   : [
     { text: 'Cancel', styleType: 'secondary', onClick: closeVendorDialog },
     { text: 'Submit Request', onClick: submitVendorRequest },
