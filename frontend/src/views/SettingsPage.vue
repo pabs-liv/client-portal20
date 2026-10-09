@@ -17,189 +17,44 @@
       <div class="account-settings">
         <Tabs v-if="selectedAccount" :tabs="settingTabs" :initial-tab="activeTab" @tab-selected="handleTabSelected" />
         <div v-if="selectedAccount && activeTab === 'company-information'">
-          <!-- Mirrors Plan Explorer > Account Profile step (Account Profile + About This
-               Company cards) — see project_settings_master_divergences.md. High Cost
-               Notifications widget re-added 2026-08-10 per Alex: needs to stay editable
-               post-go-live, not just during Implementation. Shares state with Plan
-               Explorer > Limits & Controls via useHighCostNotifications() — same setting,
-               not a duplicate. -->
+          <!-- High Cost Notifications widget re-added 2026-08-10 per Alex: needs to stay editable
+               post-go-live, not just during Implementation. Shares state with Plan Explorer >
+               Limits & Controls via useHighCostNotifications() — same setting, not a duplicate. -->
 
-          <!-- Section: Account Profile -->
+          <!-- Section: General Information — DBA + EIN only, matching Master (liv.clientportal) -->
           <div class="ap-section">
             <div class="ap-section-header ap-section-header--space-between">
-              <h4 class="text-h4">Account Profile</h4>
-              <Button v-if="!isEditingAccountProfile" @click="isEditingAccountProfile = true" label="Edit" variant="thirtiary" />
+              <h4 class="text-h4">General Information</h4>
+              <Button v-if="!isEditingGeneralInfo" @click="isEditingGeneralInfo = true" label="Edit" variant="thirtiary" />
             </div>
             <div class="ap-fields">
-              <template v-if="!isEditingAccountProfile">
-                <div class="ap-field-row ap-field-row--multi ap-field-row--thirds">
-                  <div class="ap-field">
-                    <span class="ap-field-label">Account name</span>
-                    <span class="ap-field-value">{{ editableCompanyData.companyName || '—' }}</span>
-                  </div>
-                  <div class="ap-field">
-                    <span class="ap-field-label">Legal Name</span>
-                    <span class="ap-field-value">{{ editableCompanyData.apLegalName || '—' }}</span>
-                  </div>
-                  <div class="ap-field">
-                    <span class="ap-field-label">DBA</span>
-                    <span class="ap-field-value">{{ editableCompanyData.dba || '—' }}</span>
-                  </div>
-                </div>
+              <p class="text-body">Keep company information up to date.</p>
+              <template v-if="!isEditingGeneralInfo">
                 <div class="ap-field-row ap-field-row--multi">
                   <div class="ap-field">
-                    <span class="ap-field-label">Effective start date</span>
-                    <span class="ap-field-value">{{ editableCompanyData.apEffectiveStartDate || '—' }}</span>
+                    <span class="ap-field-label">Doing business as</span>
+                    <span class="ap-field-value">{{ editableCompanyData.dba || '—' }}</span>
                   </div>
                   <div class="ap-field">
-                    <span class="ap-field-label">Effective end date</span>
-                    <span class="ap-field-value">{{ editableCompanyData.apEffectiveEndDate || '—' }}</span>
+                    <span class="ap-field-label">EIN</span>
+                    <span class="ap-field-value">{{ editableCompanyData.ein || '—' }}</span>
                   </div>
                 </div>
               </template>
               <template v-else>
                 <div class="form-row">
-                  <TextField v-model="editableCompanyData.companyName" label="Account name" />
-                  <TextField v-model="editableCompanyData.apLegalName" label="Legal Name" />
-                  <TextField v-model="editableCompanyData.dba" label="DBA" />
-                </div>
-                <div class="form-row">
-                  <TextField v-model="editableCompanyData.apEffectiveStartDate" label="Effective start date" placeholder="MM/DD/YYYY" />
-                  <TextField v-model="editableCompanyData.apEffectiveEndDate" label="Effective end date" placeholder="MM/DD/YYYY" />
-                </div>
-                <div class="ap-section-footer">
-                  <Button variant="primary" label="Save Changes" @click="saveAccountProfileChanges" />
-                  <Button variant="secondary" label="Cancel" @click="cancelAccountProfileChanges" />
-                </div>
-              </template>
-            </div>
-          </div>
-
-          <!-- Section: About This Company -->
-          <div class="ap-section">
-            <div class="ap-section-header ap-section-header--space-between">
-              <h4 class="text-h4">About This Company</h4>
-              <Button v-if="!isEditingAboutCompany" @click="isEditingAboutCompany = true" label="Edit" variant="thirtiary" />
-            </div>
-            <div class="ap-fields">
-              <template v-if="!isEditingAboutCompany">
-                <div class="ap-field-row">
-                  <div class="ap-field">
-                    <span class="ap-field-label">SIC Code</span>
-                    <span class="ap-field-value">{{ editableCompanyData.apSicCode || '—' }}</span>
-                  </div>
-                </div>
-                <h5 class="ap-subsection-heading">Physical Address</h5>
-                <div class="ap-field-row">
-                  <div class="ap-field">
-                    <span class="ap-field-label">Address 1</span>
-                    <span class="ap-field-value">{{ editableCompanyData.apPhysicalAddress1 || '—' }}</span>
-                  </div>
-                </div>
-                <div class="ap-field-row">
-                  <div class="ap-field">
-                    <span class="ap-field-label">Address 2</span>
-                    <span class="ap-field-value">{{ editableCompanyData.apPhysicalAddress2 || '—' }}</span>
-                  </div>
-                </div>
-                <div class="ap-field-row ap-field-row--multi ap-field-row--thirds">
-                  <div class="ap-field">
-                    <span class="ap-field-label">City</span>
-                    <span class="ap-field-value">{{ editableCompanyData.apPhysicalCity || '—' }}</span>
-                  </div>
-                  <div class="ap-field">
-                    <span class="ap-field-label">State</span>
-                    <span class="ap-field-value">{{ editableCompanyData.apPhysicalState || '—' }}</span>
-                  </div>
-                  <div class="ap-field">
-                    <span class="ap-field-label">ZIP</span>
-                    <span class="ap-field-value">{{ editableCompanyData.apPhysicalZip || '—' }}</span>
-                  </div>
-                </div>
-                <div class="ap-field-row">
-                  <div class="ap-field">
-                    <span class="ap-field-label">Country</span>
-                    <span class="ap-field-value">{{ editableCompanyData.apPhysicalCountry || '—' }}</span>
-                  </div>
-                </div>
-                <h5 class="ap-subsection-heading">Mailing Address</h5>
-                <div class="ap-field-row">
-                  <div class="ap-field">
-                    <span class="ap-field-label">Address 1</span>
-                    <span class="ap-field-value">{{ editableCompanyData.apMailingAddress1 || '—' }}</span>
-                  </div>
-                </div>
-                <div class="ap-field-row">
-                  <div class="ap-field">
-                    <span class="ap-field-label">Address 2</span>
-                    <span class="ap-field-value">{{ editableCompanyData.apMailingAddress2 || '—' }}</span>
-                  </div>
-                </div>
-                <div class="ap-field-row ap-field-row--multi ap-field-row--thirds">
-                  <div class="ap-field">
-                    <span class="ap-field-label">City</span>
-                    <span class="ap-field-value">{{ editableCompanyData.apMailingCity || '—' }}</span>
-                  </div>
-                  <div class="ap-field">
-                    <span class="ap-field-label">State</span>
-                    <span class="ap-field-value">{{ editableCompanyData.apMailingState || '—' }}</span>
-                  </div>
-                  <div class="ap-field">
-                    <span class="ap-field-label">ZIP</span>
-                    <span class="ap-field-value">{{ editableCompanyData.apMailingZip || '—' }}</span>
-                  </div>
-                </div>
-                <div class="ap-field-row">
-                  <div class="ap-field">
-                    <span class="ap-field-label">Country</span>
-                    <span class="ap-field-value">{{ editableCompanyData.apMailingCountry || '—' }}</span>
-                  </div>
-                </div>
-              </template>
-              <template v-else>
-                <div class="form-row">
-                  <TextField v-model="editableCompanyData.apSicCode" label="SIC Code" />
-                </div>
-                <h5 class="ap-subsection-heading">Physical Address</h5>
-                <div class="form-row">
-                  <TextField v-model="editableCompanyData.apPhysicalAddress1" label="Address 1" />
-                </div>
-                <div class="form-row">
-                  <TextField v-model="editableCompanyData.apPhysicalAddress2" label="Address 2" />
-                </div>
-                <div class="form-row">
-                  <TextField v-model="editableCompanyData.apPhysicalCity" label="City" />
-                  <TextField v-model="editableCompanyData.apPhysicalState" label="State" />
-                  <TextField v-model="editableCompanyData.apPhysicalZip" label="ZIP" />
-                </div>
-                <div class="form-row">
-                  <TextField v-model="editableCompanyData.apPhysicalCountry" label="Country" />
-                </div>
-                <div class="ap-mailing-header">
-                  <h5 class="ap-subsection-heading">Mailing Address</h5>
-                  <div class="ap-checkbox-toggle" @click="toggleSameAsPhysical">
-                    <CheckSquare v-if="sameAsPhysical" :size="18" :stroke-width="1.5" class="ap-checkbox-icon ap-checkbox-icon--checked" />
-                    <Square v-else :size="18" :stroke-width="1.5" class="ap-checkbox-icon" />
-                    <span class="text-small">Same as physical address</span>
-                  </div>
-                </div>
-                <div class="form-row">
-                  <TextField v-model="editableCompanyData.apMailingAddress1" label="Address 1" :disabled="sameAsPhysical" />
-                </div>
-                <div class="form-row">
-                  <TextField v-model="editableCompanyData.apMailingAddress2" label="Address 2" :disabled="sameAsPhysical" />
-                </div>
-                <div class="form-row">
-                  <TextField v-model="editableCompanyData.apMailingCity" label="City" :disabled="sameAsPhysical" />
-                  <TextField v-model="editableCompanyData.apMailingState" label="State" :disabled="sameAsPhysical" />
-                  <TextField v-model="editableCompanyData.apMailingZip" label="ZIP" :disabled="sameAsPhysical" />
-                </div>
-                <div class="form-row">
-                  <TextField v-model="editableCompanyData.apMailingCountry" label="Country" :disabled="sameAsPhysical" />
+                  <TextField v-model="editableCompanyData.dba" label="Doing business as" />
+                  <TextField
+                    v-model="editableCompanyData.ein"
+                    label="EIN"
+                    :error-messages="generalInfoEinError"
+                    hint="9 digits per EIN; separate multiple with a semicolon"
+                    persistent-hint
+                  />
                 </div>
                 <div class="ap-section-footer">
-                  <Button variant="primary" label="Save Changes" @click="saveAboutCompanyChanges" />
-                  <Button variant="secondary" label="Cancel" @click="cancelAboutCompanyChanges" />
+                  <Button variant="primary" label="Save Changes" :disabled="!!generalInfoEinError" @click="saveGeneralInfoChanges" />
+                  <Button variant="secondary" label="Cancel" @click="cancelGeneralInfoChanges" />
                 </div>
               </template>
             </div>
@@ -208,29 +63,22 @@
           <!-- Section: High Cost Notifications — shares state with Plan Explorer > Limits & Controls -->
           <div class="ap-section">
             <div class="ap-section-header ap-section-header--space-between">
-              <h4 class="text-h4">High Cost Notifications</h4>
+              <h4 class="text-h4">High Cost Notification Settings</h4>
               <Button v-if="!lcEditingHcn" @click="lcHcnStartEdit" label="Edit" variant="thirtiary" />
             </div>
             <div class="ap-fields">
+              <p class="text-body">Set a high-cost claim limit to get notifications when adjudicated claims surpass the limit.</p>
               <template v-if="!lcEditingHcn">
-                <div class="ap-field-row ap-field-row--multi">
+                <div class="ap-field-row">
                   <div class="ap-field">
-                    <span class="ap-field-label">Notify Threshold Amount</span>
+                    <span class="ap-field-label">Notification threshold</span>
                     <span class="ap-field-value">${{ lcNotifyThreshold }}</span>
-                  </div>
-                  <div class="ap-field">
-                    <span class="ap-field-label">Notification Recipients</span>
-                    <span class="ap-field-value">{{ lcRecipients.length ? lcRecipients.join(', ') : '—' }}</span>
                   </div>
                 </div>
               </template>
               <template v-else>
-                <p class="text-body">Before a high cost claim exceeding the notify amount is processed, the contacts below are notified. They have 24 hours to acknowledge before the claim is automatically processed.</p>
                 <div class="form-row">
-                  <TextField v-model="lcNotifyThreshold" label="Notify threshold amount" />
-                </div>
-                <div class="form-row">
-                  <Autocomplete v-model="lcRecipients" :items="lcHcnContactOptions" label="Select contacts" :multiple="true" />
+                  <TextField v-model="lcNotifyThreshold" label="Notification threshold" prefix="$" />
                 </div>
                 <div class="ap-section-footer">
                   <Button variant="primary" label="Save Changes" @click="lcHcnSaveEdit" />
@@ -1161,6 +1009,7 @@ const selectedAccount = ref<number | null>(null);
 interface CompanyData {
   companyName: string;
   dba: string;
+  ein?: string;
   // Removed 2026-08-07: notificationThreshold (High Cost Notification Settings) — this
   // is Solo2-owned and already editable via Plan Explorer > Limits & Controls; the
   // Settings tab should not have a second, separate editable copy of it.
@@ -1304,13 +1153,12 @@ const selectedAccountData = computed<CompanyData>(() => {
 
 const showSnackbar = ref(false);
 
-const isEditingAccountProfile = ref(false);
-const isEditingAboutCompany = ref(false);
-const sameAsPhysical = ref(false);
+const isEditingGeneralInfo = ref(false);
 
 const editableCompanyData = ref<Partial<CompanyData>>({
   companyName: '',
   dba: '',
+  ein: '',
   apLegalName: '',
   apEffectiveStartDate: '',
   apEffectiveEndDate: '',
@@ -1328,18 +1176,6 @@ const editableCompanyData = ref<Partial<CompanyData>>({
   apMailingZip: '',
   apMailingCountry: '',
 });
-
-const toggleSameAsPhysical = () => {
-  sameAsPhysical.value = !sameAsPhysical.value;
-  if (sameAsPhysical.value) {
-    editableCompanyData.value.apMailingAddress1 = editableCompanyData.value.apPhysicalAddress1;
-    editableCompanyData.value.apMailingAddress2 = editableCompanyData.value.apPhysicalAddress2;
-    editableCompanyData.value.apMailingCity = editableCompanyData.value.apPhysicalCity;
-    editableCompanyData.value.apMailingState = editableCompanyData.value.apPhysicalState;
-    editableCompanyData.value.apMailingZip = editableCompanyData.value.apPhysicalZip;
-    editableCompanyData.value.apMailingCountry = editableCompanyData.value.apPhysicalCountry;
-  }
-};
 
 const isEditingCaaOption = ref(false);
 const isEditingBenefitDetails = ref(false);
@@ -1425,6 +1261,7 @@ watch(selectedAccount, (newVal) => {
     editableCompanyData.value = {
       companyName: companyData[newVal].companyName,
       dba: companyData[newVal].dba,
+      ein: companyData[newVal].ein ?? '',
       apLegalName: companyData[newVal].apLegalName,
       apEffectiveStartDate: companyData[newVal].apEffectiveStartDate,
       apEffectiveEndDate: companyData[newVal].apEffectiveEndDate,
@@ -1442,9 +1279,7 @@ watch(selectedAccount, (newVal) => {
       apMailingZip: companyData[newVal].apMailingZip,
       apMailingCountry: companyData[newVal].apMailingCountry,
     };
-    isEditingAccountProfile.value = false;
-    isEditingAboutCompany.value = false;
-    sameAsPhysical.value = false;
+    isEditingGeneralInfo.value = false;
     // Initialize CAA data
     editableCaaData.value = {
       planSponsorOptions: companyData[newVal].planSponsorOptions,
@@ -1507,6 +1342,7 @@ watch(selectedAccount, (newVal) => {
     editableCompanyData.value = {
       companyName: '',
       dba: '',
+      ein: '',
       apLegalName: '',
       apEffectiveStartDate: '',
       apEffectiveEndDate: '',
@@ -1524,9 +1360,7 @@ watch(selectedAccount, (newVal) => {
       apMailingZip: '',
       apMailingCountry: '',
     };
-    isEditingAccountProfile.value = false;
-    isEditingAboutCompany.value = false;
-    sameAsPhysical.value = false;
+    isEditingGeneralInfo.value = false;
     // Reset CAA data
     editableCaaData.value = {
       groupHealthPlan: '',
@@ -1590,53 +1424,22 @@ const caaOptionSelected = computed(() => !!editableCaaData.value.planSponsorOpti
 const caaIsOption1 = computed(() => editableCaaData.value.planSponsorOptions?.includes('Option 1'));
 const caaIsOption2 = computed(() => editableCaaData.value.planSponsorOptions?.includes('Option 2'));
 
-const saveAccountProfileChanges = () => {
-  if (selectedAccount.value) {
-    Object.assign(companyData[selectedAccount.value], editableCompanyData.value);
-    isEditingAccountProfile.value = false;
+const generalInfoEinError = computed(() => einListRule(editableCompanyData.value.ein));
+
+const saveGeneralInfoChanges = () => {
+  if (selectedAccount.value && !generalInfoEinError.value) {
+    Object.assign(companyData[selectedAccount.value], { dba: editableCompanyData.value.dba, ein: editableCompanyData.value.ein });
+    isEditingGeneralInfo.value = false;
     showSnackbar.value = true;
   }
 };
 
-const cancelAccountProfileChanges = () => {
+const cancelGeneralInfoChanges = () => {
   if (selectedAccount.value) {
     const saved = companyData[selectedAccount.value];
-    editableCompanyData.value.companyName = saved.companyName;
     editableCompanyData.value.dba = saved.dba;
-    editableCompanyData.value.apLegalName = saved.apLegalName;
-    editableCompanyData.value.apEffectiveStartDate = saved.apEffectiveStartDate;
-    editableCompanyData.value.apEffectiveEndDate = saved.apEffectiveEndDate;
-    isEditingAccountProfile.value = false;
-  }
-};
-
-const saveAboutCompanyChanges = () => {
-  if (selectedAccount.value) {
-    Object.assign(companyData[selectedAccount.value], editableCompanyData.value);
-    isEditingAboutCompany.value = false;
-    sameAsPhysical.value = false;
-    showSnackbar.value = true;
-  }
-};
-
-const cancelAboutCompanyChanges = () => {
-  if (selectedAccount.value) {
-    const saved = companyData[selectedAccount.value];
-    editableCompanyData.value.apSicCode = saved.apSicCode;
-    editableCompanyData.value.apPhysicalAddress1 = saved.apPhysicalAddress1;
-    editableCompanyData.value.apPhysicalAddress2 = saved.apPhysicalAddress2;
-    editableCompanyData.value.apPhysicalCity = saved.apPhysicalCity;
-    editableCompanyData.value.apPhysicalState = saved.apPhysicalState;
-    editableCompanyData.value.apPhysicalZip = saved.apPhysicalZip;
-    editableCompanyData.value.apPhysicalCountry = saved.apPhysicalCountry;
-    editableCompanyData.value.apMailingAddress1 = saved.apMailingAddress1;
-    editableCompanyData.value.apMailingAddress2 = saved.apMailingAddress2;
-    editableCompanyData.value.apMailingCity = saved.apMailingCity;
-    editableCompanyData.value.apMailingState = saved.apMailingState;
-    editableCompanyData.value.apMailingZip = saved.apMailingZip;
-    editableCompanyData.value.apMailingCountry = saved.apMailingCountry;
-    isEditingAboutCompany.value = false;
-    sameAsPhysical.value = false;
+    editableCompanyData.value.ein = saved.ein ?? '';
+    isEditingGeneralInfo.value = false;
   }
 };
 
@@ -2028,15 +1831,7 @@ const userAdminVendorOptions = computed(() => {
   return result;
 });
 
-const { lcEditingHcn, lcNotifyThreshold, lcRecipients, lcHcnStartEdit, lcHcnSaveEdit, lcHcnCancelEdit } = useHighCostNotifications();
-// Recipient choices sourced from this account's activated portal users — a previously
-// selected name from Plan Explorer's broader contact list still displays even if it
-// isn't a portal user here (see useHighCostNotifications.ts for why this stays synced).
-const lcHcnContactOptions = computed(() => {
-  const names = new Set(userAdminData.value.map(u => u.user));
-  lcRecipients.value.forEach(name => names.add(name));
-  return [...names].sort();
-});
+const { lcEditingHcn, lcNotifyThreshold, lcHcnStartEdit, lcHcnSaveEdit, lcHcnCancelEdit } = useHighCostNotifications();
 
 const userAdminRowActions = [
   { label: 'Edit', action: 'edit' },
