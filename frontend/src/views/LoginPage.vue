@@ -54,7 +54,7 @@
       max-width="600"
     >
       <p v-if="!submitted" class="text-body vendor-dialog-text">
-        Enter your details below and we'll create a ticket to review your request.
+        Enter your details below and we'll send your request to the Client Portal team for review.
       </p>
       <p v-if="!submitted" class="vendor-required-legend">Fields marked <span class="vendor-required-asterisk">*</span> are required.</p>
 
