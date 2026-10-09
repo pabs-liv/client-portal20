@@ -1,7 +1,7 @@
 <template>
   <div class="login-page">
     <div class="login-card">
-      <img src="/icons/Logo.svg" alt="Client Portal Logo" class="login-logo" />
+      <img src="/icons/LogoMark.svg" alt="Client Portal Logo" class="login-logo" />
 
       <h1 class="login-title">We've just relaunched the Client Portal!</h1>
 
@@ -253,8 +253,8 @@ const dialogActions = computed(() => submitted.value
 
 .whats-new-label {
   width: 100%;
-  font-size: $font-size-small;
-  color: $color-text-secondary;
+  font-size: $font-size-body;
+  color: $color-text-primary;
   text-align: center;
   margin: 0 0 $spacing-medium;
 }
