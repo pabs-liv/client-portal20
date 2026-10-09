@@ -240,6 +240,7 @@
       heading="Approve Test Result"
       :text="`Are you sure you want to approve the test result for ${selectedTestResult?.accountName}?`"
       :actions="approveDialogActions"
+      show-secondary-button
     />
 
     <Dialog
@@ -249,6 +250,7 @@
       heading="Reject Test Result"
       :text="`Are you sure you want to reject the test result for ${selectedTestResult?.accountName}?`"
       :actions="rejectDialogActions"
+      show-secondary-button
     />
 
 
@@ -259,6 +261,7 @@
       heading="Approve Test Results"
       :text="bulkDialogText('approve')"
       :actions="bulkApproveDialogActions"
+      show-secondary-button
     />
 
     <Dialog
@@ -268,6 +271,7 @@
       heading="Reject Test Results"
       :text="bulkDialogText('reject')"
       :actions="bulkRejectDialogActions"
+      show-secondary-button
     />
 
     <v-snackbar v-model="showDownloadSnackbar" :timeout="3000" color="success">
@@ -374,12 +378,12 @@ const handleRowAction = ({ action, item }: { action: string; item: any }) => {
 };
 
 const approveDialogActions = [
-  { text: 'Cancel', onClick: () => (showApproveDialog.value = false), variant: 'text' as const },
+  { text: 'Cancel', onClick: () => (showApproveDialog.value = false), styleType: 'secondary' as const },
   { text: 'Approve', onClick: () => { console.log('approved', selectedTestResult.value); showApproveDialog.value = false; }, color: 'primary', variant: 'flat' as const }
 ];
 
 const rejectDialogActions = [
-  { text: 'Cancel', onClick: () => (showRejectDialog.value = false), variant: 'text' as const },
+  { text: 'Cancel', onClick: () => (showRejectDialog.value = false), styleType: 'secondary' as const },
   { text: 'Reject', onClick: () => { console.log('rejected', selectedTestResult.value); showRejectDialog.value = false; }, color: 'error', variant: 'flat' as const, type: 'destructive' as const }
 ];
 
@@ -408,7 +412,7 @@ const handleBulkDownload = (items: any[]) => {
 };
 
 const bulkApproveDialogActions = [
-  { text: 'Cancel', onClick: () => (showBulkApproveDialog.value = false), variant: 'text' as const },
+  { text: 'Cancel', onClick: () => (showBulkApproveDialog.value = false), styleType: 'secondary' as const },
   {
     text: 'Approve',
     color: 'primary',
@@ -422,7 +426,7 @@ const bulkApproveDialogActions = [
 ];
 
 const bulkRejectDialogActions = [
-  { text: 'Cancel', onClick: () => (showBulkRejectDialog.value = false), variant: 'text' as const },
+  { text: 'Cancel', onClick: () => (showBulkRejectDialog.value = false), styleType: 'secondary' as const },
   {
     text: 'Reject',
     color: 'error',

@@ -189,10 +189,12 @@
     </Transition>
 
     <!-- ── View Details Modal ── -->
-    <v-dialog v-model="showDetailModal" max-width="640" :scrim="isDark ? 'rgba(0,0,0,0.7)' : undefined">
+    <v-dialog v-model="showDetailModal" persistent @keydown.esc="showDetailModal = false" max-width="640" :scrim="isDark ? 'rgba(0,0,0,0.7)' : undefined">
       <v-card v-if="detailModalProgram" :style="isDark ? { backgroundColor: 'var(--color-card-bg)', color: 'var(--color-text-primary)' } : {}">
         <v-card-title class="modal-title-row" :style="isDark ? { borderBottomColor: 'var(--color-border)' } : {}">
           <span class="modal-program-name" :style="isDark ? { color: '#7BA7E0' } : {}">{{ detailModalProgram.name }}</span>
+          <v-spacer />
+          <v-btn icon variant="text" size="small" density="comfortable" aria-label="Close" @click="showDetailModal = false"><X :size="20" /></v-btn>
         </v-card-title>
 
         <v-card-text class="modal-body" :style="isDark ? { color: 'var(--color-text-primary)' } : {}">
@@ -252,10 +254,12 @@
     </v-dialog>
 
     <!-- ── Confirm Request Modal ── -->
-    <v-dialog v-model="showConfirmModal" max-width="480" :scrim="isDark ? 'rgba(0,0,0,0.7)' : undefined">
+    <v-dialog v-model="showConfirmModal" persistent @keydown.esc="!isSubmitting && (showConfirmModal = false)" max-width="480" :scrim="isDark ? 'rgba(0,0,0,0.7)' : undefined">
       <v-card :style="isDark ? { backgroundColor: 'var(--color-card-bg)', color: 'var(--color-text-primary)' } : {}">
         <v-card-title class="modal-title-row" :style="isDark ? { borderBottomColor: 'var(--color-border)' } : {}">
           <span :style="isDark ? { color: 'var(--color-text-primary)' } : {}">Request Program Information</span>
+          <v-spacer />
+          <v-btn icon variant="text" size="small" density="comfortable" aria-label="Close" :disabled="isSubmitting" @click="showConfirmModal = false"><X :size="20" /></v-btn>
         </v-card-title>
 
         <v-card-text class="modal-body" :style="isDark ? { color: 'var(--color-text-primary)' } : {}">

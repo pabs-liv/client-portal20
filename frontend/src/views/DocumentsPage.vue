@@ -61,7 +61,6 @@
          Configuration's "+ Add Network Link". -->
     <Dialog
       v-model="showUploadModal"
-      :persistent="true"
       :icon="CloudUpload"
       heading="Add Document"
       :actions="uploadDialogActions"

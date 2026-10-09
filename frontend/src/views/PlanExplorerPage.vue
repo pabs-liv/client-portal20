@@ -1026,7 +1026,7 @@
                   </Dialog>
 
                   <!-- ── Build New Accumulator Wizard ────────────────────────────────── -->
-                  <v-dialog v-model="showAccumulatorBuildDialog" max-width="900" persistent>
+                  <v-dialog v-model="showAccumulatorBuildDialog" max-width="900" persistent @keydown.esc="!accumulatorBuildSaving && closeAccumulatorBuildDialog()">
                     <v-card class="nl-dialog-card">
                       <v-card-title class="nl-dialog-header">
                         <Calculator :size="22" :stroke-width="1.5" class="nl-dialog-icon" />
@@ -2473,9 +2473,9 @@
                   </div>
 
                   <!-- File Submit Confirm Modal (one item at a time, triggered from inside edit mode) -->
-                  <v-dialog v-model="showTocSubmitModal" max-width="480">
+                  <v-dialog v-model="showTocSubmitModal" max-width="480" persistent @keydown.esc="showTocSubmitModal = false">
                     <v-card class="prog-modal-card">
-                      <v-card-title class="prog-modal-title">Submit {{ tocSubmitTarget === 'hcf' ? 'Historical Claims File' : 'Prior Authorization File' }}</v-card-title>
+                      <v-card-title class="prog-modal-title d-flex align-center">Submit {{ tocSubmitTarget === 'hcf' ? 'Historical Claims File' : 'Prior Authorization File' }}<v-spacer /><v-btn icon variant="text" size="small" density="comfortable" aria-label="Close" @click="showTocSubmitModal = false"><X :size="20" /></v-btn></v-card-title>
                       <v-card-text>
                         <v-divider class="mb-4" />
                         <p class="text-body mb-3">File: <strong>{{ tocSubmitTarget === 'hcf' ? tocHistoricalClaimsFile : tocPriorAuthFile }}</strong></p>
@@ -2679,10 +2679,10 @@
                     </Transition>
 
                     <!-- Configuration Modal -->
-                    <v-dialog v-model="showProgModal" max-width="560">
+                    <v-dialog v-model="showProgModal" max-width="560" persistent @keydown.esc="closeProgModal">
                       <!-- RxCompass -->
                       <v-card v-if="activeProgModal === 'rxcompass'" class="prog-modal-card">
-                        <v-card-title class="prog-modal-title">Configure RxCompass</v-card-title>
+                        <v-card-title class="prog-modal-title d-flex align-center">Configure RxCompass<v-spacer /><v-btn icon variant="text" size="small" density="comfortable" aria-label="Close" @click="closeProgModal"><X :size="20" /></v-btn></v-card-title>
                         <v-card-text>
                           <v-divider class="mb-4" />
                           <div class="nl-alert mb-4">
@@ -2726,7 +2726,7 @@
 
                       <!-- VCP -->
                       <v-card v-if="activeProgModal === 'vcp'" class="prog-modal-card">
-                        <v-card-title class="prog-modal-title">Configure Variable Copay Program</v-card-title>
+                        <v-card-title class="prog-modal-title d-flex align-center">Configure Variable Copay Program<v-spacer /><v-btn icon variant="text" size="small" density="comfortable" aria-label="Close" @click="closeProgModal"><X :size="20" /></v-btn></v-card-title>
                         <v-card-text>
                           <v-divider class="mb-4" />
                           <Select
@@ -2851,9 +2851,9 @@
                     </v-dialog>
 
                     <!-- Confirm Submit Modal -->
-                    <v-dialog v-model="showProgConfirmModal" max-width="520">
+                    <v-dialog v-model="showProgConfirmModal" max-width="520" persistent @keydown.esc="showProgConfirmModal = false">
                       <v-card class="prog-modal-card">
-                        <v-card-title class="prog-modal-title">Submit Program Setup</v-card-title>
+                        <v-card-title class="prog-modal-title d-flex align-center">Submit Program Setup<v-spacer /><v-btn icon variant="text" size="small" density="comfortable" aria-label="Close" @click="showProgConfirmModal = false"><X :size="20" /></v-btn></v-card-title>
                         <v-card-text>
                           <v-divider class="mb-4" />
                           <p class="text-body mb-3">
@@ -2901,10 +2901,11 @@
                     </v-dialog>
 
                     <!-- Pending Details Dialog -->
-                    <v-dialog v-model="showProgDetailsModal" max-width="480">
+                    <v-dialog v-model="showProgDetailsModal" max-width="480" persistent @keydown.esc="showProgDetailsModal = false">
                       <v-card class="prog-modal-card">
-                        <v-card-title class="prog-modal-title">
+                        <v-card-title class="prog-modal-title d-flex align-center">
                           {{ progDetailsTarget === 'rxcompass' ? 'RxCompass' : 'Variable Copay Program' }} — Submitted Request
+                          <v-spacer /><v-btn icon variant="text" size="small" density="comfortable" aria-label="Close" @click="showProgDetailsModal = false"><X :size="20" /></v-btn>
                         </v-card-title>
                         <v-card-text>
                           <v-divider class="mb-4" />
@@ -4164,7 +4165,7 @@
                     <Dialog
                       v-model="gpsShowDisclosure"
                       heading="Electronic Signature Disclosure"
-                      :actions="[{ text: 'Close', styleType: 'secondary', onClick: () => (gpsShowDisclosure = false) }]"
+                      :actions="[{ text: 'Close', onClick: () => (gpsShowDisclosure = false) }]"
                     >
                       <p class="text-small">
                         By typing your name and checking the acknowledgment box(es) above, using a keyboard, mouse, or other device to select an item or
@@ -4307,7 +4308,7 @@
   </div>
 
   <!-- ── Network Linking Dialog ──────────────────────────────────────────── -->
-  <v-dialog v-model="showNetworkLinkDialog" :max-width="networkLinkMode === 'edit' ? '800' : '620'" persistent>
+  <v-dialog v-model="showNetworkLinkDialog" :max-width="networkLinkMode === 'edit' ? '800' : '620'" persistent @keydown.esc="closeNetworkLinkDialog">
     <v-card class="nl-dialog-card">
       <v-card-title class="nl-dialog-header">
         <Globe :size="22" :stroke-width="1.5" class="nl-dialog-icon" />
@@ -4444,7 +4445,7 @@
   </v-dialog>
 
   <!-- ── Pharmacy Dialog (all 4 types, add + edit mode) ─────────────────── -->
-  <v-dialog v-model="showPharmacyDialog" max-width="560" persistent>
+  <v-dialog v-model="showPharmacyDialog" max-width="560" persistent @keydown.esc="showPharmacyDialog = false">
     <v-card class="nl-dialog-card">
       <v-card-title class="nl-dialog-header">
         <Building2 :size="22" :stroke-width="1.5" class="nl-dialog-icon" />

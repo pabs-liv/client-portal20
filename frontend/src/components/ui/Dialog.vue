@@ -1,8 +1,9 @@
 <template>
   <v-dialog
     :model-value="modelValue"
-    :persistent="persistent"
+    persistent
     @update:model-value="$emit('update:modelValue', $event)"
+    @keydown="onKeydown"
     :max-width="maxWidth"
   >
     <v-card class="pa-medium dialog-card">
@@ -10,7 +11,7 @@
         <component :is="icon" v-if="icon" :size="24" class="mr-2 text-primary" />
         <span class="text-h3 text-primary">{{ heading }}</span>
         <v-spacer />
-        <v-btn v-if="closable && !persistent" icon variant="text" size="small" density="comfortable" aria-label="Close" @click="handleClose">
+        <v-btn icon variant="text" size="small" density="comfortable" aria-label="Close" @click="handleClose">
           <X :size="20" />
         </v-btn>
       </v-card-title>
@@ -47,27 +48,25 @@ interface Action {
 
 interface Props {
   modelValue: boolean;
-  persistent?: boolean;
   icon?: LucideIcon;
   heading: string;
   text?: string;
   actions?: Action[];
   showSecondaryButton?: boolean;
   maxWidth?: string | number;
-  closable?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  persistent: false,
   actions: () => [],
   showSecondaryButton: false,
   maxWidth: '800',
-  closable: true,
 });
 
 const emit = defineEmits(['update:modelValue']);
 
-// The X behaves like Cancel: run the secondary action if there is one, otherwise just close.
+// Dialogs are always persistent (clicking outside never closes them), so they only close via
+// the X, Esc, or Cancel. The X and Esc behave like Cancel: run the secondary action if there
+// is one, otherwise just close. (Vuetify's persistent also blocks Esc, hence the handler.)
 function handleClose() {
   const cancelAction = props.actions.find((action) => action.styleType === 'secondary');
   if (cancelAction) {
@@ -75,6 +74,10 @@ function handleClose() {
   } else {
     emit('update:modelValue', false);
   }
+}
+
+function onKeydown(e: KeyboardEvent) {
+  if (e.key === 'Escape') handleClose();
 }
 </script>
 

@@ -205,7 +205,7 @@ function resetVendorForm() {
 }
 
 const dialogActions = computed(() => submitted.value
-  ? [{ text: 'Close', styleType: 'secondary', onClick: closeVendorDialog }]
+  ? [{ text: 'Close', onClick: closeVendorDialog }]
   : [
     { text: 'Cancel', styleType: 'secondary', onClick: closeVendorDialog },
     { text: 'Submit Request', onClick: submitVendorRequest },

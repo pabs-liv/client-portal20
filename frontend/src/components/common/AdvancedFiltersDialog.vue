@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { type LucideIcon } from 'lucide-vue-next';
+import { type LucideIcon, X } from 'lucide-vue-next';
 import type { FilterGroup } from '@/types/filters';
 
 export interface DialogAction {
@@ -14,7 +14,6 @@ export interface DialogAction {
 
 interface Props {
   modelValue: boolean;
-  persistent?: boolean;
   icon?: LucideIcon;
   iconColor?: string;
   heading: string;
@@ -23,9 +22,7 @@ interface Props {
   filters?: FilterGroup[];
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  persistent: false,
-});
+const props = defineProps<Props>();
 
 const emit = defineEmits(['update:modelValue', 'confirm', 'cancel']);
 
@@ -41,19 +38,29 @@ function handleCancel() {
   cancelAction.value?.onClick();
   emit('cancel');
 }
+
+// Always persistent (no outside-click dismiss); Vuetify's persistent also blocks Esc, so handle it here.
+function onKeydown(e: KeyboardEvent) {
+  if (e.key === 'Escape') handleCancel();
+}
 </script>
 
 <template>
   <v-dialog
     :model-value="modelValue"
-    :persistent="persistent"
+    persistent
     @update:model-value="$emit('update:modelValue', $event)"
+    @keydown="onKeydown"
     max-width="800"
   >
     <v-card class="pa-5 dialog-card">
       <v-card-title class="d-flex align-center">
         <component :is="icon" v-if="icon" :size="24" class="mr-2 text-primary" :style="{ color: iconColor }" />
         <span class="text-h3 text-primary">{{ heading }}</span>
+        <v-spacer />
+        <v-btn icon variant="text" size="small" density="comfortable" aria-label="Close" @click="handleCancel">
+          <X :size="20" />
+        </v-btn>
       </v-card-title>
       <p class="filters-instructions">
         Select one or more filter options below to refine the results. Click Apply Filters to update the table.

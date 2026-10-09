@@ -220,6 +220,7 @@
       :icon="Info"
       heading="Request Clinical Assistance"
       :actions="assistanceDialogActions"
+      show-secondary-button
     >
       <p class="text-body mb-small">
         Your request will be sent to your account management team and they will be in touch with you shortly with additional details.
