@@ -28,7 +28,6 @@
               <Button v-if="!isEditingGeneralInfo" @click="isEditingGeneralInfo = true" label="Edit" variant="thirtiary" />
             </div>
             <div class="ap-fields">
-              <p class="text-body">Keep company information up to date.</p>
               <template v-if="!isEditingGeneralInfo">
                 <div class="ap-field-row ap-field-row--multi">
                   <div class="ap-field">
@@ -42,6 +41,7 @@
                 </div>
               </template>
               <template v-else>
+                <p class="text-body">Keep company information up to date.</p>
                 <div class="form-row">
                   <TextField v-model="editableCompanyData.dba" label="Doing business as" />
                   <TextField
@@ -67,7 +67,6 @@
               <Button v-if="!lcEditingHcn" @click="lcHcnStartEdit" label="Edit" variant="thirtiary" />
             </div>
             <div class="ap-fields">
-              <p class="text-body">Set a high-cost claim limit to get notifications when adjudicated claims surpass the limit.</p>
               <template v-if="!lcEditingHcn">
                 <div class="ap-field-row">
                   <div class="ap-field">
@@ -77,6 +76,7 @@
                 </div>
               </template>
               <template v-else>
+                <p class="text-body">Set a high-cost claim limit to get notifications when adjudicated claims surpass the limit.</p>
                 <div class="form-row">
                   <TextField v-model="lcNotifyThreshold" label="Notification threshold" prefix="$" />
                 </div>
