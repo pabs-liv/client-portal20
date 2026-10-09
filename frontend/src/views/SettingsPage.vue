@@ -2577,6 +2577,13 @@ const userAdminDialogActions = computed(() => [
   }
 }
 
+// Widget titles — navy, matching Plan Explorer
+h4.text-h4 {
+  color: $color-primary;
+
+  html.dark & { color: #7BA7E0; } // lightened brand blue for dark backgrounds (navy fails contrast on dark)
+}
+
 .ap-section-footer {
   display: flex;
   align-items: center;
@@ -2597,7 +2604,6 @@ const userAdminDialogActions = computed(() => [
 
   h4 {
     margin-bottom: 0;
-    color: $color-text-primary;
   }
 }
 

@@ -9202,6 +9202,15 @@ watch(selectedAccount, (newVal) => {
   }
 }
 
+// Widget titles — navy
+.plan-explorer-content h4.text-h4,
+.ap-section-header .text-h4,
+.ap-contacts-card .text-h4 {
+  color: $color-primary;
+
+  html.dark & { color: #7BA7E0; } // navy fails contrast on dark backgrounds
+}
+
 .ap-fields {
   display: flex;
   flex-direction: column;
