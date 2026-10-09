@@ -60,33 +60,31 @@
 
       <v-form v-if="!submitted" ref="vendorFormRef">
         <div class="vendor-field-row">
-          <TextField v-model="vendorForm.firstName" label="First name *" :rules="[requiredRule]" class="vendor-field" />
-          <TextField v-model="vendorForm.lastName" label="Last name *" :rules="[requiredRule]" class="vendor-field" />
+          <TextField v-model="vendorForm.firstName" label="First name *" class="vendor-field" />
+          <TextField v-model="vendorForm.lastName" label="Last name *" class="vendor-field" />
         </div>
-        <TextField v-model="vendorForm.email" label="Business Email Address *" type="email" :rules="[requiredRule, emailRule]" class="vendor-field" />
+        <TextField v-model="vendorForm.email" label="Business Email Address *" type="email" :rules="[emailRule]" class="vendor-field" />
         <TextField v-model="vendorForm.jobTitle" label="Business Job Title" class="vendor-field" />
-        <TextField v-model="vendorForm.vendorName" label="Vendor name *" :rules="[requiredRule]" class="vendor-field" />
-        <TextField v-model="vendorForm.addressLine1" label="Business Address *" :rules="[requiredRule]" class="vendor-field" />
+        <TextField v-model="vendorForm.vendorName" label="Vendor name *" class="vendor-field" />
+        <TextField v-model="vendorForm.addressLine1" label="Business Address *" class="vendor-field" />
         <div class="vendor-field-row">
           <TextField v-model="vendorForm.addressLine2" label="Suite, Apt, Building" class="vendor-field" />
-          <TextField v-model="vendorForm.city" label="City *" :rules="[requiredRule]" class="vendor-field" />
+          <TextField v-model="vendorForm.city" label="City *" class="vendor-field" />
         </div>
         <div class="vendor-field-row">
           <Select
             v-model="vendorForm.state"
             :items="usStates"
             label="State *"
-            :rules="[requiredRule]"
             class="vendor-field"
           />
-          <TextField v-model="vendorForm.zipCode" label="Zip Code *" :rules="[requiredRule, zipRule]" class="vendor-field" />
+          <TextField v-model="vendorForm.zipCode" label="Zip Code *" :rules="[zipRule]" class="vendor-field" />
         </div>
         <TextField
           v-model="vendorForm.associatedAccount"
           label="Associated client account *"
           hint="Enter an account you manage or are associated with so we can identify you."
           persistent-hint
-          :rules="[requiredRule]"
           class="vendor-field"
         />
       </v-form>
@@ -107,7 +105,6 @@ import Banner from '@/components/common/Banner.vue';
 import TextField from '@/components/ui/TextField.vue';
 import Select from '@/components/ui/Select.vue';
 
-const requiredRule = (v: string) => !!v || 'This field is required.';
 const emailRule = (v: string) => !v || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) || 'Enter a valid email address.';
 const zipRule = (v: string) => !v || /^\d{5}(-\d{4})?$/.test(v) || 'Enter a valid zip code.';
 
@@ -204,11 +201,19 @@ function resetVendorForm() {
   vendorForm.associatedAccount = '';
 }
 
+// Submit stays disabled until every required field is filled in and the email/zip formats are valid.
+const isFormValid = computed(() => {
+  const f = vendorForm;
+  const requiredFilled = [f.firstName, f.lastName, f.email, f.vendorName, f.addressLine1, f.city, f.state, f.zipCode, f.associatedAccount]
+    .every((value) => value.trim() !== '');
+  return requiredFilled && emailRule(f.email) === true && zipRule(f.zipCode) === true;
+});
+
 const dialogActions = computed(() => submitted.value
   ? [{ text: 'Close', onClick: closeVendorDialog }]
   : [
     { text: 'Cancel', styleType: 'secondary', onClick: closeVendorDialog },
-    { text: 'Submit Request', onClick: submitVendorRequest },
+    { text: 'Submit Request', onClick: submitVendorRequest, disabled: !isFormValid.value },
   ]);
 </script>
 
@@ -369,7 +374,8 @@ const dialogActions = computed(() => submitted.value
 }
 
 .vendor-field {
-  margin-bottom: $spacing-small;
+  // 16px so inline error text doesn't crowd the next field's label
+  margin-bottom: calc(#{$spacing-small} + #{$spacing-nano});
 }
 
 .vendor-field-row {
