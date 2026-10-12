@@ -30,29 +30,267 @@
 
       <!-- Wayne Enterprises: Active/fully-implemented view -->
       <div v-if="isWayneEnterprises" class="gap-view">
-        <p class="text-body gap-dev-note">
-          <strong>Design Note for Dev/QA:</strong> This section is an exact replication of Solo2 &rarr; Member InSites &rarr; Member Search &rarr; GAP tab. Do not use this mockup as the visual source of truth — reference the live GAP tab in Solo2 directly for exact fields, order, and behavior (including live search-highlighting and conditional field visibility).
-        </p>
-
         <div class="gap-meta">
           <Building2 :size="14" :stroke-width="1.5" class="gap-meta-icon" />
-          <span>Wayne Enterprises – 11250</span>
+          <span>Wayne Enterprises - Account Id: 11250</span>
           <span class="gap-meta-dot">•</span>
           <span>Effective: 01/01/2026</span>
         </div>
 
-        <div class="gap-search">
-          <Search :size="16" :stroke-width="1.5" class="gap-search-icon" />
-          <input class="gap-search-input" placeholder="Search for any field or value..." />
-        </div>
+        <button class="button button-primary gap-gps-btn" @click="gapGpsClick">
+          <CloudDownload :size="16" :stroke-width="1.5" /> Generate &amp; Download GPS
+        </button>
 
         <div class="gap-accordion-list">
-          <div class="gap-accordion-item" v-for="section in gapSections" :key="section.label">
-            <component :is="section.icon" :size="18" :stroke-width="1.5" class="gap-accordion-icon" />
-            <span class="gap-accordion-label">{{ section.label }}</span>
-            <ChevronDown :size="18" :stroke-width="1.5" class="gap-accordion-chevron" />
+          <div class="gap-accordion-item gap-section" v-for="section in gapSections" :key="section.key">
+            <div class="gap-accordion-head" role="button" tabindex="0" :aria-expanded="gapOpenSections.includes(section.key)" @click="gapToggle(gapOpenSections, section.key)" @keydown.enter.prevent="gapToggle(gapOpenSections, section.key)" @keydown.space.prevent="gapToggle(gapOpenSections, section.key)">
+              <component :is="section.icon" :size="24" :stroke-width="1.5" class="gap-accordion-icon" />
+              <h3 class="gap-accordion-label">{{ section.label }}</h3>
+              <ChevronDown :size="18" :stroke-width="1.5" :class="['gap-accordion-chevron', { 'gap-accordion-chevron--open': gapOpenSections.includes(section.key) }]" />
+            </div>
+
+            <div v-if="gapOpenSections.includes(section.key)" class="gap-section-body">
+
+              <!-- ACCOUNT INFORMATION -->
+              <template v-if="section.key === 'accountInformation'">
+                <template v-for="(group, gIdx) in gapAccountInfo" :key="group.title">
+                  <h4 class="gap-h4">{{ group.title }}</h4>
+                  <v-row v-for="(row, rIdx) in group.rows" :key="rIdx" :class="{ 'mb-8': rIdx === group.rows.length - 1 && gIdx < gapAccountInfo.length - 1 }">
+                    <v-col v-for="f in row" :key="f.label" :cols="f.cols">
+                      <v-textarea v-if="f.multiline" :model-value="f.value || '-'" :label="f.label" variant="underlined" rows="1" auto-grow disabled class="gap-ro" />
+                      <TextField v-else :model-value="f.value || '-'" :label="f.label" disabled class="gap-ro" />
+                    </v-col>
+                  </v-row>
+                </template>
+              </template>
+
+              <!-- PLAN DESIGN -->
+              <template v-else-if="section.key === 'planDesign'">
+                <h4 class="gap-h4">Plan Details</h4>
+                <div class="gap-sub-list">
+                  <div v-for="plan in gapPlans" :key="plan.id" class="gap-sub-panel">
+                    <div class="gap-sub-head" role="button" tabindex="0" :aria-expanded="gapOpenDesignPlans.includes(plan.id)" @click="gapToggle(gapOpenDesignPlans, plan.id)" @keydown.enter.prevent="gapToggle(gapOpenDesignPlans, plan.id)" @keydown.space.prevent="gapToggle(gapOpenDesignPlans, plan.id)">
+                      <span class="gap-plan-name">{{ plan.name }}</span>
+                      <ChevronDown :size="18" :stroke-width="1.5" :class="['gap-accordion-chevron', { 'gap-accordion-chevron--open': gapOpenDesignPlans.includes(plan.id) }]" />
+                    </div>
+                    <div v-if="gapOpenDesignPlans.includes(plan.id)" class="gap-sub-body">
+                      <v-row>
+                        <v-col cols="4"><TextField :model-value="String(plan.id)" label="Plan ID" disabled class="gap-ro" /></v-col>
+                        <v-col cols="4"><TextField :model-value="plan.startDate" label="Plan Start Date" disabled class="gap-ro" /></v-col>
+                        <v-col cols="4"><TextField :model-value="plan.endDate || '-'" label="Plan End Date" disabled class="gap-ro" /></v-col>
+                      </v-row>
+                      <v-row>
+                        <v-col cols="6"><TextField :model-value="plan.benefitReset || '-'" label="Benefit Reset Date" disabled class="gap-ro" /></v-col>
+                        <v-col cols="6"><TextField :model-value="plan.grandfathered" label="Grandfathered status" disabled class="gap-ro" /></v-col>
+                      </v-row>
+                      <v-row><v-col cols="6"><TextField :model-value="plan.variableCopay" label="Variable Copay" disabled class="gap-ro" /></v-col></v-row>
+                      <v-row><v-col cols="6"><TextField :model-value="plan.benefitPeriod" label="Benefit Period" disabled class="gap-ro" /></v-col></v-row>
+                      <v-row v-for="p in (plan.benefitPeriods.length ? plan.benefitPeriods : [{ start: '', end: '' }])" :key="p.start || 'none'">
+                        <v-col cols="6"><TextField :model-value="p.start || '-'" label="Benefit Period Start Date" disabled class="gap-ro" /></v-col>
+                        <v-col cols="6"><TextField :model-value="p.end || '-'" label="Benefit Period End Date" disabled class="gap-ro" /></v-col>
+                      </v-row>
+                      <v-row class="mb-5"><v-col cols="6"><TextField :model-value="plan.situsState || '-'" label="Situs State" disabled class="gap-ro" /></v-col></v-row>
+
+                      <h4 class="gap-h4">Plan Parameters</h4>
+                      <div v-if="plan.planParameterIds.length" class="pd-param-grid mb-5">
+                        <div v-for="param in pdOnParams(plan)" :key="param.id" class="pd-param-tile pd-param-tile--on pd-param-tile--readonly">
+                          <div class="pd-param-tile-header">
+                            <span class="pd-param-tile-name">{{ param.name }}</span>
+                            <CircleCheckBig :size="18" class="pd-param-tile-check" />
+                          </div>
+                          <p class="pd-param-tile-desc">{{ param.description }}</p>
+                          <div class="pd-param-tile-footer"><Check :size="14" :stroke-width="2.5" /> Added</div>
+                        </div>
+                      </div>
+                      <div v-else class="nc-empty-state mb-5">
+                        <img :src="EmptyStateImg" alt="No data" class="nc-empty-icon" />
+                        <p class="nc-empty-title">Nothing to see here</p>
+                        <p class="nc-empty-subtitle">No plan parameters configured.</p>
+                      </div>
+
+                      <h4 class="gap-h4">Accumulators</h4>
+                      <div class="gap-table-wrap">
+                        <table class="gap-table">
+                          <thead>
+                            <tr>
+                              <th class="gap-th-expand"><span class="gap-sr-only">Expand</span></th>
+                              <th v-for="h in gapAccumHeaders" :key="h">{{ h }}</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <template v-for="acc in plan.accumulators" :key="acc.id">
+                              <tr>
+                                <td class="gap-td-expand">
+                                  <button class="gap-icon-btn" :aria-label="gapOpenAccums.includes(acc.id) ? 'Collapse' : 'Expand'" :aria-expanded="gapOpenAccums.includes(acc.id)" @click="gapToggle(gapOpenAccums, acc.id)">
+                                    <ChevronDown v-if="gapOpenAccums.includes(acc.id)" :size="16" />
+                                    <ChevronRight v-else :size="16" />
+                                  </button>
+                                </td>
+                                <td><div class="gap-cell-title">{{ acc.name }}</div><div class="gap-cell-sub">ID: {{ acc.id }}</div></td>
+                                <td><span class="gap-chip gap-chip--success"><Check :size="14" :stroke-width="2.5" /> {{ acc.status }}</span></td>
+                                <td>{{ acc.type }}</td>
+                                <td>{{ acc.period }}</td>
+                                <td>{{ acc.planIds }}</td>
+                                <td>{{ acc.planCodes }}</td>
+                                <td>{{ acc.startDate }}</td>
+                                <td>{{ acc.endDate }}</td>
+                              </tr>
+                              <tr v-if="gapOpenAccums.includes(acc.id)">
+                                <td colspan="9" class="gap-detail-cell">
+                                  <template v-for="(grp, i) in gapAccumGroups(acc)" :key="grp.title">
+                                    <div :class="['gap-detail-title', { 'gap-detail-title--first': i === 0 }]">{{ grp.title }}</div>
+                                    <div class="gap-detail-grid">
+                                      <div v-for="d in grp.details" :key="d.label">
+                                        <div class="gap-detail-label">{{ d.label }}</div>
+                                        <div class="gap-detail-value">{{ d.value }}</div>
+                                      </div>
+                                    </div>
+                                  </template>
+                                </td>
+                              </tr>
+                            </template>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </template>
+
+              <!-- BENEFIT INFORMATION -->
+              <template v-else-if="section.key === 'benefitInformation'">
+                <div class="gap-benefit-toolbar">
+                  <button class="button button-secondary" @click="gapCopayNotesOpen = true">Copay Notes</button>
+                </div>
+                <div class="gap-sub-list">
+                  <div v-for="plan in gapPlans" :key="plan.id" class="gap-sub-panel">
+                    <div class="gap-sub-head" role="button" tabindex="0" :aria-expanded="gapOpenBenefitPlans.includes(plan.id)" @click="gapToggle(gapOpenBenefitPlans, plan.id)" @keydown.enter.prevent="gapToggle(gapOpenBenefitPlans, plan.id)" @keydown.space.prevent="gapToggle(gapOpenBenefitPlans, plan.id)">
+                      <span class="gap-plan-name">{{ plan.name }}</span>
+                      <ChevronDown :size="18" :stroke-width="1.5" :class="['gap-accordion-chevron', { 'gap-accordion-chevron--open': gapOpenBenefitPlans.includes(plan.id) }]" />
+                    </div>
+                    <div v-if="gapOpenBenefitPlans.includes(plan.id)" class="gap-sub-body">
+                      <div v-for="source in plan.benefitSources" :key="source.label" class="mb-6">
+                        <h4 class="gap-h4 gap-h4--source">{{ source.label }}</h4>
+                        <div v-for="network in source.networks" :key="network.label" class="mb-4">
+                          <h5 class="gap-h5">{{ network.label }}</h5>
+
+                          <!-- Copay Conditions (Custom source only) -->
+                          <div v-if="source.label === 'Custom'" class="gap-sub-panel mb-6">
+                            <div class="gap-sub-head" role="button" tabindex="0" :aria-expanded="gapOpenConditions.includes(network.label)" @click="gapToggle(gapOpenConditions, network.label)" @keydown.enter.prevent="gapToggle(gapOpenConditions, network.label)" @keydown.space.prevent="gapToggle(gapOpenConditions, network.label)">
+                              <span class="gap-plan-name">Copay Conditions</span>
+                              <ChevronDown :size="18" :stroke-width="1.5" :class="['gap-accordion-chevron', { 'gap-accordion-chevron--open': gapOpenConditions.includes(network.label) }]" />
+                            </div>
+                            <div v-if="gapOpenConditions.includes(network.label)" class="gap-sub-body">
+                              <h4 class="gap-h4">Lists</h4>
+                              <v-row class="mb-5">
+                                <v-col v-for="l in gapConditions.lists" :key="l.label" cols="6" md="3"><TextField :model-value="l.value" :label="l.label" disabled class="gap-ro" /></v-col>
+                              </v-row>
+                              <template v-for="c in gapConditions.toggles" :key="c.label">
+                                <div class="gap-switch-row">
+                                  <span :class="['gap-switch', { 'gap-switch--on': c.on }]" aria-hidden="true"><span class="gap-switch-knob" /></span>
+                                  <span class="gap-switch-label">{{ c.label }}: {{ c.on ? 'On' : 'Off' }}</span>
+                                </div>
+                                <p class="gap-condition-desc">{{ c.description }}</p>
+                                <v-row v-if="c.on" class="mb-5">
+                                  <v-col v-for="f in c.fields" :key="f.label" cols="6" :md="f.wide ? 6 : 3"><TextField :model-value="f.value" :label="f.label" disabled class="gap-ro" /></v-col>
+                                </v-row>
+                              </template>
+                            </div>
+                          </div>
+
+                          <div v-for="ds in network.daySupplyGroups" :key="ds.label" class="gap-table-wrap mb-6">
+                            <table class="gap-table gap-table--benefit">
+                              <thead>
+                                <tr><th v-for="(h, hi) in gapBenefitHeaders(ds.label)" :key="h">{{ h }}</th></tr>
+                              </thead>
+                              <tbody>
+                                <tr v-for="row in ds.rows" :key="row[0]">
+                                  <td v-for="(cell, ci) in row" :key="ci" :class="{ 'gap-td-tier': ci === 0 }">{{ cell }}</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </template>
+
+              <!-- ACCOUNT CONTACTS -->
+              <template v-else-if="section.key === 'accountContacts'">
+                <h4 class="gap-h4">Basic Information</h4>
+                <div v-for="group in gapContacts" :key="group.role" class="gap-contact-card mb-5">
+                  <h4 class="gap-contact-role">{{ group.role }}</h4>
+                  <div v-for="person in group.people" :key="person.email" class="mt-5">
+                    <p class="gap-contact-name">{{ person.name }}</p>
+                    <p class="gap-contact-email">{{ person.email }}</p>
+                  </div>
+                </div>
+                <p v-if="!gapContacts.length" class="gap-muted">No contacts found.</p>
+              </template>
+
+              <!-- THIRD PARTY VENDORS -->
+              <template v-else-if="section.key === 'thirdPartyVendors'">
+                <h4 class="gap-h4">Vendor Details</h4>
+                <div class="gap-table-wrap mb-8">
+                  <table class="gap-table">
+                    <thead><tr><th v-for="h in gapVendorHeaders" :key="h">{{ h }}</th></tr></thead>
+                    <tbody>
+                      <tr v-for="v in gapVendors" :key="v.id">
+                        <td><div class="gap-cell-title">{{ v.name }}</div><div class="gap-cell-sub">ID - {{ v.id }}</div></td>
+                        <td><span class="gap-chip gap-chip--success"><Check :size="14" :stroke-width="2.5" /> {{ v.status }}</span></td>
+                        <td>{{ v.type || '-' }}</td>
+                        <td>{{ v.startDate }}</td>
+                        <td>{{ v.endDate || '-' }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <h4 class="gap-h4">Additional information</h4>
+                <div class="gap-notes-label">Notes</div>
+                <div class="gap-muted">{{ gapVendorNotes || '-' }}</div>
+              </template>
+            </div>
           </div>
         </div>
+
+        <!-- Copay Notes dialog -->
+        <Dialog
+          v-model="gapCopayNotesOpen"
+          heading="Copay Notes"
+          :actions="[{ text: 'Close', styleType: 'secondary', onClick: () => (gapCopayNotesOpen = false) }]"
+        >
+          <p v-if="!gapCopayNotes.length" class="gap-notes-empty">This account does not have any Copay Notes.</p>
+          <div v-for="note in gapCopayNotes" :key="note.id" class="gap-note-card">
+            <div class="gap-note-head">
+              <span class="gap-note-subject">{{ note.subject }}</span>
+              <div class="gap-note-head-actions">
+                <Pin v-if="note.pinned" :size="16" :stroke-width="1.5" class="gap-note-pin" aria-label="Pinned" />
+                <button class="gap-icon-btn" aria-label="Edit Note" @click="gapStartEditNote(note)"><Pencil :size="16" :stroke-width="1.5" /></button>
+              </div>
+            </div>
+            <p class="gap-note-body">{{ note.body }}</p>
+            <p class="gap-note-meta">Entered by {{ note.entryBy }} on {{ note.entryDate }}</p>
+            <p v-if="note.editBy" class="gap-note-meta">Edited by {{ note.editBy }} on {{ note.editDate }}</p>
+          </div>
+        </Dialog>
+
+        <!-- Edit Copay Note dialog -->
+        <Dialog
+          v-model="gapNoteEditOpen"
+          heading="Edit Note"
+          :show-secondary-button="true"
+          :actions="[
+            { text: 'Cancel', styleType: 'secondary', onClick: () => (gapNoteEditOpen = false) },
+            { text: 'Save Changes', onClick: gapSaveNote },
+          ]"
+        >
+          <p class="ap-required-legend">Fields marked <span class="ap-required-asterisk">*</span> are required.</p>
+          <TextField v-model="gapNoteForm.subject" label="Subject *" :error-messages="gapNoteTouched && !gapNoteForm.subject.trim() ? ['Required'] : []" class="mb-4" />
+          <v-textarea v-model="gapNoteForm.body" label="Note *" variant="underlined" rows="3" auto-grow :error-messages="gapNoteTouched && !gapNoteForm.body.trim() ? ['Required'] : []" />
+        </Dialog>
+        <v-snackbar v-model="gapSnackbar" color="success" :timeout="4000" location="bottom right">Note Updated Successfully</v-snackbar>
       </div>
 
       <div v-else class="plan-explorer-content">
@@ -4830,7 +5068,7 @@ import {
   Save as SaveIcon, LayoutList as LayoutListIcon, CircleCheck as CircleCheckIcon,
   ArrowRight as ArrowRightIcon, Pencil, PenLine, CheckSquare, Square, ChevronDown, X, Check, CloudDownload, TriangleAlert,
   Building2, Shield, Link2, Users, FileText, Search, Globe, Trash2, Paperclip, Info, Plus,
-  Calculator, CheckCircle2,
+  Calculator, CheckCircle2, ChevronRight, Pin,
 } from 'lucide-vue-next';
 import EmptyStateImg from '@/assets/EmptyState.svg';
 import { useDocumentsStore } from '@/stores/documents';
@@ -5962,13 +6200,184 @@ const isOscorp = computed(() => selectedAccount.value === OSCORP_ID);
 const isTyrell = computed(() => selectedAccount.value === TYRELL_CORPORATION_ID);
 const isWizardAccount = computed(() => isStarkIndustries.value || isCyberdyne.value || isOscorp.value || isTyrell.value);
 
+// ─── Active Account view (replicates Liv.ClientPortal PlanConfigurationPanel) ──
 const gapSections = [
-  { label: 'Account Information',  icon: Building2  },
-  { label: 'Plan Design',          icon: Shield     },
-  { label: 'Benefit Information',  icon: Link2      },
-  { label: 'Account Contacts',     icon: Users      },
-  { label: 'Third Party Vendors',  icon: FileText   },
+  { key: 'accountInformation', label: 'Account Information', icon: Building2 },
+  { key: 'planDesign',         label: 'Plan Design',         icon: Shield    },
+  { key: 'benefitInformation', label: 'Benefit Information', icon: Link2     },
+  { key: 'accountContacts',    label: 'Account Contacts',    icon: Users     },
+  { key: 'thirdPartyVendors',  label: 'Third Party Vendors', icon: FileText  },
 ];
+
+const gapOpenSections = ref<string[]>([]);
+const gapOpenDesignPlans = ref<number[]>([]);
+const gapOpenBenefitPlans = ref<number[]>([]);
+const gapOpenAccums = ref<number[]>([]);
+const gapOpenConditions = ref<string[]>([]);
+
+function gapToggle<T>(list: T[], value: T) {
+  const idx = list.indexOf(value);
+  if (idx === -1) list.push(value);
+  else list.splice(idx, 1);
+}
+
+const gapGpsClick = () => { /* prototype: GPS download not simulated */ };
+
+const gapAccountInfo = [
+  { title: 'Basic Information', rows: [
+    [{ label: 'Account Legal Name', value: 'Wayne Enterprises, Inc.', cols: 6 }, { label: 'DBA', value: 'Wayne Enterprises', cols: 6 }],
+    [{ label: 'Physical Address', value: '1007 Mountain Dr, Gotham, NJ 07001', cols: 6 }, { label: 'Mailing Address', value: 'PO Box 1007, Gotham, NJ 07001', cols: 6 }],
+  ] },
+  { title: 'Plan Administration', rows: [
+    [{ label: 'TPA Name', value: 'Gotham Benefit Administrators', cols: 6 }, { label: 'ID Card Vendor', value: 'CardWorks', cols: 3 }, { label: 'ID Card Preference', value: 'Digital Only', cols: 3 }],
+    [{ label: 'Mail Order', value: 'Liviniti Mail Order', cols: 6, multiline: true }, { label: 'Pharmacy Network', value: 'Liviniti National Retail Network', cols: 6, multiline: true }],
+    [{ label: 'Formulary', value: 'Liviniti Standard Formulary', cols: 6 }],
+  ] },
+  { title: 'Program Settings', rows: [
+    [{ label: 'Transition of Care', value: 'Yes', cols: 6 }, { label: 'Rx Watchtower', value: 'No', cols: 6 }],
+    [{ label: 'Manual Claims', value: 'Yes', cols: 6 }],
+  ] },
+];
+
+const gapAccumHeaders = ['Name', 'Status', 'Type', 'Period', 'Plan ID(s)', 'Plan Code(s)', 'Eff. Start Date', 'Eff. End Date'];
+
+const gapTiers = ['Generic', 'Brand-Preferred', 'Brand-NonPreferred', 'Specialty-Generic', 'Specialty-Preferred', 'Specialty-NonPreferred', 'Specialty T4', 'Excluded T4', 'Compound', 'Tier 90'];
+const gapTierValues: Record<string, string[]> = {
+  'Generic':            ['Copay', '$10.00', '-', '-', '-', '-', '-', 'No', 'No'],
+  'Brand-Preferred':    ['Copay', '$35.00', '-', '-', '-', '-', '-', 'No', 'No'],
+  'Brand-NonPreferred': ['Coinsurance', '-', '30%', '$50.00', '$150.00', '-', '-', 'Yes', 'No'],
+  'Specialty-Generic':  ['Copay', '$75.00', '-', '-', '-', '-', '-', 'No', 'No'],
+};
+function gapBenefitRows(scale: number): string[][] {
+  return gapTiers.map(tier => {
+    const v = gapTierValues[tier];
+    if (!v) return [tier, '-', '-', '-', '-', '-', '-', '-', 'No', 'No'];
+    return [tier, ...v.map(c => (c.startsWith('$') && scale !== 1 ? `$${(parseFloat(c.slice(1)) * scale).toFixed(2)}` : c))];
+  });
+}
+const gapBenefitHeaders = (daySupplyLabel: string) =>
+  [daySupplyLabel, 'Formula', 'Copay', 'Coinsurance', 'Coins. Min', 'Coins. Max', 'Incentive Min', 'Incentive Max', 'Ded. Waived', 'OOP Waived'];
+
+const gapPlans = [
+  {
+    id: 20481, name: 'Wayne Enterprises Standard PPO', benefitReset: '01/01', grandfathered: 'No', variableCopay: 'No',
+    benefitPeriod: 'Calendar Year', situsState: 'NJ', startDate: '01/01/2026', endDate: '',
+    benefitPeriods: [{ start: '01/01/2026', end: '12/31/2026' }],
+    // IDs from pdPlanParameterCatalog (resolved at render time; the catalog is declared further down)
+    planParameterIds: [4, 5],
+    accumulators: [
+      { id: 90112, name: 'Standard Deductible / OOP', status: 'Active', type: 'Deductible & OOP', period: 'Calendar Year', planIds: '20481', planCodes: 'WE-PPO', startDate: '01/01/2026', endDate: '12/31/2026',
+        ded: ['Embedded', '$500.00', '$1,000.00', 'All Pharmacies'], oop: ['Embedded', '$3,000.00', '$6,000.00', 'All Pharmacies'],
+        incentive: ['No', '-', '-'], penalty: ['No', '-', '-'], benefitMax: ['-', '-', '-', '-'] },
+      { id: 90113, name: 'Specialty Benefit Max', status: 'Active', type: 'Benefit Max', period: 'Calendar Year', planIds: '20481', planCodes: 'WE-PPO', startDate: '01/01/2026', endDate: '12/31/2026',
+        ded: ['-', '-', '-', '-'], oop: ['-', '-', '-', '-'],
+        incentive: ['-', '-', '-'], penalty: ['-', '-', '-'], benefitMax: ['$25,000.00', 'Yes', '75', 'Plan maximum met'] },
+    ],
+    benefitSources: [
+      { label: 'Standard', networks: [
+        { label: 'Liviniti National Retail Network', daySupplyGroups: [
+          { label: '1 - 30 Day Supply', rows: gapBenefitRows(1) },
+          { label: '31 - 90 Day Supply', rows: gapBenefitRows(2.5) },
+        ] },
+      ] },
+      { label: 'Custom', networks: [
+        { label: 'Specialty Carve-out', daySupplyGroups: [{ label: '1 - 30 Day Supply', rows: gapBenefitRows(1.5) }] },
+      ] },
+    ],
+  },
+  {
+    id: 20482, name: 'Wayne Enterprises High Deductible Plan', benefitReset: '', grandfathered: 'Yes', variableCopay: 'No',
+    benefitPeriod: 'Plan Year', situsState: 'NJ', startDate: '01/01/2026', endDate: '12/31/2026',
+    benefitPeriods: [],
+    planParameterIds: [2, 3],
+    accumulators: [
+      { id: 90120, name: 'HDHP Deductible', status: 'Active', type: 'Deductible', period: 'Plan Year', planIds: '20482', planCodes: 'WE-HDHP', startDate: '01/01/2026', endDate: '12/31/2026',
+        ded: ['Aggregate', '$1,600.00', '$3,200.00', 'All Pharmacies'], oop: ['-', '-', '-', '-'],
+        incentive: ['-', '-', '-'], penalty: ['-', '-', '-'], benefitMax: ['-', '-', '-', '-'] },
+    ],
+    benefitSources: [
+      { label: 'Standard', networks: [
+        { label: 'Liviniti National Retail Network', daySupplyGroups: [{ label: '1 - 30 Day Supply', rows: gapBenefitRows(1.2) }] },
+      ] },
+    ],
+  },
+];
+
+function gapAccumGroups(acc: typeof gapPlans[number]['accumulators'][number]) {
+  const mk = (title: string, labels: string[], vals: string[]) => ({ title, details: labels.map((label, i) => ({ label, value: vals[i] })) });
+  return [
+    mk('DED', ['DED Embed/Agg.', 'DED Amount', 'DED Family Amount', 'DED Pharmacy(ies)'], acc.ded),
+    mk('OOP', ['OOP Embed/Agg.', 'OOP Amount', 'OOP Family Amount', 'OOP Pharmacy(ies)'], acc.oop),
+    mk('Incentive', ['Waive DED and OOP Deductibles', 'Custom Drug List', 'Incentive Amount'], acc.incentive),
+    mk('Penalty', ['Waive DED and OOP Deductibles', 'Custom Drug List', 'Incentive Amount'], acc.penalty),
+    mk('Benefit Max', ['Benefit Max Amount', 'Reject when plan max met', 'NCPDP Reject Code', 'Reject Message'], acc.benefitMax),
+  ];
+}
+
+const gapConditions = {
+  lists: [
+    { label: 'Drug List', value: 'Specialty Drug List' }, { label: 'Pharmacy List', value: 'N/A' },
+    { label: 'Member List', value: 'N/A' }, { label: 'Provider List', value: 'N/A' },
+  ],
+  toggles: [
+    { label: 'Price Range', on: true, description: 'Set the price range to filter out drugs between a specific price range.',
+      fields: [{ label: 'From', value: '$500.00' }, { label: 'To', value: '$10,000.00' }] },
+    { label: 'Prior Fill Limits', on: false, description: "This setting evaluates the patient's prior fill history to determine if the current claim meets pre-defined criteria related to medication usage patterns, quantities, and dates of previous fills.", fields: [] },
+    { label: 'Eligibility Codes', on: false, description: 'Applicable eligibility codes to trigger the custom copay applicaton.', fields: [] },
+    { label: 'Age Limit', on: true, description: 'Restricts certain benefits based on the age of the patient, requiring the claim to comply with age-related criteria to be approved for payment.',
+      fields: [{ label: 'Min Age', value: '18' }, { label: 'Max Age', value: '64' }] },
+    { label: 'Program Tagging', on: false, description: 'Allows claims to be tagged for specific programs.', fields: [] },
+  ],
+};
+
+const gapContacts = [
+  // Internal (Liviniti) contacts only, one card per contact title — matches Liv.ClientPortal.
+  { role: 'Implementation Coordinator', people: [{ name: 'Jordan Ellis', email: 'jordan.ellis@example.com' }] },
+  { role: 'Implementation Manager', people: [{ name: 'Casey Morgan', email: 'casey.morgan@example.com' }] },
+  { role: 'Primary Account Executive', people: [{ name: 'Riley Hayes', email: 'riley.hayes@example.com' }] },
+  { role: 'Clinical Point of Contact', people: [{ name: 'Taylor Brooks', email: 'taylor.brooks@example.com' }] },
+  { role: 'Primary Account Manager', people: [{ name: 'Avery Patel', email: 'avery.patel@example.com' }] },
+];
+
+const gapVendorHeaders = ['Name', 'Status', 'Vendor Type', 'Start Date', 'End Date'];
+const gapVendors = [
+  { id: 3301, name: 'CardWorks', status: 'Active', type: 'ID Card Vendor', startDate: '01/01/2026', endDate: '' },
+  { id: 3302, name: 'Gotham Benefit Administrators', status: 'Active', type: 'TPA', startDate: '01/01/2026', endDate: '' },
+];
+const gapVendorNotes = 'TPA sends weekly eligibility files on Mondays.';
+
+const gapCopayNotesOpen = ref(false);
+const gapNoteEditOpen = ref(false);
+const gapNoteTouched = ref(false);
+const gapSnackbar = ref(false);
+const gapNoteEditingId = ref<number | null>(null);
+const gapNoteForm = reactive({ subject: '', body: '' });
+const gapCopayNotes = ref([
+  { id: 1, subject: 'Specialty carve-out copays', body: 'Custom specialty copays apply to drugs on the Specialty Drug List priced between $500 and $10,000.', pinned: true,
+    entryBy: 'Charity Phoenix', entryDate: '03/12/2026', editBy: '', editDate: '' },
+  { id: 2, subject: 'Mandatory generic exception', body: 'Member-requested brand exceptions are reviewed by the clinical team.', pinned: false,
+    entryBy: 'Charity Phoenix', entryDate: '02/02/2026', editBy: 'Charity Phoenix', editDate: '02/20/2026' },
+]);
+function gapStartEditNote(note: { id: number; subject: string; body: string }) {
+  gapNoteEditingId.value = note.id;
+  gapNoteForm.subject = note.subject;
+  gapNoteForm.body = note.body;
+  gapNoteTouched.value = false;
+  gapNoteEditOpen.value = true;
+}
+function gapSaveNote() {
+  gapNoteTouched.value = true;
+  if (!gapNoteForm.subject.trim() || !gapNoteForm.body.trim()) return;
+  const note = gapCopayNotes.value.find(n => n.id === gapNoteEditingId.value);
+  if (note) {
+    note.subject = gapNoteForm.subject;
+    note.body = gapNoteForm.body;
+    note.editBy = 'Charity Phoenix';
+    note.editDate = '10/12/2026';
+  }
+  gapNoteEditOpen.value = false;
+  gapSnackbar.value = true;
+}
 
 const selectedAccountName = computed(() => {
   const account = accountOptions.value.find(acc => acc.id === selectedAccount.value);
@@ -11048,19 +11457,108 @@ watch(selectedAccount, (newVal) => {
 }
 
 .gap-accordion-item {
-  display: flex;
-  align-items: center;
-  gap: $spacing-small;
-  padding: $spacing-medium;
   border: 1px solid $color-border;
   border-radius: 8px;
   background: $color-neutral-white;
+  overflow: hidden;
+}
+
+.gap-accordion-head,
+.gap-sub-head {
+  display: flex;
+  align-items: center;
+  gap: $spacing-small;
   cursor: pointer;
 
-  &:hover {
-    background-color: rgba($color-primary, 0.03);
-  }
+  &:hover { background-color: rgba($color-primary, 0.03); }
+  &:focus-visible { outline: 2px solid $color-primary; outline-offset: -2px; }
 }
+
+.gap-accordion-head { padding: $spacing-medium; }
+.gap-section-body { padding: $spacing-large; border-top: 1px solid $color-border; }
+
+.gap-gps-btn { margin-bottom: $spacing-large; }
+
+.gap-h4 { color: $color-primary; font-size: $font-size-body; margin-bottom: $spacing-large; }
+.gap-h4--source { margin-bottom: $spacing-medium; }
+.gap-h5 { color: $color-primary; font-size: $font-size-small; margin-bottom: $spacing-small; }
+
+.gap-sub-list { display: flex; flex-direction: column; gap: $spacing-xsmall; }
+.gap-sub-panel { border: 1px solid $color-border; border-radius: 8px; overflow: hidden; }
+.gap-sub-head { padding: $spacing-small $spacing-medium; }
+.gap-sub-body { padding: $spacing-large; border-top: 1px solid $color-border; }
+.gap-plan-name { flex: 1; font-size: $font-size-body; font-weight: $font-weight-semibold; color: $color-text-primary; }
+
+.gap-benefit-toolbar { display: flex; justify-content: flex-end; margin-bottom: $spacing-large; }
+
+.gap-table-wrap { overflow-x: auto; border: 1px solid $color-border; border-radius: 4px; }
+.gap-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: $font-size-small;
+
+  th, td { padding: $spacing-small $spacing-medium; text-align: left; border-bottom: 1px solid $color-border; vertical-align: top; }
+  th { font-weight: 700; color: $color-text-primary; }
+  tbody tr:last-child td { border-bottom: none; }
+}
+.gap-table--plain { border: 1px solid $color-border; }
+.gap-table--benefit {
+  th { border-bottom: 1px solid $color-text-primary; }
+  .gap-td-tier { white-space: nowrap; min-width: 180px; font-weight: 500; border-right: 1px solid $color-primary; }
+  th:first-child { white-space: nowrap; min-width: 180px; }
+}
+.gap-th-expand, .gap-td-expand { width: 48px; }
+.gap-cell-title { font-weight: 500; }
+.gap-cell-sub { font-size: $font-size-small; color: $color-text-secondary; }
+.gap-sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.gap-icon-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border: none; background: transparent; border-radius: 50%;
+  color: $color-text-secondary; cursor: pointer;
+  &:hover { background-color: rgba($color-primary, 0.08); }
+  &:focus-visible { outline: 2px solid $color-primary; }
+}
+
+.gap-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px $spacing-small; border-radius: 4px; font-size: $font-size-small; font-weight: $font-weight-semibold;
+  &--success { background-color: $color-success-background; color: $color-success; }
+}
+
+.gap-detail-cell { background-color: #f7f8fa; padding: $spacing-medium $spacing-large !important; }
+.gap-detail-title { color: $color-primary; font-weight: 700; margin: $spacing-large 0 $spacing-small; }
+.gap-detail-title--first { margin-top: 0; }
+.gap-detail-grid {
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: $spacing-medium;
+}
+.gap-detail-label { font-weight: 700; }
+.gap-detail-value { color: $color-text-secondary; margin-top: 2px; }
+
+.gap-switch-row { display: flex; align-items: center; gap: $spacing-small; margin-top: $spacing-medium; }
+.gap-switch {
+  position: relative; width: 36px; height: 20px; border-radius: 10px; background: $color-text-secondary; flex-shrink: 0;
+  &--on { background: $color-primary; }
+}
+.gap-switch-knob { position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: $color-neutral-white; }
+.gap-switch--on .gap-switch-knob { left: 18px; }
+.gap-switch-label { font-weight: $font-weight-semibold; }
+.gap-condition-desc { font-size: $font-size-body; color: $color-text-secondary; margin: 2px 0 $spacing-small; }
+
+.gap-contact-card { border: 1px solid $color-border; border-radius: 8px; padding: $spacing-medium; }
+.gap-contact-role { font-size: $font-size-body; font-weight: $font-weight-bold; color: $color-text-primary; }
+.gap-contact-name { font-size: $font-size-body; }
+.gap-contact-email, .gap-muted { color: $color-text-secondary; }
+.gap-notes-label { font-size: $font-size-small; color: $color-primary; margin-bottom: $spacing-small; }
+.gap-notes-empty { text-align: center; color: $color-text-secondary; }
+
+.gap-note-card { border: 1px solid $color-border; border-radius: 8px; padding: $spacing-medium; margin-bottom: $spacing-small; }
+.gap-note-head { display: flex; justify-content: space-between; align-items: center; }
+.gap-note-head-actions { display: flex; align-items: center; gap: $spacing-xsmall; }
+.gap-note-subject { font-weight: $font-weight-bold; }
+.gap-note-pin { color: $color-primary; }
+.gap-note-body { white-space: pre-wrap; margin: $spacing-xsmall 0; }
+.gap-note-meta { font-size: $font-size-small; color: $color-text-secondary; }
 
 .gap-accordion-icon {
   color: $color-primary;
@@ -11077,6 +11575,9 @@ watch(selectedAccount, (newVal) => {
 .gap-accordion-chevron {
   color: $color-text-secondary;
   flex-shrink: 0;
+  transition: transform 0.2s ease;
+
+  &--open { transform: rotate(180deg); }
 }
 
 // ─── Network Link + Pharmacy Dialogs ─────────────────────────────────────────
@@ -11883,6 +12384,26 @@ watch(selectedAccount, (newVal) => {
 
 <!-- Non-scoped dark mode overrides — bypasses Vue scoping to apply correctly -->
 <style lang="scss">
+// Active Account view read-only fields: match Liv.ClientPortal's displayOnly fields —
+// full-opacity text/label (no disabled dimming) and no underline.
+.gap-ro.v-input--disabled {
+  --v-disabled-opacity: 1;
+  opacity: 1;
+
+  .v-field--disabled,
+  .v-field__input,
+  .v-label,
+  .v-field-label {
+    opacity: 1;
+  }
+  .v-field__input { color: var(--color-text-primary); -webkit-text-fill-color: currentColor; }
+  .v-field--variant-underlined .v-field__outline::before {
+    border-image: none;
+    border-width: 0;
+  }
+  .v-field__outline::after { display: none; }
+}
+
 html.dark {
   // ── Timeline cards ──────────────────────────────────────────────────────────
   .timeline-card {
