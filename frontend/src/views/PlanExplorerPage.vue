@@ -74,10 +74,10 @@
                       <ChevronDown :size="18" :stroke-width="1.5" :class="['gap-accordion-chevron', { 'gap-accordion-chevron--open': gapOpenDesignPlans.includes(plan.id) }]" />
                     </div>
                     <div v-if="gapOpenDesignPlans.includes(plan.id)" class="gap-sub-body">
+                      <v-row><v-col cols="6"><TextField :model-value="String(plan.id)" label="Plan ID" disabled class="gap-ro" /></v-col></v-row>
                       <v-row>
-                        <v-col cols="4"><TextField :model-value="String(plan.id)" label="Plan ID" disabled class="gap-ro" /></v-col>
-                        <v-col cols="4"><TextField :model-value="plan.startDate" label="Plan Start Date" disabled class="gap-ro" /></v-col>
-                        <v-col cols="4"><TextField :model-value="plan.endDate || '-'" label="Plan End Date" disabled class="gap-ro" /></v-col>
+                        <v-col cols="6"><TextField :model-value="plan.startDate" label="Plan Start Date" disabled class="gap-ro" /></v-col>
+                        <v-col cols="6"><TextField :model-value="plan.endDate || '-'" label="Plan End Date" disabled class="gap-ro" /></v-col>
                       </v-row>
                       <v-row>
                         <v-col cols="6"><TextField :model-value="plan.benefitReset || '-'" label="Benefit Reset Date" disabled class="gap-ro" /></v-col>
@@ -6260,7 +6260,7 @@ const gapBenefitHeaders = (daySupplyLabel: string) =>
 
 const gapPlans = [
   {
-    id: 20481, name: 'Wayne Enterprises Standard PPO', benefitReset: '01/01', grandfathered: 'No', variableCopay: 'No',
+    id: 20481, name: 'Wayne Enterprises Standard PPO', benefitReset: 'January 1: Calendar Year', grandfathered: 'No', variableCopay: 'No',
     benefitPeriod: 'Calendar Year', situsState: 'NJ', startDate: '01/01/2026', endDate: '',
     benefitPeriods: [{ start: '01/01/2026', end: '12/31/2026' }],
     // IDs from pdPlanParameterCatalog (resolved at render time; the catalog is declared further down)
@@ -6286,7 +6286,7 @@ const gapPlans = [
     ],
   },
   {
-    id: 20482, name: 'Wayne Enterprises High Deductible Plan', benefitReset: '', grandfathered: 'Yes', variableCopay: 'No',
+    id: 20482, name: 'Wayne Enterprises High Deductible Plan', benefitReset: 'July 1', grandfathered: 'Yes', variableCopay: 'No',
     benefitPeriod: 'Plan Year', situsState: 'NJ', startDate: '01/01/2026', endDate: '12/31/2026',
     benefitPeriods: [],
     planParameterIds: [2, 3],
@@ -11487,7 +11487,7 @@ watch(selectedAccount, (newVal) => {
 .gap-sub-panel { border: 1px solid $color-border; border-radius: 8px; overflow: hidden; }
 .gap-sub-head { padding: $spacing-small $spacing-medium; }
 .gap-sub-body { padding: $spacing-large; border-top: 1px solid $color-border; }
-.gap-plan-name { flex: 1; font-size: $font-size-body; font-weight: $font-weight-semibold; color: $color-text-primary; }
+.gap-plan-name { flex: 1; font-size: $font-size-body; font-weight: $font-weight-semibold; color: $color-primary; }
 
 .gap-benefit-toolbar { display: flex; justify-content: flex-end; margin-bottom: $spacing-large; }
 
@@ -11498,7 +11498,7 @@ watch(selectedAccount, (newVal) => {
   font-size: $font-size-small;
 
   th, td { padding: $spacing-small $spacing-medium; text-align: left; border-bottom: 1px solid $color-border; vertical-align: top; }
-  th { font-weight: 700; color: $color-text-primary; }
+  th { font-weight: 700; color: $color-primary; }
   tbody tr:last-child td { border-bottom: none; }
 }
 .gap-table--plain { border: 1px solid $color-border; }
@@ -11532,7 +11532,7 @@ watch(selectedAccount, (newVal) => {
 .gap-detail-grid {
   display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: $spacing-medium;
 }
-.gap-detail-label { font-weight: 700; }
+.gap-detail-label { font-weight: 700; color: $color-primary; }
 .gap-detail-value { color: $color-text-secondary; margin-top: 2px; }
 
 .gap-switch-row { display: flex; align-items: center; gap: $spacing-small; margin-top: $spacing-medium; }
@@ -11546,7 +11546,7 @@ watch(selectedAccount, (newVal) => {
 .gap-condition-desc { font-size: $font-size-body; color: $color-text-secondary; margin: 2px 0 $spacing-small; }
 
 .gap-contact-card { border: 1px solid $color-border; border-radius: 8px; padding: $spacing-medium; }
-.gap-contact-role { font-size: $font-size-body; font-weight: $font-weight-bold; color: $color-text-primary; }
+.gap-contact-role { font-size: $font-size-body; font-weight: $font-weight-bold; color: $color-primary; }
 .gap-contact-name { font-size: $font-size-body; }
 .gap-contact-email, .gap-muted { color: $color-text-secondary; }
 .gap-notes-label { font-size: $font-size-small; color: $color-primary; margin-bottom: $spacing-small; }
@@ -12553,7 +12553,11 @@ html.dark {
     color: var(--color-text-primary);
   }
 
-  .gap-accordion-label { color: var(--color-text-primary); }
+  .gap-accordion-label,
+  .gap-plan-name,
+  .gap-table th,
+  .gap-detail-label,
+  .gap-contact-role { color: var(--color-text-primary); }
   .gap-accordion-chevron { color: var(--color-text-secondary); }
 
   // ── General text inside plan explorer ────────────────────────────────────────
