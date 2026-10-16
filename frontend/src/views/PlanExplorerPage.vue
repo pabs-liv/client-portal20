@@ -6386,7 +6386,7 @@ const wizardSteps = ref([
   { name: 'Account Profile',        required: true,  status: 'not-started',  description: 'Confirm account details, set effective dates, and review or update account contacts.' },
   { name: 'Network Configuration',  required: true,  status: 'not-started',  description: 'Define the pharmacy network and coverage settings for this account.' },
   { name: 'Group Setup',            required: true,  status: 'not-started',  description: 'Define the groups for this account.' },
-  { name: 'Plan Design',            required: true,  status: 'not-started',  description: 'Configure the benefit structure, cost-sharing rules, and coverage tiers.' },
+  { name: 'Plan Design',            required: true,  status: 'not-started',  description: 'Configure benefit structure, cost-sharing rules, and coverage tiers.' },
   { name: 'Transition of Care',     required: false, status: 'not-started',  description: 'Set up transition of care rules for members moving from another plan.' },
   { name: 'Programs',               required: false, status: 'not-started',  description: 'Select and configure clinical and specialty programs for this account.' },
   { name: 'Limits & Controls',      required: false, status: 'not-started',  description: 'Configure dispensing limits, high cost claim notifications, and manual claims handling for the account.' },
