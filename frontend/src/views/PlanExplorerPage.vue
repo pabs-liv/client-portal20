@@ -3233,14 +3233,20 @@
                     </div>
                     <div class="ap-fields">
                       <template v-if="!lcEditingHcn">
-                        <div class="ap-field-row ap-field-row--multi">
+                        <div class="ap-field-row">
                           <div class="ap-field">
                             <span class="ap-field-label">Notify Threshold Amount</span>
                             <span class="ap-field-value">${{ lcNotifyThreshold }}</span>
                           </div>
+                        </div>
+                        <div class="ap-field-row">
                           <div class="ap-field">
                             <span class="ap-field-label">Notification Recipients</span>
-                            <span class="ap-field-value">{{ lcRecipients.length ? lcRecipients.join(', ') : '—' }}</span>
+                            <div v-if="lcHcnContactUsers.length > 0">
+                              <div v-for="name in lcHcnContactUsers" :key="name" class="ap-field-value">{{ name }}</div>
+                            </div>
+                            <div v-else-if="lcHcnPendingUserRequestCount === 0" class="ap-field-value">No users with the High-Cost permission have been requested yet. To add one, submit a portal access request with the High-Cost permission under Client Contacts or Vendor Contacts in the Account Profile step.</div>
+                            <p v-if="lcHcnPendingUserRequestCount > 0" class="text-body bl-note">There are {{ lcHcnPendingUserRequestCount }} pending user accounts. Once approved, additional users may display if they contain the applicable permission.</p>
                           </div>
                         </div>
                       </template>
@@ -3253,11 +3259,12 @@
                           </div>
                         </div>
                         <div class="bl-section">
-                          <p class="lc-hcn-label">Who should receive high cost notifications?</p>
-                          <p class="text-body bl-note">Selected contacts will be notified when a high cost claim is pending approval.</p>
-                          <div class="bl-field-narrow">
-                            <Autocomplete v-model="lcRecipients" :items="lcHcnContactOptions" label="Select contacts" :multiple="true" />
+                          <p class="lc-hcn-label">Notification Recipients</p>
+                          <div v-if="lcHcnContactUsers.length > 0">
+                            <div v-for="name in lcHcnContactUsers" :key="name" class="ap-field-value">{{ name }}</div>
                           </div>
+                          <div v-else-if="lcHcnPendingUserRequestCount === 0" class="ap-field-value">No users with the High-Cost permission have been requested yet. To add one, submit a portal access request with the High-Cost permission under Client Contacts or Vendor Contacts in the Account Profile step.</div>
+                          <p v-if="lcHcnPendingUserRequestCount > 0" class="text-body bl-note">There are {{ lcHcnPendingUserRequestCount }} pending user accounts. Once approved, additional users may display if they contain the applicable permission.</p>
                         </div>
                         <div class="ap-section-footer">
                           <button class="button button-primary" @click="lcHcnSaveEdit">Save Changes</button>
@@ -5555,25 +5562,7 @@ function lcCancelEdit() {
   lcEditingLimits.value = false;
 }
 
-const { lcEditingHcn, lcNotifyThreshold, lcRecipients, lcHcnStartEdit, lcHcnSaveEdit, lcHcnCancelEdit } = useHighCostNotifications();
-
-const lcHcnContactOptions = computed(() => {
-  const items: any[] = [
-    { type: 'subheader', title: 'Client Contacts' },
-    ...apClientContacts.value.map(c => ({ title: c.name, value: c.name })),
-  ];
-  const vendorGroups = new Map<string, string[]>();
-  apVendorContacts.value.forEach(c => {
-    if (!vendorGroups.has(c.vendor)) vendorGroups.set(c.vendor, []);
-    vendorGroups.get(c.vendor)!.push(c.name);
-  });
-  vendorGroups.forEach((names, vendor) => {
-    items.push({ type: 'divider' });
-    items.push({ type: 'subheader', title: vendor });
-    names.forEach(name => items.push({ title: name, value: name }));
-  });
-  return items;
-});
+const { lcEditingHcn, lcNotifyThreshold, lcHcnStartEdit, lcHcnSaveEdit, lcHcnCancelEdit } = useHighCostNotifications();
 
 const lcEditingDaw = ref(false);
 const lcDaw1Options = ['No (Recommended)', 'Yes – Brand Copay', 'Yes – Generic Copay'];
@@ -5682,7 +5671,7 @@ const blDebitApprovalEmail = ref('');
 // The sample contacts are shared across accounts, so Cyberdyne Systems and Oscorp are treated as accounts where
 // nobody holds either permission yet (nothing submitted in Account Profile, or only pending requests).
 const blAccountsWithoutPermissionUsers = [CYBERDYNE_SYSTEMS_ID, OSCORP_ID];
-const blContactsWithPermission = (permission: 'invoices' | 'rebates') => {
+const blContactsWithPermission = (permission: 'invoices' | 'rebates' | 'highCost') => {
   if (selectedAccount.value !== null && blAccountsWithoutPermissionUsers.includes(selectedAccount.value)) return [];
   return [...apClientContacts.value, ...apVendorContacts.value]
     .filter(c => c.portalAccess && c.permissions?.[permission])
@@ -5690,6 +5679,8 @@ const blContactsWithPermission = (permission: 'invoices' | 'rebates') => {
 };
 const blInvoiceContactUsers = computed(() => blContactsWithPermission('invoices'));
 const blRebateContactUsers = computed(() => blContactsWithPermission('rebates'));
+const lcHcnContactUsers = computed(() => blContactsWithPermission('highCost'));
+const lcHcnPendingUserRequestCount = computed(() => 0);
 // Account-wide count of user access requests still awaiting approval (sample values for the prototype):
 // Cyberdyne Systems: nobody submitted yet (empty state). Oscorp: nobody approved, requests pending (pending note
 // only). Stark Industries: approved users plus pending requests (names and pending note).
@@ -6557,14 +6548,19 @@ const statusOptions = ['Implementation', 'Active', 'Inactive', 'Pending'];
 // Taxonomy validated against both the old Client Portal (Ehn.Web.Pbm.Customers
 // AccountPermissions) and Solo2's GPS report "Client Portal Access" template.
 const apPermissionOptions = [
-  { key: 'reports', label: 'Reports' },
-  { key: 'invoices', label: 'Invoices' },
+  { key: 'addedValue', label: 'Added Value' },
+  { key: 'billing', label: 'Billing' },
+  { key: 'caa', label: 'CAA' },
+  { key: 'dashboard', label: 'Dashboard' },
+  { key: 'documents', label: 'Documents' },
+  { key: 'highCost', label: 'High-Cost' },
+  { key: 'pa', label: 'PA' },
+  { key: 'phi', label: 'PHI' },
+  { key: 'planExplorer', label: 'Plan Explorer' },
   { key: 'rebates', label: 'Rebates' },
-  { key: 'highCostNotifications', label: 'High Cost Notifications' },
-  { key: 'planChanges', label: 'Plan Changes' },
-  { key: 'planApproval', label: 'Plan Approval' },
-  { key: 'overrides', label: 'Overrides' },
-  { key: 'vcpClaims', label: 'VCP Claims' },
+  { key: 'reports', label: 'Reports' },
+  { key: 'settings', label: 'Settings' },
+  { key: 'testResults', label: 'Test Results' },
 ];
 const apVendorRoleOptions = ['Broker', 'Consultant', 'Captive/Coalition', 'PA Vendor', 'Rebate Aggregator', 'Introducer'];
 const apSalutationOptions = ['Mr.', 'Mrs.', 'Ms.', 'Miss', 'Dr.'];
@@ -6585,7 +6581,7 @@ const apClientBusinessRoleOptions = [
   'Compliance / Risk / Legal',
   'Other',
 ];
-const apNewPermissions = (): Record<string, boolean> => ({ reports: false, invoices: false, rebates: false, highCostNotifications: false, planChanges: false, planApproval: false, overrides: false, vcpClaims: false });
+const apNewPermissions = (): Record<string, boolean> => ({ addedValue: false, billing: false, caa: false, dashboard: false, documents: false, highCost: false, pa: false, phi: false, planExplorer: false, rebates: false, reports: false, settings: false, testResults: false });
 const apHasAnyPermission = (perms: Record<string, boolean>) => Object.values(perms).some(v => v);
 const apPermissionsSummary = (role: string, permissions: Record<string, boolean>) => {
   const selected = apPermissionOptions.filter(p => permissions[p.key]).map(p => p.label);
@@ -6792,11 +6788,11 @@ const apVendorContactHeaders = [
 ];
 type ApVendorContact = { name: string; vendor: string; email: string; phone: string; portalAccess?: boolean; role?: string; permissions?: Record<string, boolean>; allowPhi?: boolean; mainPointOfContact?: boolean; surveyContact?: boolean; ackConfirmed?: boolean; accessFormConfirmed?: boolean; roleLabel?: string };
 const apVendorContacts = ref<ApVendorContact[]>([
-  { name: 'Mark Tillman', vendor: 'Southern Scripts Carrier', email: 'mtillman@sstpa.com', phone: '(704) 555-0121', portalAccess: true, role: 'Broker', permissions: { ...apNewPermissions(), reports: true, invoices: true }, allowPhi: false, mainPointOfContact: false, surveyContact: false, ackConfirmed: true, accessFormConfirmed: true, roleLabel: 'Broker' },
+  { name: 'Mark Tillman', vendor: 'Southern Scripts Carrier', email: 'mtillman@sstpa.com', phone: '(704) 555-0121', portalAccess: true, role: 'Broker', permissions: { ...apNewPermissions(), reports: true, billing: true }, allowPhi: false, mainPointOfContact: false, surveyContact: false, ackConfirmed: true, accessFormConfirmed: true, roleLabel: 'Broker' },
   { name: 'Dana Osei', vendor: 'Southern Scripts Carrier', email: 'dosei@sstpa.com', phone: '(704) 555-0122', portalAccess: true, role: 'Broker', permissions: { ...apNewPermissions(), reports: true }, allowPhi: false, mainPointOfContact: false, surveyContact: false, ackConfirmed: true, accessFormConfirmed: true, roleLabel: 'Broker' },
   { name: 'Rachel Vance', vendor: 'Acclaim Benefits', email: 'rvance@acclaim.com', phone: '(615) 555-0188', portalAccess: true, role: 'Broker', permissions: { ...apNewPermissions(), reports: true, rebates: true }, allowPhi: false, mainPointOfContact: false, surveyContact: false, ackConfirmed: true, accessFormConfirmed: true, roleLabel: 'Broker' },
-  { name: 'James Pruitt', vendor: 'Acclaim Benefits', email: 'jpruitt@acclaim.com', phone: '(615) 555-0189', portalAccess: true, role: 'Broker', permissions: { ...apNewPermissions(), invoices: true }, allowPhi: false, mainPointOfContact: false, surveyContact: false, ackConfirmed: true, accessFormConfirmed: true, roleLabel: 'Broker' },
-  { name: 'Tara Mendez', vendor: 'Benefit Advantage', email: 'tmendez@benefitadv.com', phone: '(512) 555-0144', portalAccess: true, role: 'Consultant', permissions: { ...apNewPermissions(), reports: true, planChanges: true }, allowPhi: false, mainPointOfContact: false, surveyContact: false, ackConfirmed: true, accessFormConfirmed: true, roleLabel: 'Consultant' },
+  { name: 'James Pruitt', vendor: 'Acclaim Benefits', email: 'jpruitt@acclaim.com', phone: '(615) 555-0189', portalAccess: true, role: 'Broker', permissions: { ...apNewPermissions(), billing: true }, allowPhi: false, mainPointOfContact: false, surveyContact: false, ackConfirmed: true, accessFormConfirmed: true, roleLabel: 'Broker' },
+  { name: 'Tara Mendez', vendor: 'Benefit Advantage', email: 'tmendez@benefitadv.com', phone: '(512) 555-0144', portalAccess: true, role: 'Consultant', permissions: { ...apNewPermissions(), reports: true, planExplorer: true }, allowPhi: false, mainPointOfContact: false, surveyContact: false, ackConfirmed: true, accessFormConfirmed: true, roleLabel: 'Consultant' },
 ]);
 const apVendorContactsSorted = computed(() => [...apVendorContacts.value].sort((a, b) =>
   a.vendor.localeCompare(b.vendor) || apLastName(a.name).localeCompare(apLastName(b.name)) || apFirstName(a.name).localeCompare(apFirstName(b.name))
