@@ -116,11 +116,14 @@
     <v-snackbar v-model="showUploadSnackbar" :timeout="3000" color="success">
       {{ uploadSnackbarText }}
     </v-snackbar>
+    <LockedAccountUnavailableDialog v-model="isLockedAccountUnavailableDialogOpen" :account-name="lockedAccountUnavailableName" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
+import LockedAccountUnavailableDialog from '@/components/common/LockedAccountUnavailableDialog.vue';
+import { useLockedAccountDefault } from '@/composables/useAccountLock';
 import { CloudUpload, Paperclip, CheckSquare, Square, Trash2, X } from 'lucide-vue-next';
 import EmptyStateImg from '@/assets/EmptyState.svg';
 import PageCard from '@/components/common/PageCard.vue';
@@ -149,6 +152,16 @@ const accountOptions = ref([
 ]);
 
 const selectedAccount = ref<number | null>(null);
+
+// The locked account becomes the selected account every time the page opens (and when the lock
+// changes while it is open); an account this page doesn't offer opens the "Account Not Available" dialog.
+const { isUnavailableDialogOpen: isLockedAccountUnavailableDialogOpen, unavailableAccountName: lockedAccountUnavailableName } =
+  useLockedAccountDefault('documents', {
+    isPresent: (account) => accountOptions.value.some((a) => a.id === account.id),
+    apply: (account) => {
+      selectedAccount.value = account.id;
+    },
+  });
 
 const selectedAccountName = computed(() =>
   accountOptions.value.find(acc => acc.id === selectedAccount.value)?.name ?? ''

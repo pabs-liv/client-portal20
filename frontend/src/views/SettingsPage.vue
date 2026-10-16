@@ -974,11 +974,14 @@
     <v-snackbar v-model="showSnackbar" :timeout="3000" color="success">
       Settings saved successfully!
     </v-snackbar>
+    <LockedAccountUnavailableDialog v-model="isLockedAccountUnavailableDialogOpen" :account-name="lockedAccountUnavailableName" />
   </div>
 </template>
 
 <script setup lang="ts">
 import AccountSelector from '@/components/common/AccountSelector.vue';
+import LockedAccountUnavailableDialog from '@/components/common/LockedAccountUnavailableDialog.vue';
+import { useLockedAccountDefault } from '@/composables/useAccountLock';
 import Tabs from '@/components/common/Tabs.vue';
 import TextField from '@/components/ui/TextField.vue';
 import ReportDataTable from '@/components/common/ReportDataTable.vue';
@@ -998,13 +1001,24 @@ import { useHighCostNotifications } from '@/composables/useHighCostNotifications
 // (matches master's AccountStatuses.ActiveImplementationAndTermed).
 const accountOptions = ref([
   { id: 1, name: 'Company A', status: 'active' },
-  { id: 2, name: 'Company B', status: 'implementation' },
-  { id: 3, name: 'Company C', status: 'active' },
-  { id: 4, name: 'Company D', status: 'termed' },
+  { id: 2, name: 'Company B', status: 'active' },
+  { id: 3, name: 'Company C', status: 'implementation' },
+  { id: 4, name: 'Company D', status: 'active' },
   { id: 5, name: 'Company E', status: 'active' },
+  { id: 6, name: 'Company F', status: 'termed' },
 ]);
 
 const selectedAccount = ref<number | null>(null);
+
+// The locked account becomes the selected account every time the page opens (and when the lock
+// changes while it is open); an account this page doesn't offer opens the "Account Not Available" dialog.
+const { isUnavailableDialogOpen: isLockedAccountUnavailableDialogOpen, unavailableAccountName: lockedAccountUnavailableName } =
+  useLockedAccountDefault('settings', {
+    isPresent: (account) => accountOptions.value.some((a) => a.id === account.id),
+    apply: (account) => {
+      selectedAccount.value = account.id;
+    },
+  });
 
 interface CompanyData {
   companyName: string;
@@ -1084,6 +1098,19 @@ const companyData: { [key: number]: CompanyData } = {
   3: { companyName: 'Company C', dba: 'Company C', apLegalName: 'Company C Corp.', apEffectiveStartDate: '01/01/2025', apEffectiveEndDate: '', apSicCode: '2836', apPhysicalAddress1: '21440 Chase Dr', apPhysicalAddress2: '', apPhysicalCity: 'Fremont', apPhysicalState: 'CA', apPhysicalZip: '94539', apPhysicalCountry: 'USA', apMailingAddress1: '21440 Chase Dr', apMailingAddress2: '', apMailingCity: 'Fremont', apMailingState: 'CA', apMailingZip: '94539', apMailingCountry: 'USA', planSponsorOptions: 'Option 1 - D3-D8 and PBM portion of narrative posted to Liviniti Client Portal for retrieval', reportingPeriodOccurance: 'Current Reporting Period', groupHealthPlanName: 'Company C Health Plan', groupHealthPlan: '11223344', carveOutBenefit: 'Specialty Drug Only', form5500Plan: '503', states: ['IL', 'GA'], marketSegment: 'Commercial Plans', planYearBeginDate: '01/01/2025', planYearEndDate: '12/31/2025', membersAsOf: '100', option2Acknowledged: false, legalAcknowledged: false, planSponsorLegalName: 'Company C Corp.', planSponsorEin: '112233445', tpaName: 'Allied Benefit Solutions', tpaEin: '368799581', authorize: 'no', gagFeeAcknowledged: false, gagAuthorityAcknowledged: false, reportingPeriod: 'plan-year', effectiveStartDate: '01/01/2025', effectiveEndDate: '01/31/2025', reportingEntityType: '(Non-Federal) governmental group health plan', planNumber: '', reportingEntityName: 'Company C Corp.', reportingEntityEin: '112233445', attestationAgreement: ['Behavioral Health'], agreementTypes: 'Type 3', mailingAddress1: '21440 Chase Dr', mailingAddress2: '', city: 'Fremont', mailingState: 'CA', zipCode: '94539', contactFirstName: 'Miles', contactLastName: 'Dyson', contactEmail: 'miles.dyson@companyc.com', contactPhoneNumber: '555-345-6789', billingOrganization: 'Company C', billingFirstName: 'Sarah', billingLastName: 'Connor', billingEmail: 'sarah.connor@companyc.com', billingPhoneNumber: '555-765-4321', eSignature: 'Miles Dyson' },
   4: { companyName: 'Company D', dba: 'Company D Industries', apLegalName: 'Company D Industries', apEffectiveStartDate: '07/01/2024', apEffectiveEndDate: '', apSicCode: '3827', apPhysicalAddress1: '200 Park Ave', apPhysicalAddress2: '', apPhysicalCity: 'New York', apPhysicalState: 'NY', apPhysicalZip: '10166', apPhysicalCountry: 'USA', apMailingAddress1: '200 Park Ave', apMailingAddress2: '', apMailingCity: 'New York', apMailingState: 'NY', apMailingZip: '10166', apMailingCountry: 'USA', planSponsorOptions: 'Option 2 - D3-D8, PBM portion of narrative submitted to CMS on behalf of client, fee applicable', reportingPeriodOccurance: 'Annually', groupHealthPlanName: 'Company D Industries Health Plan', groupHealthPlan: '44332211', carveOutBenefit: 'Fertility Only', form5500Plan: '504', states: ['PA', 'OH'], marketSegment: 'SF Large Employer Plans', planYearBeginDate: '07/01/2024', planYearEndDate: '06/30/2025', membersAsOf: '750', option2Acknowledged: true, legalAcknowledged: true, planSponsorLegalName: 'Company D Industries', planSponsorEin: '443322110', tpaName: 'Allied Benefit Solutions', tpaEin: '368799581', authorize: 'no', gagFeeAcknowledged: false, gagAuthorityAcknowledged: false, reportingPeriod: 'benefit-period', effectiveStartDate: '07/01/2024', effectiveEndDate: '06/30/2025', reportingEntityType: 'ERISA group health plan (GHP)', planNumber: '502', reportingEntityName: 'Company D Industries', reportingEntityEin: '443322110', attestationAgreement: ['Medical', 'Pharmacy Benefits'], agreementTypes: 'Type 4', mailingAddress1: '200 Park Ave', mailingAddress2: '', city: 'New York', mailingState: 'NY', zipCode: '10166', contactFirstName: 'Norman', contactLastName: 'Osborn', contactEmail: 'norman.osborn@companyd.com', contactPhoneNumber: '555-456-7890', billingOrganization: 'Company D', billingFirstName: 'Harry', billingLastName: 'Osborn', billingEmail: 'harry.osborn@companyd.com', billingPhoneNumber: '555-654-3210', eSignature: 'Norman Osborn' },
   5: { companyName: 'Company E', dba: 'Company E', apLegalName: 'Company E Corporation', apEffectiveStartDate: '01/01/2025', apEffectiveEndDate: '', apSicCode: '8731', apPhysicalAddress1: '1238 W 6th St', apPhysicalAddress2: '', apPhysicalCity: 'Los Angeles', apPhysicalState: 'CA', apPhysicalZip: '90017', apPhysicalCountry: 'USA', apMailingAddress1: '1238 W 6th St', apMailingAddress2: '', apMailingCity: 'Los Angeles', apMailingState: 'CA', apMailingZip: '90017', apMailingCountry: 'USA', planSponsorOptions: '', reportingPeriodOccurance: '', groupHealthPlanName: '', groupHealthPlan: '99887766', carveOutBenefit: 'Pharmacy Only', form5500Plan: '505', states: ['WA', 'OR'], marketSegment: 'SF Large Employer Plans', planYearBeginDate: '01/01/2025', planYearEndDate: '12/31/2025', membersAsOf: '300', option2Acknowledged: false, legalAcknowledged: false, planSponsorLegalName: 'Company E Corporation', planSponsorEin: '998877665', tpaName: 'Allied Benefit Solutions', tpaEin: '368799581', authorize: 'no', gagFeeAcknowledged: false, gagAuthorityAcknowledged: false, reportingPeriod: 'plan-year', effectiveStartDate: '01/01/2025', effectiveEndDate: '03/31/2025', reportingEntityType: 'Church plan', planNumber: '', reportingEntityName: 'Company E Corporation', reportingEntityEin: '998877665', attestationAgreement: ['All'], agreementTypes: 'Type 5', mailingAddress1: '1238 W 6th St', mailingAddress2: '', city: 'Los Angeles', mailingState: 'CA', zipCode: '90017', contactFirstName: 'Eldon', contactLastName: 'Tyrell', contactEmail: 'eldon.tyrell@companye.com', contactPhoneNumber: '555-567-8901', billingOrganization: 'Company E', billingFirstName: 'Rachael', billingLastName: 'Tyrell', billingEmail: 'rachael.tyrell@companye.com', billingPhoneNumber: '555-543-2109', eSignature: 'Eldon Tyrell' },
+};
+
+// Company F is a Termed account added so the account lock can be clicked through; its details are
+// Company D's with the company-specific names swapped.
+companyData[6] = {
+  ...companyData[4],
+  companyName: 'Company F',
+  dba: 'Company F',
+  apLegalName: 'Company F Inc.',
+  groupHealthPlanName: 'Company F Health Plan',
+  planSponsorLegalName: 'Company F Inc.',
+  reportingEntityName: 'Company F Inc.',
+  billingOrganization: 'Company F',
 };
 
 const selectedAccountData = computed<CompanyData>(() => {

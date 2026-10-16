@@ -284,10 +284,13 @@
     <v-snackbar v-model="showSuccessSnackbar" :timeout="3000" color="success">
       {{ successSnackbarText }}
     </v-snackbar>
+    <LockedAccountUnavailableDialog v-model="isLockedAccountUnavailableDialogOpen" :account-name="lockedAccountUnavailableName" />
   </div>
 </template>
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import LockedAccountUnavailableDialog from '@/components/common/LockedAccountUnavailableDialog.vue';
+import { isAccountNameAllowedOn, resolveAccountName, useLockedAccountDefault } from '@/composables/useAccountLock';
 import { Info, ClockFading, DollarSign, Calculator, SlidersHorizontal, Check, X } from 'lucide-vue-next';
 import PageCard from '@/components/common/PageCard.vue';
 import Banner from '@/components/common/Banner.vue';
@@ -501,7 +504,20 @@ const showAccountList = ref(false);
 const statusSearch = ref('');
 const showStatusList = ref(false);
 
-const accountOptions = computed(() => [...new Set(claimsData.value.map(c => c.accountName))].sort());
+const accountOptions = computed(() =>
+  [...new Set(claimsData.value.map(c => c.accountName))].filter(name => isAccountNameAllowedOn('highCostClaims', name)).sort()
+);
+
+// The locked account becomes the Account filter every time the page opens (and when the lock changes
+// while it is open); an account this page doesn't offer opens the "Account Not Available" dialog.
+const { isUnavailableDialogOpen: isLockedAccountUnavailableDialogOpen, unavailableAccountName: lockedAccountUnavailableName } =
+  useLockedAccountDefault('highCostClaims', {
+    isPresent: (account) => !!resolveAccountName(account, accountOptions.value),
+    apply: (account) => {
+      const name = resolveAccountName(account, accountOptions.value);
+      if (name) appliedAccounts.value = [name];
+    },
+  });
 const filteredAccountOptions = computed(() => {
   const q = accountSearch.value?.toLowerCase() ?? '';
   return accountOptions.value.filter(a => a.toLowerCase().includes(q));

@@ -163,6 +163,8 @@
         :top-therapeutic-classes="activeData.topTherapeuticClasses"
       />
     </PageCard>
+
+    <LockedAccountUnavailableDialog v-model="isLockedAccountUnavailableDialogOpen" :account-name="lockedAccountUnavailableName" />
   </div>
 </template>
 
@@ -178,6 +180,8 @@ import UtilizationDriversChart from '../components/common/UtilizationDriversChar
 import CategoryTrendChart from '../components/common/CategoryTrendChart.vue';
 import TopDriversCard from '../components/common/TopDriversCard.vue';
 import Select from '../components/ui/Select.vue';
+import LockedAccountUnavailableDialog from '../components/common/LockedAccountUnavailableDialog.vue';
+import { useLockedAccountDefault } from '../composables/useAccountLock';
 import SegmentedToggle from '../components/ui/SegmentedToggle.vue';
 import { CircleCheckBig, ChartNoAxesCombined, RotateCcwKey } from 'lucide-vue-next';
 
@@ -227,12 +231,23 @@ const accountOptions = ref([
   { id: BOOK_OF_BUSINESS_ID, name: 'All Accounts' },
   { id: 1, name: 'Company A', status: 'active' },
   { id: 2, name: 'Company B', status: 'active' },
-  { id: 3, name: 'Company C', status: 'termed' },
   { id: 4, name: 'Company D', status: 'active' },
   { id: 5, name: 'Company E', status: 'active' },
+  { id: 6, name: 'Company F', status: 'termed' },
 ]);
 
 const selectedAccountId = ref<number | null>(BOOK_OF_BUSINESS_ID);
+
+// The locked account becomes the dashboard's account every time the page opens (and when the lock
+// changes while it is open). If the lock is on an account this page doesn't offer, the "Account Not
+// Available" dialog opens and the selection stays on All Accounts.
+const { isUnavailableDialogOpen: isLockedAccountUnavailableDialogOpen, unavailableAccountName: lockedAccountUnavailableName } =
+  useLockedAccountDefault('dashboard', {
+    isPresent: (account) => accountOptions.value.some((a) => a.id === account.id),
+    apply: (account) => {
+      selectedAccountId.value = account.id;
+    },
+  });
 
 interface PeriodDashboardData {
   summaryLabel: string;

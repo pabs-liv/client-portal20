@@ -3,6 +3,22 @@
   <v-app-bar app flat dense border class="app-header">
     <v-spacer></v-spacer>
 
+    <div class="d-flex align-center mr-4 account-lock">
+      <v-switch
+        :model-value="!!lockedAccount"
+        color="primary"
+        hide-details
+        density="compact"
+        aria-label="Account lock"
+        @update:model-value="onLockSwitchChange"
+      ></v-switch>
+      <a href="#" class="account-lock-link" @click.prevent="isAccountLockDialogOpen = true">
+        {{ lockedAccount?.name ?? 'Account Lock' }}
+      </a>
+    </div>
+
+    <AccountLockDialog v-model="isAccountLockDialogOpen" />
+
     <v-btn
       icon
       variant="text"
@@ -37,12 +53,27 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
 import { Sun, Moon } from 'lucide-vue-next';
 import { useRouter } from 'vue-router';
 import { useDarkMode } from '@/composables/useDarkMode';
+import { useAccountLock } from '@/composables/useAccountLock';
+import AccountLockDialog from '@/components/layout/AccountLockDialog.vue';
 
 const { isDark, toggleDarkMode } = useDarkMode();
 const router = useRouter();
+
+const { lockedAccount, unlockAccount } = useAccountLock();
+const isAccountLockDialogOpen = ref(false);
+
+// Switching on opens the dialog to pick an account; switching off clears the lock.
+function onLockSwitchChange(value: boolean | null) {
+  if (value) {
+    isAccountLockDialogOpen.value = true;
+  } else {
+    unlockAccount();
+  }
+}
 
 function onLogout() {
   router.push('/');
@@ -61,6 +92,11 @@ function onLogout() {
   text-transform: none;
   color: var(--color-text-primary) !important;
   border-color: var(--color-border) !important;
+}
+
+.account-lock-link {
+  color: var(--color-text-primary);
+  text-decoration: underline;
 }
 
 .dark-mode-toggle {

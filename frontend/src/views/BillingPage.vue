@@ -114,11 +114,14 @@
     <v-snackbar v-model="showDownloadSnackbar" :timeout="3000" color="success">
       {{ downloadSnackbarText }}
     </v-snackbar>
+    <LockedAccountUnavailableDialog v-model="isLockedAccountUnavailableDialogOpen" :account-name="lockedAccountUnavailableName" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue';
+import LockedAccountUnavailableDialog from '@/components/common/LockedAccountUnavailableDialog.vue';
+import { isAccountNameAllowedOn, resolveAccountName, useLockedAccountDefault } from '@/composables/useAccountLock';
 import { SlidersHorizontal, Check, X } from 'lucide-vue-next';
 import PageCard from '@/components/common/PageCard.vue';
 import ReportDataTable from '@/components/common/ReportDataTable.vue';
@@ -209,8 +212,19 @@ const billingData = ref([
 ]);
 
 const accountOptions = computed(() =>
-  [...new Set(billingData.value.map(item => item.accountName))].sort()
+  [...new Set(billingData.value.map(item => item.accountName))].filter(name => isAccountNameAllowedOn('billing', name)).sort()
 );
+
+// The locked account becomes the Account filter every time the page opens (and when the lock changes
+// while it is open); an account this page doesn't offer opens the "Account Not Available" dialog.
+const { isUnavailableDialogOpen: isLockedAccountUnavailableDialogOpen, unavailableAccountName: lockedAccountUnavailableName } =
+  useLockedAccountDefault('billing', {
+    isPresent: (account) => !!resolveAccountName(account, accountOptions.value),
+    apply: (account) => {
+      const name = resolveAccountName(account, accountOptions.value);
+      if (name) appliedAccounts.value = [name];
+    },
+  });
 
 // Passed to AdvancedFiltersDialog only to drive slot iteration — not used for modelValue
 const billingFilters = reactive<FilterGroup[]>([

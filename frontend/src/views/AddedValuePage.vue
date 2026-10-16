@@ -306,11 +306,14 @@
       </div>
     </v-snackbar>
 
+    <LockedAccountUnavailableDialog v-model="isLockedAccountUnavailableDialogOpen" :account-name="lockedAccountUnavailableName" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
+import LockedAccountUnavailableDialog from '@/components/common/LockedAccountUnavailableDialog.vue';
+import { useLockedAccountDefault } from '@/composables/useAccountLock';
 import AccountSelector from '@/components/common/AccountSelector.vue';
 import { Check, CheckCircle, X } from 'lucide-vue-next';
 import { useDarkMode } from '@/composables/useDarkMode';
@@ -459,6 +462,16 @@ const accountOptions = ref<Account[]>([
 ]);
 
 const selectedAccount        = ref<number | null>(null);
+
+// The locked account becomes the selected account every time the page opens (and when the lock
+// changes while it is open); an account this page doesn't offer opens the "Account Not Available" dialog.
+const { isUnavailableDialogOpen: isLockedAccountUnavailableDialogOpen, unavailableAccountName: lockedAccountUnavailableName } =
+  useLockedAccountDefault('addedValue', {
+    isPresent: (account) => accountOptions.value.some((a) => a.id === account.id),
+    apply: (account) => {
+      selectedAccount.value = account.id;
+    },
+  });
 const selectedAvailableIds   = ref<string[]>([]);
 const expandedActiveId       = ref<string | null>(null);
 const detailModalProgram     = ref<Program | null>(null);

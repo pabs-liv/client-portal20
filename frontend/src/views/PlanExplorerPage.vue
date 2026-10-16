@@ -5053,10 +5053,13 @@
     {{ toast.message }}
   </v-snackbar>
 
+  <LockedAccountUnavailableDialog v-model="isLockedAccountUnavailableDialogOpen" :account-name="lockedAccountUnavailableName" />
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, computed, watch, nextTick } from 'vue';
+import LockedAccountUnavailableDialog from '@/components/common/LockedAccountUnavailableDialog.vue';
+import { useLockedAccountDefault } from '@/composables/useAccountLock';
 import AccountSelector from '@/components/common/AccountSelector.vue';
 import PageCard from '@/components/common/PageCard.vue';
 import Banner from '@/components/common/Banner.vue';
@@ -5103,6 +5106,16 @@ const accountOptions = ref([
 ]);
 
 const selectedAccount = ref<number | null>(null);
+
+// The locked account becomes the selected account every time the page opens (and when the lock
+// changes while it is open); an account this page doesn't offer opens the "Account Not Available" dialog.
+const { isUnavailableDialogOpen: isLockedAccountUnavailableDialogOpen, unavailableAccountName: lockedAccountUnavailableName } =
+  useLockedAccountDefault('planExplorer', {
+    isPresent: (account) => accountOptions.value.some((a) => a.id === account.id),
+    apply: (account) => {
+      selectedAccount.value = account.id;
+    },
+  });
 const wizardActive = ref(false);
 // Once Plan Setup is finished, every widget's Edit action and the Mark Complete/Incomplete
 // controls lock — matching master's isComplete gating (PlanDesignStep.vue).
