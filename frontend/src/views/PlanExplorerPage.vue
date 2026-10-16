@@ -2735,7 +2735,7 @@
                     <div class="prog-widget">
                       <div class="prog-widget-header">
                         <h4 class="text-h4">Programs to Configure</h4>
-                        <p class="prog-widget-desc">Select a program to configure it for this account. Once submitted, a setup ticket will be created for the RxCompass Team or VCP Team.</p>
+                        <p class="prog-widget-desc">Select a program to configure it for this account. Once submitted, a setup ticket will be created for the applicable team.</p>
                       </div>
                       <div class="prog-widget-body">
 
