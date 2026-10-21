@@ -38,7 +38,7 @@
       headerText="Prior Authorization Manager"
       :descriptionText="isExternal ? 'Review the status of your prior authorizations, or ask a question about a submission.' : 'Review prior authorization statuses and monitor clinical assistance requests submitted by clients.'"
     >
-      <div v-if="pendingClinicalAssistanceItems.length > 0" class="pending-assistance-section mb-large">
+      <div class="pending-assistance-section mb-large">
         <h3 class="pending-assistance-section__title">Pending Clinical Assistance</h3>
         <v-table density="compact">
           <thead>
@@ -51,6 +51,9 @@
             </tr>
           </thead>
           <tbody>
+            <tr v-if="pendingClinicalAssistanceItems.length === 0">
+              <td colspan="5" class="pending-assistance-section__empty">No pending clinical assistance requests.</td>
+            </tr>
             <tr v-for="auth in pendingClinicalAssistanceItems" :key="auth.eocId">
               <td>{{ auth.accountName }}</td>
               <td>{{ auth.drugName }}</td>
@@ -770,6 +773,11 @@ const filteredPriorAuthData = computed(() => {
     tbody td {
       color: $color-text-primary;
       background-color: rgba($color-neutral-white, 0.8);
+    }
+
+    tbody td.pending-assistance-section__empty {
+      color: $color-text-secondary;
+      text-align: center;
     }
   }
 }

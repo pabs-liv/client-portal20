@@ -39,7 +39,7 @@
       headerText="High Cost Claim Manager"
       :descriptionText="isExternal ? 'Review or ask questions about high-cost claims.' : 'Review high-cost claims and monitor clinical assistance requests submitted by clients.'"
     >
-      <div v-if="pendingAssistanceClaims.length > 0" class="pending-assistance-section mb-large">
+      <div class="pending-assistance-section mb-large">
         <h3 class="pending-assistance-section__title">Pending Clinical Assistance</h3>
         <v-table density="compact">
           <thead>
@@ -53,6 +53,9 @@
             </tr>
           </thead>
           <tbody>
+            <tr v-if="pendingAssistanceClaims.length === 0">
+              <td colspan="6" class="pending-assistance-section__empty">No pending clinical assistance requests.</td>
+            </tr>
             <tr v-for="claim in pendingAssistanceClaims" :key="claim.id">
               <td>{{ claim.accountName }}</td>
               <td>{{ claim.drugName }}</td>
@@ -335,7 +338,7 @@ const claimsHeaders = computed(() => {
 const claimsData = ref([
   { id: 157826931, eocId: 'EOC30021', accountName: 'Company A', drugName: 'Drug A', ndc: '00071-0155-23', claimDate: '2025-07-15', quantity: 1, daysSupply: 30, cost: '$12,450.00', rawStatus: 'Submitted', ackStatus: 'Pending', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, ticketNumber: null as string | null, assistanceStatus: null as string | null },
   { id: 158088181, eocId: 'EOC30047', accountName: 'Company B', drugName: 'Drug B', ndc: '00069-0944-30', claimDate: '2025-07-14', quantity: 2, daysSupply: 90, cost: '$45,800.00', rawStatus: 'Approved', ackStatus: 'Acknowledged', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, ticketNumber: null as string | null, assistanceStatus: null as string | null },
-  { id: 158480891, eocId: 'EOC30058', accountName: 'Company C', drugName: 'Drug C', ndc: '00078-0421-15', claimDate: '2025-07-13', quantity: 4, daysSupply: 30, cost: '$18,750.00', rawStatus: 'Show Review', ackStatus: 'Pending', notes: 'Can you confirm if a savings program applies to this claim?' as string | null, requestedBy: 'Jane Doe' as string | null, requestedDate: '2025-07-16' as string | null, ticketNumber: '1005014' as string | null, assistanceStatus: 'Submitted' },
+  { id: 158480891, eocId: 'EOC30058', accountName: 'Company C', drugName: 'Drug C', ndc: '00078-0421-15', claimDate: '2025-07-13', quantity: 4, daysSupply: 30, cost: '$18,750.00', rawStatus: 'Show Review', ackStatus: 'Pending', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, ticketNumber: null as string | null, assistanceStatus: null as string | null },
   { id: 152987510, eocId: 'EOC30063', accountName: 'Company D', drugName: 'Drug D', ndc: '00006-0749-31', claimDate: '2025-07-12', quantity: 1, daysSupply: 28, cost: '$92,300.00', rawStatus: 'Approved', ackStatus: 'Acknowledged', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, ticketNumber: null as string | null, assistanceStatus: null as string | null },
   { id: 153219641, eocId: 'EOC30079', accountName: 'Company E', drugName: 'Drug E', ndc: '00173-0879-00', claimDate: '2025-07-11', quantity: 3, daysSupply: 84, cost: '$61,200.00', rawStatus: 'Rejected', ackStatus: 'Pending', notes: null as string | null, requestedBy: null as string | null, requestedDate: null as string | null, ticketNumber: null as string | null, assistanceStatus: null as string | null },
 ]);
@@ -838,6 +841,11 @@ const filteredClaimsData = computed(() => {
     tbody td {
       color: $color-text-primary;
       background-color: rgba($color-neutral-white, 0.8);
+    }
+
+    tbody td.pending-assistance-section__empty {
+      color: $color-text-secondary;
+      text-align: center;
     }
   }
 }
