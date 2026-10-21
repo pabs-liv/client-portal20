@@ -1124,6 +1124,75 @@
                   </Dialog>
 
                   <Dialog
+                    v-model="pdShowCloneDialog"
+                    heading="Clone Plan"
+                    max-width="560"
+                    :show-secondary-button="true"
+                    :actions="pdCloneDialogActions"
+                  >
+                    <p class="pd-clone-intro">
+                      Enter plan details for the new plan, then choose which sections to clone from
+                      <strong>{{ pdCloneSource?.name }}</strong>.
+                    </p>
+                    <v-row class="mt-1">
+                      <v-col cols="12">
+                        <TextField
+                          v-model="pdCloneForm.planName"
+                          label="Plan Name *"
+                          :error-messages="pdCloneTouched && !pdCloneForm.planName.trim() ? ['Required'] : []"
+                        />
+                      </v-col>
+                    </v-row>
+                    <div class="nl-date-row nl-date-row--grid">
+                      <DatePicker
+                        v-model="pdCloneForm.startDate"
+                        label="Eff. start date *"
+                        variant="underlined"
+                        :error="pdCloneTouched && !pdCloneForm.startDate"
+                        :error-messages="pdCloneTouched && !pdCloneForm.startDate ? ['Required'] : []"
+                      />
+                      <DatePicker
+                        v-model="pdCloneForm.endDate"
+                        label="Eff. end date"
+                        variant="underlined"
+                        :min="pdCloneForm.startDate"
+                        :error="endDateBeforeStartError(pdCloneForm.startDate, pdCloneForm.endDate)"
+                        :error-messages="endDateBeforeStartError(pdCloneForm.startDate, pdCloneForm.endDate) ? ['Must be after start date'] : []"
+                      />
+                      <span></span>
+                      <p class="nl-date-hint">Optional - Leave blank to keep active</p>
+                    </div>
+                    <h6 class="ap-subsection-heading">Sections to clone</h6>
+                    <p class="text-small ap-role-note">Uncheck any plan sections you don't want to clone. At least one section must remain selected.</p>
+                    <div class="pd-clone-sections">
+                      <div v-for="section in pdCloneSections" :key="section.key" class="pd-clone-section">
+                        <v-checkbox
+                          v-model="pdCloneForm.sections[section.key]"
+                          :true-icon="CheckSquare"
+                          :false-icon="Square"
+                          color="primary"
+                          density="compact"
+                          hide-details
+                          class="ap-vcheckbox"
+                          :label="section.label"
+                        />
+                        <p class="pd-clone-section-help">{{ section.help }}</p>
+                      </div>
+                    </div>
+                    <p v-if="pdCloneTouched && !pdCloneAnySectionSelected" class="pd-clone-error">At least one section must be selected to clone.</p>
+                    <p class="text-small ap-role-note pd-clone-note">Benefit Reset Date, Situs State, and BPG Configuration are not cloned. Set them up on the new plan after it is created.</p>
+                  </Dialog>
+
+                  <Dialog
+                    v-model="pdShowDeleteDialog"
+                    :icon="Trash2"
+                    heading="Delete Plan"
+                    :text="pdDeleteText"
+                    :actions="pdDeleteDialogActions"
+                    :show-secondary-button="true"
+                  />
+
+                  <Dialog
                     v-model="showBpgDialog"
                     heading="Add BPG Entry"
                     text="Select a group to associate with this plan's BPG configuration."
@@ -1143,42 +1212,6 @@
                         </p>
                       </v-col>
                     </v-row>
-                  </Dialog>
-
-                  <Dialog
-                    v-model="showCodeDialog"
-                    :heading="codeDialogHeading"
-                    :show-secondary-button="true"
-                    :actions="codeDialogActions"
-                  >
-                    <v-row class="mt-1">
-                      <v-col cols="12">
-                        <TextField
-                          v-model="codeForm.code"
-                          :label="`${codeFieldLabel} *`"
-                          :error-messages="codeTouched && !codeForm.code.trim() ? ['Required'] : []"
-                        />
-                      </v-col>
-                    </v-row>
-                    <div class="nl-date-row nl-date-row--grid">
-                      <DatePicker
-                        v-model="codeForm.startDate"
-                        label="Start Date *"
-                        variant="underlined"
-                        :error="codeTouched && !codeForm.startDate"
-                        :error-messages="codeTouched && !codeForm.startDate ? ['Required'] : []"
-                      />
-                      <DatePicker
-                        v-model="codeForm.endDate"
-                        label="End Date"
-                        variant="underlined"
-                        :min="codeForm.startDate"
-                        :error="endDateBeforeStartError(codeForm.startDate, codeForm.endDate)"
-                        :error-messages="endDateBeforeStartError(codeForm.startDate, codeForm.endDate) ? ['Must be after start date'] : []"
-                      />
-                      <span></span>
-                      <p class="nl-date-hint">Optional - Leave blank to keep active</p>
-                    </div>
                   </Dialog>
 
                   <Dialog
@@ -1685,15 +1718,39 @@
                     >
                       <div class="pd-accordion-header" @click="togglePlan(plan.id)">
                         <div class="pd-accordion-header-left">
+                          <component
+                            :is="expandedPlans.includes(plan.id) ? ChevronDown : ChevronRight"
+                            :size="16"
+                            :stroke-width="1.5"
+                            class="pd-accordion-chevron"
+                          />
                           <span class="pd-plan-name">{{ plan.name }}</span>
                           <span class="pd-plan-id">ID - {{ plan.id }}</span>
                           <span :class="['pd-status-badge', `pd-status-badge--${plan.status.toLowerCase()}`]">{{ plan.status }}</span>
                         </div>
-                        <ChevronDown
-                          :class="['pd-accordion-chevron', { 'pd-accordion-chevron--open': expandedPlans.includes(plan.id) }]"
-                          :size="20"
-                          :stroke-width="1.5"
-                        />
+                        <div class="pd-accordion-header-right">
+                          <v-menu v-if="!planSetupComplete" location="bottom end">
+                            <template v-slot:activator="{ props: menuProps }">
+                              <button
+                                v-bind="menuProps"
+                                type="button"
+                                class="pd-plan-menu-btn"
+                                :aria-label="`Actions for ${plan.name}`"
+                                @click.stop
+                              >
+                                <EllipsisVertical :size="20" :stroke-width="1.5" />
+                              </button>
+                            </template>
+                            <v-list>
+                              <v-list-item @click="pdOpenCloneDialog(plan)">
+                                <v-list-item-title>Clone Plan</v-list-item-title>
+                              </v-list-item>
+                              <v-list-item v-if="plan.status === 'Scheduled'" @click="pdOpenDeleteDialog(plan)">
+                                <v-list-item-title>Delete Plan</v-list-item-title>
+                              </v-list-item>
+                            </v-list>
+                          </v-menu>
+                        </div>
                       </div>
                       <div v-if="expandedPlans.includes(plan.id)" class="pd-accordion-body">
 
@@ -2186,60 +2243,6 @@
                                 <img :src="EmptyStateImg" alt="No data" class="nc-empty-icon" />
                                 <p class="nc-empty-title">Nothing configured yet</p>
                                 <button class="button button-secondary pd-empty-cta" @click="openBpgDialog(plan)">+ Add Group</button>
-                              </div>
-                            </template>
-                          </ReportDataTable>
-                        </div>
-
-                        <!-- Associated Plan Codes -->
-                        <div class="pd-section">
-                          <div class="pd-section-header pd-section-header--table">
-                            <h4 class="text-h4">Associated Plan Codes</h4>
-                            <button v-if="plan.planCodes.length > 0" class="button button-primary" @click="openCodeDialog('planCode', plan)">+ Add Plan Code</button>
-                          </div>
-                          <ReportDataTable
-                            :headers="planCodesHeaders"
-                            :items="plan.planCodes"
-                            :show-search-bar="false"
-                            :show-filter-pills="false"
-                            :show-selection-checkboxes="false"
-                            :show-row-actions="true"
-                            :row-action-items="codeRowActions"
-                            :show-table-footer="false"
-                            @row-action="(payload) => handleCodeRowAction('planCode', plan, payload)"
-                          >
-                            <template #empty-state>
-                              <div class="nc-empty-state">
-                                <img :src="EmptyStateImg" alt="No data" class="nc-empty-icon" />
-                                <p class="nc-empty-title">Nothing configured yet</p>
-                                <button class="button button-secondary pd-empty-cta" @click="openCodeDialog('planCode', plan)">+ Add Plan Code</button>
-                              </div>
-                            </template>
-                          </ReportDataTable>
-                        </div>
-
-                        <!-- Associated Benefit Codes -->
-                        <div class="pd-section">
-                          <div class="pd-section-header pd-section-header--table">
-                            <h4 class="text-h4">Associated Benefit Codes</h4>
-                            <button v-if="plan.benefitCodes.length > 0" class="button button-primary" @click="openCodeDialog('benefitCode', plan)">+ Add Benefit Code</button>
-                          </div>
-                          <ReportDataTable
-                            :headers="benefitCodesHeaders"
-                            :items="plan.benefitCodes"
-                            :show-search-bar="false"
-                            :show-filter-pills="false"
-                            :show-selection-checkboxes="false"
-                            :show-row-actions="true"
-                            :row-action-items="codeRowActions"
-                            :show-table-footer="false"
-                            @row-action="(payload) => handleCodeRowAction('benefitCode', plan, payload)"
-                          >
-                            <template #empty-state>
-                              <div class="nc-empty-state">
-                                <img :src="EmptyStateImg" alt="No data" class="nc-empty-icon" />
-                                <p class="nc-empty-title">Nothing configured yet</p>
-                                <button class="button button-secondary pd-empty-cta" @click="openCodeDialog('benefitCode', plan)">+ Add Benefit Code</button>
                               </div>
                             </template>
                           </ReportDataTable>
@@ -5078,7 +5081,7 @@ import {
   Save as SaveIcon, LayoutList as LayoutListIcon, CircleCheck as CircleCheckIcon,
   ArrowRight as ArrowRightIcon, Pencil, PenLine, CheckSquare, Square, ChevronDown, X, Check, CloudDownload, TriangleAlert,
   Building2, Shield, Link2, Users, FileText, Search, Globe, Trash2, Paperclip, Info, Plus,
-  Calculator, CheckCircle2, ChevronRight, Pin,
+  Calculator, CheckCircle2, ChevronRight, Pin, EllipsisVertical,
 } from 'lucide-vue-next';
 import EmptyStateImg from '@/assets/EmptyState.svg';
 import { useDocumentsStore } from '@/stores/documents';
@@ -7770,8 +7773,8 @@ const planDesignPlans = ref([
   {
     id: 70954,
     name: 'Silver Plan',
-    status: 'Active',
-    effStartDate: '03/06/2026',
+    status: 'Scheduled',
+    effStartDate: '01/01/2027',
     effEndDate: '',
     benefitReset: 'February 1',
     situsState: '',
@@ -7780,7 +7783,7 @@ const planDesignPlans = ref([
     allowSecondaryPayer: false,
     cobConfigOptions: [] as string[],
     benefitPeriodType: 'PlanYear' as string,
-    benefitPeriodRanges: [{ startDate: '03/06/2026', endDate: '03/05/2027' }] as { startDate: string; endDate: string }[],
+    benefitPeriodRanges: [{ startDate: '01/01/2027', endDate: '12/31/2027' }] as { startDate: string; endDate: string }[],
     benefitByFlag: false,
     bpgRows: [] as { bin: string; pcn: string; groupId: string; groupName: string; effStartDate: string; effEndDate: string }[],
     planCodes: [
@@ -7868,104 +7871,6 @@ function bpgActionIcons(plan: { bpgRows: { groupId: string }[] }) {
     },
   ];
 }
-
-const planCodesHeaders = [
-  { title: 'Plan Code', key: 'planCode' },
-  { title: 'Start Date', key: 'effStartDate' },
-  { title: 'End Date',   key: 'effEndDate' },
-  { title: '',           key: 'actions', sortable: false },
-];
-
-const benefitCodesHeaders = [
-  { title: 'Benefit Code', key: 'benefitCode' },
-  { title: 'Start Date',   key: 'effStartDate' },
-  { title: 'End Date',     key: 'effEndDate' },
-  { title: '',             key: 'actions', sortable: false },
-];
-
-const codeRowActions = [
-  { label: 'Edit',   action: 'edit'   },
-  { label: 'Remove', action: 'remove' },
-];
-
-type CodeKind = 'planCode' | 'benefitCode';
-type CodeRow = { planCode?: string; benefitCode?: string; effStartDate: string; effEndDate: string };
-
-const codeFieldKey: Record<CodeKind, 'planCode' | 'benefitCode'> = { planCode: 'planCode', benefitCode: 'benefitCode' };
-const codeFieldLabelMap: Record<CodeKind, string> = { planCode: 'Plan Code', benefitCode: 'Benefit Code' };
-
-const showCodeDialog = ref(false);
-const codeDialogKind = ref<CodeKind>('planCode');
-const codeDialogPlanId = ref<number | null>(null);
-const codeDialogMode = ref<'add' | 'edit'>('add');
-const codeEditingIndex = ref(-1);
-const codeTouched = ref(false);
-const codeForm = ref({ code: '', startDate: '', endDate: '' });
-
-const codeFieldLabel = computed(() => codeFieldLabelMap[codeDialogKind.value]);
-const codeDialogHeading = computed(() =>
-  `${codeDialogMode.value === 'edit' ? 'Edit' : 'Add'} ${codeFieldLabel.value}`
-);
-const codeDialogPlan = computed(() => planDesignPlans.value.find(p => p.id === codeDialogPlanId.value));
-
-const openCodeDialog = (kind: CodeKind, plan: { id: number }) => {
-  codeDialogKind.value = kind;
-  codeDialogPlanId.value = plan.id;
-  codeDialogMode.value = 'add';
-  codeEditingIndex.value = -1;
-  codeTouched.value = false;
-  codeForm.value = { code: '', startDate: '', endDate: '' };
-  showCodeDialog.value = true;
-};
-
-const handleCodeRowAction = (kind: CodeKind, plan: { id: number; planCodes: CodeRow[]; benefitCodes: CodeRow[] }, { action, item }: { action: string; item: CodeRow }) => {
-  const arr = kind === 'planCode' ? plan.planCodes : plan.benefitCodes;
-  if (action === 'remove') {
-    const idx = arr.indexOf(item);
-    if (idx !== -1) arr.splice(idx, 1);
-    return;
-  }
-  if (action === 'edit') {
-    codeDialogKind.value = kind;
-    codeDialogPlanId.value = plan.id;
-    codeDialogMode.value = 'edit';
-    codeEditingIndex.value = arr.indexOf(item);
-    codeTouched.value = false;
-    codeForm.value = {
-      code: (item[codeFieldKey[kind]] as string) ?? '',
-      startDate: item.effStartDate === '—' ? '' : item.effStartDate,
-      endDate: item.effEndDate === '—' ? '' : item.effEndDate,
-    };
-    showCodeDialog.value = true;
-  }
-};
-
-const saveCodeEntry = () => {
-  codeTouched.value = true;
-  const plan = codeDialogPlan.value;
-  if (!plan || !codeForm.value.code.trim() || !codeForm.value.startDate) return;
-  if (endDateBeforeStartError(codeForm.value.startDate, codeForm.value.endDate)) return;
-
-  const kind = codeDialogKind.value;
-  const arr = kind === 'planCode' ? plan.planCodes : plan.benefitCodes;
-  const entry: CodeRow = {
-    [codeFieldKey[kind]]: codeForm.value.code.trim(),
-    effStartDate: codeForm.value.startDate,
-    effEndDate: codeForm.value.endDate || '—',
-  } as CodeRow;
-
-  if (codeDialogMode.value === 'edit' && codeEditingIndex.value !== -1) {
-    arr[codeEditingIndex.value] = entry;
-  } else {
-    arr.push(entry);
-  }
-  showCodeDialog.value = false;
-};
-
-const codeDialogActions = computed(() => [
-  { text: 'Cancel', styleType: 'secondary' as const, onClick: () => { showCodeDialog.value = false; } },
-  { text: codeDialogMode.value === 'edit' ? 'Save Changes' : `Add ${codeFieldLabel.value}`, styleType: 'primary' as const, onClick: saveCodeEntry },
-]);
 
 const accumulatorsHeaders = [
   { title: 'Accumulator Name', key: 'accumulatorName' },
@@ -8670,6 +8575,150 @@ const pdCreateDialogActions = computed(() => [
   { text: 'Create Plan', styleType: 'primary' as const, onClick: pdSaveNewPlan },
 ]);
 
+// ─── Plan Design — Clone / Delete Plan (plan row kebab menu) ──────────────────
+// Plan Overview (name, dates, benefit reset, situs state) is never copied — it is always entered
+// fresh. Only Scheduled plans can be deleted; Clone is available on any plan while Plan Design is
+// still editable. BPG Configuration is not part of the clone — it ties a plan to specific groups
+// and is always set up per plan. (Plan Codes / Benefit Codes are also never copied.)
+type PdPlan = (typeof planDesignPlans.value)[number];
+
+const pdCloneSections = [
+  { key: 'cob',             label: 'Coordination of Benefits', help: 'Other coverage codes and secondary payer settings' },
+  { key: 'benefitPeriod',   label: 'Applicable Benefit Period', help: 'Benefit period type and settings; date ranges are set from the new start date' },
+  { key: 'planParameters',  label: 'Plan Parameters',           help: 'Selected plan parameters' },
+  { key: 'preventiveList',  label: 'Preventive List',           help: 'Preventive list, lower copay prescribers, copay amount, and deductible waiver' },
+  { key: 'accumulators',    label: 'Associated Accumulators',   help: 'Deductible, OOP, and benefit max accumulators' },
+  { key: 'copayStructure',  label: 'Copay Structure',           help: 'All tiers on the Pharmacy Network, Mail Order, and In-House tabs' },
+] as const;
+type PdCloneSectionKey = (typeof pdCloneSections)[number]['key'];
+
+const pdNewCloneForm = () => ({
+  planName: '', startDate: '', endDate: '',
+  sections: Object.fromEntries(pdCloneSections.map(s => [s.key, true])) as Record<PdCloneSectionKey, boolean>,
+});
+const pdShowCloneDialog = ref(false);
+const pdCloneSource = ref<PdPlan | null>(null);
+const pdCloneForm = ref(pdNewCloneForm());
+const pdCloneTouched = ref(false);
+
+const pdCloneAnySectionSelected = computed(() => Object.values(pdCloneForm.value.sections).some(Boolean));
+const pdCloneFormValid = computed(() => {
+  const f = pdCloneForm.value;
+  return !!f.planName.trim() && !!f.startDate
+    && !endDateBeforeStartError(f.startDate, f.endDate) && pdCloneAnySectionSelected.value;
+});
+
+const pdOpenCloneDialog = (plan: PdPlan) => {
+  pdCloneSource.value = plan;
+  pdCloneForm.value = pdNewCloneForm();
+  pdCloneTouched.value = false;
+  pdShowCloneDialog.value = true;
+};
+
+const pdCloseCloneDialog = () => {
+  pdShowCloneDialog.value = false;
+  pdCloneSource.value = null;
+  pdCloneTouched.value = false;
+};
+
+const pdDeepCopy = <T,>(value: T): T => JSON.parse(JSON.stringify(value));
+
+const pdSaveClonedPlan = () => {
+  pdCloneTouched.value = true;
+  const source = pdCloneSource.value;
+  if (!source || !pdCloneFormValid.value) return;
+  const f = pdCloneForm.value;
+  const s = f.sections;
+  const newId = Math.max(...planDesignPlans.value.map(p => p.id)) + 1;
+
+  const newPlan: PdPlan = {
+    id: newId,
+    name: f.planName.trim(),
+    status: deriveStatus(f.startDate, f.endDate),
+    effStartDate: f.startDate,
+    effEndDate: f.endDate,
+    benefitReset: '',
+    situsState: '',
+    planParameterIds: s.planParameters ? pdDeepCopy(source.planParameterIds) : [],
+    occCodes: s.cob ? pdDeepCopy(source.occCodes) : [],
+    allowSecondaryPayer: s.cob ? source.allowSecondaryPayer : false,
+    cobConfigOptions: s.cob ? pdDeepCopy(source.cobConfigOptions) : [],
+    benefitPeriodType: s.benefitPeriod ? source.benefitPeriodType : 'Custom',
+    // Non-Custom types recalculate from the new plan's start date; Custom has no formula, so its manual ranges carry over.
+    benefitPeriodRanges: !s.benefitPeriod
+      ? []
+      : source.benefitPeriodType === 'Custom'
+        ? pdDeepCopy(source.benefitPeriodRanges)
+        : computeBenefitPeriodRanges(source.benefitPeriodType, f.startDate),
+    benefitByFlag: s.benefitPeriod ? source.benefitByFlag : false,
+    bpgRows: [],
+    planCodes: [],
+    benefitCodes: [],
+    accumulators: s.accumulators
+      ? pdDeepCopy(source.accumulators).map((a, i) => ({ ...a, id: `${newId}-acc-${i + 1}` }))
+      : [],
+    copayTiers: s.copayStructure
+      ? Object.fromEntries(
+          Object.entries(pdDeepCopy(source.copayTiers)).map(([context, tiers]) => [
+            context,
+            (tiers as CopayTier[]).map(tier => ({ ...tier, id: nextCopayTierId++ })),
+          ]),
+        )
+      : {},
+    preventiveListApplies: s.preventiveList ? source.preventiveListApplies : null,
+    preventiveListName: s.preventiveList ? source.preventiveListName : '',
+    lowerCopaysApplied: s.preventiveList ? source.lowerCopaysApplied : false,
+    lowerCopayPrescribers: s.preventiveList ? pdDeepCopy(source.lowerCopayPrescribers) : [],
+    lowerCopayNotes: s.preventiveList ? source.lowerCopayNotes : '',
+    copayAmountApplicable: s.preventiveList ? source.copayAmountApplicable : false,
+    copayAmount: s.preventiveList ? source.copayAmount : null,
+    deductibleWaived: s.preventiveList ? source.deductibleWaived : false,
+  };
+
+  planDesignPlans.value.unshift(newPlan);
+  expandedPlans.value.push(newId);
+  pdCloseCloneDialog();
+  showToast('Plan Cloned Successfully', 'success');
+};
+
+const pdCloneDialogActions = computed(() => [
+  { text: 'Cancel', styleType: 'secondary' as const, onClick: pdCloseCloneDialog },
+  { text: 'Clone Plan', styleType: 'primary' as const, onClick: pdSaveClonedPlan },
+]);
+
+const pdShowDeleteDialog = ref(false);
+const pdPlanToDelete = ref<PdPlan | null>(null);
+
+const pdDeleteText = computed(() =>
+  pdPlanToDelete.value
+    ? `Are you sure you want to delete ${pdPlanToDelete.value.name}? The plan will be terminated as of today.`
+    : '',
+);
+
+const pdOpenDeleteDialog = (plan: PdPlan) => {
+  pdPlanToDelete.value = plan;
+  pdShowDeleteDialog.value = true;
+};
+
+const pdCloseDeleteDialog = () => {
+  pdShowDeleteDialog.value = false;
+  pdPlanToDelete.value = null;
+};
+
+const pdConfirmDeletePlan = () => {
+  const plan = pdPlanToDelete.value;
+  if (!plan) return;
+  planDesignPlans.value = planDesignPlans.value.filter(p => p.id !== plan.id);
+  expandedPlans.value = expandedPlans.value.filter(id => id !== plan.id);
+  pdCloseDeleteDialog();
+  showToast('Plan Deleted Successfully', 'success');
+};
+
+const pdDeleteDialogActions = computed(() => [
+  { text: 'Cancel', styleType: 'secondary' as const, onClick: pdCloseDeleteDialog },
+  { text: 'Delete Plan', type: 'destructive' as const, onClick: pdConfirmDeletePlan },
+]);
+
 // ─── Plan Design — Plan Overview edit ─────────────────────────────────────────
 const pdBenefitResetOptions = [
   'January 1: Calendar Year', 'February 1', 'March 1', 'March 31', 'April 1', 'May 1',
@@ -8704,9 +8753,15 @@ const pdCancelEditOverview = (plan: PdOverviewFields) => {
   pdOverviewTouched.value = pdOverviewTouched.value.filter(id => id !== plan.id);
 };
 
-const pdSaveEditOverview = (plan: PdOverviewFields) => {
+const pdSaveEditOverview = (plan: PdPlan) => {
   if (!pdOverviewTouched.value.includes(plan.id)) pdOverviewTouched.value.push(plan.id);
   if (!plan.name.trim() || !plan.effStartDate || endDateBeforeStartError(plan.effStartDate, plan.effEndDate)) return;
+  // Status follows the dates (future start = Scheduled), and non-Custom benefit periods are
+  // calculated from the start date, so both refresh when the dates change.
+  plan.status = deriveStatus(plan.effStartDate, plan.effEndDate);
+  if (plan.benefitPeriodType !== 'Custom') {
+    plan.benefitPeriodRanges = computeBenefitPeriodRanges(plan.benefitPeriodType, plan.effStartDate);
+  }
   pdOverviewEditingIds.value = pdOverviewEditingIds.value.filter(id => id !== plan.id);
   pdOverviewTouched.value = pdOverviewTouched.value.filter(id => id !== plan.id);
 };
@@ -10082,6 +10137,65 @@ watch(selectedAccount, (newVal) => {
   gap: $spacing-small;
 }
 
+.pd-accordion-header-right {
+  display: flex;
+  align-items: center;
+  gap: $spacing-small;
+}
+
+.pd-plan-menu-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-xsmall;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: $color-text-secondary;
+  cursor: pointer;
+
+  &:hover {
+    color: $color-primary;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-primary;
+    outline-offset: 2px;
+  }
+}
+
+.pd-clone-intro {
+  font-family: $font-family-base;
+  font-size: $font-size-body;
+  color: $color-text-primary;
+  margin: 0 0 $spacing-small;
+}
+
+.pd-clone-sections {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-small;
+}
+
+.pd-clone-section-help {
+  font-family: $font-family-base;
+  font-size: $font-size-small;
+  color: $color-text-secondary;
+  margin: 0 0 0 $spacing-large;
+}
+
+// Set well apart from the last checkbox so it reads as a note about the whole dialog, not about Copay Structure.
+.pd-clone-note {
+  margin-top: $spacing-large;
+}
+
+.pd-clone-error {
+  font-family: $font-family-base;
+  font-size: $font-size-small;
+  color: $color-error;
+  margin: $spacing-small 0 0;
+}
+
 .pd-plan-name {
   font-family: $font-family-base;
   font-size: $font-size-body;
@@ -10114,19 +10228,23 @@ watch(selectedAccount, (newVal) => {
     color: $color-neutral-disabled;
   }
 
-  &--pending {
+  &--pending,
+  &--scheduled {
     background-color: $color-warning-background;
     color: $color-warning;
   }
+
+  // Lighter tint than $color-error-background: #B80909 text on that fill is ~4.3:1 (fails AA); this is ~5.5:1.
+  &--terminated {
+    background-color: rgba($color-error, 0.1);
+    color: $color-error;
+  }
 }
 
+// Same look as the expand chevron in ReportDataTable (right-facing closed, down when open).
 .pd-accordion-chevron {
+  flex-shrink: 0;
   color: $color-text-secondary;
-  transition: transform 0.2s ease;
-
-  &--open {
-    transform: rotate(180deg);
-  }
 }
 
 .pd-accordion-body {
