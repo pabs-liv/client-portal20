@@ -1624,14 +1624,15 @@
                     :heading="copayTierDialogIsNew ? 'Add Copay Tier' : 'Edit Copay Tier'"
                     :show-secondary-button="true"
                     :actions="copayTierDialogActions"
+                    max-width="1200"
                   >
                     <Select
                       v-if="copayTierDialogIsNetwork"
                       v-model="copayTierDialogForm.networkId"
                       :items="copayNetworkOptions"
                       label="Pharmacy Network *"
-                      style="max-width: 320px;"
-                      class="mb-3 mt-1"
+                      style="max-width: 480px;"
+                      class="mb-4 mt-1"
                       :error="copayTierDialogTouched && !copayTierDialogForm.networkId"
                       :error-messages="copayTierDialogTouched && !copayTierDialogForm.networkId ? ['Required'] : []"
                     />
@@ -1641,7 +1642,7 @@
                         label="Days Supply Min *"
                         type="number"
                         min="0"
-                        style="max-width: 190px;"
+                        style="max-width: 250px;"
                         :error="copayTierDialogTouched && copayTierDialogForm.daysSupplyMin === ''"
                         :error-messages="copayTierDialogTouched && copayTierDialogForm.daysSupplyMin === '' ? ['Required'] : []"
                       />
@@ -1650,13 +1651,18 @@
                         label="Days Supply Max *"
                         type="number"
                         min="0"
-                        style="max-width: 190px;"
+                        style="max-width: 250px;"
                         :error="copayTierDialogTouched && copayTierDialogForm.daysSupply === ''"
                         :error-messages="copayTierDialogTouched && copayTierDialogForm.daysSupply === '' ? ['Required'] : []"
                       />
                     </div>
-                    <p v-if="copayTierDialogTouched && copayTierDialogOverlapping" class="cs-tier-error">
-                      This day-supply range overlaps another tier.
+                    <div class="cs-tier-messages mt-3 mb-5">
+                      <p v-if="copayTierDialogTouched && copayTierDialogOverlapping" class="cs-tier-error">
+                        This day-supply range overlaps another tier.
+                      </p>
+                    </div>
+                    <p class="cs-apply-hint mb-2">
+                      Use the <ChevronsUpDown :size="16" aria-hidden="true" class="cs-apply-hint-icon" /> button in any cell to copy its value to all other rows in that column.
                     </p>
                     <ReportDataTable
                       :headers="copayMatrixHeaders"
@@ -1666,40 +1672,48 @@
                       :show-selection-checkboxes="false"
                       :show-row-actions="false"
                       :show-table-footer="false"
-                      class="cs-matrix-table mt-3"
+                      class="cs-matrix-table"
                     >
-                      <template #item.formula="{ item }">
-                        <Select v-model="copayTierDialogCellFor(item.productType).formula" :items="copayFormulaOptions" density="compact" />
-                      </template>
-                      <template #item.copay="{ item }">
-                        <TextField v-model="copayTierDialogCellFor(item.productType).copay" density="compact" />
-                      </template>
-                      <template #item.coinsurance="{ item }">
-                        <TextField v-model="copayTierDialogCellFor(item.productType).coinsurance" density="compact" />
-                      </template>
-                      <template #item.coinsMin="{ item }">
-                        <TextField v-model="copayTierDialogCellFor(item.productType).coinsMin" density="compact" />
-                      </template>
-                      <template #item.coinsMax="{ item }">
-                        <TextField v-model="copayTierDialogCellFor(item.productType).coinsMax" density="compact" />
-                      </template>
-                      <template #item.incentiveMin="{ item }">
-                        <TextField v-model="copayTierDialogCellFor(item.productType).incentiveMin" density="compact" />
-                      </template>
-                      <template #item.incentiveMax="{ item }">
-                        <TextField v-model="copayTierDialogCellFor(item.productType).incentiveMax" density="compact" />
-                      </template>
-                      <template #item.patientPayMax="{ item }">
-                        <TextField v-model="copayTierDialogCellFor(item.productType).patientPayMax" density="compact" />
-                      </template>
-                      <template #item.dedWaived="{ item }">
-                        <v-checkbox v-model="copayTierDialogCellFor(item.productType).dedWaived" hide-details density="compact" />
-                      </template>
-                      <template #item.oopWaived="{ item }">
-                        <v-checkbox v-model="copayTierDialogCellFor(item.productType).oopWaived" hide-details density="compact" />
+                      <template v-for="col in copayEditableColumns" :key="col.key" #[`item.${col.key}`]="{ item }">
+                        <div class="cs-apply-cell" @focusin="clearCopayApplyError(item.productType, col)">
+                          <Select v-if="col.key === 'formula'" v-model="copayTierDialogCellFor(item.productType).formula" :items="copayFormulaOptions" label="" hide-details density="compact" />
+                          <v-checkbox v-else-if="col.isCheckbox" v-model="copayTierDialogCellFor(item.productType)[col.key]" hide-details density="compact" />
+                          <TextField v-else v-model="copayTierDialogCellFor(item.productType)[col.key]" hide-details density="compact" />
+                          <v-tooltip location="top">
+                            <template #activator="{ props: tipProps }">
+                              <button
+                                v-bind="tipProps"
+                                type="button"
+                                class="cs-apply-btn"
+                                :aria-label="`Apply ${col.label} from ${item.productType} to all rows`"
+                                :aria-describedby="isCopayApplyErrorShown(item.productType, col) ? copayApplyErrorId(item.productType, col) : undefined"
+                                @click="applyCopayCellToAllRows(item.productType, col)"
+                              >
+                                <ChevronsUpDown :size="16" aria-hidden="true" />
+                              </button>
+                            </template>
+                            Apply to all rows
+                          </v-tooltip>
+                          <div
+                            v-if="isCopayApplyErrorShown(item.productType, col)"
+                            :id="copayApplyErrorId(item.productType, col)"
+                            class="cs-apply-error"
+                            role="alert"
+                          >
+                            Enter a value
+                          </div>
+                        </div>
                       </template>
                     </ReportDataTable>
                   </Dialog>
+
+                  <Dialog
+                    v-model="showCopayApplyConfirm"
+                    heading="Apply to all rows?"
+                    :text="copayApplyConfirmText"
+                    :show-secondary-button="true"
+                    :actions="copayApplyConfirmActions"
+                  />
 
                   <Dialog
                     v-model="showCopayTierRemoveDialog"
@@ -5055,6 +5069,12 @@
   >
     {{ toast.message }}
   </v-snackbar>
+  <v-snackbar v-model="copayApplySnackbar" color="success" location="top right" :timeout="6000" rounded="lg">
+    {{ copayApplySnackbarText }}
+    <template #actions>
+      <button type="button" class="cs-undo-btn" @click="undoCopayApply">Undo</button>
+    </template>
+  </v-snackbar>
 
   <LockedAccountUnavailableDialog v-model="isLockedAccountUnavailableDialogOpen" :account-name="lockedAccountUnavailableName" />
 </template>
@@ -5081,7 +5101,7 @@ import {
   Save as SaveIcon, LayoutList as LayoutListIcon, CircleCheck as CircleCheckIcon,
   ArrowRight as ArrowRightIcon, Pencil, PenLine, CheckSquare, Square, ChevronDown, X, Check, CloudDownload, TriangleAlert,
   Building2, Shield, Link2, Users, FileText, Search, Globe, Trash2, Paperclip, Info, Plus,
-  Calculator, CheckCircle2, ChevronRight, Pin, EllipsisVertical,
+  Calculator, CheckCircle2, ChevronRight, Pin, EllipsisVertical, ChevronsUpDown,
 } from 'lucide-vue-next';
 import EmptyStateImg from '@/assets/EmptyState.svg';
 import { useDocumentsStore } from '@/stores/documents';
@@ -8290,9 +8310,9 @@ const copayMatrixHeaders = [
   { title: 'Product Type',    key: 'productType' },
   { title: 'Formula',         key: 'formula' },
   { title: 'Copay',           key: 'copay' },
-  { title: 'Coinsurance',     key: 'coinsurance' },
-  { title: 'Coins Min',       key: 'coinsMin' },
-  { title: 'Coins Max',       key: 'coinsMax' },
+  { title: 'Coinsurance Rate', key: 'coinsurance' },
+  { title: 'Coinsurance Min', key: 'coinsMin' },
+  { title: 'Coinsurance Max', key: 'coinsMax' },
   { title: 'Incentive Min',   key: 'incentiveMin' },
   { title: 'Incentive Max',   key: 'incentiveMax' },
   { title: 'Patient Pay Max', key: 'patientPayMax' },
@@ -8452,6 +8472,113 @@ function confirmRemoveCopayTier() {
   if (pending) removeCopayTier(pending.plan, pending.contextKey, pending.tier.id);
   showCopayTierRemoveDialog.value = false;
   copayTierPendingRemove.value = null;
+}
+
+// ─── Apply a cell's value to all rows (Copay Structure tier editor) ──────────
+type CopayEditableColumn = { key: keyof CopayCell; label: string; isCheckbox: boolean };
+const copayEditableColumns: CopayEditableColumn[] = copayMatrixHeaders
+  .filter(h => h.key !== 'productType')
+  .map(h => ({ key: h.key as keyof CopayCell, label: h.title, isCheckbox: h.key === 'dedWaived' || h.key === 'oopWaived' }));
+
+const showCopayApplyConfirm = ref(false);
+const copayApplyPending = ref<{ sourceType: string; col: CopayEditableColumn; differing: number } | null>(null);
+const copayApplySnackbar = ref(false);
+const copayApplySnackbarText = ref('');
+let copayApplyUndoSnapshot: Record<string, unknown> | null = null;
+let copayApplyUndoKey: keyof CopayCell | null = null;
+
+const isCopayValueEmpty = (v: unknown) => v === null || v === undefined || v === '' || v === false;
+
+function runCopayApply(sourceType: string, col: CopayEditableColumn) {
+  const value = copayTierDialogCellFor(sourceType)[col.key];
+  const snapshot: Record<string, unknown> = {};
+  copayProductTypes.forEach(pt => {
+    if (pt === sourceType) return;
+    const cell = copayTierDialogCellFor(pt);
+    snapshot[pt] = cell[col.key];
+    (cell as Record<string, unknown>)[col.key] = value;
+  });
+  copayApplyUndoSnapshot = snapshot;
+  copayApplyUndoKey = col.key;
+  copayApplySnackbarText.value = `${col.label} applied to ${copayProductTypes.length - 1} other rows.`;
+  copayApplySnackbar.value = true;
+}
+
+// Checkboxes always count as filled (unchecked is a real value); 0 counts as filled for text cells.
+function isCopayApplySourceBlank(sourceType: string, col: CopayEditableColumn) {
+  if (col.isCheckbox) return false;
+  const v = copayTierDialogCellFor(sourceType)[col.key];
+  return v === null || v === undefined || v === '';
+}
+
+// "Enter a value" shows only after the icon is clicked on a blank cell, and clears once the user
+// focuses back into that cell, clicks another cell's icon, or closes the modal.
+const copayApplyError = ref<{ productType: string; key: keyof CopayCell } | null>(null);
+
+const copayApplyErrorId = (productType: string, col: CopayEditableColumn) => `cs-apply-err-${productType}-${col.key}`;
+
+function isCopayApplyErrorShown(productType: string, col: CopayEditableColumn) {
+  const e = copayApplyError.value;
+  return !!e && e.productType === productType && e.key === col.key && isCopayApplySourceBlank(productType, col);
+}
+
+function clearCopayApplyError(productType: string, col: CopayEditableColumn) {
+  const e = copayApplyError.value;
+  if (e && e.productType === productType && e.key === col.key) copayApplyError.value = null;
+}
+
+watch(showCopayTierDialog, (isOpen) => {
+  if (!isOpen) copayApplyError.value = null;
+});
+
+function applyCopayCellToAllRows(sourceType: string, col: CopayEditableColumn) {
+  if (isCopayApplySourceBlank(sourceType, col)) {
+    copayApplyError.value = { productType: sourceType, key: col.key };
+    return;
+  }
+  copayApplyError.value = null;
+  const value = copayTierDialogCellFor(sourceType)[col.key];
+  const differing = copayProductTypes.filter(pt => {
+    if (pt === sourceType) return false;
+    const other = copayTierDialogCellFor(pt)[col.key];
+    return !isCopayValueEmpty(other) && other !== value;
+  }).length;
+  if (differing > 0) {
+    copayApplyPending.value = { sourceType, col, differing };
+    showCopayApplyConfirm.value = true;
+    return;
+  }
+  runCopayApply(sourceType, col);
+}
+
+const copayApplyConfirmText = computed(() => {
+  const p = copayApplyPending.value;
+  if (!p) return '';
+  return `${p.differing} other ${p.differing === 1 ? 'row has' : 'rows have'} a different ${p.col.label} value. Applying the ${p.sourceType} value will overwrite ${p.differing === 1 ? 'it' : 'them'}.`;
+});
+
+function confirmCopayApply() {
+  const p = copayApplyPending.value;
+  if (p) runCopayApply(p.sourceType, p.col);
+  showCopayApplyConfirm.value = false;
+  copayApplyPending.value = null;
+}
+
+const copayApplyConfirmActions = [
+  { text: 'Cancel', styleType: 'secondary' as const, onClick: () => { showCopayApplyConfirm.value = false; copayApplyPending.value = null; } },
+  { text: 'Apply to All Rows', onClick: confirmCopayApply },
+];
+
+function undoCopayApply() {
+  if (copayApplyUndoSnapshot && copayApplyUndoKey) {
+    const key = copayApplyUndoKey;
+    Object.entries(copayApplyUndoSnapshot).forEach(([pt, v]) => {
+      (copayTierDialogCellFor(pt) as Record<string, unknown>)[key] = v;
+    });
+  }
+  copayApplyUndoSnapshot = null;
+  copayApplyUndoKey = null;
+  copayApplySnackbar.value = false;
 }
 
 const copayTierRemoveDialogActions = [
@@ -10471,30 +10598,115 @@ watch(selectedAccount, (newVal) => {
 .cs-tier-error {
   color: $color-error;
   font-size: $font-size-small;
-  margin: -#{$spacing-xsmall} 0 $spacing-small;
+  margin: 0;
+}
+
+.cs-apply-hint {
+  color: $color-text-secondary;
+  font-size: $font-size-small;
+}
+
+.cs-apply-hint-icon {
+  vertical-align: text-bottom;
+  color: $color-primary;
+}
+
+.cs-apply-cell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  column-gap: 4px;
+
+  .cs-apply-btn {
+    margin-bottom: 4px; // centers the icon on the input's text line, not the whole cell
+  }
+}
+
+.cs-apply-error {
+  grid-column: 1 / -1;
+  color: $color-error;
+  font-size: $font-size-small;
+}
+
+.cs-apply-btn {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: $color-primary;
+  cursor: pointer;
+  opacity: 0;
+
+  &:hover {
+    background: $color-border;
+  }
+
+  &:focus-visible {
+    opacity: 1;
+    outline: 2px solid $color-primary;
+    outline-offset: 1px;
+  }
+}
+
+// Visible on hover, anywhere in the row for keyboard users, and always on touch (no hover).
+tr:hover .cs-apply-btn,
+tr:focus-within .cs-apply-btn {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .cs-apply-btn {
+    opacity: 1;
+  }
+}
+
+.cs-undo-btn {
+  color: $color-neutral-white;
+  font-weight: 600;
+  text-decoration: underline;
+  padding: 0 $spacing-xsmall;
 }
 
 // This table has 11 columns of inputs — letting it shrink to fit the container squeezes every
 // cell down to unusable widths. Force it to size to content and scroll horizontally instead.
+// Cell padding and column widths match the Edit Copay Tier modal in Liv.ClientPortal.
 .cs-matrix-table {
   :deep(table) {
     width: max-content;
     min-width: 100%;
   }
 
-  :deep(th),
-  :deep(td) {
-    min-width: 130px;
+  :deep(th) {
+    font-weight: $font-weight-bold;
   }
 
+  :deep(th),
+  :deep(td) {
+    min-width: 180px; // 150px in Liv.ClientPortal, plus room for the apply icon
+    padding: 8px 12px;
+    white-space: nowrap;
+    vertical-align: bottom;
+  }
+
+  // Product Type stays pinned while the rest of the row scrolls sideways.
   :deep(th:first-child),
   :deep(td:first-child) {
-    min-width: 160px;
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    min-width: 170px;
+    background-color: $color-neutral-white;
+    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
   }
 
   :deep(th:nth-child(2)),
   :deep(td:nth-child(2)) {
-    min-width: 170px;
+    min-width: 250px;
   }
 }
 
