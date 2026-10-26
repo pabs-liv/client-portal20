@@ -833,13 +833,13 @@
                         <v-checkbox v-model="apVendorAccessFormConfirmed" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox">
                           <template #label><span class="text-small">I confirm the Client Portal Access Request Form has been completed and signed by the client.<span class="ap-required-asterisk">*</span></span></template>
                         </v-checkbox>
-                      </template>
 
-                      <h5 class="ap-subsection-heading">Data Transfer Agreement Acknowledgement</h5>
-                      <p class="text-small ap-role-note">External vendors must be defined on the PPSAA and must have signed the Global Data Transfer Agreement. If you are unsure if the proper paperwork has been signed, please contact the legal team.</p>
-                      <v-checkbox v-model="apVendorAckConfirmed" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox">
-                        <template #label><span class="text-small">I confirm the proper paperwork has been completed.<span class="ap-required-asterisk">*</span></span></template>
-                      </v-checkbox>
+                        <h6 class="ap-subsection-heading">Data Transfer Agreement Acknowledgement</h6>
+                        <p class="text-small ap-role-note">External vendors must be defined on the PPSAA and must have signed the Global Data Transfer Agreement. If you are unsure if the proper paperwork has been signed, please contact the legal team.</p>
+                        <v-checkbox v-model="apVendorAckConfirmed" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox">
+                          <template #label><span class="text-small">I confirm the proper paperwork has been completed.<span class="ap-required-asterisk">*</span></span></template>
+                        </v-checkbox>
+                      </template>
                     </template>
                   </Dialog>
 
@@ -890,13 +890,13 @@
                       <v-checkbox v-model="apEditVendorContactForm.accessFormConfirmed" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox">
                         <template #label><span class="text-small">I confirm the Client Portal Access Request Form has been completed and signed by the client.<span class="ap-required-asterisk">*</span></span></template>
                       </v-checkbox>
-                    </template>
 
-                    <h5 class="ap-subsection-heading">Data Transfer Agreement Acknowledgement</h5>
-                    <p class="text-small ap-role-note">External vendors must be defined on the PPSAA and must have signed the Global Data Transfer Agreement. If you are unsure if the proper paperwork has been signed, please contact the legal team.</p>
-                    <v-checkbox v-model="apEditVendorContactForm.ackConfirmed" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox">
-                      <template #label><span class="text-small">I confirm the proper paperwork has been completed.<span class="ap-required-asterisk">*</span></span></template>
-                    </v-checkbox>
+                      <h6 class="ap-subsection-heading">Data Transfer Agreement Acknowledgement</h6>
+                      <p class="text-small ap-role-note">External vendors must be defined on the PPSAA and must have signed the Global Data Transfer Agreement. If you are unsure if the proper paperwork has been signed, please contact the legal team.</p>
+                      <v-checkbox v-model="apEditVendorContactForm.ackConfirmed" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox">
+                        <template #label><span class="text-small">I confirm the proper paperwork has been completed.<span class="ap-required-asterisk">*</span></span></template>
+                      </v-checkbox>
+                    </template>
                   </Dialog>
 
                 </template>
@@ -6897,8 +6897,8 @@ const apResetVendorAddState = () => {
   apVendorAccessFormConfirmed.value = false;
 };
 const apVendorAddDisabled = computed(() => {
-  if (!apVendorContactSelection.value || !apVendorAckConfirmed.value) return true;
-  if (apVendorPortalAccess.value) return !apHasAnyPermission(apVendorPermissions.value) || !apVendorAccessFormConfirmed.value;
+  if (!apVendorContactSelection.value) return true;
+  if (apVendorPortalAccess.value) return !apHasAnyPermission(apVendorPermissions.value) || !apVendorAccessFormConfirmed.value || !apVendorAckConfirmed.value;
   return false;
 });
 const apSaveVendorContacts = () => {
@@ -6918,7 +6918,7 @@ const apSaveVendorContacts = () => {
         allowPhi: apVendorAllowPhi.value,
         mainPointOfContact: apVendorMainPointOfContact.value,
         surveyContact: apVendorSurveyContact.value,
-        ackConfirmed: apVendorAckConfirmed.value,
+        ackConfirmed: apVendorPortalAccess.value ? apVendorAckConfirmed.value : false,
         accessFormConfirmed: apVendorPortalAccess.value ? apVendorAccessFormConfirmed.value : false,
         roleLabel: apVendorRoleSelection.value,
       });
@@ -6979,8 +6979,7 @@ const handleApVendorContactRowAction = ({ action, item }: { action: string; item
 };
 const apEditVendorSaveDisabled = computed(() => {
   if (!apEditVendorContactHasChanges.value) return true;
-  if (!apEditVendorContactForm.value.ackConfirmed) return true;
-  if (apEditVendorContactForm.value.portalAccess) return !apHasAnyPermission(apEditVendorContactForm.value.permissions) || !apEditVendorContactForm.value.accessFormConfirmed;
+  if (apEditVendorContactForm.value.portalAccess) return !apHasAnyPermission(apEditVendorContactForm.value.permissions) || !apEditVendorContactForm.value.accessFormConfirmed || !apEditVendorContactForm.value.ackConfirmed;
   return false;
 });
 const apSaveEditVendorContact = () => {
@@ -6995,7 +6994,7 @@ const apSaveEditVendorContact = () => {
     c.allowPhi = apEditVendorContactForm.value.allowPhi;
     c.mainPointOfContact = apEditVendorContactForm.value.mainPointOfContact;
     c.surveyContact = apEditVendorContactForm.value.surveyContact;
-    c.ackConfirmed = apEditVendorContactForm.value.ackConfirmed;
+    c.ackConfirmed = portalAccess ? apEditVendorContactForm.value.ackConfirmed : false;
     c.accessFormConfirmed = portalAccess ? apEditVendorContactForm.value.accessFormConfirmed : false;
     c.permissions = portalAccess ? { ...apEditVendorContactForm.value.permissions } : apNewPermissions();
     c.roleLabel = apEditVendorContactForm.value.role;
