@@ -798,7 +798,6 @@
                         <v-col cols="12" sm="6"><Select v-model="apVendorEmailSelection" :items="apVendorContactEmailOptions" label="Email" /></v-col>
                         <v-col cols="12" sm="6"><Select v-model="apVendorPhoneSelection" :items="apVendorContactPhoneOptions" label="Phone" /></v-col>
                       </v-row>
-                      <p class="ap-required-legend">Fields marked <span class="ap-required-asterisk">*</span> are required.</p>
                       <v-row class="mt-1">
                         <v-col cols="12" sm="6"><Select v-model="apVendorRoleSelection" :items="apVendorRoleOptions" label="Business Role" /></v-col>
                       </v-row>
@@ -823,6 +822,7 @@
                       <h5 class="ap-subsection-heading">Client Portal Access</h5>
                       <v-checkbox v-model="apVendorPortalAccess" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox" label="Grant Client Portal access" />
                       <template v-if="apVendorPortalAccess">
+                        <p class="ap-required-legend">Fields marked <span class="ap-required-asterisk">*</span> are required.</p>
                         <h6 class="ap-subsection-heading">Client Portal Permissions<span class="ap-required-asterisk">*</span></h6>
                         <p class="text-small ap-role-note">At least one permission is required to grant portal access.</p>
                         <div class="ap-permission-grid">
@@ -855,7 +855,6 @@
                       <v-col cols="12" sm="6"><Select v-model="apEditVendorContactForm.email" :items="apEditVendorContactEmailOptions" label="Email" /></v-col>
                       <v-col cols="12" sm="6"><Select v-model="apEditVendorContactForm.phone" :items="apEditVendorContactPhoneOptions" label="Phone" /></v-col>
                     </v-row>
-                    <p class="ap-required-legend">Fields marked <span class="ap-required-asterisk">*</span> are required.</p>
                     <v-row class="mt-1">
                       <v-col cols="12" sm="6"><Select v-model="apEditVendorContactForm.role" :items="apVendorRoleOptions" label="Business Role" /></v-col>
                     </v-row>
@@ -880,6 +879,7 @@
                     <h5 class="ap-subsection-heading">Client Portal Access</h5>
                     <v-checkbox v-model="apEditVendorContactForm.portalAccess" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox" label="Grant Client Portal access" />
                     <template v-if="apEditVendorContactForm.portalAccess">
+                      <p class="ap-required-legend">Fields marked <span class="ap-required-asterisk">*</span> are required.</p>
                       <h6 class="ap-subsection-heading">Client Portal Permissions<span class="ap-required-asterisk">*</span></h6>
                       <p class="text-small ap-role-note">At least one permission is required to grant portal access.</p>
                       <div class="ap-permission-grid">
