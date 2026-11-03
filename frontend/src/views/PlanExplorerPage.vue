@@ -829,15 +829,15 @@
                           <v-checkbox v-for="perm in apPermissionOptions" :key="perm.key" v-model="apVendorPermissions[perm.key]" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox" :label="perm.label" />
                         </div>
 
-                        <h6 class="ap-subsection-heading">Access Request Form Acknowledgement</h6>
+                        <h6 class="ap-subsection-heading">Access Request Form Acknowledgement<span class="ap-required-asterisk">*</span></h6>
                         <v-checkbox v-model="apVendorAccessFormConfirmed" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox">
-                          <template #label><span class="text-small">I confirm the Client Portal Access Request Form has been completed and signed by the client.<span class="ap-required-asterisk">*</span></span></template>
+                          <template #label><span class="text-small">I confirm the Client Portal Access Request Form has been completed and signed by the client.</span></template>
                         </v-checkbox>
 
-                        <h6 class="ap-subsection-heading">Data Transfer Agreement Acknowledgement</h6>
+                        <h6 class="ap-subsection-heading">Data Transfer Agreement Acknowledgement<span class="ap-required-asterisk">*</span></h6>
                         <p class="text-small ap-role-note">External vendors must be defined on the PPSAA and must have signed the Global Data Transfer Agreement. If you are unsure if the proper paperwork has been signed, please contact the legal team.</p>
                         <v-checkbox v-model="apVendorAckConfirmed" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox">
-                          <template #label><span class="text-small">I confirm the proper paperwork has been completed.<span class="ap-required-asterisk">*</span></span></template>
+                          <template #label><span class="text-small">I confirm the proper paperwork has been completed.</span></template>
                         </v-checkbox>
                       </template>
                     </template>
@@ -886,15 +886,15 @@
                         <v-checkbox v-for="perm in apPermissionOptions" :key="perm.key" v-model="apEditVendorContactForm.permissions[perm.key]" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox" :label="perm.label" />
                       </div>
 
-                      <h6 class="ap-subsection-heading">Access Request Form Acknowledgement</h6>
+                      <h6 class="ap-subsection-heading">Access Request Form Acknowledgement<span class="ap-required-asterisk">*</span></h6>
                       <v-checkbox v-model="apEditVendorContactForm.accessFormConfirmed" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox">
-                        <template #label><span class="text-small">I confirm the Client Portal Access Request Form has been completed and signed by the client.<span class="ap-required-asterisk">*</span></span></template>
+                        <template #label><span class="text-small">I confirm the Client Portal Access Request Form has been completed and signed by the client.</span></template>
                       </v-checkbox>
 
-                      <h6 class="ap-subsection-heading">Data Transfer Agreement Acknowledgement</h6>
+                      <h6 class="ap-subsection-heading">Data Transfer Agreement Acknowledgement<span class="ap-required-asterisk">*</span></h6>
                       <p class="text-small ap-role-note">External vendors must be defined on the PPSAA and must have signed the Global Data Transfer Agreement. If you are unsure if the proper paperwork has been signed, please contact the legal team.</p>
                       <v-checkbox v-model="apEditVendorContactForm.ackConfirmed" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox">
-                        <template #label><span class="text-small">I confirm the proper paperwork has been completed.<span class="ap-required-asterisk">*</span></span></template>
+                        <template #label><span class="text-small">I confirm the proper paperwork has been completed.</span></template>
                       </v-checkbox>
                     </template>
                   </Dialog>
