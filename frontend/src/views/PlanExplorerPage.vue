@@ -1675,7 +1675,7 @@
                       class="cs-matrix-table"
                     >
                       <template v-for="col in copayEditableColumns" :key="col.key" #[`item.${col.key}`]="{ item }">
-                        <div class="cs-apply-cell" @focusin="clearCopayApplyError(item.productType, col)">
+                        <div class="cs-apply-cell">
                           <Select v-if="col.key === 'formula'" v-model="copayTierDialogCellFor(item.productType).formula" :items="copayFormulaOptions" label="" hide-details density="compact" />
                           <v-checkbox v-else-if="col.isCheckbox" v-model="copayTierDialogCellFor(item.productType)[col.key]" hide-details density="compact" />
                           <TextField v-else v-model="copayTierDialogCellFor(item.productType)[col.key]" hide-details density="compact" />
@@ -1686,7 +1686,6 @@
                                 type="button"
                                 class="cs-apply-btn"
                                 :aria-label="`Apply ${col.label} from ${item.productType} to all rows`"
-                                :aria-describedby="isCopayApplyErrorShown(item.productType, col) ? copayApplyErrorId(item.productType, col) : undefined"
                                 @click="applyCopayCellToAllRows(item.productType, col)"
                               >
                                 <ChevronsUpDown :size="16" aria-hidden="true" />
@@ -1694,14 +1693,6 @@
                             </template>
                             Apply to all rows
                           </v-tooltip>
-                          <div
-                            v-if="isCopayApplyErrorShown(item.productType, col)"
-                            :id="copayApplyErrorId(item.productType, col)"
-                            class="cs-apply-error"
-                            role="alert"
-                          >
-                            Enter a value
-                          </div>
                         </div>
                       </template>
                     </ReportDataTable>
@@ -8503,39 +8494,8 @@ function runCopayApply(sourceType: string, col: CopayEditableColumn) {
   copayApplySnackbar.value = true;
 }
 
-// Checkboxes always count as filled (unchecked is a real value); 0 counts as filled for text cells.
-function isCopayApplySourceBlank(sourceType: string, col: CopayEditableColumn) {
-  if (col.isCheckbox) return false;
-  const v = copayTierDialogCellFor(sourceType)[col.key];
-  return v === null || v === undefined || v === '';
-}
-
-// "Enter a value" shows only after the icon is clicked on a blank cell, and clears once the user
-// focuses back into that cell, clicks another cell's icon, or closes the modal.
-const copayApplyError = ref<{ productType: string; key: keyof CopayCell } | null>(null);
-
-const copayApplyErrorId = (productType: string, col: CopayEditableColumn) => `cs-apply-err-${productType}-${col.key}`;
-
-function isCopayApplyErrorShown(productType: string, col: CopayEditableColumn) {
-  const e = copayApplyError.value;
-  return !!e && e.productType === productType && e.key === col.key && isCopayApplySourceBlank(productType, col);
-}
-
-function clearCopayApplyError(productType: string, col: CopayEditableColumn) {
-  const e = copayApplyError.value;
-  if (e && e.productType === productType && e.key === col.key) copayApplyError.value = null;
-}
-
-watch(showCopayTierDialog, (isOpen) => {
-  if (!isOpen) copayApplyError.value = null;
-});
-
+// A blank source cell is applied like any other value: the other rows in the column are cleared.
 function applyCopayCellToAllRows(sourceType: string, col: CopayEditableColumn) {
-  if (isCopayApplySourceBlank(sourceType, col)) {
-    copayApplyError.value = { productType: sourceType, key: col.key };
-    return;
-  }
-  copayApplyError.value = null;
   const value = copayTierDialogCellFor(sourceType)[col.key];
   const differing = copayProductTypes.filter(pt => {
     if (pt === sourceType) return false;
@@ -10619,12 +10579,6 @@ watch(selectedAccount, (newVal) => {
   .cs-apply-btn {
     margin-bottom: 4px; // centers the icon on the input's text line, not the whole cell
   }
-}
-
-.cs-apply-error {
-  grid-column: 1 / -1;
-  color: $color-error;
-  font-size: $font-size-small;
 }
 
 .cs-apply-btn {
