@@ -2513,6 +2513,12 @@
                 <!-- Step 5: Transition of Care -->
                 <template v-else-if="currentWizardStep === 4">
 
+                  <Banner
+                    variant="info"
+                    :always-show="true"
+                    message="Transition of Care is not available to clients under 500 lives."
+                  />
+
                   <!-- Card 1: Transition of Care Setup (Historical Claims + Prior Authorization File) -->
                   <div class="ap-section">
                     <div class="ap-section-header">
