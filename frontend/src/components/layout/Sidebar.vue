@@ -60,39 +60,13 @@
           <span class="nav-title">Settings</span>
         </div>
       </v-list-item>
-      <v-list-item class="nav-item">
-        <div class="nav-item-content">
-          <v-icon class="nav-icon">mdi-logout</v-icon>
-          <span class="nav-title">Logout</span>
-        </div>
-      </v-list-item>
     </v-list>
-
-    <!-- Development-only user type switcher -->
-    <div v-if="isDev" class="dev-switcher">
-      <v-switch
-        :model-value="isInternal"
-        label="Internal User"
-        density="compact"
-        hide-details
-        @update:model-value="toggleUserType"
-      ></v-switch>
-    </div>
   </v-navigation-drawer>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
 import { House, FileChartColumnIncreasing, FileCheck2, FileText, Tablets, RotateCcwKey, ScrollText, Blocks, CircleGauge, MonitorCog } from 'lucide-vue-next';
-import { useUserType } from '@/composables/useUserType';
-
-const { isInternal, setUserType } = useUserType();
-
-const isDev = import.meta.env.DEV;
-
-const toggleUserType = (value: boolean) => {
-  setUserType(value ? 'internal' : 'external');
-};
 
 const navItems = ref([
   { title: 'Home', to: '/' },
@@ -137,11 +111,33 @@ const navItems = ref([
   color: var(--color-text-secondary);
   margin-left: 8px;
 }
+// Nav items share the available height equally (up to their original 65px) so the
+// full list fits on shorter screens without a scrollbar.
+// Items never shrink below 46px; on windows too short for that, the sidebar scrolls
+// (scrollbar hidden) so Settings stays reachable.
+.sidebar :deep(.v-navigation-drawer__content) {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.sidebar :deep(.v-navigation-drawer__content)::-webkit-scrollbar {
+  display: none;
+}
 .nav-list {
   padding: 0;
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
 }
-.nav-item {
-  padding: 16px 0;
+// Higher specificity so these override Vuetify's own nav-item min-height, padding and gap.
+.nav-list .nav-item {
+  flex: 1 1 0;
+  min-height: 46px;
+  max-height: 65px;
+  padding: 0;
+  margin-top: 0 !important;
   text-align: center;
 }
 .nav-item-content {
@@ -176,17 +172,6 @@ const navItems = ref([
 :global(html.dark) .nav-item-active .nav-icon,
 :global(html.dark) .nav-item-active .nav-title {
   color: #7BA7E0 !important; // 6.9:1 contrast on #13161F — WCAG AA ✓
-}
-
-.dev-switcher {
-  padding: 8px 4px 16px;
-  text-align: center;
-
-  :deep(.v-label) {
-    font-size: 0.6875rem;
-    opacity: 1;
-    color: var(--color-nav-title);
-  }
 }
 
 </style>
