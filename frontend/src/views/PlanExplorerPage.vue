@@ -712,7 +712,7 @@
                     v-model="apShowRemoveContactDialog"
                     :icon="Trash2"
                     heading="Remove Contact"
-                    :text="`Are you sure you want to remove ${apPendingRemoveContact?.name} from this account?`"
+                    :text="`Are you sure you want to remove ${apPendingRemoveContact?.name} from this account? They will also be removed from any Billing and Rebate contact lists.`"
                     :actions="apRemoveContactDialogActions"
                     :show-secondary-button="true"
                   />
@@ -3439,14 +3439,46 @@
                           </div>
                         </div>
                       </template>
-                      <!-- Read-only reflection of who holds the Invoices permission on this account; shown in view and edit mode alike. -->
+                      <!-- Responsible Party and Billing Notification contacts: chosen from the Account Profile contacts, independent of Client Portal access. Saved with the card and listed on the GPS for Implementation to enter in Solo1. -->
                       <div class="bl-section">
                         <p class="lc-hcn-label">Responsible Party</p>
-                        <div v-if="blInvoiceContactUsers.length > 0">
-                          <div v-for="name in blInvoiceContactUsers" :key="name" class="ap-field-value">{{ name }}</div>
-                        </div>
-                        <div v-else-if="blPendingUserRequestCount === 0" class="ap-field-value">No users with the Invoice permission have been requested yet. To add one, submit a portal access request with the Invoices permission under Client Contacts or Vendor Contacts in the Account Profile step.</div>
-                        <p v-if="blPendingUserRequestCount > 0" class="text-body bl-note">There are {{ blPendingUserRequestCount }} pending user accounts. Once approved, additional users may display if they contain the applicable permission.</p>
+                        <template v-if="!blEditingSetup">
+                          <div v-if="blResponsibleNames.length > 0">
+                            <div v-for="name in blResponsibleNames" :key="name" class="ap-field-value">{{ name }}</div>
+                          </div>
+                          <div v-else class="ap-field-value">—</div>
+                        </template>
+                        <template v-else>
+                          <p class="text-body bl-note">Contacts responsible for making sure the invoice is paid. Select from Client Contacts and Vendor Contacts in the Account Profile step.</p>
+                          <div class="bl-field-wide">
+                            <Autocomplete
+                              v-model="blResponsibleNames"
+                              :items="blContactOptionsFor('responsible')"
+                              :multiple="true"
+                              label="Select contacts"
+                            />
+                          </div>
+                        </template>
+                      </div>
+                      <div class="bl-section">
+                        <p class="lc-hcn-label">Billing Notification Contacts</p>
+                        <template v-if="!blEditingSetup">
+                          <div v-if="blBillingNotifyNames.length > 0">
+                            <div v-for="name in blBillingNotifyNames" :key="name" class="ap-field-value">{{ name }}</div>
+                          </div>
+                          <div v-else class="ap-field-value">—</div>
+                        </template>
+                        <template v-else>
+                          <p class="text-body bl-note">Contacts who receive the invoice by email but are not responsible for making sure it is paid.</p>
+                          <div class="bl-field-wide">
+                            <Autocomplete
+                              v-model="blBillingNotifyNames"
+                              :items="blContactOptionsFor('billingNotify')"
+                              :multiple="true"
+                              label="Select contacts"
+                            />
+                          </div>
+                        </template>
                       </div>
                       <div v-if="blEditingSetup" class="ap-section-footer">
                         <button class="button button-primary" @click="blSetupSaveEdit">Save Changes</button>
@@ -3751,14 +3783,26 @@
                       </button>
                     </div>
                     <div class="ap-fields">
-                      <!-- Read-only reflection of who holds the Rebates permission on this account; shown in view and edit mode alike. -->
+                      <!-- Rebate Notification contacts: chosen from the Account Profile contacts, independent of Client Portal access. Saved with the card and listed on the GPS for Implementation to enter in Solo1. -->
                       <div class="bl-section">
                         <p class="lc-hcn-label">Rebate Notification Contacts</p>
-                        <div v-if="blRebateContactUsers.length > 0">
-                          <div v-for="name in blRebateContactUsers" :key="name" class="ap-field-value">{{ name }}</div>
-                        </div>
-                        <div v-else-if="blPendingUserRequestCount === 0" class="ap-field-value">No users with the Rebates permission have been requested yet. To add one, submit a portal access request with the Rebates permission under Client Contacts or Vendor Contacts in the Account Profile step.</div>
-                        <p v-if="blPendingUserRequestCount > 0" class="text-body bl-note">There are {{ blPendingUserRequestCount }} pending user accounts. Once approved, additional users may display if they contain the applicable permission.</p>
+                        <template v-if="!blEditingRebate">
+                          <div v-if="blRebateNames.length > 0">
+                            <div v-for="name in blRebateNames" :key="name" class="ap-field-value">{{ name }}</div>
+                          </div>
+                          <div v-else class="ap-field-value">—</div>
+                        </template>
+                        <template v-else>
+                          <p class="text-body bl-note">Selected contacts will be notified when rebates are issued.</p>
+                          <div class="bl-field-wide">
+                            <Autocomplete
+                              v-model="blRebateNames"
+                              :items="blContactOptionsFor('rebate')"
+                              :multiple="true"
+                              label="Select contacts"
+                            />
+                          </div>
+                        </template>
                       </div>
                       <template v-if="!blEditingRebate">
                         <div class="ap-field-row ap-field-row--multi">
@@ -5699,10 +5743,9 @@ const blDebitTiming = ref('');
 const blDebitTimingOptions = ['3–5 business days after billing complete', '10 business days', 'Prior approval required', 'Custom'];
 const blDebitApprovalEmail = ref('');
 
-// B-05/B-14: Contacts — read-only. Responsible Party and Rebate Notification Contacts list the names of
-// users on the account who hold the Invoices / Rebates Client Portal permission; they are not selectable here.
-// The sample contacts are shared across accounts, so Cyberdyne Systems and Oscorp are treated as accounts where
-// nobody holds either permission yet (nothing submitted in Account Profile, or only pending requests).
+// High-Cost Notification Recipients stay read-only: they list the names of users on the account who hold the
+// High Cost Client Portal permission. The sample contacts are shared across accounts, so Cyberdyne Systems and
+// Oscorp are treated as accounts where nobody holds the permission yet.
 const blAccountsWithoutPermissionUsers = [CYBERDYNE_SYSTEMS_ID, OSCORP_ID];
 const blContactsWithPermission = (permission: 'invoices' | 'rebates' | 'highCost') => {
   if (selectedAccount.value !== null && blAccountsWithoutPermissionUsers.includes(selectedAccount.value)) return [];
@@ -5710,16 +5753,46 @@ const blContactsWithPermission = (permission: 'invoices' | 'rebates' | 'highCost
     .filter(c => c.portalAccess && c.permissions?.[permission])
     .map(c => c.name);
 };
-const blInvoiceContactUsers = computed(() => blContactsWithPermission('invoices'));
-const blRebateContactUsers = computed(() => blContactsWithPermission('rebates'));
 const lcHcnContactUsers = computed(() => blContactsWithPermission('highCost'));
 const lcHcnPendingUserRequestCount = computed(() => 0);
-// Account-wide count of user access requests still awaiting approval (sample values for the prototype):
-// Cyberdyne Systems: nobody submitted yet (empty state). Oscorp: nobody approved, requests pending (pending note
-// only). Stark Industries: approved users plus pending requests (names and pending note).
-const blPendingUserRequestsByAccount: Record<number, number> = { [OSCORP_ID]: 2, [STARK_INDUSTRIES_ID]: 3 };
-const blPendingUserRequestCount = computed(() =>
-  selectedAccount.value === null ? 0 : (blPendingUserRequestsByAccount[selectedAccount.value] ?? 0));
+
+// Responsible Party, Billing Notification and Rebate Notification contacts are chosen from the Account Profile contacts
+// (Client + Vendor), independent of Client Portal access. They are saved with their card and listed on the GPS so
+// Implementation can enter them in Solo1 manually. Responsible Party = responsible for making sure the invoice is paid;
+// Billing Notification = receives the invoice by email only. A person can't be in both billing lists.
+type BlContactTarget = 'responsible' | 'billingNotify' | 'rebate';
+const blResponsibleNames = ref<string[]>(['Mark Tillman']);
+const blBillingNotifyNames = ref<string[]>(['James Pruitt']);
+const blRebateNames = ref<string[]>(['Rachel Vance', 'Nick Johnson']);
+const blContactNamesFor = (target: BlContactTarget) =>
+  target === 'responsible' ? blResponsibleNames : target === 'billingNotify' ? blBillingNotifyNames : blRebateNames;
+// A contact removed from Step 1: Account Profile is no longer linked to the account, so they come off every list here.
+watch([apClientContacts, apVendorContacts], () => {
+  const linked = new Set([...apClientContacts.value, ...apVendorContacts.value].map(c => c.name));
+  [blResponsibleNames, blBillingNotifyNames, blRebateNames].forEach(list => {
+    if (list.value.some(name => !linked.has(name))) list.value = list.value.filter(name => linked.has(name));
+  });
+}, { deep: true });
+const blContactOptionsFor = (target: BlContactTarget) => {
+  const otherBillingNames = target === 'responsible' ? blBillingNotifyNames.value : target === 'billingNotify' ? blResponsibleNames.value : [];
+  const otherLabel = target === 'responsible' ? 'Billing Notification' : 'Responsible Party';
+  const toItems = (names: string[]) => [...names].sort((a, b) => a.localeCompare(b)).map(name =>
+    otherBillingNames.includes(name) ? { title: `${name} — Already a ${otherLabel} contact`, value: name, props: { disabled: true } } : name);
+  const result: any[] = [];
+  if (apClientContacts.value.length > 0) {
+    result.push({ type: 'subheader', title: 'Client Contacts' }, ...toItems(apClientContacts.value.map(c => c.name)));
+  }
+  // Vendor contacts are grouped under their vendor's name (same grouping as the Add Vendor Contact dropdown in Step 1).
+  const byVendor = new Map<string, string[]>();
+  apVendorContacts.value.forEach(c => {
+    if (!byVendor.has(c.vendor)) byVendor.set(c.vendor, []);
+    byVendor.get(c.vendor)!.push(c.name);
+  });
+  [...byVendor.keys()].sort().forEach(vendor => {
+    result.push({ type: 'subheader', title: vendor }, ...toItems(byVendor.get(vendor)!));
+  });
+  return result;
+};
 watch(() => blExistingParty.value, () => {
   blSkipAchSetup.value = false;
 });
@@ -5768,12 +5841,14 @@ const blEditingRebate = ref(false);
 const blEditingNotes = ref(false);
 
 // Card 1: Billing Setup — snapshot/restore so Cancel undoes every field, not just uploads
-let blSetupSnapshot = { einNumber: '', existingParty: 'no', selectedCarrier: '' };
+let blSetupSnapshot = { einNumber: '', existingParty: 'no', selectedCarrier: '', responsible: [] as string[], billingNotify: [] as string[] };
 const blSetupStartEdit = () => {
   blSetupSnapshot = {
     einNumber: blEinNumber.value,
     existingParty: blExistingParty.value,
     selectedCarrier: blSelectedCarrier.value,
+    responsible: [...blResponsibleNames.value],
+    billingNotify: [...blBillingNotifyNames.value],
   };
   blSetupTouched.value = false;
   blEditingSetup.value = true;
@@ -5787,6 +5862,8 @@ const blSetupCancelEdit = () => {
   blEinNumber.value = blSetupSnapshot.einNumber;
   blExistingParty.value = blSetupSnapshot.existingParty;
   blSelectedCarrier.value = blSetupSnapshot.selectedCarrier;
+  blResponsibleNames.value = [...blSetupSnapshot.responsible];
+  blBillingNotifyNames.value = [...blSetupSnapshot.billingNotify];
   blSetupTouched.value = false;
   blEditingSetup.value = false;
 };
@@ -5905,11 +5982,13 @@ const blPendingRebateAchAuthRemoval = ref(false);
 let blRebateSnapshot = {
   w9File: null as string | null,
   achAuthFile: null as string | null,
+  contacts: [] as string[],
 };
 const blRebateStartEdit = () => {
   blRebateSnapshot = {
     w9File: blRebateW9File.value,
     achAuthFile: blRebateAchAuthFile.value,
+    contacts: [...blRebateNames.value],
   };
   blEditingRebate.value = true;
 };
@@ -5923,6 +6002,7 @@ const saveRebateCard = () => {
 const cancelRebateCard = () => {
   blRebateW9File.value = blRebateSnapshot.w9File;
   blRebateAchAuthFile.value = blRebateSnapshot.achAuthFile;
+  blRebateNames.value = [...blRebateSnapshot.contacts];
   blPendingRebateW9Removal.value = false;
   blPendingRebateAchAuthRemoval.value = false;
   blEditingRebate.value = false;
@@ -6779,8 +6859,16 @@ const apSaveEditContact = () => {
   const idx = apEditingContactIndex.value;
   if (idx > -1) {
     const f = apEditContactForm.value;
+    const oldName = apClientContacts.value[idx].name;
+    const newName = `${f.firstName} ${f.lastName}`;
+    // A renamed contact keeps their place on the Billing and Rebate contact lists under the new name.
+    if (oldName !== newName) {
+      [blResponsibleNames, blBillingNotifyNames, blRebateNames].forEach(list => {
+        list.value = list.value.map(n => (n === oldName ? newName : n));
+      });
+    }
     apClientContacts.value[idx] = {
-      name:  `${f.firstName} ${f.lastName}`,
+      name:  newName,
       salutation: f.salutation,
       businessRole: f.businessRole,
       email: f.email,
@@ -11395,6 +11483,11 @@ tr:focus-within .cs-apply-btn {
 
 .bl-field-narrow {
   max-width: 340px;
+}
+
+// Wider variant for multi-select fields whose chips need room for several names
+.bl-field-wide {
+  max-width: 560px;
 }
 
 .bl-subsection-select {

@@ -68,6 +68,12 @@ defineEmits(['update:modelValue']);
 @import '@/style.scss';
 
 .custom-autocomplete {
+  // Give selected chips breathing room so they don't sit directly on the underline
+  :deep(.v-field__input) {
+    padding-bottom: $spacing-xsmall;
+    row-gap: $spacing-xsmall;
+  }
+
   .v-field__append-inner {
     .v-icon {
       color: $color-text-secondary;
