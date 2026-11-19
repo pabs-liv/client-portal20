@@ -3440,8 +3440,8 @@
                         </div>
                       </template>
                       <!-- Responsible Party and Billing Notification contacts: chosen from the Account Profile contacts, independent of Client Portal access. Saved with the card and listed on the GPS for Implementation to enter in Solo1. -->
-                      <div class="bl-section">
-                        <p class="lc-hcn-label">Responsible Party</p>
+                      <div :class="blEditingSetup ? 'bl-section' : 'ap-field'">
+                        <p :class="blEditingSetup ? 'lc-hcn-label' : 'ap-field-label'">Responsible Party</p>
                         <template v-if="!blEditingSetup">
                           <div v-if="blResponsibleNames.length > 0">
                             <div v-for="name in blResponsibleNames" :key="name" class="ap-field-value">{{ name }}</div>
@@ -3460,8 +3460,8 @@
                           </div>
                         </template>
                       </div>
-                      <div class="bl-section">
-                        <p class="lc-hcn-label">Billing Notification Contacts</p>
+                      <div :class="blEditingSetup ? 'bl-section' : 'ap-field'">
+                        <p :class="blEditingSetup ? 'lc-hcn-label' : 'ap-field-label'">Billing Notification Contacts</p>
                         <template v-if="!blEditingSetup">
                           <div v-if="blBillingNotifyNames.length > 0">
                             <div v-for="name in blBillingNotifyNames" :key="name" class="ap-field-value">{{ name }}</div>
@@ -3784,8 +3784,8 @@
                     </div>
                     <div class="ap-fields">
                       <!-- Rebate Notification contacts: chosen from the Account Profile contacts, independent of Client Portal access. Saved with the card and listed on the GPS for Implementation to enter in Solo1. -->
-                      <div class="bl-section">
-                        <p class="lc-hcn-label">Rebate Notification Contacts</p>
+                      <div :class="blEditingRebate ? 'bl-section' : 'ap-field'">
+                        <p :class="blEditingRebate ? 'lc-hcn-label' : 'ap-field-label'">Rebate Notification Contacts</p>
                         <template v-if="!blEditingRebate">
                           <div v-if="blRebateNames.length > 0">
                             <div v-for="name in blRebateNames" :key="name" class="ap-field-value">{{ name }}</div>
