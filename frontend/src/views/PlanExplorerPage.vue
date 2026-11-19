@@ -5766,13 +5766,6 @@ const blBillingNotifyNames = ref<string[]>(['James Pruitt']);
 const blRebateNames = ref<string[]>(['Rachel Vance', 'Nick Johnson']);
 const blContactNamesFor = (target: BlContactTarget) =>
   target === 'responsible' ? blResponsibleNames : target === 'billingNotify' ? blBillingNotifyNames : blRebateNames;
-// A contact removed from Step 1: Account Profile is no longer linked to the account, so they come off every list here.
-watch([apClientContacts, apVendorContacts], () => {
-  const linked = new Set([...apClientContacts.value, ...apVendorContacts.value].map(c => c.name));
-  [blResponsibleNames, blBillingNotifyNames, blRebateNames].forEach(list => {
-    if (list.value.some(name => !linked.has(name))) list.value = list.value.filter(name => linked.has(name));
-  });
-}, { deep: true });
 const blContactOptionsFor = (target: BlContactTarget) => {
   const otherBillingNames = target === 'responsible' ? blBillingNotifyNames.value : target === 'billingNotify' ? blResponsibleNames.value : [];
   const otherLabel = target === 'responsible' ? 'Billing Notification' : 'Responsible Party';
@@ -6915,6 +6908,14 @@ const apVendorContacts = ref<ApVendorContact[]>([
   { name: 'James Pruitt', vendor: 'Acclaim Benefits', email: 'jpruitt@acclaim.com', phone: '(615) 555-0189', portalAccess: true, role: 'Broker', permissions: { ...apNewPermissions(), billing: true }, allowPhi: false, mainPointOfContact: false, surveyContact: false, ackConfirmed: true, accessFormConfirmed: true, roleLabel: 'Broker' },
   { name: 'Tara Mendez', vendor: 'Benefit Advantage', email: 'tmendez@benefitadv.com', phone: '(512) 555-0144', portalAccess: true, role: 'Consultant', permissions: { ...apNewPermissions(), reports: true, planExplorer: true }, allowPhi: false, mainPointOfContact: false, surveyContact: false, ackConfirmed: true, accessFormConfirmed: true, roleLabel: 'Consultant' },
 ]);
+// A contact removed from Step 1: Account Profile is no longer linked to the account, so they come off every Billing list.
+// (Declared here, after both contact lists exist, because watch() reads them immediately.)
+watch([apClientContacts, apVendorContacts], () => {
+  const linked = new Set([...apClientContacts.value, ...apVendorContacts.value].map(c => c.name));
+  [blResponsibleNames, blBillingNotifyNames, blRebateNames].forEach(list => {
+    if (list.value.some(name => !linked.has(name))) list.value = list.value.filter(name => linked.has(name));
+  });
+}, { deep: true });
 const apVendorContactsSorted = computed(() => [...apVendorContacts.value].sort((a, b) =>
   a.vendor.localeCompare(b.vendor) || apLastName(a.name).localeCompare(apLastName(b.name)) || apFirstName(a.name).localeCompare(apFirstName(b.name))
 ));
