@@ -5190,7 +5190,7 @@ const currentWizardStep = ref(0);
 
 // Step 4: Transition of Care
 const documentsStore = useDocumentsStore();
-const tocDayOptions = ['30 days', '60 days', '90 days'];
+const tocDayOptions = ['30 days', '60 days', '90 days', 'N/A'];
 
 // Card edit-mode flags (read-only by default, matching the Billing card pattern)
 const tocEditingFiles = ref(false); // Historical Claims + Prior Authorization File + RxWatchtower — shared widget
