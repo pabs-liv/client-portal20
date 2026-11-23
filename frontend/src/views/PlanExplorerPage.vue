@@ -2539,7 +2539,7 @@
                             <span class="ap-field-value">{{ tocEnrolledRxw ? 'Yes' : 'No' }}</span>
                           </div>
                         </div>
-                        <div v-if="tocEnrolledRxw || tocHistoricalClaims === true" class="ap-field-row">
+                        <div v-if="tocEnrolledRxw" class="ap-field-row">
                           <div class="ap-field">
                             <span class="ap-field-label">Override Period</span>
                             <span class="ap-field-value">{{ tocOverrideDays }}</span>
@@ -2617,9 +2617,8 @@
                         <v-checkbox v-model="tocEnrolledRxw" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox ap-vcheckbox--body" label="Enroll in RxWatchtower" />
                         <p v-if="tocEnrolledRxw && tocHistoricalClaims === true" class="text-body bl-note">RxWatchtower reviews rejected Prior Authorization claims post go-live and provides overrides for the duration selected below. Received historical claims data will also be checked against the Liviniti Formulary using this same period, giving affected members time to align their medications with Liviniti.</p>
                         <p v-else-if="tocEnrolledRxw" class="text-body bl-note">RxWatchtower reviews rejected Prior Authorization claims post go-live and provides overrides for the duration selected below.</p>
-                        <p v-else-if="tocHistoricalClaims === true" class="text-body bl-note">This account is not enrolled in RxWatchtower. Received historical claims data will be checked against the Liviniti Formulary using the period selected below, giving affected members time to align their medications with Liviniti.</p>
                         <p v-else class="text-body bl-note">This account is not enrolled in RxWatchtower.</p>
-                        <div v-if="tocEnrolledRxw || tocHistoricalClaims === true" class="bl-field-narrow">
+                        <div v-if="tocEnrolledRxw" class="bl-field-narrow">
                           <Select v-model="tocOverrideDays" :items="tocDayOptions" label="Override Period" />
                         </div>
 
