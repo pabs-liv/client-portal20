@@ -2535,6 +2535,12 @@
                             <span class="ap-field-value">{{ tocHistoricalClaims ? 'Yes' : 'No' }}</span>
                           </div>
                           <div class="ap-field">
+                            <span class="ap-field-label">Enrolled in RxWatchtower?</span>
+                            <span class="ap-field-value">{{ tocEnrolledRxw ? 'Yes' : 'No' }}</span>
+                          </div>
+                        </div>
+                        <div v-if="tocEnrolledRxw || tocHistoricalClaims === true" class="ap-field-row">
+                          <div class="ap-field">
                             <span class="ap-field-label">Override Period</span>
                             <span class="ap-field-value">{{ tocOverrideDays }}</span>
                           </div>
@@ -2608,9 +2614,12 @@
                           </template>
                         </template>
 
-                        <p v-if="tocHistoricalClaims === true" class="text-body bl-note">This account is automatically enrolled in RxWatchtower, which reviews rejected Prior Authorization claims post go-live and provides overrides for the duration selected below. Received historical claims data will also be checked against the Liviniti Formulary using this same period, giving affected members time to align their medications with Liviniti.</p>
-                        <p v-else class="text-body bl-note">This account is automatically enrolled in RxWatchtower, which reviews rejected Prior Authorization claims post go-live and provides overrides for the duration selected below.</p>
-                        <div class="bl-field-narrow">
+                        <v-checkbox v-model="tocEnrolledRxw" :true-icon="CheckSquare" :false-icon="Square" color="primary" density="compact" hide-details class="ap-vcheckbox ap-vcheckbox--body" label="Enroll in RxWatchtower" />
+                        <p v-if="tocEnrolledRxw && tocHistoricalClaims === true" class="text-body bl-note">RxWatchtower reviews rejected Prior Authorization claims post go-live and provides overrides for the duration selected below. Received historical claims data will also be checked against the Liviniti Formulary using this same period, giving affected members time to align their medications with Liviniti.</p>
+                        <p v-else-if="tocEnrolledRxw" class="text-body bl-note">RxWatchtower reviews rejected Prior Authorization claims post go-live and provides overrides for the duration selected below.</p>
+                        <p v-else-if="tocHistoricalClaims === true" class="text-body bl-note">This account is not enrolled in RxWatchtower. Received historical claims data will be checked against the Liviniti Formulary using the period selected below, giving affected members time to align their medications with Liviniti.</p>
+                        <p v-else class="text-body bl-note">This account is not enrolled in RxWatchtower.</p>
+                        <div v-if="tocEnrolledRxw || tocHistoricalClaims === true" class="bl-field-narrow">
                           <Select v-model="tocOverrideDays" :items="tocDayOptions" label="Override Period" />
                         </div>
 
@@ -5190,7 +5199,7 @@ const currentWizardStep = ref(0);
 
 // Step 4: Transition of Care
 const documentsStore = useDocumentsStore();
-const tocDayOptions = ['30 days', '60 days', '90 days', 'N/A'];
+const tocDayOptions = ['30 days', '60 days', '90 days'];
 
 // Card edit-mode flags (read-only by default, matching the Billing card pattern)
 const tocEditingFiles = ref(false); // Historical Claims + Prior Authorization File + RxWatchtower — shared widget
@@ -5202,6 +5211,7 @@ const tocEditingNotes = ref(false);
 // so there is a single editable value even though HCF can be No while RxWatchtower stays always-on.
 const tocHistoricalClaims = ref(false);
 const tocOverrideDays = ref('60 days');
+const tocEnrolledRxw = ref(true); // "Enroll in RxWatchtower" — checked by default; gates the Override Period
 const tocHistoricalClaimsFile = ref('');
 const tocPendingHcfRemoval = ref(false);
 const hcfPending = ref(false);
@@ -5266,12 +5276,13 @@ function confirmTocSubmit() {
 
 // Snapshots capture each widget's values the moment Edit is clicked, so Cancel can restore
 // every field to exactly what it was before this edit session — not just pending file removals.
-let tocFilesSnapshot = { historicalClaims: false, overrideDays: '', historicalClaimsFile: '', priorAuth: false, priorAuthFile: '' };
+let tocFilesSnapshot = { historicalClaims: false, overrideDays: '', enrolledRxw: true, historicalClaimsFile: '', priorAuth: false, priorAuthFile: '' };
 
 function startEditFilesCard() {
   tocFilesSnapshot = {
     historicalClaims: tocHistoricalClaims.value,
     overrideDays: tocOverrideDays.value,
+    enrolledRxw: tocEnrolledRxw.value,
     historicalClaimsFile: tocHistoricalClaimsFile.value,
     priorAuth: tocPriorAuth.value,
     priorAuthFile: tocPriorAuthFile.value,
@@ -5294,6 +5305,7 @@ function saveFilesCard() {
 function cancelFilesCard() {
   tocHistoricalClaims.value = tocFilesSnapshot.historicalClaims;
   tocOverrideDays.value = tocFilesSnapshot.overrideDays;
+  tocEnrolledRxw.value = tocFilesSnapshot.enrolledRxw;
   tocHistoricalClaimsFile.value = tocFilesSnapshot.historicalClaimsFile;
   tocPriorAuth.value = tocFilesSnapshot.priorAuth;
   tocPriorAuthFile.value = tocFilesSnapshot.priorAuthFile;
@@ -10000,6 +10012,12 @@ watch(selectedAccount, (newVal) => {
       color: $color-border !important;
     }
   }
+}
+
+// Same checkbox, label at body size and bold — matches the bold question labels around it in a card
+.ap-vcheckbox--body :deep(.v-label) {
+  font-size: $font-size-body;
+  font-weight: $font-weight-bold;
 }
 
 .ap-contacts-card {
